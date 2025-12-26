@@ -1,0 +1,5 @@
+✅ .env chargé dans supabase.js
+✅ Supabase client initialized
+🚀 Starting server on port 3001...
+✅ API is running on http://localhost:3001
+✅ Access from browser: http://127.0.0.1:3001

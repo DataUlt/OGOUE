@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html class="light" lang="fr">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Génération des États Financiers</title>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <!-- Fonts & icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecc8",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#10221f",
+                        "card-light": "#ffffff",
+                        "card-dark": "#182c29",
+                        "text-light-primary": "#0d1b19",
+                        "text-dark-primary": "#e0f2ef",
+                        "text-light-secondary": "#4c9a8d",
+                        "text-dark-secondary": "#78b8ae"
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark font-display text-text-light-primary dark:text-text-dark-primary">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+
+    <!-- ===== HEADER OGOUE ===== -->
+    <header class="sticky top-0 z-10 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-[#cfe7e3] dark:border-gray-700">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between whitespace-nowrap py-3">
+                <div class="flex items-center gap-4 text-[#0d1b19] dark:text-white">
+                    <span class="material-symbols-outlined text-3xl text-primary">insights</span>
+                    <h2 class="text-lg font-bold leading-tight tracking-[-0.015em]">OGOUE</h2>
+                </div>
+
+                <div class="hidden md:flex items-center gap-9">
+                    <a class="text-[#0d1b19] dark:text-gray-300 dark:hover:text-white text-sm font-medium"
+                       href="module_tableau_bord.html">
+                        Tableau de Bord
+                    </a>
+                    <a class="text-primary text-sm font-bold"
+                       href="module_ventes.html">
+                        Comptabilité
+                    </a>
+                    <a class="text-[#0d1b19] dark:text-gray-300 dark:hover:text-white text-sm font-medium"
+                       href="module_scoring.html">
+                        Financement
+                    </a>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-primary/20 text-[#0d1b19] dark:bg-primary/30 dark:text-white" data-action="notifications">
+                        <span class="material-symbols-outlined">notifications</span>
+                    </button>
+                    <button class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-primary/20 dark:bg-primary/30 text-[#0d1b19] dark:text-white" data-action="settings">
+                        <span class="material-symbols-outlined">settings</span>
+                    </button>
+                    <button class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-300 hover:bg-teal-200 dark:hover:bg-teal-800 transition-colors"
+                         data-action="profile"
+                         title="Profil utilisateur">
+                        <span class="material-symbols-outlined text-2xl">account_circle</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- ===== FIN HEADER ===== -->
+
+    <!-- ===== CONTENU ===== -->
+    <main class="flex-grow">
+        <div class="container mx-auto px-4 py-8">
+            <div class="max-w-7xl mx-auto flex flex-col gap-8">
+
+                <!-- Titre page -->
+                <header class="flex flex-wrap justify-between items-center gap-3 mb-2">
+                    <div class="flex flex-col gap-1">
+                        <h1 class="text-[#0d1b19] dark:text-white text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em]">
+                            Gestion Comptable
+                        </h1>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            Enregistrer et suivre vos dépenses quotidiennes.
+                        </p>
+                    </div>
+                </header>
+
+                <!-- Onglets + Filtre date sur la même ligne -->
+                <div class="border-b border-gray-200 dark:border-gray-700 pb-3">
+                    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+                        <nav class="flex gap-8 -mb-px">
+                            <a href="module_ventes.html"
+                               class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
+                                <p class="text-sm font-bold leading-normal tracking-[0.015em]">Ventes</p>
+                            </a>
+                            <a href="module_depenses.html"
+                               class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
+                                <p class="text-sm font-bold leading-normal tracking-[0.015em]">Dépenses</p>
+                            </a>
+                            <a href="module_resume_ventes_depenses.html"
+                               class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
+                                <p class="text-sm font-bold leading-normal tracking-[0.015em]">Résumé</p>
+                            </a>
+                            <a href="module_etats_financiers.html"
+                               class="flex flex-col items-center justify-center border-b-[3px] border-b-primary text-[#0d1b19] dark:text-white pb-3 pt-4 px-2">
+                                <p class="text-sm font-bold leading-normal tracking-[0.015em]">Analyse financière</p>
+                            </a>
+                        </nav>
+
+                        <!-- Carte Filtrer par date (alignée à droite des onglets) -->
+                        <div class="relative rounded-lg border border-[#cfe7e3] dark:border-gray-700 bg-card-light dark:bg-card-dark px-3 py-2 shadow-sm w-[260px]">
+                            <p class="text-[10px] font-semibold uppercase tracking-wide text-text-light-secondary dark:text-text-dark-secondary mb-1">
+                                Filtrer par date
+                            </p>
+
+                            <button id="dateFilterButton"
+                                    class="flex items-center justify-between w-full h-10 rounded-md border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark px-3 text-sm">
+                                <span id="dateFilterLabel" class="truncate text-[13px]"></span>
+                                <span class="material-symbols-outlined text-lg text-gray-500">calendar_month</span>
+                            </button>
+
+                            <!-- Panel calendrier -->
+                            <div id="dateFilterPanel"
+                                 class="absolute right-0 mt-2 w-[340px] rounded-xl border border-[#cfe7e3] dark:border-gray-700 bg-white dark:bg-[#182c29] shadow-xl p-4 hidden z-20">
+
+                                <div class="flex items-center justify-between mb-3">
+                                    <button id="prevMonth" class="p-1.5 rounded-full hover:bg-background-light dark:hover:bg-background-dark">
+                                        <span class="material-symbols-outlined">chevron_left</span>
+                                    </button>
+                                    <p id="monthLabel" class="text-sm font-semibold"></p>
+                                    <button id="nextMonth" class="p-1.5 rounded-full hover:bg-background-light dark:hover:bg-background-dark">
+                                        <span class="material-symbols-outlined">chevron_right</span>
+                                    </button>
+                                </div>
+
+                                <div class="grid grid-cols-7 text-center text-[11px] uppercase text-gray-400 dark:text-gray-500 mb-1">
+                                    <span>l</span><span>m</span><span>m</span><span>j</span><span>v</span><span>s</span><span>d</span>
+                                </div>
+
+                                <div id="calendarGrid" class="grid grid-cols-7 gap-1 text-sm"></div>
+
+                                <div class="flex justify-between items-center pt-3 mt-3 border-t border-[#cfe7e3] dark:border-gray-700">
+                                    <button id="resetRange" class="text-xs px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-background-light">
+                                        Réinitialiser
+                                    </button>
+                                    <button id="closeCalendar" class="text-xs px-3 py-1.5 rounded-lg bg-primary text-[#0d1b19]">
+                                        Fermer
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+               <!--
+<div class="flex flex-col gap-2 mt-4">
+    <p class="text-text-light-secondary dark:text-text-dark-secondary max-w-lg">
+        Sélectionnez un document à prévisualiser ou exportez l'ensemble des états financiers pour l'exercice en cours.
+    </p>
+</div>
+-->
+
+
+                <!-- Boutons -->
+                <div class="flex flex-wrap justify-end gap-3">
+                    <button id="printAllBtn" class="flex items-center gap-2 rounded-lg h-10 px-4 bg-primary/20 text-sm font-bold">
+                        <span class="material-symbols-outlined">print</span>
+                        Imprimer
+                    </button>
+                </div>
+
+                <!-- Cartes des états -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+                    <!-- Compte de Résultat -->
+                    <div class="flex flex-col gap-4 p-5 bg-card-light dark:bg-card-dark rounded-xl shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-primary/20 p-2 rounded-lg">
+                                <span class="material-symbols-outlined text-primary">assessment</span>
+                            </div>
+                            <h2 class="text-lg font-bold">Compte de Résultat</h2>
+                        </div>
+                        <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary flex-grow">
+                            Synthèse des charges et produits de l'exercice.
+                        </p>
+                        <button id="generateCompteBtn" class="rounded-lg h-9 px-4 bg-primary/20 text-sm font-bold">Générer l'aperçu</button>
+                    </div>
+
+                    <!-- Tableau de Flux -->
+                    <div class="flex flex-col gap-4 p-5 bg-card-light dark:bg-card-dark rounded-xl shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-primary/20 p-2 rounded-lg">
+                                <span class="material-symbols-outlined text-primary">swap_horiz</span>
+                            </div>
+                            <h2 class="text-lg font-bold">Tableau de Flux</h2>
+                        </div>
+                        <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary flex-grow">
+                            Analyse des flux de liquidités entrants et sortants.
+                        </p>
+                        <button id="generateFluxBtn" class="rounded-lg h-9 px-4 bg-primary/20 text-sm font-bold">Générer l'aperçu</button>
+                    </div>
+
+                    <!-- Historique des ventes -->
+                    <div class="flex flex-col gap-4 p-5 bg-card-light dark:bg-card-dark rounded-xl shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-primary/20 p-2 rounded-lg">
+                                <span class="material-symbols-outlined text-primary">trending_up</span>
+                            </div>
+                            <h2 class="text-lg font-bold">Historique des ventes</h2>
+                        </div>
+                        <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary flex-grow">
+                            Suivi détaillé de toutes les ventes réalisées.
+                        </p>
+                        <button id="generateVentesBtn" class="rounded-lg h-9 px-4 bg-primary/20 text-sm font-bold">Générer l'aperçu</button>
+                    </div>
+
+                    <!-- Historiques des dépenses -->
+                    <div class="flex flex-col gap-4 p-5 bg-card-light dark:bg-card-dark rounded-xl shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-primary/20 p-2 rounded-lg">
+                                <span class="material-symbols-outlined text-primary">receipt_long</span>
+                            </div>
+                            <h2 class="text-lg font-bold">Historiques des dépenses</h2>
+                        </div>
+                        <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary flex-grow">
+                            Suivi détaillé de toutes les dépenses engagées.
+                        </p>
+                        <button id="generateDepensesBtn" class="rounded-lg h-9 px-4 bg-primary/20 text-sm font-bold">Générer l'aperçu</button>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </main>
+    <!-- ===== FIN CONTENU ===== -->
+
+</div>
+
+<!-- Store OGOUÉ -->
+<script src="js/ogoue-state.js"></script>
+<script src="js/header-ui.js"></script>
+
+<!-- JS dédié aux états financiers -->
+<script src="js/etats_financiers.js"></script>
+<script src="js/topbar-actions.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.OGOUE?.initTopbarActions) {
+            window.OGOUE.initTopbarActions();
+        }
+    });
+</script>
+
+</body>
+</html>

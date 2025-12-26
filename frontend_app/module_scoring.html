@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html class="light" lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Parcours de Financement - Scoring</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <!-- Fonts & icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#13ecc8",
+            "background-light": "#f6f8f8",
+            "background-dark": "#10221f",
+            "card-light": "#ffffff",
+            "card-dark": "#162e2a",
+          },
+          fontFamily: {
+            "display": ["Inter", "sans-serif"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "2xl": "1rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    .circular-chart {
+      display: block;
+      margin: 0 auto;
+      max-width: 100%;
+      max-height: 250px;
+    }
+    .circle-bg {
+      fill: none;
+      stroke: #e7f3f1;
+      stroke-width: 2.5;
+    }
+    .circle {
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      animation: progress 1s ease-out forwards;
+    }
+    @keyframes progress {
+      0% { stroke-dasharray: 0 100; }
+    }
+    .loading {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+  </style>
+</head>
+
+<body class="font-display bg-background-light dark:bg-background-dark text-[#0d1b19] dark:text-gray-100 min-h-screen flex flex-col">
+<div class="relative flex min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+
+  <!-- ===== HEADER OGOUE ===== -->
+  <header class="sticky top-0 z-10 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-[#cfe7e3] dark:border-gray-700">
+    <div class="container mx-auto px-4">
+      <div class="flex items-center justify-between whitespace-nowrap py-3">
+        <div class="flex items-center gap-4 text-[#0d1b19] dark:text-white">
+          <span class="material-symbols-outlined text-3xl text-primary">insights</span>
+          <h2 class="text-lg font-bold leading-tight tracking-[-0.015em]">OGOUE</h2>
+        </div>
+
+        <div class="hidden md:flex items-center gap-9">
+          <a class="text-[#0d1b19] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
+             href="module_tableau_bord.html">Tableau de Bord</a>
+
+          <a class="text-[#0d1b19] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
+             href="module_ventes.html">Comptabilité</a>
+
+          <a class="text-primary text-sm font-bold leading-normal"
+             href="module_scoring.html">Financement</a>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-primary/20 text-[#0d1b19] dark:bg-primary/30 dark:text-white" data-action="notifications">
+            <span class="material-symbols-outlined">notifications</span>
+          </button>
+          <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-primary/20 text-[#0d1b19] dark:bg-primary/30 dark:text-white" data-action="settings">
+            <span class="material-symbols-outlined">settings</span>
+          </button>
+
+          <!-- ✅ PROFIL (corrigé + fiable) -->
+          <button
+            id="profileBtn"
+            class="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-300 hover:bg-teal-200 dark:hover:bg-teal-800 transition-colors"
+            data-action="profile"
+            title="Profil"
+            type="button"
+          >
+            <span class="material-symbols-outlined text-2xl">account_circle</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <!-- ===== FIN HEADER ===== -->
+
+  <!-- MAIN -->
+  <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Heading -->
+    <div class="flex flex-col gap-2 mb-8">
+      <h1 class="text-[#0d1b19] dark:text-white text-3xl sm:text-4xl font-black leading-tight tracking-[-0.033em]">
+        Parcours de financement
+      </h1>
+      <p class="text-gray-500 dark:text-gray-400 text-base sm:text-lg font-normal leading-normal max-w-3xl">
+        Découvrez votre score de traçabilité et préparez votre entreprise au financement.
+      </p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mb-8 border-b border-[#cfe7e3] dark:border-[#2d4a46]">
+      <nav aria-label="Tabs" class="flex gap-8">
+        <div class="relative group">
+          <a class="border-b-[3px] border-transparent text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400 pb-3 px-1 flex items-center gap-2 cursor-help" href="#">
+            <span class="material-symbols-outlined text-xl">folder_off</span>
+            <span class="font-medium text-sm tracking-[0.015em]">Accès espace partenaire (Bientôt)</span>
+          </a>
+          
+          <!-- Tooltip -->
+          <div class="absolute left-0 top-full mt-2 w-96 bg-white dark:bg-card-dark rounded-lg shadow-lg border border-[#e7f3f1] dark:border-[#1e3b36] p-6 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 pointer-events-none group-hover:pointer-events-auto">
+            <h3 class="text-lg font-bold text-[#0d1b19] dark:text-white mb-3">Espace Partenaire</h3>
+            
+            <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
+              L'espace partenaire sera un espace dédié à la préparation au financement. Il permettra de faire le lien entre la gestion quotidienne et les critères réellement utilisés par les institutions financières.
+            </p>
+
+            <div class="space-y-4">
+              <!-- Section 1 -->
+              <div>
+                <h4 class="font-semibold text-[#0d1b19] dark:text-white mb-2 flex items-center gap-2">
+                  <span class="material-symbols-outlined text-base text-primary">trending_up</span>
+                  Évaluer votre crédibilité financière
+                </h4>
+                <p class="text-xs text-gray-600 dark:text-gray-400 mb-2">Dans l'espace partenaire, vous pourrez simuler un score de crédibilité financière basé sur les critères utilisés par les institutions financières.</p>
+                <ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1 ml-4">
+                  <li>• Vous situer par rapport aux attentes des partenaires</li>
+                  <li>• Identifier les points à renforcer</li>
+                  <li>• Suivre l'évolution de votre crédibilité</li>
+                </ul>
+              </div>
+
+              <!-- Section 2 -->
+              <div>
+                <h4 class="font-semibold text-[#0d1b19] dark:text-white mb-2 flex items-center gap-2">
+                  <span class="material-symbols-outlined text-base text-primary">checklist</span>
+                  Vous préparer à une demande de financement
+                </h4>
+                <ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1 ml-4">
+                  <li>• Identifier les types de financements adaptés</li>
+                  <li>• Éviter des démarches inutiles</li>
+                  <li>• Vous projeter vers des solutions réalistes</li>
+                </ul>
+              </div>
+
+              <!-- Section 3 -->
+              <div>
+                <h4 class="font-semibold text-[#0d1b19] dark:text-white mb-2 flex items-center gap-2">
+                  <span class="material-symbols-outlined text-base text-primary">folder_open</span>
+                  Constituer un dossier clair
+                </h4>
+                <ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1 ml-4">
+                  <li>• Préparer progressivement votre dossier</li>
+                  <li>• Connaître les documents attendus</li>
+                  <li>• Suivre l'évolution en temps réel</li>
+                </ul>
+              </div>
+
+              <!-- Section 4 -->
+              <div>
+                <h4 class="font-semibold text-[#0d1b19] dark:text-white mb-2 flex items-center gap-2">
+                  <span class="material-symbols-outlined text-base text-primary">verified</span>
+                  Valoriser le sérieux de votre gestion
+                </h4>
+                <p class="text-xs text-gray-600 dark:text-gray-400">Les données d'OGOUÉ permettront de mettre en avant votre régularité et renforcer la confiance des partenaires financiers.</p>
+              </div>
+
+              <!-- En résumé -->
+              <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                <h4 class="font-semibold text-[#0d1b19] dark:text-white mb-2 flex items-center gap-2">
+                  <span class="material-symbols-outlined text-base text-primary">summarize</span>
+                  En résumé
+                </h4>
+                <p class="text-xs text-gray-600 dark:text-gray-400">L'espace partenaire vous permettra de passer d'une simple gestion comptable à une véritable préparation au financement, en vous appuyant sur des critères clairs et alignés avec les attentes des institutions financières.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="flex flex-col lg:grid lg:grid-cols-12 gap-6">
+      <!-- Left Column: Main Score & Stats (8 cols) -->
+      <div class="lg:col-span-8 flex flex-col gap-6">
+        <!-- Hero Score Card -->
+        <div class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-[#e7f3f1] dark:border-[#1e3b36] p-6 sm:p-8 flex flex-col sm:flex-row items-center sm:items-start gap-8">
+          <!-- Circular Gauge -->
+          <div class="relative size-40 sm:size-48 flex-shrink-0">
+            <svg class="circular-chart text-primary w-full h-full transform -rotate-90" viewbox="0 0 36 36">
+              <path class="circle-bg stroke-gray-100 dark:stroke-gray-700" d="M18 2.0845
+                                  a 15.9155 15.9155 0 0 1 0 31.831
+                                  a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+              <path id="globalScoreCircle" class="circle stroke-current" d="M18 2.0845
+                                  a 15.9155 15.9155 0 0 1 0 31.831
+                                  a 15.9155 15.9155 0 0 1 0 -31.831" stroke-dasharray="0, 100"></path>
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <span id="globalScoreValue" class="text-4xl font-black text-[#0d1b19] dark:text-white tracking-tighter">—</span>
+              <span class="text-xs font-medium text-gray-400 uppercase tracking-widest mt-1">Global</span>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="flex flex-col gap-3 items-center sm:items-start text-center sm:text-left flex-1">
+            <div id="scoreBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+              <span class="material-symbols-outlined text-sm font-bold">verified</span>
+              <span class="text-sm font-bold" id="scoreBadgeText">Excellent niveau de traçabilité</span>
+            </div>
+            <h3 class="text-xl font-bold text-[#0d1b19] dark:text-white">Score de traçabilité</h3>
+            <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
+              Ce score mesure la part de vos ventes et dépenses associées à un justificatif valide. Un score élevé augmente vos chances d'obtenir un financement.
+            </p>
+            <!-- Mini Legend -->
+            <div class="mt-2 flex gap-2 text-xs text-gray-400">
+              <div class="flex items-center gap-1"><div class="size-2 rounded-full bg-red-400"></div>&lt;40%</div>
+              <div class="flex items-center gap-1"><div class="size-2 rounded-full bg-orange-400"></div>40-70%</div>
+              <div class="flex items-center gap-1"><div class="size-2 rounded-full bg-primary"></div>&gt;70%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detailed Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Sales Card -->
+          <div class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-[#e7f3f1] dark:border-[#1e3b36] p-6 flex flex-col gap-4">
+            <div class="flex justify-between items-start">
+              <div class="bg-emerald-50 dark:bg-emerald-900/20 p-2 rounded-lg text-primary">
+                <span class="material-symbols-outlined">shopping_cart</span>
+              </div>
+              <span id="salesBadge" class="text-primary dark:text-emerald-400 font-bold text-sm bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 rounded">—</span>
+            </div>
+            <div>
+              <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Ventes justifiées</p>
+              <div class="flex items-baseline gap-2 mt-1">
+                <h4 id="salesScore" class="text-2xl font-bold text-[#0d1b19] dark:text-white">—</h4>
+                <span class="text-sm text-gray-400 font-medium" id="salesTotalSpan">/ —</span>
+              </div>
+            </div>
+            <!-- Progress Bar -->
+            <div class="flex flex-col gap-2">
+              <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5">
+                <div id="salesProgress" class="bg-emerald-400 h-2.5 rounded-full" style="width: 0%"></div>
+              </div>
+              <p id="salesMessage" class="text-xs text-primary font-medium mt-1">—</p>
+            </div>
+          </div>
+
+          <!-- Expenses Card -->
+          <div class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-[#e7f3f1] dark:border-[#1e3b36] p-6 flex flex-col gap-4">
+            <div class="flex justify-between items-start">
+              <div class="bg-emerald-50 dark:bg-emerald-900/20 p-2 rounded-lg text-primary">
+                <span class="material-symbols-outlined">receipt_long</span>
+              </div>
+              <span id="expensesBadge" class="text-primary dark:text-emerald-400 font-bold text-sm bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 rounded">—</span>
+            </div>
+            <div>
+              <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Dépenses justifiées</p>
+              <div class="flex items-baseline gap-2 mt-1">
+                <h4 id="expensesScore" class="text-2xl font-bold text-[#0d1b19] dark:text-white">—</h4>
+                <span class="text-sm text-gray-400 font-medium" id="expensesTotalSpan">/ —</span>
+              </div>
+            </div>
+            <!-- Progress Bar -->
+            <div class="flex flex-col gap-2">
+              <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5">
+                <div id="expensesProgress" class="bg-primary h-2.5 rounded-full" style="width: 0%"></div>
+              </div>
+              <p id="expensesMessage" class="text-xs text-primary font-medium mt-1">—</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Education & Actions (4 cols) -->
+      <div class="lg:col-span-4 flex flex-col gap-6">
+        <!-- Education Block -->
+        <div class="bg-[#10221f] rounded-xl p-6 text-white relative overflow-hidden group">
+          <!-- Abstract Background pattern -->
+          <div class="absolute top-0 right-0 -mr-8 -mt-8 size-32 bg-primary/20 rounded-full blur-2xl group-hover:bg-primary/30 transition-all"></div>
+          <div class="relative z-10 flex flex-col gap-3">
+            <div class="flex items-center gap-2 mb-1 text-primary">
+              <span class="material-symbols-outlined">lightbulb</span>
+              <span class="text-xs font-bold uppercase tracking-wider">Info</span>
+            </div>
+            <h3 class="text-lg font-bold">Qu'est-ce que le score ?</h3>
+            <p class="text-gray-300 text-sm leading-relaxed">
+              C'est un indicateur de confiance pour les banques. Il prouve que vos flux financiers sont réels et documentés. Plus il est haut, plus vous êtes éligible aux crédits.
+            </p>
+          </div>
+        </div>
+
+        <!-- Action Checklist -->
+        <div class="bg-white dark:bg-card-dark rounded-xl border border-[#e7f3f1] dark:border-[#1e3b36] shadow-sm p-6 flex-1">
+          <h3 class="text-lg font-bold text-[#0d1b19] dark:text-white mb-4">Comment améliorer mon score ?</h3>
+          <div class="flex flex-col gap-4">
+            <!-- Action Item 1 -->
+            <div class="flex gap-3 items-start group">
+              <div class="mt-0.5 min-w-[20px]">
+                <span class="material-symbols-outlined text-primary text-xl">add_a_photo</span>
+              </div>
+              <div class="flex flex-col">
+                <p class="text-sm font-semibold text-[#0d1b19] dark:text-gray-200 group-hover:text-primary transition-colors cursor-pointer">Ajouter les justificatifs manquants</p>
+                <p class="text-xs text-gray-500">Prenez en photo vos factures et reçus récents.</p>
+              </div>
+            </div>
+            <div class="h-px bg-gray-100 dark:bg-gray-800 w-full"></div>
+
+            <!-- Action Item 3 -->
+            <div class="flex gap-3 items-start group">
+              <div class="mt-0.5 min-w-[20px]">
+                <span class="material-symbols-outlined text-primary text-xl">update</span>
+              </div>
+              <div class="flex flex-col">
+                <p class="text-sm font-semibold text-[#0d1b19] dark:text-gray-200 group-hover:text-primary transition-colors cursor-pointer">Mise à jour régulière</p>
+                <p class="text-xs text-gray-500">Connectez-vous chaque semaine pour valider vos comptes.</p>
+              </div>
+            </div>
+          </div>
+
+          <button class="mt-6 w-full py-2.5 rounded-lg bg-primary hover:bg-[#0fdaba] text-[#0d1b19] font-bold text-sm transition-colors flex items-center justify-center gap-2" id="addDocumentBtn">
+            <span class="material-symbols-outlined text-lg">upload_file</span>
+            Ajouter un document
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL: Ajouter un justificatif -->
+  <div id="uploadModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-card-dark rounded-xl shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div class="sticky top-0 bg-white dark:bg-card-dark border-b border-[#e7f3f1] dark:border-[#1e3b36] p-6 flex items-center justify-between">
+        <h2 class="text-xl font-bold text-[#0d1b19] dark:text-white">Ajouter les justificatifs manquants</h2>
+        <button type="button" id="closeModalBtn" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-50" disabled>
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-6">
+        <!-- Ventes sans justificatif -->
+        <div>
+          <h3 class="text-lg font-bold text-[#0d1b19] dark:text-white mb-4">Ventes sans justificatif</h3>
+          <div id="salesListContainer" class="space-y-3">
+            <p class="text-gray-500 dark:text-gray-400 text-sm">Chargement...</p>
+          </div>
+        </div>
+
+        <!-- Dépenses sans justificatif -->
+        <div>
+          <h3 class="text-lg font-bold text-[#0d1b19] dark:text-white mb-4">Dépenses sans justificatif</h3>
+          <div id="expensesListContainer" class="space-y-3">
+            <p class="text-gray-500 dark:text-gray-400 text-sm">Chargement...</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="sticky bottom-0 bg-white dark:bg-card-dark border-t border-[#e7f3f1] dark:border-[#1e3b36] p-6 flex gap-3">
+        <button type="button" id="cancelModalBtn" class="flex-1 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-[#0d1b19] dark:text-white font-bold text-sm transition-colors">
+          Annuler
+        </button>
+      </div>
+    </div>
+  </div>
+
+<script src="js/ogoue-state.js"></script>
+<script src="js/header-ui.js"></script>
+<script>
+// ============================================================
+// CALCUL DYNAMIQUE DU SCORE DE TRAÇABILITÉ
+// ============================================================
+// API_BASE_URL, getToken() et handleUnauthorized() sont définis dans ogoue-state.js
+
+/**
+ * Récupère les ventes et dépenses du mois courant
+ */
+async function fetchOperations() {
+  const token = getToken();
+  if (!token) {
+    handleUnauthorized();
+    return null;
+  }
+
+  try {
+    const now = new Date();
+    const month = now.getMonth() + 1;
+    const year = now.getFullYear();
+
+    const [salesRes, expensesRes] = await Promise.all([
+      fetch(`${API_BASE_URL}/api/sales?month=${month}&year=${year}`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      }),
+      fetch(`${API_BASE_URL}/api/expenses?month=${month}&year=${year}`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      })
+    ]);
+
+    if (salesRes.status === 401 || expensesRes.status === 401) {
+      handleUnauthorized();
+      return null;
+    }
+
+    if (!salesRes.ok || !expensesRes.ok) {
+      throw new Error("Erreur lors de la récupération des données");
+    }
+
+    const salesData = await salesRes.json();
+    const expensesData = await expensesRes.json();
+
+    return {
+      sales: salesData.sales || [],
+      expenses: expensesData.expenses || []
+    };
+  } catch (error) {
+    console.error("❌ Erreur fetch:", error);
+    return null;
+  }
+}
+
+/**
+ * Calcule les pourcentages de traçabilité
+ */
+function calculateScores(operations) {
+  if (!operations) return null;
+
+  const { sales, expenses } = operations;
+
+  // Calcul pour les ventes
+  const totalSales = sales.length;
+  const salesWithReceipt = sales.filter(s => s.justificatif && s.justificatif.trim()).length;
+  const salesPercentage = totalSales > 0 ? Math.round((salesWithReceipt / totalSales) * 100) : 0;
+
+  // Calcul pour les dépenses
+  const totalExpenses = expenses.length;
+  const expensesWithReceipt = expenses.filter(e => e.justificatif && e.justificatif.trim()).length;
+  const expensesPercentage = totalExpenses > 0 ? Math.round((expensesWithReceipt / totalExpenses) * 100) : 0;
+
+  // Score global = moyenne
+  const globalScore = totalSales + totalExpenses > 0 
+    ? Math.round((salesPercentage + expensesPercentage) / 2) 
+    : 0;
+
+  return {
+    globalScore,
+    salesPercentage,
+    salesCount: totalSales,
+    salesWithReceipt,
+    expensesPercentage,
+    expensesCount: totalExpenses,
+    expensesWithReceipt
+  };
+}
+
+/**
+ * Retourne le label et couleur basé sur le score
+ */
+function getScoreLabel(score) {
+  if (score >= 80) return { label: "Excellent", color: "primary" };
+  if (score >= 60) return { label: "Bon", color: "primary" };
+  if (score >= 40) return { label: "Moyen", color: "orange" };
+  return { label: "Faible", color: "red" };
+}
+
+/**
+ * Met à jour l'UI avec les scores calculés
+ */
+function updateUI(scores) {
+  if (!scores) return;
+
+  const { globalScore, salesPercentage, expensesPercentage, salesCount, expensesCount, salesWithReceipt, expensesWithReceipt } = scores;
+
+  // === SCORE GLOBAL ===
+  const globalLabel = getScoreLabel(globalScore);
+  document.getElementById("globalScoreValue").textContent = `${globalScore}%`;
+  document.getElementById("scoreBadgeText").textContent = `${globalLabel.label} niveau de traçabilité`;
+  
+  // Mettre à jour le cercle de progression
+  const circle = document.getElementById("globalScoreCircle");
+  const dasharray = (globalScore / 100) * 100 + ", 100";
+  circle.setAttribute("stroke-dasharray", dasharray);
+
+  // === VENTES ===
+  const salesLabel = getScoreLabel(salesPercentage);
+  document.getElementById("salesScore").textContent = salesWithReceipt;
+  document.getElementById("salesTotalSpan").textContent = `/ ${salesCount}`;
+  document.getElementById("salesBadge").textContent = salesLabel.label;
+  document.getElementById("salesProgress").style.width = `${salesPercentage}%`;
+  
+  const salesNoReceipt = salesCount - salesWithReceipt;
+  const salesMsg = salesCount > 0 
+    ? `${salesNoReceipt} vente${salesNoReceipt !== 1 ? 's' : ''} sans justificatif`
+    : "Aucune vente enregistrée";
+  document.getElementById("salesMessage").textContent = salesMsg;
+
+  // === DÉPENSES ===
+  const expensesLabel = getScoreLabel(expensesPercentage);
+  document.getElementById("expensesScore").textContent = expensesWithReceipt;
+  document.getElementById("expensesTotalSpan").textContent = `/ ${expensesCount}`;
+  document.getElementById("expensesBadge").textContent = expensesLabel.label;
+  document.getElementById("expensesProgress").style.width = `${expensesPercentage}%`;
+  
+  const expensesNoReceipt = expensesCount - expensesWithReceipt;
+  const expensesMsg = expensesCount > 0
+    ? expensesPercentage >= 80 
+      ? "Bravo ! Continuez ainsi."
+      : `${expensesNoReceipt} dépense${expensesNoReceipt !== 1 ? 's' : ''} sans justificatif`
+    : "Aucune dépense enregistrée";
+  document.getElementById("expensesMessage").textContent = expensesMsg;
+}
+
+/**
+ * Initialisation au chargement
+ */
+async function init() {
+  const ops = await fetchOperations();
+  console.log("📊 Opérations récupérées:", ops);
+  
+  const scores = calculateScores(ops);
+  console.log("📈 Scores calculés:", scores);
+  
+  updateUI(scores);
+
+  // Store operations globally for modal use
+  window.currentOperations = ops;
+
+  if (window.OGOUE?.initTopbarActions) {
+    window.OGOUE.initTopbarActions();
+  }
+}
+
+/**
+ * Affiche le modal pour ajouter les justificatifs manquants
+ */
+function openUploadModal() {
+  const modal = document.getElementById("uploadModal");
+  const ops = window.currentOperations;
+
+  if (!ops) {
+    alert("Aucune donnée disponible");
+    return;
+  }
+
+  // Ventes sans justificatif
+  const salesWithoutReceipt = ops.sales.filter(s => !s.justificatif || !s.justificatif.trim());
+  const salesContainer = document.getElementById("salesListContainer");
+  
+  if (salesWithoutReceipt.length === 0) {
+    salesContainer.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-sm">✅ Toutes les ventes ont un justificatif</p>';
+  } else {
+    salesContainer.innerHTML = salesWithoutReceipt.map(sale => `
+      <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <input type="checkbox" class="sale-checkbox" data-id="${sale.id}" data-type="sales">
+        <div class="flex-1">
+          <p class="text-sm font-medium text-[#0d1b19] dark:text-white">${sale.description || 'Sans description'}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">${sale.date} • ${sale.montant} FCFA</p>
+        </div>
+        <input type="file" class="file-input" data-id="${sale.id}" data-type="sales" style="width: 150px;">
+      </div>
+    `).join('');
+  }
+
+  // Dépenses sans justificatif
+  const expensesWithoutReceipt = ops.expenses.filter(e => !e.justificatif || !e.justificatif.trim());
+  const expensesContainer = document.getElementById("expensesListContainer");
+  
+  if (expensesWithoutReceipt.length === 0) {
+    expensesContainer.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-sm">✅ Toutes les dépenses ont un justificatif</p>';
+  } else {
+    expensesContainer.innerHTML = expensesWithoutReceipt.map(expense => `
+      <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <input type="checkbox" class="expense-checkbox" data-id="${expense.id}" data-type="expenses">
+        <div class="flex-1">
+          <p class="text-sm font-medium text-[#0d1b19] dark:text-white">${expense.categorie || 'Sans catégorie'}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">${expense.date} • ${expense.montant} FCFA</p>
+        </div>
+        <input type="file" class="file-input" data-id="${expense.id}" data-type="expenses" style="width: 150px;">
+      </div>
+    `).join('');
+  }
+
+  modal.classList.remove("hidden");
+}
+
+function closeUploadModal() {
+  const modal = document.getElementById("uploadModal");
+  const closeBtn = document.getElementById("closeModalBtn");
+  modal.classList.add("hidden");
+  closeBtn.disabled = false;
+}
+
+/**
+ * Met à jour le justificatif d'une opération
+ */
+async function updateOperationJustificatif(type, operationId, file, inputElement) {
+  const token = getToken();
+  if (!token) {
+    handleUnauthorized();
+    return false;
+  }
+
+  try {
+    // Désactiver le bouton close et show loading state
+    const closeBtn = document.getElementById("closeModalBtn");
+    closeBtn.disabled = true;
+    inputElement.disabled = true;
+
+    const endpoint = type === "sales" ? "/api/sales" : "/api/expenses";
+    const url = `${API_BASE_URL}${endpoint}/${operationId}`;
+    
+    console.log("📤 Upload vers:", url);
+    console.log("📦 Fichier:", file.name);
+
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ receiptName: file.name })
+    });
+
+    console.log("📥 Status:", response.status);
+    console.log("📥 Headers:", response.headers);
+
+    if (response.status === 401) {
+      handleUnauthorized();
+      return false;
+    }
+
+    if (!response.ok) {
+      const text = await response.text();
+      console.error("❌ Erreur API (text):", text);
+      
+      try {
+        const error = JSON.parse(text);
+        console.error("❌ Erreur API (json):", error);
+      } catch (e) {
+        // La réponse n'est pas du JSON
+      }
+      
+      closeBtn.disabled = false;
+      inputElement.disabled = false;
+      return false;
+    }
+
+    console.log("✅ Justificatif téléchargé avec succès");
+    
+    // Afficher notification de succès
+    console.log("📢 Affichage du toast...");
+    showToast(`✅ ${file.name} téléchargé avec succès!`, 2000);
+    
+    // Attendre un peu puis rafraîchir et fermer
+    console.log("⏳ Attente de 1500ms...");
+    await new Promise(r => setTimeout(r, 1500));
+    
+    console.log("🔄 Rafraîchissement des données...");
+    // Refresh the data
+    window.currentOperations = await fetchOperations();
+    console.log("📊 Nouvelles opérations:", window.currentOperations);
+    
+    const scores = calculateScores(window.currentOperations);
+    console.log("📈 Nouveaux scores:", scores);
+    
+    updateUI(scores);
+    console.log("🎨 UI mise à jour");
+    
+    // Fermer le modal
+    console.log("❌ Fermeture du modal...");
+    closeUploadModal();
+    console.log("✅ Modal fermé");
+    
+    return true;
+  } catch (error) {
+    console.error("❌ Erreur:", error);
+    const closeBtn = document.getElementById("closeModalBtn");
+    closeBtn.disabled = false;
+    inputElement.disabled = false;
+    return false;
+  }
+}
+
+/**
+ * Affiche une notification toast
+ */
+function showToast(message, duration = 3000) {
+  const toast = document.createElement('div');
+  toast.style.cssText = `
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #13ecc8;
+    color: #0d1b19;
+    padding: 12px 16px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    font-weight: bold;
+    font-size: 14px;
+    z-index: 99999;
+    max-width: 350px;
+    word-wrap: break-word;
+    font-family: Inter, sans-serif;
+  `;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transition = 'opacity 0.3s ease';
+    setTimeout(() => {
+      if (toast && toast.parentElement) {
+        toast.remove();
+      }
+    }, 300);
+  }, duration);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  init();
+
+  // Modal controls
+  document.getElementById("addDocumentBtn").addEventListener("click", openUploadModal);
+  document.getElementById("closeModalBtn").addEventListener("click", closeUploadModal);
+  document.getElementById("cancelModalBtn").addEventListener("click", closeUploadModal);
+
+  // Close modal on background click
+  document.getElementById("uploadModal").addEventListener("click", (e) => {
+    if (e.target.id === "uploadModal") closeUploadModal();
+  });
+
+  // File input changes
+  document.addEventListener("change", async (e) => {
+    if (!e.target.classList.contains("file-input")) return;
+
+    const files = e.target.files;
+    const operationId = e.target.dataset.id;
+    const operationType = e.target.dataset.type;
+
+    if (files.length > 0) {
+      const file = files[0];
+      const success = await updateOperationJustificatif(operationType, operationId, file, e.target);
+      
+      if (!success) {
+        e.target.value = ""; // Reset input
+        showToast("❌ Erreur lors du téléchargement du justificatif", 3000);
+      }
+    }
+  });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>OGOUE - Plateforme de gestion financière pour PME</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#0F766E",
+                        secondary: "#1E3A5F",
+                        "background-light": "#F3F4F6",
+                        "background-dark": "#111827",
+                        "card-light": "#FFFFFF",
+                        "card-dark": "#1F2937",
+                        "text-light": "#1F2937",
+                        "text-dark": "#F9FAFB",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                        body: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        'xl': '1rem',
+                        '2xl': '1.5rem',
+                    },
+                },
+            },
+        };
+        // Simple mobile menu toggle script
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            if (menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+            } else {
+                menu.classList.add('hidden');
+            }
+        }
+        function toggleDropdown() {
+            const dropdown = document.getElementById('mobile-dropdown');
+            dropdown.classList.toggle('hidden');
+        }
+    </script>
+    <style>
+        body {
+            font-family: "Inter", sans-serif;
+        }
+
+        .hero-pattern {
+            background-color: #3b4d61;
+            background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuADJ9iyvZNp7-5-dKJEVoxqiJjmAT-XXy8jcfUXl9cAiuO4sIlBeXRTpMNxWtFxtm-w09AGj-TO0D4zWOzpb5c_YqIF6mD-IJPe_PDfWEFTpjNBTUPApPTLpccroMR3bdC7IkqNdkZsU35l64AlaiWagGtEhOv3KqqF9eyAkiIS9zVjoc7eXIt3fnqSDexP-sobgrs5gfKoXUM3mYRLoAU5QxJbOqJ6G5bVIvw51s797t-_Jv1DK9srwJpAcsYlc-cHCZaGU2ZnHMc);
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark transition-colors duration-300">
+    <nav
+        class="sticky top-0 z-50 bg-white/90 dark:bg-card-dark/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0 flex items-center gap-2">
+                    <div
+                        class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                        O</div>
+                    <span class="font-bold text-xl tracking-tight text-secondary dark:text-white">OGOUE</span>
+                </div>
+                <div class="hidden lg:flex space-x-6 items-center">
+                    <a class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition font-medium"
+                        href="accueil.html">Accueil</a>
+                    <div class="relative group">
+                        <button
+                            class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition font-medium flex items-center gap-1 focus:outline-none">
+                            Pour qui? <span class="material-icons-round text-base">expand_more</span>
+                        </button>
+                        <div
+                            class="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none hidden group-hover:block transition-all duration-200 z-50">
+                            <div aria-orientation="vertical" class="py-1" role="menu">
+                                <a class="block px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    href="Pour qui_/pme.html" role="menuitem">
+                                    <div class="font-bold">Pour les PME</div>
+                                    <div class="text-xs text-gray-500 mt-0.5">Gestion et accès au financement</div>
+                                </a>
+                                <a class="block px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    href="Pour qui_/microfinances.html" role="menuitem">
+                                    <div class="font-bold">Institutions Financières</div>
+                                    <div class="text-xs text-gray-500 mt-0.5">Données fiables et monitoring</div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <a class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition font-medium"
+                        href="#features">Fonctionnalités</a>
+                    <a class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition font-medium"
+                        href="#benefits">Avantages</a>
+                    <a class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition font-medium"
+                        href="#partners">Partenaires</a>
+                    <a class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition font-medium"
+                        href="apropos.html">À propos</a>
+                </div>
+                <div class="hidden lg:flex items-center space-x-4">
+                    <a class="text-secondary dark:text-gray-200 font-medium hover:text-primary transition" href="login.html">Se
+                        connecter</a>
+                    <a class="bg-primary hover:bg-opacity-90 text-white px-5 py-2 rounded-lg font-medium transition shadow-lg shadow-primary/30"
+                        href="signin.html">Créer un compte</a>
+                </div>
+                <div class="lg:hidden flex items-center">
+                    <button
+                        class="text-gray-600 dark:text-gray-300 hover:text-gray-900 focus:outline-none p-2 rounded-md"
+                        onclick="toggleMobileMenu()">
+                        <span class="material-icons-round text-3xl">menu</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="hidden lg:hidden bg-white dark:bg-card-dark border-t border-gray-200 dark:border-gray-700 absolute w-full left-0 top-16 shadow-xl"
+            id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800"
+                    href="accueil.html">Accueil</a>
+                <button
+                    class="w-full text-left flex justify-between items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800"
+                    onclick="toggleDropdown()">
+                    <span>Pour qui?</span>
+                    <span class="material-icons-round text-sm">expand_more</span>
+                </button>
+                <div class="hidden pl-6 space-y-1" id="mobile-dropdown">
+                    <a class="block px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-white"
+                        href="Pour qui_/pme.html">PME</a>
+                    <a class="block px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-white"
+                        href="Pour qui_/microfinances.html">Institutions Financières</a>
+                </div>
+                <a class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800"
+                    href="#features">Fonctionnalités</a>
+                <a class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800"
+                    href="#benefits">Avantages</a>
+                <a class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800"
+                    href="#partners">Partenaires</a>
+                <a class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800"
+                    href="apropos.html">À propos</a>
+                <div class="pt-4 border-t border-gray-200 dark:border-gray-700 mt-4 flex flex-col gap-2">
+                    <a class="block w-full text-center px-5 py-3 rounded-md font-medium text-secondary dark:text-gray-200 bg-gray-50 dark:bg-gray-800"
+                        href="login.html">Se connecter</a>
+                    <a class="block w-full text-center px-5 py-3 rounded-md font-medium text-white bg-primary"
+                        href="signin.html">Créer un compte</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <section class="relative overflow-hidden pt-16 pb-20 lg:pt-24 lg:pb-28">
+        <div
+            class="absolute inset-0 bg-gradient-to-br from-secondary to-[#334e68] dark:from-[#0f172a] dark:to-[#1e293b] hero-pattern skew-y-3 origin-top-left transform -translate-y-24 h-full w-full -z-10">
+        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div class="text-center lg:text-left">
+                    <div
+                        class="inline-flex items-center px-3 py-1 rounded-full bg-primary/20 text-green-300 text-sm font-semibold mb-6 border border-primary/30">
+                        <span class="w-2 h-2 rounded-full bg-green-400 mr-2 animate-pulse"></span>
+                        Nouvelle plateforme pour PME Gabonaises
+                    </div>
+                    <h1 class="text-4xl lg:text-6xl font-extrabold text-white tracking-tight mb-6 leading-tight">
+                        Digitalisez votre gestion financière, <span class="text-green-400">accélérez votre
+                            croissance.</span>
+                    </h1>
+                    <p class="text-lg text-gray-200 mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+                        La plateforme tout-en-un pour les PME gabonaises. Visualisez votre santé financière,
+                        surveillez votre activité et accédez au financement bancaire en quelques clics.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                        <a class="bg-primary text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-opacity-90 transition shadow-xl flex items-center justify-center gap-2 group"
+                            href="signin.html">
+                            Commencer maintenant
+                            <span
+                                class="material-icons-round group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                        </a>
+                        <a class="bg-white/10 backdrop-blur-sm border border-white/20 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/20 transition flex items-center justify-center gap-2"
+                            href="#how-it-works">
+                            <span class="material-icons-round">play_circle_outline</span>
+                            Voir la démo
+                        </a>
+                    </div>
+                    <div class="mt-10 flex flex-wrap justify-center lg:justify-start gap-6 text-gray-300 text-sm">
+                        <div class="flex items-center gap-2">
+                            <span class="material-icons-round text-green-400 text-base">check_circle</span>
+                            <span>Pas de carte requise</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="material-icons-round text-green-400 text-base">check_circle</span>
+                            <span>Inscription rapide</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="material-icons-round text-green-400 text-base">check_circle</span>
+                            <span>Données sécurisées</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative lg:h-auto z-10 mt-12 lg:mt-0">
+                    <div
+                        class="absolute -inset-1 bg-gradient-to-r from-green-400 to-blue-500 rounded-2xl blur opacity-30 animate-pulse">
+                    </div>
+                    <div
+                        class="relative bg-white dark:bg-card-dark rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        <div
+                            class="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2">
+                            <div class="flex gap-1.5">
+                                <div class="w-3 h-3 rounded-full bg-red-400"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-400"></div>
+                            </div>
+                            <div class="ml-4 bg-gray-200 dark:bg-gray-700 h-4 w-32 rounded-md"></div>
+                        </div>
+                        <div class="p-6 grid gap-6">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-xl">
+                                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">Chiffre d'Affaires</div>
+                                    <div class="text-2xl font-bold text-gray-900 dark:text-white truncate">12,5M XAF
+                                    </div>
+                                    <div class="text-green-500 text-xs mt-2 flex items-center font-medium">
+                                        <span class="material-icons-round text-sm mr-1">trending_up</span> +5.2%
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-xl">
+                                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">Scoring (éligibilité au
+                                        financement)</div>
+                                    <div class="text-2xl font-bold text-primary">83/100</div>
+                                    <div class="text-gray-500 dark:text-gray-400 text-xs mt-2">Excellent profil pour la
+                                        microfinance A</div>
+                                </div>
+                            </div>
+                            <div
+                                class="bg-gray-50 dark:bg-gray-800 p-4 rounded-xl h-48 flex items-end justify-between px-2 pb-2 gap-2">
+                                <div
+                                    class="w-full bg-green-100 dark:bg-green-900/30 rounded-t-lg h-[40%] relative group">
+                                    <div
+                                        class="absolute bottom-0 w-full bg-primary rounded-t-lg h-[60%] transition-all duration-500 group-hover:h-[70%]">
+                                    </div>
+                                </div>
+                                <div
+                                    class="w-full bg-green-100 dark:bg-green-900/30 rounded-t-lg h-[60%] relative group">
+                                    <div
+                                        class="absolute bottom-0 w-full bg-primary rounded-t-lg h-[40%] transition-all duration-500 group-hover:h-[50%]">
+                                    </div>
+                                </div>
+                                <div
+                                    class="w-full bg-green-100 dark:bg-green-900/30 rounded-t-lg h-[50%] relative group">
+                                    <div
+                                        class="absolute bottom-0 w-full bg-primary rounded-t-lg h-[75%] transition-all duration-500 group-hover:h-[85%]">
+                                    </div>
+                                </div>
+                                <div
+                                    class="w-full bg-green-100 dark:bg-green-900/30 rounded-t-lg h-[70%] relative group">
+                                    <div
+                                        class="absolute bottom-0 w-full bg-primary rounded-t-lg h-[55%] transition-all duration-500 group-hover:h-[65%]">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="absolute -bottom-6 -right-6 bg-white dark:bg-card-dark p-4 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 flex items-center gap-3 animate-bounce hidden sm:flex"
+                        style="animation-duration: 3s;">
+                        <div class="bg-green-100 dark:bg-green-900 p-2 rounded-lg">
+                            <span class="material-icons-round text-green-600 dark:text-green-400">verified</span>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Pré-qualification</p>
+                            <p class="font-bold text-gray-800 dark:text-white">Validée</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="py-20 bg-background-light dark:bg-background-dark" id="features">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-primary font-semibold tracking-wide uppercase text-sm mb-2">Fonctionnalités Clés</h2>
+                <h3 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Tout ce dont vous avez
+                    besoin pour gérer votre PME</h3>
+                <p class="text-lg text-gray-600 dark:text-gray-400">Une suite d'outils puissants conçus spécifiquement
+                    pour aider les PME .</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div
+                    class="bg-white dark:bg-card-dark rounded-2xl p-8 shadow-sm hover:shadow-lg transition border border-gray-100 dark:border-gray-700 group">
+                    <div
+                        class="w-14 h-14 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <span class="material-icons-round text-blue-600 dark:text-blue-400 text-3xl">analytics</span>
+                    </div>
+                    <h4 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Tableau de Bord Financier</h4>
+                    <p class="text-gray-600 dark:text-gray-400">Visualisez votre chiffre d'affaires
+                        en temps réel. Prenez des décisions basées sur des données.</p>
+                </div>
+                <div
+                    class="bg-white dark:bg-card-dark rounded-2xl p-8 shadow-sm hover:shadow-lg transition border border-gray-100 dark:border-gray-700 group">
+                    <div
+                        class="w-14 h-14 bg-green-50 dark:bg-green-900/20 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <span
+                            class="material-icons-round text-green-600 dark:text-green-400 text-3xl">verified_user</span>
+                    </div>
+                    <h4 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Score de Crédibilité</h4>
+                    <p class="text-gray-600 dark:text-gray-400">Un algorithme unique qui analyse votre activité pour
+                        générer un score de confiance auprès des institutions financières.</p>
+                </div>
+                <div
+                    class="bg-white dark:bg-card-dark rounded-2xl p-8 shadow-sm hover:shadow-lg transition border border-gray-100 dark:border-gray-700 group">
+                    <div
+                        class="w-14 h-14 bg-purple-50 dark:bg-purple-900/20 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <span
+                            class="material-icons-round text-purple-600 dark:text-purple-400 text-3xl">request_quote</span>
+                    </div>
+                    <h4 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Demande de Financement</h4>
+                    <p class="text-gray-600 dark:text-gray-400">Digitalisez vos dossiers financiers. Soyez pré-qualifié
+                        et envoyez vos demandes directement aux banques partenaires.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="py-20 bg-white dark:bg-card-dark overflow-hidden" id="benefits">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row items-center gap-16">
+                <div class="lg:w-1/2 relative">
+                    <div class="absolute inset-0 bg-primary/10 rounded-3xl transform rotate-3 scale-105"></div>
+                    <img alt="Entrepreneur utilisant OGOUE sur tablette"
+                        class="relative rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-700 w-full object-cover h-[500px]"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCA1-d7Qyr_ArRyb7dOxbkja5yXOsDwO-HYuoWlMT6HC3YeROWNWRNq9grATU4OK2-QcENnFKVlvAHXREc-cNqRosKnKeDynlzVgoOnM8A-Ab-GiEPEpcFCRbY_ddZqX9ijoSoAH7Y-7LlEJCCVkJFeOBsQmNCV4Fjbj6W0JpUmssLQlz3a8dmE3U2Uw_Tko5wIKzqdKXjBOfvKX40NCF3BQZR-Y2-kzlW0klrpU4YhfLLXo-vIM-0rBdrgF42bLAIjh0VheEUzQWg" />
+                    <div
+                        class="absolute top-10 -right-10 bg-white dark:bg-card-dark p-5 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 w-80 hidden md:block z-20">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                <span
+                                    class="p-1.5 bg-green-100 dark:bg-green-900/30 rounded-lg text-green-600 dark:text-green-400">
+                                    <span class="material-icons-round text-lg">add_shopping_cart</span>
+                                </span>
+                                Saisie des ventes
+                            </h4>
+                            <span class="text-xs text-gray-400 font-medium">Aujourd'hui</span>
+                        </div>
+                        <form class="space-y-3">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="col-span-2">
+                                    <label
+                                        class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Article</label>
+                                    <input
+                                        class="w-full text-sm rounded-lg border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary placeholder-gray-400"
+                                        placeholder="Ex: Ciment 50kg" type="text" />
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Quantité</label>
+                                    <input
+                                        class="w-full text-sm rounded-lg border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary"
+                                        type="number" value="1" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Prix
+                                        (XAF)</label>
+                                    <input
+                                        class="w-full text-sm rounded-lg border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary"
+                                        placeholder="0" type="text" />
+                                </div>
+                            </div>
+                            <button
+                                class="w-full bg-primary hover:bg-teal-700 text-white font-medium py-2.5 rounded-lg text-sm transition-colors shadow-lg shadow-primary/25 mt-2 flex items-center justify-center gap-2"
+                                type="button">
+                                <span class="material-icons-round text-base">save</span>
+                                Enregistrer la vente
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="lg:w-1/2">
+                    <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">Pour les gérants, agents et
+                        administrateurs</h3>
+                    <p class="text-lg text-gray-600 dark:text-gray-400 mb-8">
+                        Que vous soyez sur le terrain ou au bureau, OGOUE s'adapte à votre rôle.
+                        Gérez vos accès avec des profils dédiés pour sécuriser vos données sensibles.
+                    </p>
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-start">
+                            <span class="material-icons-round text-primary mr-3 mt-1">check_circle_outline</span>
+                            <div>
+                                <span class="block font-bold text-gray-900 dark:text-white">Accès
+                                    multi-utilisateurs</span>
+                                <span class="text-gray-500 dark:text-gray-400 text-sm">Définissez les permissions pour
+                                    chaque membre de l'équipe.</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="material-icons-round text-primary mr-3 mt-1">check_circle_outline</span>
+                            <div>
+                                <span class="block font-bold text-gray-900 dark:text-white">Suivi en temps réel</span>
+                                <span class="text-gray-500 dark:text-gray-400 text-sm">Recevez des notifications pour
+                                    chaque changement critique.</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="material-icons-round text-primary mr-3 mt-1">check_circle_outline</span>
+                            <div>
+                                <span class="block font-bold text-gray-900 dark:text-white">Reporting automatisé</span>
+                                <span class="text-gray-500 dark:text-gray-400 text-sm">Générez vos états financiers
+                                    sans effort.</span>
+                            </div>
+                        </li>
+                    </ul>
+                    <a class="text-primary font-bold flex items-center hover:underline" href="apropos.html">
+                        En savoir plus
+                        <span class="material-icons-round ml-1 text-sm">arrow_forward</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section id="partners" class="py-20 bg-background-light dark:bg-background-dark">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Une solution qui rassemble deux entités
+                </h2>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                <div class="bg-gradient-to-br from-white to-gray-50 dark:from-card-dark dark:to-gray-800 p-8 rounded-2xl shadow-md border-t-4 border-primary relative overflow-hidden"
+                    id="pme">
+                    <div class="absolute top-0 right-0 p-4 opacity-10">
+                        <span class="material-icons-round text-9xl text-primary">store</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                        <span class="bg-primary/10 text-primary p-2 rounded-lg mr-3">
+                            <span class="material-icons-round">store</span>
+                        </span>
+                        Pour les PME
+                    </h3>
+                    <ul class="space-y-3 text-gray-600 dark:text-gray-300 mb-8">
+                        <li class="flex items-center"><span
+                                class="w-1.5 h-1.5 bg-primary rounded-full mr-2"></span>Visibilité complète sur
+                            l'activité</li>
+                        <li class="flex items-center"><span
+                                class="w-1.5 h-1.5 bg-primary rounded-full mr-2"></span>Simplification de la
+                            comptabilité</li>
+                        <li class="flex items-center"><span
+                                class="w-1.5 h-1.5 bg-primary rounded-full mr-2"></span>Accès facilité au crédit
+                            bancaire</li>
+                    </ul>
+                    <a class="inline-block w-full text-center bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 py-3 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-600 transition"
+                        href="Pour qui_/pme.html">Je suis une PME</a>
+                </div>
+                <div class="bg-gradient-to-br from-secondary to-[#2c3e50] p-8 rounded-2xl shadow-md border-t-4 border-blue-400 relative overflow-hidden text-white"
+                    id="institutions">
+                    <div class="absolute top-0 right-0 p-4 opacity-10">
+                        <span class="material-icons-round text-9xl text-white">account_balance</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4 flex items-center">
+                        <span class="bg-white/20 text-white p-2 rounded-lg mr-3">
+                            <span class="material-icons-round">account_balance</span>
+                        </span>
+                        Pour les Institutions Financières
+                    </h3>
+                    <ul class="space-y-3 text-blue-100 mb-8">
+                        <li class="flex items-center"><span
+                                class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>Accès à des données fiables
+                        </li>
+                        <li class="flex items-center"><span
+                                class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>Réduction du risque de crédit
+                        </li>
+                        <li class="flex items-center"><span
+                                class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>Monitoring du portefeuille</li>
+                    </ul>
+                    <a class="inline-block w-full text-center bg-blue-500 hover:bg-blue-600 border border-transparent py-3 rounded-lg font-medium transition text-white"
+                        href="Pour qui_/microfinances.html">Je suis une Institution</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="py-20 bg-background-light dark:bg-background-dark">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-primary font-semibold tracking-wide uppercase text-sm mb-2">Partenaires de Confiance</h2>
+                <h3 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Nos partenaires institutionnels</h3>
+                <p class="text-lg text-gray-600 dark:text-gray-400">OGOUE travaille avec les meilleures institutions financières et partenaires du Gabon</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="bg-white dark:bg-card-dark rounded-lg p-8 shadow-sm hover:shadow-lg transition border border-gray-100 dark:border-gray-700 flex flex-col items-center text-center">
+                    <span class="material-icons-round text-5xl text-primary mb-4">apartment</span>
+                    <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-2">ERG Gabon</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Leader en solutions d'énergie</p>
+                </div>
+                <div class="bg-white dark:bg-card-dark rounded-lg p-8 shadow-sm hover:shadow-lg transition border border-gray-100 dark:border-gray-700 flex flex-col items-center text-center">
+                    <span class="material-icons-round text-5xl text-primary mb-4">account_balance</span>
+                    <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Banque Atlantique</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Partenaire financier principal</p>
+                </div>
+                <div class="bg-white dark:bg-card-dark rounded-lg p-8 shadow-sm hover:shadow-lg transition border border-gray-100 dark:border-gray-700 flex flex-col items-center text-center">
+                    <span class="material-icons-round text-5xl text-primary mb-4">storefront</span>
+                    <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Réseau PME Gabon</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Communauté d'entrepreneurs</p>
+                </div>
+                <div class="bg-white dark:bg-card-dark rounded-lg p-8 shadow-sm hover:shadow-lg transition border border-gray-100 dark:border-gray-700 flex flex-col items-center text-center">
+                    <span class="material-icons-round text-5xl text-primary mb-4">architecture</span>
+                    <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-2">GABAFEX</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Fédération des entreprises</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <section class="py-20">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-secondary rounded-3xl p-8 md:p-16 text-center relative overflow-hidden shadow-2xl">
+                <div class="absolute top-0 left-0 -ml-10 -mt-10 w-40 h-40 bg-white opacity-5 rounded-full blur-2xl">
+                </div>
+                <div
+                    class="absolute bottom-0 right-0 -mr-10 -mb-10 w-40 h-40 bg-primary opacity-20 rounded-full blur-2xl">
+                </div>
+                <h2 class="text-3xl md:text-5xl font-bold text-white mb-6 relative z-10">Prêt à transformer votre
+                    entreprise ?</h2>
+                <p class="text-blue-100 text-lg mb-10 max-w-2xl mx-auto relative z-10">Rejoignez des centaines(100+) de
+                    PME
+                    gabonaises qui utilisent OGOUE pour grandir sereinement.</p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4 relative z-10">
+                    <a class="bg-primary hover:bg-opacity-90 text-white px-8 py-4 rounded-xl font-bold text-lg transition shadow-lg w-full sm:w-auto"
+                        href="signin.html">
+                        Créer un compte gratuit
+                    </a>
+                    <a class="bg-white text-secondary hover:bg-gray-100 px-8 py-4 rounded-xl font-bold text-lg transition shadow-lg w-full sm:w-auto"
+                        href="apropos.html">
+                        En savoir plus
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <footer class="bg-white dark:bg-card-dark border-t border-gray-200 dark:border-gray-800 pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+                <div class="col-span-2 md:col-span-1">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div
+                            class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                            O</div>
+                        <span class="font-bold text-xl tracking-tight text-gray-900 dark:text-white">OGOUE</span>
+                    </div>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">
+                        La plateforme de référence pour la digitalisation financière en Afrique.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-900 dark:text-white mb-4">Produit</h4>
+                    <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                        <li><a class="hover:text-primary transition" href="#features">Fonctionnalités</a></li>
+                        <li><a class="hover:text-primary transition" href="apropos.html">Tarifs</a></li>
+                        <li><a class="hover:text-primary transition" href="apropos.html">Sécurité</a></li>
+                        <li><a class="hover:text-primary transition" href="apropos.html">Mises à jour</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-900 dark:text-white mb-4">Société</h4>
+                    <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                        <li><a class="hover:text-primary transition" href="apropos.html">À propos</a></li>
+                        <li><a class="hover:text-primary transition" href="apropos.html">Carrières</a></li>
+                        <li><a class="hover:text-primary transition" href="apropos.html">Blog</a></li>
+                        <li><a class="hover:text-primary transition" href="apropos.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-900 dark:text-white mb-4">Légal</h4>
+                    <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                        <li><a class="hover:text-primary transition" href="apropos.html">Confidentialité</a></li>
+                        <li><a class="hover:text-primary transition" href="apropos.html">CGU</a></li>
+                        <li><a class="hover:text-primary transition" href="apropos.html">Cookies</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div
+                class="border-t border-gray-100 dark:border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-sm text-gray-500 dark:text-gray-400">© 2023 OGOUE. Tous droits réservés.</p>
+                <div class="flex space-x-4">
+                    <a class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300" href="#">
+                        <span class="sr-only">Facebook</span>
+                        <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path clip-rule="evenodd"
+                                d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"
+                                fill-rule="evenodd"></path>
+                        </svg>
+                    </a>
+                    <a class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300" href="#">
+                        <span class="sr-only">LinkedIn</span>
+                        <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path clip-rule="evenodd"
+                                d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"
+                                fill-rule="evenodd"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (location.hash) {
+                var id = location.hash.substring(1);
+                var el = document.getElementById(id);
+                if (el) {
+                    var y = el.getBoundingClientRect().top + window.pageYOffset - 80;
+                    window.scrollTo({ top: y, behavior: 'smooth' });
+                }
+            }
+            document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+                a.addEventListener('click', function(e) {
+                    var target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        e.preventDefault();
+                        var y = target.getBoundingClientRect().top + window.pageYOffset - 80;
+                        window.scrollTo({ top: y, behavior: 'smooth' });
+                        history.pushState(null, '', this.getAttribute('href'));
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

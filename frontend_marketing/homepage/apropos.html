@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>À Propos - OGOUE</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#0F766E",
+                        secondary: "#102C4C",
+                        "brand-dark-blue": "#4A6076",
+                        "background-light": "#F5F7FA",
+                        "background-dark": "#111827",
+                        "surface-light": "#FFFFFF",
+                        "surface-dark": "#1F2937",
+                        "text-main-light": "#111827",
+                        "text-main-dark": "#F9FAFB",
+                        "text-muted-light": "#6B7280",
+                        "text-muted-dark": "#9CA3AF",
+                    },
+                    fontFamily: {
+                        sans: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        'xl': '1rem',
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        body {
+            font-family: "Inter", sans-serif;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background-light dark:bg-background-dark font-sans text-text-main-light dark:text-text-main-dark transition-colors duration-200">
+    <!-- NAVIGATION -->
+    <nav
+        class="sticky top-0 z-50 bg-white/90 dark:bg-card-dark/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0 flex items-center gap-2">
+                    <div
+                        class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                        O</div>
+                    <span class="font-bold text-xl tracking-tight text-secondary dark:text-white">OGOUE</span>
+                </div>
+                <div class="hidden lg:flex space-x-6 items-center">
+                    <a class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition font-medium"
+                        href="accueil.html">Accueil</a>
+                    <div class="relative group">
+                        <button
+                            class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition font-medium flex items-center gap-1 focus:outline-none">
+                            Pour qui? <span class="material-icons-outlined text-base">expand_more</span>
+                        </button>
+                        <div
+                            class="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none hidden group-hover:block transition-all duration-200 z-50">
+                            <div aria-orientation="vertical" class="py-1" role="menu">
+                                <a class="block px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    href="Pour qui_/pme.html" role="menuitem">
+                                    <div class="font-bold">Pour les PME</div>
+                                    <div class="text-xs text-gray-500 mt-0.5">Gestion et accès au financement</div>
+                                </a>
+                                <a class="block px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    href="Pour qui_/microfinances.html" role="menuitem">
+                                    <div class="font-bold">Institutions Financières</div>
+                                    <div class="text-xs text-gray-500 mt-0.5">Données fiables et monitoring</div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <a class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition font-medium"
+                        href="accueil.html#features">Fonctionnalités</a>
+                    <a class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition font-medium"
+                        href="accueil.html#benefits">Avantages</a>
+                        <a class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition font-medium"
+                            href="accueil.html#partners">Partenaires</a>
+                    <a class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition font-medium"
+                        href="apropos.html">À propos</a>
+                </div>
+                <div class="hidden lg:flex items-center space-x-4">
+                    <a class="text-secondary dark:text-gray-200 font-medium hover:text-primary transition"
+                        href="login.html">Se connecter</a>
+                    <a class="bg-primary hover:bg-opacity-90 text-white px-5 py-2 rounded-lg font-medium transition shadow-lg shadow-primary/30"
+                        href="signin.html">Créer un compte</a>
+                </div>
+                <div class="lg:hidden flex items-center">
+                    <button
+                        class="text-gray-600 dark:text-gray-300 hover:text-gray-900 focus:outline-none p-2 rounded-md"
+                        onclick="toggleMobileMenu()">
+                        <span class="material-icons-outlined text-3xl">menu</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="hidden lg:hidden bg-white dark:bg-card-dark border-t border-gray-200 dark:border-gray-700 absolute w-full left-0 top-16 shadow-xl"
+            id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800"
+                    href="accueil.html">Accueil</a>
+                <button
+                    class="w-full text-left flex justify-between items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800"
+                    onclick="toggleDropdown()">
+                    <span>Pour qui?</span>
+                    <span class="material-icons-outlined text-sm">expand_more</span>
+                </button>
+                <div class="hidden pl-6 space-y-1" id="mobile-dropdown">
+                    <a class="block px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-white"
+                        href="Pour qui_/pme.html">PME</a>
+                    <a class="block px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-white"
+                        href="Pour qui_/microfinances.html">Institutions Financières</a>
+                </div>
+                <a class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800"
+                    href="accueil.html#features">Fonctionnalités</a>
+                <a class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800"
+                    href="accueil.html#benefits">Avantages</a>
+                    <a class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800"
+                        href="accueil.html#partners">Partenaires</a>
+                <a class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800"
+                    href="apropos.html">À propos</a>
+                <div class="pt-4 border-t border-gray-200 dark:border-gray-700 mt-4 flex flex-col gap-2">
+                    <a class="block w-full text-center px-5 py-3 rounded-md font-medium text-secondary dark:text-gray-200 bg-gray-50 dark:bg-gray-800"
+                        href="login.html">Se connecter</a>
+                    <a class="block w-full text-center px-5 py-3 rounded-md font-medium text-white bg-primary"
+                        href="signin.html">Créer un compte</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-grow">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <!-- En-tête -->
+            <div class="text-center mb-16">
+                <h1 class="text-4xl lg:text-5xl font-bold mb-4">À Propos d'OGOUE</h1>
+                <p class="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                    La plateforme de gestion financière conçue pour les entreprises gabonaises
+                </p>
+            </div>
+
+            <!-- Notre Mission -->
+            <div class="grid lg:grid-cols-2 gap-12 items-center mb-20">
+                <div>
+                    <h2 class="text-3xl font-bold mb-6">Notre Mission</h2>
+                    <p class="text-lg text-gray-700 dark:text-gray-300 mb-4">
+                        OGOUE est née d'une vision simple : democratiser l'accès à la gestion financière professionnelle
+                        pour les PME et microentreprises gabonaises.
+                    </p>
+                    <p class="text-lg text-gray-700 dark:text-gray-300">
+                        Nous croyons que chaque entreprise, quelle que soit sa taille, mérite des outils puissants pour
+                        digitaliser sa comptabilité et accéder au financement bancaire.
+                    </p>
+                </div>
+                <div class="bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg p-8 h-80 flex items-center justify-center">
+                    <div class="text-center">
+                        <span class="material-icons-outlined text-6xl text-primary">mission</span>
+                        <p class="text-gray-700 dark:text-gray-300 mt-4 font-semibold">Digitaliser le Gabon</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nos Valeurs -->
+            <div class="mb-20">
+                <h2 class="text-3xl font-bold mb-12 text-center">Nos Valeurs</h2>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="bg-white dark:bg-card-dark rounded-lg p-8 shadow-sm">
+                        <span class="material-icons-outlined text-4xl text-primary mb-4 block">verified</span>
+                        <h3 class="text-xl font-bold mb-3">Transparence</h3>
+                        <p class="text-gray-600 dark:text-gray-400">
+                            Nous croyons en la clarté et l'honnêteté dans chaque interaction avec nos clients.
+                        </p>
+                    </div>
+                    <div class="bg-white dark:bg-card-dark rounded-lg p-8 shadow-sm">
+                        <span class="material-icons-outlined text-4xl text-primary mb-4 block">security</span>
+                        <h3 class="text-xl font-bold mb-3">Sécurité</h3>
+                        <p class="text-gray-600 dark:text-gray-400">
+                            Vos données financières sont protégées avec les standards de sécurité les plus élevés.
+                        </p>
+                    </div>
+                    <div class="bg-white dark:bg-card-dark rounded-lg p-8 shadow-sm">
+                        <span class="material-icons-outlined text-4xl text-primary mb-4 block">favorite</span>
+                        <h3 class="text-xl font-bold mb-3">Excellence</h3>
+                        <p class="text-gray-600 dark:text-gray-400">
+                            Nous nous engageons à fournir le meilleur service possible à chaque instant.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notre Équipe (Concept) -->
+            <div class="bg-gradient-to-r from-secondary/10 to-primary/10 rounded-lg p-12 text-center mb-20">
+                <h2 class="text-3xl font-bold mb-4">Construite Par Des Experts</h2>
+                <p class="text-lg text-gray-700 dark:text-gray-300 max-w-2xl mx-auto mb-8">
+                    Notre équipe regroupe des experts en fintech, comptabilité et développement logiciel,
+                    passionnés par la transformation digitale des entreprises gabonaises.
+                </p>
+                <div class="flex justify-center gap-4">
+                    <div class="text-center">
+                        <span class="material-icons-outlined text-5xl text-primary mx-auto">engineering</span>
+                        <p class="mt-2 font-semibold">Tech</p>
+                    </div>
+                    <div class="text-center">
+                        <span class="material-icons-outlined text-5xl text-secondary mx-auto">calculate</span>
+                        <p class="mt-2 font-semibold">Finance</p>
+                    </div>
+                    <div class="text-center">
+                        <span class="material-icons-outlined text-5xl text-primary mx-auto">business</span>
+                        <p class="mt-2 font-semibold">Stratégie</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTA -->
+            <div class="text-center">
+                <h2 class="text-3xl font-bold mb-4">Prêt à Rejoindre OGOUE ?</h2>
+                <p class="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-xl mx-auto">
+                    Commencez votre transformation digitale dès aujourd'hui
+                </p>
+                <a href="signin.html"
+                    class="inline-block bg-primary hover:bg-opacity-90 text-white px-8 py-3 rounded-lg font-semibold transition shadow-lg">
+                    Créer un compte gratuitement
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-secondary dark:bg-gray-900 text-white py-8 mt-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <h3 class="font-bold mb-4">OGOUE</h3>
+                    <p class="text-sm text-gray-300">
+                        Plateforme de gestion financière pour PME gabonaises.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Produit</h4>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li><a href="accueil.html" class="hover:text-white">Accueil</a></li>
+                        <li><a href="Pour qui_/pme.html" class="hover:text-white">Pour les PME</a></li>
+                        <li><a href="Pour qui_/microfinances.html" class="hover:text-white">Pour les Institutions</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Entreprise</h4>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li><a href="apropos.html" class="hover:text-white">À Propos</a></li>
+                        <li><a href="apropos.html" class="hover:text-white">Contact</a></li>
+                        <li><a href="apropos.html" class="hover:text-white">Blog</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Légal</h4>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li><a href="apropos.html" class="hover:text-white">Conditions</a></li>
+                        <li><a href="apropos.html" class="hover:text-white">Confidentialité</a></li>
+                        <li><a href="apropos.html" class="hover:text-white">Cookies</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 pt-8 text-center text-sm text-gray-300">
+                <p>&copy; 2025 OGOUE. Tous les droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            if (menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+            } else {
+                menu.classList.add('hidden');
+            }
+        }
+
+        function toggleDropdown() {
+            const dropdown = document.getElementById('mobile-dropdown');
+            dropdown.classList.toggle('hidden');
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html class="light" lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Dépôt de dossier - OGOUE</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <!-- Fonts & icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#13ecc8",
+            "background-light": "#f6f8f8",
+            "background-dark": "#10221f",
+            "text-light-primary": "#0d1b19",
+            "text-light-secondary": "#4c9a8d",
+          },
+          fontFamily: { "display": ["Inter", "sans-serif"] },
+          borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+          boxShadow: {
+            "soft": "0 10px 30px rgba(13,27,25,.08)",
+            "lift": "0 14px 40px rgba(13,27,25,.12)"
+          }
+        },
+      },
+    }
+  </script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 500,'GRAD' 0,'opsz' 24; }
+    .fade-in { animation: fade .18s ease-out both; }
+    @keyframes fade { from{opacity:.0; transform: translateY(6px);} to{opacity:1; transform: translateY(0);} }
+  </style>
+</head>
+
+<body class="font-display bg-background-light dark:bg-background-dark text-text-light-primary dark:text-gray-200">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+
+  <!-- HEADER -->
+  <header class="sticky top-0 z-20 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-[#cfe7e3] dark:border-gray-700">
+    <div class="container mx-auto px-4">
+      <div class="flex items-center justify-between whitespace-nowrap py-3">
+        <div class="flex items-center gap-3 text-text-light-primary dark:text-white">
+          <span class="material-symbols-outlined text-3xl text-primary">insights</span>
+          <h2 class="text-lg font-black leading-tight tracking-[-0.015em]">OGOUE</h2>
+        </div>
+
+        <div class="hidden md:flex items-center gap-9">
+          <a class="text-text-light-primary dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
+             href="module_tableau_bord.html">Tableau de Bord</a>
+          <a class="text-text-light-primary dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
+             href="module_ventes.html">Comptabilité</a>
+          <a class="text-primary text-sm font-bold leading-normal"
+             href="module_scoring.html">Financement</a>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 text-text-light-primary dark:bg-primary/25 dark:text-white hover:bg-primary/25 transition cursor-pointer" data-action="notifications">
+            <span class="material-symbols-outlined">notifications</span>
+          </button>
+          <button class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 text-text-light-primary dark:bg-primary/25 dark:text-white hover:bg-primary/25 transition cursor-pointer" data-action="settings">
+            <span class="material-symbols-outlined">settings</span>
+          </button>
+          <button class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-300 hover:bg-teal-200 dark:hover:bg-teal-800 transition-colors ring-2 ring-primary/25"
+               data-action="profile"
+               title="Profil utilisateur">
+            <span class="material-symbols-outlined text-2xl">account_circle</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="flex-grow flex flex-col items-center py-6 px-4 md:px-10 lg:px-40">
+    <div class="w-full max-w-[980px] flex flex-col gap-6">
+
+      <!-- TABS -->
+      <div class="border-b border-gray-200 dark:border-gray-700">
+        <nav class="flex gap-8 -mb-px">
+          <a href="module_scoring.html"
+             class="flex items-center gap-2 border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400
+                    hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
+            <span class="text-sm font-bold tracking-[0.015em]">Scoring</span>
+          </a>
+
+          <a href="module_depot_dossier.html"
+             class="flex items-center gap-2 border-b-[3px] border-b-primary text-[#0d1b19] dark:text-white pb-3 pt-4 px-2">
+            <span class="text-sm font-bold tracking-[0.015em]">Dépôt de dossier</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- HERO -->
+      <section class="bg-white dark:bg-white/5 border border-[#cfe7e3] dark:border-gray-700 rounded-2xl p-5 md:p-6 shadow-soft">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 class="mt-2 text-2xl md:text-3xl font-black tracking-[-0.02em] text-text-light-primary dark:text-white">
+              Déposez votre dossier en 3 étapes
+            </h1>
+            <p class="mt-2 text-sm md:text-base text-text-light-secondary max-w-2xl">
+              Choisissez l’institution financière, sélectionnez le produit, puis téléversez les documents requis.
+            </p>
+          </div>
+
+          <div class="flex items-center gap-2 px-3 py-2 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/40">
+            <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-[18px]">lock</span>
+            <span class="text-xs font-semibold text-blue-600 dark:text-blue-400">Dossier sécurisé & chiffré</span>
+          </div>
+        </div>
+
+        <!-- STEPPER -->
+        <div class="mt-5 grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div id="step0" class="rounded-xl border border-primary/30 bg-primary/5 p-4 flex items-start gap-3">
+            <div class="size-9 rounded-xl bg-primary/20 flex items-center justify-center text-text-light-primary font-black">0</div>
+            <div>
+              <p class="text-sm font-black text-text-light-primary dark:text-white">Partenaire</p>
+              <p class="text-xs text-text-light-secondary mt-0.5">Choisir l’institution</p>
+            </div>
+          </div>
+
+          <div id="step1" class="rounded-xl border border-[#e7f3f1] dark:border-[#1f3a35] bg-white dark:bg-[#152a26]/30 p-4 flex items-start gap-3">
+            <div class="size-9 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-300 font-black">1</div>
+            <div>
+              <p class="text-sm font-black text-text-light-primary dark:text-white">Crédit</p>
+              <p class="text-xs text-text-light-secondary mt-0.5">Choisir le produit</p>
+            </div>
+          </div>
+
+          <div id="step2" class="rounded-xl border border-[#e7f3f1] dark:border-[#1f3a35] bg-white dark:bg-[#152a26]/30 p-4 flex items-start gap-3">
+            <div class="size-9 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-300 font-black">2</div>
+            <div>
+              <p class="text-sm font-black text-text-light-primary dark:text-white">Documents</p>
+              <p class="text-xs text-text-light-secondary mt-0.5">Téléversement</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 0. PARTENAIRE (cards) -->
+      <section class="bg-white dark:bg-white/5 border border-[#cfe7e3] dark:border-gray-700 rounded-2xl p-5 md:p-6 shadow-soft">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <h2 class="text-lg font-black text-text-light-primary dark:text-white flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary">account_balance</span>
+              0. Choisissez votre partenaire financier
+            </h2>
+            <p class="mt-1 text-sm text-text-light-secondary">
+              Les produits et documents requis dépendent de l’institution sélectionnée.
+            </p>
+          </div>
+
+          <div id="partnerSelectedPill" class="hidden md:flex items-center gap-2 px-3 py-2 rounded-full bg-primary/10 border border-primary/20">
+            <span class="material-symbols-outlined text-primary text-[18px]">verified</span>
+            <span id="partnerPillText" class="text-xs font-bold text-text-light-primary">—</span>
+          </div>
+        </div>
+
+        <div class="mt-4 relative">
+          <button id="pScrollLeft"
+            class="hidden md:flex absolute -left-5 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-[#152a26]
+                   border border-[#e7f3f1] dark:border-[#1f3a35] shadow-soft rounded-full w-10 h-10 items-center justify-center hover:bg-primary/10 transition">
+            <span class="material-symbols-outlined text-primary">chevron_left</span>
+          </button>
+
+          <div id="partnerScroller" class="flex gap-4 overflow-x-auto scroll-smooth pb-2 scrollbar-hide">
+            <!-- Microfinance A -->
+            <div class="min-w-[320px] max-w-[320px]">
+              <input class="peer sr-only" id="p-mf_a" name="partner" type="radio" />
+              <label for="p-mf_a"
+                     class="block h-full p-4 rounded-2xl bg-white dark:bg-[#152a26]
+                            border border-[#e7f3f1] dark:border-[#1f3a35]
+                            hover:border-primary/50 hover:shadow-soft transition
+                            peer-checked:border-2 peer-checked:border-primary peer-checked:ring-1 peer-checked:ring-primary/20 peer-checked:shadow-lift">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="flex items-start gap-3">
+                    <div class="size-12 rounded-2xl bg-primary/15 flex items-center justify-center">
+                      <span class="material-symbols-outlined text-primary">savings</span>
+                    </div>
+                    <div>
+                      <p class="text-base font-black text-text-light-primary dark:text-white">Microfinance A</p>
+                      <p class="text-sm text-text-light-secondary">Décision rapide • BFR / Trésorerie</p>
+                      <div class="mt-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/40">
+                        <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-[16px]">bolt</span>
+                        <span class="text-xs font-bold text-blue-600 dark:text-blue-400">72h</span>
+                      </div>
+                    </div>
+                  </div>
+                  <span class="material-symbols-outlined text-primary hidden peer-checked:block">check_circle</span>
+                </div>
+              </label>
+            </div>
+
+            <!-- Banque B -->
+            <div class="min-w-[320px] max-w-[320px]">
+              <input class="peer sr-only" id="p-bank_b" name="partner" type="radio" />
+              <label for="p-bank_b"
+                     class="block h-full p-4 rounded-2xl bg-white dark:bg-[#152a26]
+                            border border-[#e7f3f1] dark:border-[#1f3a35]
+                            hover:border-primary/50 hover:shadow-soft transition
+                            peer-checked:border-2 peer-checked:border-primary peer-checked:ring-1 peer-checked:ring-primary/20 peer-checked:shadow-lift">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="flex items-start gap-3">
+                    <div class="size-12 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                      <span class="material-symbols-outlined text-gray-600 dark:text-gray-300">account_balance</span>
+                    </div>
+                    <div>
+                      <p class="text-base font-black text-text-light-primary dark:text-white">Banque Populaire B</p>
+                      <p class="text-sm text-text-light-secondary">Investissement • Équipement • Stock</p>
+                      <div class="mt-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 dark:bg-white/5 border border-[#e7f3f1] dark:border-[#1f3a35]">
+                        <span class="material-symbols-outlined text-[16px] text-text-light-secondary">gavel</span>
+                        <span class="text-xs font-bold text-text-light-secondary">Exigences élevées</span>
+                      </div>
+                    </div>
+                  </div>
+                  <span class="material-symbols-outlined text-primary hidden peer-checked:block">check_circle</span>
+                </div>
+              </label>
+            </div>
+
+            <!-- Fonds C -->
+            <div class="min-w-[320px] max-w-[320px]">
+              <input class="peer sr-only" id="p-fund_c" name="partner" type="radio" />
+              <label for="p-fund_c"
+                     class="block h-full p-4 rounded-2xl bg-white dark:bg-[#152a26]
+                            border border-[#e7f3f1] dark:border-[#1f3a35]
+                            hover:border-primary/50 hover:shadow-soft transition
+                            peer-checked:border-2 peer-checked:border-primary peer-checked:ring-1 peer-checked:ring-primary/20 peer-checked:shadow-lift">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="flex items-start gap-3">
+                    <div class="size-12 rounded-2xl bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center">
+                      <span class="material-symbols-outlined text-purple-600 dark:text-purple-400">rocket_launch</span>
+                    </div>
+                    <div>
+                      <p class="text-base font-black text-text-light-primary dark:text-white">Fonds d’Investissement C</p>
+                      <p class="text-sm text-text-light-secondary">Expansion • Matériel • Croissance</p>
+                      <div class="mt-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-900/40">
+                        <span class="material-symbols-outlined text-[16px] text-purple-600 dark:text-purple-400">workspace_premium</span>
+                        <span class="text-xs font-bold text-purple-600 dark:text-purple-400">Pitch requis</span>
+                      </div>
+                    </div>
+                  </div>
+                  <span class="material-symbols-outlined text-primary hidden peer-checked:block">check_circle</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <button id="pScrollRight"
+            class="hidden md:flex absolute -right-5 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-[#152a26]
+                   border border-[#e7f3f1] dark:border-[#1f3a35] shadow-soft rounded-full w-10 h-10 items-center justify-center hover:bg-primary/10 transition">
+            <span class="material-symbols-outlined text-primary">chevron_right</span>
+          </button>
+        </div>
+
+        <!-- fallback mobile dropdown (optional mais utile) -->
+        <div class="mt-4 md:hidden">
+          <label class="text-xs font-bold text-text-light-secondary">Partenaire (liste)</label>
+          <select id="partnerSelectMobile"
+                  class="mt-2 w-full h-12 rounded-xl border border-[#cfe7e3] dark:border-gray-700 bg-white dark:bg-background-dark p-3 text-sm font-semibold">
+            <option value="" selected>— Choisir un partenaire —</option>
+            <option value="mf_a">Microfinance A (Gabon)</option>
+            <option value="bank_b">Banque Populaire B</option>
+            <option value="fund_c">Fonds d’Investissement C</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- 1. CREDIT -->
+      <section class="bg-white dark:bg-white/5 border border-[#cfe7e3] dark:border-gray-700 rounded-2xl p-5 md:p-6 shadow-soft">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <h2 class="text-lg font-black text-text-light-primary dark:text-white flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary">inventory_2</span>
+              1. Sélectionnez votre crédit
+            </h2>
+            <p class="mt-1 text-sm text-text-light-secondary">
+              Cette liste est filtrée selon votre partenaire.
+            </p>
+          </div>
+          <a class="text-xs md:text-sm text-primary font-bold hover:underline flex items-center gap-1" href="#">
+            <span class="material-symbols-outlined text-[16px]">compare_arrows</span>
+            Comparer
+          </a>
+        </div>
+
+        <div class="mt-4 relative">
+          <button id="scrollLeft"
+            class="hidden md:flex absolute -left-5 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-[#152a26]
+                   border border-[#e7f3f1] dark:border-[#1f3a35] shadow-soft rounded-full w-10 h-10 items-center justify-center hover:bg-primary/10 transition">
+            <span class="material-symbols-outlined text-primary">chevron_left</span>
+          </button>
+
+          <div id="creditScroller" class="relative flex gap-4 overflow-x-auto scroll-smooth pb-2 scrollbar-hide">
+
+            <!-- overlay lock -->
+            <div id="loanOverlay" class="absolute inset-0 z-10 rounded-2xl bg-white/60 dark:bg-black/30 backdrop-blur-[1px] hidden">
+              <div class="h-full w-full flex items-center justify-center p-6 text-center">
+                <div class="max-w-md bg-white dark:bg-[#152a26] border border-[#e7f3f1] dark:border-[#1f3a35] rounded-2xl p-4 shadow-soft">
+                  <div class="flex items-center justify-center gap-2 text-primary font-black">
+                    <span class="material-symbols-outlined">lock</span>
+                    Sélectionnez d’abord un partenaire
+                  </div>
+                  <p class="mt-2 text-sm text-text-light-secondary">
+                    Les crédits varient selon l’institution.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- STOCK -->
+            <div class="relative cursor-pointer group min-w-[320px] max-w-[320px]" data-loan-card="stock">
+              <input class="peer sr-only" id="loan-stock" name="loan-type" type="radio"/>
+              <label class="block h-full p-4 rounded-2xl bg-white dark:bg-[#152a26]
+                            border border-[#e7f3f1] dark:border-[#1f3a35]
+                            hover:border-primary/50 hover:shadow-soft transition
+                            peer-checked:border-2 peer-checked:border-primary peer-checked:ring-1 peer-checked:ring-primary/20 peer-checked:shadow-lift"
+                     for="loan-stock">
+                <div class="flex justify-between items-start">
+                  <div class="bg-primary/15 p-2.5 rounded-xl text-primary">
+                    <span class="material-symbols-outlined text-[24px]">inventory_2</span>
+                  </div>
+                  <span class="material-symbols-outlined text-primary hidden peer-checked:block text-[24px]">check_circle</span>
+                </div>
+                <div class="mt-3">
+                  <h3 class="font-black text-text-light-primary dark:text-white text-lg">Prêt de Stock</h3>
+                  <p class="text-sm text-text-light-secondary mt-1">Financement d'inventaire</p>
+                  <div class="mt-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20">
+                    <span class="material-symbols-outlined text-[16px] text-primary">bolt</span>
+                    <span class="text-xs font-bold text-text-light-primary">Rapide</span>
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            <!-- INVEST -->
+            <div class="relative cursor-pointer group min-w-[320px] max-w-[320px]" data-loan-card="invest">
+              <input class="peer sr-only" id="loan-invest" name="loan-type" type="radio"/>
+              <label class="block h-full p-4 rounded-2xl bg-white dark:bg-[#152a26]
+                            border border-[#e7f3f1] dark:border-[#1f3a35]
+                            hover:border-primary/50 hover:shadow-soft transition
+                            peer-checked:border-2 peer-checked:border-primary peer-checked:ring-1 peer-checked:ring-primary/20 peer-checked:shadow-lift"
+                     for="loan-invest">
+                <div class="flex justify-between items-start">
+                  <div class="bg-gray-100 dark:bg-gray-800 p-2.5 rounded-xl text-gray-600 dark:text-gray-300">
+                    <span class="material-symbols-outlined text-[24px]">storefront</span>
+                  </div>
+                  <span class="material-symbols-outlined text-primary hidden peer-checked:block text-[24px]">check_circle</span>
+                </div>
+                <div class="mt-3">
+                  <h3 class="font-black text-text-light-primary dark:text-white text-lg">Investissement</h3>
+                  <p class="text-sm text-text-light-secondary mt-1">Travaux & Extension</p>
+                </div>
+              </label>
+            </div>
+
+            <!-- CASH -->
+            <div class="relative cursor-pointer group min-w-[320px] max-w-[320px]" data-loan-card="cash">
+              <input class="peer sr-only" id="loan-cash" name="loan-type" type="radio"/>
+              <label class="block h-full p-4 rounded-2xl bg-white dark:bg-[#152a26]
+                            border border-[#e7f3f1] dark:border-[#1f3a35]
+                            hover:border-primary/50 hover:shadow-soft transition
+                            peer-checked:border-2 peer-checked:border-primary peer-checked:ring-1 peer-checked:ring-primary/20 peer-checked:shadow-lift"
+                     for="loan-cash">
+                <div class="flex justify-between items-start">
+                  <div class="bg-gray-100 dark:bg-gray-800 p-2.5 rounded-xl text-gray-600 dark:text-gray-300">
+                    <span class="material-symbols-outlined text-[24px]">payments</span>
+                  </div>
+                  <span class="material-symbols-outlined text-primary hidden peer-checked:block text-[24px]">check_circle</span>
+                </div>
+                <div class="mt-3">
+                  <h3 class="font-black text-text-light-primary dark:text-white text-lg">Avance Trésorerie</h3>
+                  <p class="text-sm text-text-light-secondary mt-1">Court terme (30j)</p>
+                </div>
+              </label>
+            </div>
+
+            <!-- EQUIPMENT -->
+            <div class="relative cursor-pointer group min-w-[320px] max-w-[320px]" data-loan-card="equipment">
+              <input class="peer sr-only" id="loan-equipment" name="loan-type" type="radio"/>
+              <label class="block h-full p-4 rounded-2xl bg-white dark:bg-[#152a26]
+                            border border-[#e7f3f1] dark:border-[#1f3a35]
+                            hover:border-primary/50 hover:shadow-soft transition
+                            peer-checked:border-2 peer-checked:border-primary peer-checked:ring-1 peer-checked:ring-primary/20 peer-checked:shadow-lift"
+                     for="loan-equipment">
+                <div class="flex justify-between items-start">
+                  <div class="bg-gray-100 dark:bg-gray-800 p-2.5 rounded-xl text-gray-600 dark:text-gray-300">
+                    <span class="material-symbols-outlined text-[24px]">precision_manufacturing</span>
+                  </div>
+                  <span class="material-symbols-outlined text-primary hidden peer-checked:block text-[24px]">check_circle</span>
+                </div>
+                <div class="mt-3">
+                  <h3 class="font-black text-text-light-primary dark:text-white text-lg">Équipement Pro</h3>
+                  <p class="text-sm text-text-light-secondary mt-1">Matériel & outillage</p>
+                </div>
+              </label>
+            </div>
+
+          </div>
+
+          <button id="scrollRight"
+            class="hidden md:flex absolute -right-5 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-[#152a26]
+                   border border-[#e7f3f1] dark:border-[#1f3a35] shadow-soft rounded-full w-10 h-10 items-center justify-center hover:bg-primary/10 transition">
+            <span class="material-symbols-outlined text-primary">chevron_right</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- 2. DOCS -->
+      <section class="bg-white dark:bg-white/5 border border-[#cfe7e3] dark:border-gray-700 rounded-2xl p-5 md:p-6 shadow-soft">
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2 text-primary font-black text-sm uppercase tracking-wider">
+              <span class="material-symbols-outlined text-[18px]">folder_open</span>
+              2. Constitution du dossier
+            </div>
+
+            <h2 id="dossierTitle" class="mt-2 text-2xl md:text-3xl font-black tracking-[-0.02em] text-text-light-primary dark:text-white">
+              Dossier : —
+            </h2>
+            <p id="dossierSubtitle" class="mt-2 text-sm md:text-base text-text-light-secondary">
+              Sélectionnez un partenaire puis un crédit pour voir les documents requis.
+            </p>
+
+            <div class="mt-3 inline-flex items-center gap-2 px-3 py-2 rounded-full bg-primary/10 border border-primary/20">
+              <span class="material-symbols-outlined text-primary text-[18px]">verified_user</span>
+              <span id="docsBadge" class="text-xs font-black text-text-light-primary">(—)</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="docsGrid" class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      </section>
+
+      <!-- Sticky bottom summary -->
+      <div class="sticky bottom-5 z-20">
+        <div class="bg-[#0d1b19] dark:bg-black text-white p-4 md:p-5 rounded-2xl shadow-lift flex flex-col md:flex-row items-center justify-between gap-4 border border-white/10">
+          <div class="flex items-center gap-4 w-full md:w-auto">
+            <div class="relative size-12 hidden md:block">
+              <svg class="size-full -rotate-90" viewBox="0 0 36 36">
+                <path class="text-white/20" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="4"></path>
+                <path class="text-primary" id="progressArc" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="0, 100" stroke-width="4"></path>
+              </svg>
+              <span id="progressText" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] font-black">0%</span>
+            </div>
+
+            <div class="flex flex-col">
+              <span id="footerTitle" class="font-black text-lg">Sélectionnez un partenaire</span>
+              <span id="footerSubtitle" class="text-sm text-white/70">Le dépôt est lié à une institution financière.</span>
+            </div>
+          </div>
+
+          <div class="flex gap-3 w-full md:w-auto">
+            <button id="btnSave"
+              class="flex-1 md:flex-none px-6 py-3 rounded-xl border border-white/20 text-white font-black text-sm hover:bg-white/10 transition">
+              Sauvegarder
+            </button>
+
+            <button id="btnSubmit"
+              class="flex-1 md:flex-none px-8 py-3 rounded-xl bg-white/15 text-white/60 font-black text-sm cursor-not-allowed flex items-center justify-center gap-2 opacity-80"
+              disabled>
+              Soumettre
+              <span class="material-symbols-outlined text-[18px]">send</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="mt-auto py-8 border-t border-[#e7f3f1] dark:border-[#1f3a35] bg-white dark:bg-[#152a26]">
+    <div class="flex justify-center text-center px-4">
+      <p class="text-sm text-text-light-secondary">© 2024 OGOUE. Plateforme sécurisée de gestion financière.</p>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  // =============================
+  // DATA (V2 statique)
+  // =============================
+  const DATA = {
+    partners: {
+      mf_a: { name: "Microfinance A", type: "Microfinance Catégorie 2", loans: ["stock", "cash"] },
+      bank_b: { name: "Banque Populaire B", type: "Banque commerciale", loans: ["stock", "invest", "equipment"] },
+      fund_c: { name: "Fonds d’Investissement C", type: "Fonds / Investisseur", loans: ["invest", "equipment"] },
+    },
+    loans: {
+      stock: {
+        label: "Prêt de Stock",
+        amountText: "Demande indicative : 5M FCFA",
+        docsByPartner: {
+          mf_a: [
+            { title:"Pièce d'identité du gérant", subtitle:"CNI ou Passeport en cours de validité", status:"uploaded", file:{type:"PDF", name:"CNI_Gerant_2023.pdf", size:"1.2 MB"} },
+            { title:"Registre de Commerce", subtitle:"Fiche circuit RCCM", status:"uploaded", file:{type:"IMG", name:"RCCM_Scan_01.jpg", size:"2.4 MB"} },
+            { title:"Relevés Bancaires", subtitle:"Les 3 derniers mois (PDF)", status:"to_upload" },
+            { title:"Photos de la boutique", subtitle:"Devanture et intérieur", status:"to_upload" },
+            { title:"Quittance fiscale", subtitle:"Année en cours (obligatoire)", status:"missing" },
+          ],
+          bank_b: [
+            { title:"Pièce d'identité du gérant", subtitle:"CNI ou Passeport", status:"to_upload" },
+            { title:"RCCM / Statuts", subtitle:"RCCM + statuts signés (PDF)", status:"to_upload" },
+            { title:"Relevés Bancaires", subtitle:"Les 6 derniers mois (PDF)", status:"to_upload" },
+            { title:"Bilan & Compte de résultat", subtitle:"Dernier exercice (obligatoire)", status:"missing" },
+            { title:"État de stock", subtitle:"Inventaire détaillé + valorisation", status:"to_upload" },
+          ]
+        }
+      },
+      invest: {
+        label: "Investissement",
+        amountText: "Demande indicative : 15M FCFA",
+        docsByPartner: {
+          bank_b: [
+            { title:"Business plan", subtitle:"Projet + prévisions (PDF)", status:"to_upload" },
+            { title:"Devis / Proforma", subtitle:"Fournisseurs / travaux (PDF)", status:"to_upload" },
+            { title:"Relevés Bancaires", subtitle:"Les 6 derniers mois (PDF)", status:"to_upload" },
+            { title:"Bilan & Compte de résultat", subtitle:"Dernier exercice (obligatoire)", status:"missing" },
+          ],
+          fund_c: [
+            { title:"Pitch deck", subtitle:"Présentation projet (PDF)", status:"to_upload" },
+            { title:"Prévisionnel", subtitle:"CA, charges, trésorerie (Excel/PDF)", status:"to_upload" },
+            { title:"Justificatifs légaux", subtitle:"RCCM + identité dirigeant", status:"to_upload" },
+          ]
+        }
+      },
+      cash: {
+        label: "Avance Trésorerie",
+        amountText: "Demande indicative : 2M FCFA",
+        docsByPartner: {
+          mf_a: [
+            { title:"Pièce d'identité du gérant", subtitle:"CNI ou Passeport", status:"to_upload" },
+            { title:"Relevés Bancaires", subtitle:"Les 3 derniers mois (PDF)", status:"to_upload" },
+            { title:"Journal des ventes", subtitle:"Dernières 4 semaines", status:"to_upload" },
+          ]
+        }
+      },
+      equipment: {
+        label: "Équipement Pro",
+        amountText: "Demande indicative : 8M FCFA",
+        docsByPartner: {
+          bank_b: [
+            { title:"Devis / Proforma", subtitle:"Matériel & fournisseur (PDF)", status:"to_upload" },
+            { title:"Relevés Bancaires", subtitle:"Les 6 derniers mois (PDF)", status:"to_upload" },
+            { title:"Bilan & Compte de résultat", subtitle:"Dernier exercice (si disponible)", status:"to_upload" },
+          ],
+          fund_c: [
+            { title:"Justificatif d'activité", subtitle:"RCCM / statuts", status:"to_upload" },
+            { title:"Proforma équipement", subtitle:"Fournisseur (PDF)", status:"to_upload" },
+          ]
+        }
+      }
+    }
+  };
+
+  // =============================
+  // DOM
+  // =============================
+  const loanOverlay = document.getElementById("loanOverlay");
+  const docsGrid = document.getElementById("docsGrid");
+  const dossierTitle = document.getElementById("dossierTitle");
+  const dossierSubtitle = document.getElementById("dossierSubtitle");
+  const docsBadge = document.getElementById("docsBadge");
+
+  const footerTitle = document.getElementById("footerTitle");
+  const footerSubtitle = document.getElementById("footerSubtitle");
+  const btnSubmit = document.getElementById("btnSubmit");
+  const btnSave = document.getElementById("btnSave");
+
+  const progressArc = document.getElementById("progressArc");
+  const progressText = document.getElementById("progressText");
+
+  const step0 = document.getElementById("step0");
+  const step1 = document.getElementById("step1");
+  const step2 = document.getElementById("step2");
+
+  const partnerSelectedPill = document.getElementById("partnerSelectedPill");
+  const partnerPillText = document.getElementById("partnerPillText");
+
+  const partnerRadios = {
+    mf_a: document.getElementById("p-mf_a"),
+    bank_b: document.getElementById("p-bank_b"),
+    fund_c: document.getElementById("p-fund_c")
+  };
+  const partnerSelectMobile = document.getElementById("partnerSelectMobile");
+
+  const loanInputs = {
+    stock: document.getElementById("loan-stock"),
+    invest: document.getElementById("loan-invest"),
+    cash: document.getElementById("loan-cash"),
+    equipment: document.getElementById("loan-equipment"),
+  };
+  const loanCards = Array.from(document.querySelectorAll("[data-loan-card]"));
+
+  // scrollers
+  const pScroller = document.getElementById("partnerScroller");
+  const pLeft = document.getElementById("pScrollLeft");
+  const pRight = document.getElementById("pScrollRight");
+
+  const scroller = document.getElementById("creditScroller");
+  const btnLeft = document.getElementById("scrollLeft");
+  const btnRight = document.getElementById("scrollRight");
+
+  // =============================
+  // Helpers
+  // =============================
+  function setOverlayLocked(locked) {
+    loanOverlay.classList.toggle("hidden", !locked);
+    Object.values(loanInputs).forEach(inp => inp.disabled = locked);
+  }
+
+  function showLoans(loanIds) {
+    loanCards.forEach(card => {
+      const id = card.getAttribute("data-loan-card");
+      card.classList.toggle("hidden", !loanIds.includes(id));
+    });
+  }
+
+  function computeProgress(docs) {
+    if (!docs || docs.length === 0) return 0;
+    const uploaded = docs.filter(d => d.status === "uploaded").length;
+    return Math.round((uploaded / docs.length) * 100);
+  }
+
+  function setProgress(pct) {
+    const p = Math.max(0, Math.min(100, pct));
+    progressArc.setAttribute("stroke-dasharray", `${p}, 100`);
+    progressText.textContent = `${p}%`;
+  }
+
+  function setStepState({partnerOk, loanOk, docsOk}) {
+    const base = "rounded-xl p-4 flex items-start gap-3";
+    const done = "border border-primary/30 bg-primary/5";
+    const idle = "border border-[#e7f3f1] dark:border-[#1f3a35] bg-white dark:bg-[#152a26]/30";
+
+    step0.className = `${base} ${partnerOk ? done : done}`; // step0 always highlighted (current)
+    step1.className = `${base} ${partnerOk ? done : idle}`;
+    step2.className = `${base} ${loanOk ? done : idle}`;
+  }
+
+  function badgeForStatus(status) {
+    if (status === "uploaded") return {wrap:"bg-primary/10 text-text-light-primary border-primary/20", icon:"check_circle", text:"Téléversé"};
+    if (status === "missing") return {wrap:"bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-100 dark:border-red-800", icon:"error", text:"Manquant"};
+    return {wrap:"bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-200 border-gray-200 dark:border-gray-600", icon:"hourglass_empty", text:"À téléverser"};
+  }
+
+  function renderDocCard(doc) {
+    const b = badgeForStatus(doc.status);
+    const border =
+      doc.status === "missing" ? "border-red-200 dark:border-red-900/50" :
+      (doc.status === "uploaded" ? "border-primary/30" : "border-[#e7f3f1] dark:border-[#1f3a35]");
+
+    const fileBloc = doc.status === "uploaded" && doc.file ? `
+      <div class="mt-2 bg-[#f8fcfb] dark:bg-[#10221f] rounded-xl p-3 border border-dashed border-[#e7f3f1] dark:border-[#1f3a35] flex justify-between items-center">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg ${doc.file.type === "PDF" ? "bg-red-100 text-red-500" : "bg-blue-100 text-blue-500"} flex items-center justify-center font-black text-xs">${doc.file.type}</div>
+          <div class="flex flex-col">
+            <span class="text-sm font-bold text-text-light-primary dark:text-white truncate max-w-[190px]">${doc.file.name}</span>
+            <span class="text-xs text-gray-500">${doc.file.size}</span>
+          </div>
+        </div>
+        <div class="flex gap-1">
+          <button class="text-gray-400 hover:text-primary transition-colors p-1" title="Voir">
+            <span class="material-symbols-outlined text-[20px]">visibility</span>
+          </button>
+          <button class="text-gray-400 hover:text-red-500 transition-colors p-1" title="Supprimer">
+            <span class="material-symbols-outlined text-[20px]">delete</span>
+          </button>
+        </div>
+      </div>
+    ` : "";
+
+    const uploadBloc = (doc.status === "to_upload" || doc.status === "missing") ? `
+      <div class="mt-2 border-2 border-dashed ${doc.status === "missing" ? "border-red-200 dark:border-red-800/50 bg-red-50/30 dark:bg-red-900/10" : "border-[#e7f3f1] dark:border-[#1f3a35]"}
+                  rounded-xl p-6 flex flex-col items-center justify-center gap-2 text-center
+                  hover:bg-[#f8fcfb] dark:hover:bg-[#10221f] hover:border-primary/40 transition-all cursor-pointer">
+        <span class="material-symbols-outlined text-3xl ${doc.status === "missing" ? "text-red-300 dark:text-red-700" : "text-gray-300 dark:text-gray-600"}">
+          ${doc.status === "missing" ? "upload_file" : "cloud_upload"}
+        </span>
+        <div class="text-sm font-bold ${doc.status === "missing" ? "text-red-600 dark:text-red-400" : "text-text-light-primary dark:text-white"}">
+          ${doc.status === "missing" ? "Veuillez téléverser ce document" : "Glisser-déposer ou <span class='text-primary underline'>parcourir</span>"}
+        </div>
+        <p class="text-xs ${doc.status === "missing" ? "text-red-400/80" : "text-gray-400"}">
+          ${doc.status === "missing" ? "Obligatoire pour continuer" : "PDF, JPG, PNG max 5Mo"}
+        </p>
+      </div>
+    ` : "";
+
+    return `
+      <div class="fade-in bg-white dark:bg-[#152a26] rounded-2xl border ${border} shadow-soft p-5 flex flex-col gap-4 relative overflow-hidden">
+        <div class="absolute top-0 right-0 p-3">
+          <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-xs font-black ${b.wrap}">
+            <span class="material-symbols-outlined text-[16px]">${b.icon}</span>
+            ${b.text}
+          </span>
+        </div>
+
+        <div class="flex items-start gap-3">
+          <div class="bg-primary/10 p-2.5 rounded-xl text-primary">
+            <span class="material-symbols-outlined">description</span>
+          </div>
+          <div>
+            <h3 class="font-black text-text-light-primary dark:text-white">${doc.title}</h3>
+            <p class="text-xs text-text-light-secondary mt-1">${doc.subtitle}</p>
+          </div>
+        </div>
+
+        ${fileBloc}
+        ${uploadBloc}
+      </div>
+    `;
+  }
+
+  // =============================
+  // State
+  // =============================
+  let state = { partnerId: "", loanId: "" };
+
+  function loadState() {
+    try {
+      const saved = JSON.parse(localStorage.getItem("ogoUE_depot_state_v3") || "{}");
+      state.partnerId = saved.partnerId || "";
+      state.loanId = saved.loanId || "";
+    } catch (_) {}
+  }
+  function saveState() {
+    localStorage.setItem("ogoUE_depot_state_v3", JSON.stringify(state));
+  }
+
+  function getDocs(partnerId, loanId) {
+    const loan = DATA.loans[loanId];
+    if (!loan) return [];
+    return (loan.docsByPartner && loan.docsByPartner[partnerId]) ? loan.docsByPartner[partnerId] : [];
+  }
+
+  function updateUI() {
+    const partnerId = state.partnerId;
+    const loanId = state.loanId;
+
+    // stepper
+    const partnerOk = !!partnerId;
+
+    if (!partnerId) {
+      setOverlayLocked(true);
+      showLoans([]); // hide all
+      docsGrid.innerHTML = "";
+      dossierTitle.textContent = "Dossier : —";
+      dossierSubtitle.textContent = "Sélectionnez un partenaire puis un crédit pour voir les documents requis.";
+      docsBadge.textContent = "(—)";
+      footerTitle.textContent = "Sélectionnez un partenaire";
+      footerSubtitle.textContent = "Le dépôt est lié à une institution financière.";
+      btnSubmit.disabled = true;
+      btnSubmit.className = "flex-1 md:flex-none px-8 py-3 rounded-xl bg-white/15 text-white/60 font-black text-sm cursor-not-allowed flex items-center justify-center gap-2 opacity-80";
+      setProgress(0);
+      setStepState({partnerOk:false, loanOk:false, docsOk:false});
+      partnerSelectedPill.classList.add("hidden");
+      saveState();
+      return;
+    }
+
+    const partner = DATA.partners[partnerId];
+    partnerSelectedPill.classList.remove("hidden");
+    partnerPillText.textContent = `${partner.name} • ${partner.type}`;
+
+    // show loans allowed
+    showLoans(partner.loans);
+    setOverlayLocked(false);
+
+    // ensure loan valid
+    if (!loanId || !partner.loans.includes(loanId)) {
+      state.loanId = partner.loans[0] || "";
+    }
+
+    // check correct radio
+    Object.keys(loanInputs).forEach(k => loanInputs[k].checked = (k === state.loanId));
+
+    // docs
+    const loan = DATA.loans[state.loanId];
+    const docs = getDocs(partnerId, state.loanId);
+
+    dossierTitle.textContent = `Dossier : ${loan ? loan.label : "—"}`;
+    dossierSubtitle.textContent = `${loan ? loan.amountText : ""}. Documents requis selon ${partner.name}.`;
+    docsBadge.textContent = `(${loan ? loan.label : "—"} • ${partner.name})`;
+
+    docsGrid.innerHTML = docs.length
+      ? docs.map(renderDocCard).join("")
+      : `<div class="col-span-1 md:col-span-2 p-5 rounded-2xl border border-[#e7f3f1] dark:border-[#1f3a35] bg-white dark:bg-[#152a26]">
+          <p class="text-sm text-text-light-secondary">Aucun document configuré pour ce produit chez ce partenaire (V2 statique).</p>
+        </div>`;
+
+    const hasMissing = docs.some(d => d.status === "missing");
+    const pct = computeProgress(docs);
+    setProgress(pct);
+
+    const loanOk = !!state.loanId;
+    setStepState({partnerOk:true, loanOk, docsOk: !hasMissing});
+
+    if (hasMissing || docs.length === 0) {
+      footerTitle.textContent = "Votre dossier est incomplet";
+      footerSubtitle.textContent = "Ajoutez tous les documents obligatoires pour pouvoir soumettre.";
+      btnSubmit.disabled = true;
+      btnSubmit.className = "flex-1 md:flex-none px-8 py-3 rounded-xl bg-white/15 text-white/60 font-black text-sm cursor-not-allowed flex items-center justify-center gap-2 opacity-80";
+      btnSubmit.innerHTML = `Soumettre à ${partner.name}<span class="material-symbols-outlined text-[18px]">send</span>`;
+    } else {
+      footerTitle.textContent = "Dossier prêt à être soumis";
+      footerSubtitle.textContent = "Tous les documents obligatoires sont présents.";
+      btnSubmit.disabled = false;
+      btnSubmit.className = "flex-1 md:flex-none px-8 py-3 rounded-xl bg-primary text-[#0d1b19] font-black text-sm flex items-center justify-center gap-2 hover:bg-primary/90 transition";
+      btnSubmit.innerHTML = `Soumettre à ${partner.name}<span class="material-symbols-outlined text-[18px]">send</span>`;
+    }
+
+    saveState();
+  }
+
+  // =============================
+  // Events
+  // =============================
+  Object.entries(partnerRadios).forEach(([id, el]) => {
+    el.addEventListener("change", () => {
+      state.partnerId = id;
+      state.loanId = "";
+      if (partnerSelectMobile) partnerSelectMobile.value = id;
+      updateUI();
+    });
+  });
+
+  if (partnerSelectMobile) {
+    partnerSelectMobile.addEventListener("change", () => {
+      state.partnerId = partnerSelectMobile.value;
+      state.loanId = "";
+      // sync radios
+      if (partnerRadios[state.partnerId]) partnerRadios[state.partnerId].checked = true;
+      updateUI();
+    });
+  }
+
+  Object.keys(loanInputs).forEach(loanId => {
+    loanInputs[loanId].addEventListener("change", () => {
+      state.loanId = loanId;
+      updateUI();
+    });
+  });
+
+  // scrollers
+  if (pScroller && pLeft && pRight) {
+    const amt = 340;
+    pLeft.addEventListener("click", () => pScroller.scrollBy({ left: -amt, behavior: "smooth" }));
+    pRight.addEventListener("click", () => pScroller.scrollBy({ left: amt, behavior: "smooth" }));
+  }
+  if (scroller && btnLeft && btnRight) {
+    const amt = 340;
+    btnLeft.addEventListener("click", () => scroller.scrollBy({ left: -amt, behavior: "smooth" }));
+    btnRight.addEventListener("click", () => scroller.scrollBy({ left: amt, behavior: "smooth" }));
+  }
+
+  // save
+  btnSave.addEventListener("click", () => {
+    saveState();
+    footerSubtitle.textContent = "Sauvegarde locale effectuée (V2 statique).";
+    setTimeout(() => updateUI(), 900);
+  });
+
+  // init
+  loadState();
+  if (state.partnerId && partnerRadios[state.partnerId]) partnerRadios[state.partnerId].checked = true;
+  if (partnerSelectMobile && state.partnerId) partnerSelectMobile.value = state.partnerId;
+  updateUI();
+</script>
+
+<script src="js/ogoue-state.js"></script>
+<script src="js/header-ui.js"></script>
+<script src="js/topbar-actions.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.OGOUE?.initTopbarActions) {
+            window.OGOUE.initTopbarActions();
+        }
+    });
+</script>
+
+</body>
+</html>
