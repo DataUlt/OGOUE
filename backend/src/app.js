@@ -10,7 +10,32 @@ import { authMiddleware } from "./middleware/auth.middleware.js";
 
 export const app = express();
 
-app.use(cors({ origin: process.env.CORS_ORIGIN || "*" }));
+const allowedOrigins = (process.env.CORS_ORIGIN || "")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Autorise les requêtes sans Origin (Postman/curl/server-to-server)
+      if (!origin) return callback(null, true);
+
+      // Dev fallback
+      if (allowedOrigins.length === 0 || process.env.CORS_ORIGIN === "*") {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`CORS blocked: ${origin}`));
+    },
+    credentials: true,
+  })
+);
+
 app.use(express.json({ limit: "200kb" }));
 
 app.get("/health", (req, res) => res.json({ ok: true }));
