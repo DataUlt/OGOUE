@@ -357,7 +357,8 @@
                 
                 // Redirect to dashboard after 1.5s
                 setTimeout(() => {
-                    window.location.href = 'http://127.0.0.1:5500/frontend_app/module_tableau_bord.html';
+                    // Production dashboard URL
+                    window.location.href = 'https://app.ogoue.com/module_tableau_bord.html';
                 }, 1500);
                 
             } catch (error) {
