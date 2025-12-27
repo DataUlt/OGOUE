@@ -35,7 +35,10 @@ function handleUnauthorized() {
   console.warn("❌ Token expiré ou invalide. Redirection vers login...");
   localStorage.removeItem("authToken");
   localStorage.removeItem("user");
-  window.location.href = "https://www.ogoue.com/login.html";
+  const MARKETING_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
+    ? 'http://127.0.0.1:5500/OGOUE_COMBINED/frontend_marketing/homepage'
+    : 'https://www.ogoue.com';
+  window.location.href = `${MARKETING_BASE}/login.html`;
 }
 
 // ─────────────────────────────────────────────────
