@@ -34,7 +34,7 @@ export async function authMiddleware(req, res, next) {
       .from("users")
       .select("id, organization_id, role")
       .eq("auth_id", userData.user.id)
-      .single();
+      .maybeSingle();
 
     if (!recordError && userRecord) {
       req.user.userId = userRecord.id;
@@ -71,7 +71,7 @@ export async function authMiddlewareOptional(req, res, next) {
           .from("users")
           .select("id, organization_id, role")
           .eq("auth_id", userData.user.id)
-          .single();
+          .maybeSingle();
 
         if (userRecord) {
           req.user.userId = userRecord.id;
