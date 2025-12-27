@@ -21,7 +21,7 @@ const loginSchema = z.object({
 
 /**
  * POST /auth/register
- * Crée une nouvelle organisation, un utilisateur Supabase Auth et un record dans app.users
+ * Crée une nouvelle organisation, un utilisateur Supabase Auth et un record dans users
  */
 export async function register(req, res) {
   try {
@@ -61,7 +61,7 @@ export async function register(req, res) {
       return res.status(500).json({ error: "Erreur lors de la création de l'organisation" });
     }
 
-    // 3️⃣ Créer le record utilisateur dans app.users
+    // 3️⃣ Créer le record utilisateur dans users
     const { data: userData, error: userError } = await supabase
       .from("users")
       .insert({
@@ -188,7 +188,7 @@ export async function getMe(req, res) {
       .from("users")
       .select("id, first_name, last_name, email, role, organization_id, created_at")
       .eq("auth_id", authId)
-      .single();
+      .maybeSingle();
 
     if (userError || !userData) {
       console.error("User record error:", userError);
