@@ -12,29 +12,43 @@ export const app = express();
 
 const allowedOrigins = (process.env.CORS_ORIGIN || "")
   .split(",")
-  .map((o) => o.trim())
+  .map((o) => o.trim().toLowerCase())
   .filter(Boolean);
+
+console.info && console.info('CORS allowedOrigins:', allowedOrigins);
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Autorise les requêtes sans Origin (Postman/curl/server-to-server)
-      if (!origin) return callback(null, true);
+      try {
+        console.debug && console.debug('CORS check:', { origin, allowedOrigins });
 
-      // Dev fallback
-      if (allowedOrigins.length === 0 || process.env.CORS_ORIGIN === "*") {
-        return callback(null, true);
+        // allow server-to-server / curl / same-origin (no Origin header)
+        if (!origin) return callback(null, true);
+
+        // if no env var set, allow all (dev fallback)
+        if (allowedOrigins.length === 0) return callback(null, true);
+
+        // wildcard support
+        if (allowedOrigins.includes('*')) return callback(null, true);
+
+        // compare in lowercase
+        if (allowedOrigins.includes(origin.toLowerCase())) return callback(null, true);
+
+        console.warn(`CORS blocked for origin: ${origin}`);
+        return callback(null, false);
+      } catch (err) {
+        console.error('CORS origin check error:', err && err.stack ? err.stack : err);
+        return callback(null, false);
       }
-
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      return callback(new Error(`CORS blocked: ${origin}`));
     },
-    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// make sure preflight is handled
+app.options("*", cors());
 
 app.use(express.json({ limit: "200kb" }));
 

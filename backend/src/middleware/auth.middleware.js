@@ -29,9 +29,9 @@ export async function authMiddleware(req, res, next) {
       email: userData.user.email,
     };
 
-    // Récupérer l'organizationId depuis app.users
+    // Récupérer l'organizationId depuis users
     const { data: userRecord, error: recordError } = await supabase
-      .from("app.users")
+      .from("users")
       .select("id, organization_id, role")
       .eq("auth_id", userData.user.id)
       .single();
@@ -66,9 +66,9 @@ export async function authMiddlewareOptional(req, res, next) {
           email: userData.user.email,
         };
 
-        // Récupérer l'organizationId depuis app.users
+        // Récupérer l'organizationId depuis users
         const { data: userRecord } = await supabase
-          .from("app.users")
+          .from("users")
           .select("id, organization_id, role")
           .eq("auth_id", userData.user.id)
           .single();
