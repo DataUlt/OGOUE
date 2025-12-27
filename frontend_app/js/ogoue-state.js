@@ -4,7 +4,7 @@
 // ============================================================
 
 // URL de base du backend
-const API_BASE_URL = "http://127.0.0.1:3001";
+const API_BASE_URL = "https://api.ogoue.com";
 
 // ─────────────────────────────────────────────────
 // 🔐 AUTHENTICATION HELPERS
@@ -35,7 +35,7 @@ function handleUnauthorized() {
   console.warn("❌ Token expiré ou invalide. Redirection vers login...");
   localStorage.removeItem("authToken");
   localStorage.removeItem("user");
-  window.location.href = "../../frontend_marketing/homepage/login.html";
+  window.location.href = "https://www.ogoue.com/login.html";
 }
 
 // ─────────────────────────────────────────────────
