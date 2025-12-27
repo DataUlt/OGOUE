@@ -616,7 +616,11 @@
       if(confirm('Êtes-vous sûr ?')) {
         localStorage.removeItem('authToken');
         localStorage.removeItem('user');
-        window.location.href = 'http://127.0.0.1:5500/OGOUE_COMBINED/frontend_marketing/homepage/login.html';
+        // Redirect to marketing login page (env-aware)
+        const MARKETING_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
+          ? 'http://127.0.0.1:5500/OGOUE_COMBINED/frontend_marketing/homepage'
+          : 'https://www.ogoue.com';
+        window.location.href = `${MARKETING_BASE}/login.html`;
       }
     });
   }

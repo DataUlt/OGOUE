@@ -355,10 +355,12 @@
                 
                 showSuccess("Compte créé avec succès ! Redirection...");
                 
-                // Redirect to dashboard after 1.5s
+                // Redirect to dashboard after 1.5s (env-aware)
+                const APP_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
+                    ? 'http://127.0.0.1:5500/frontend_app'
+                    : 'https://app.ogoue.com';
                 setTimeout(() => {
-                    // Production dashboard URL
-                    window.location.href = 'https://app.ogoue.com/module_tableau_bord.html';
+                    window.location.href = `${APP_BASE}/module_tableau_bord.html`;
                 }, 1500);
                 
             } catch (error) {
