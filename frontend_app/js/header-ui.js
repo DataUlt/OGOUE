@@ -276,11 +276,17 @@
   async function saveOrgToServer(org) {
     try {
       const token = localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('Token d\'authentification manquant');
+      }
+
       const API_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
-        ? 'http://localhost:5000/api'
+        ? 'http://localhost:3001/api'
         : 'https://ogoue.onrender.com/api';
 
-      const response = await fetch(`${API_BASE}/organizations`, {
+      console.log('Sauvegarde org:', { rccm: org.rccm, nif: org.nif });
+
+      const response = await fetch(`${API_BASE}/organization`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -292,12 +298,17 @@
         })
       });
 
+      console.log('Réponse API:', response.status);
+
       if (!response.ok) {
-        console.error('Erreur mise à jour organisation:', response.status);
-        throw new Error(`Error: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Erreur API:', errorData);
+        throw new Error(errorData.error || `Erreur ${response.status}`);
       }
 
       const data = await response.json();
+      console.log('Réponse réussie:', data);
+
       // Update local org with server response
       const updatedOrg = {
         ...org,
@@ -615,19 +626,25 @@
     
     // RCCM
     const rccmDiv = document.createElement('div');
-    rccmDiv.className = 'flex items-center justify-between text-sm text-gray-700 dark:text-gray-300';
+    rccmDiv.className = 'text-sm text-gray-700 dark:text-gray-300 space-y-2';
     rccmDiv.innerHTML = `
-      <span class="text-gray-600 dark:text-gray-400">${org.rccm || 'RCCM-001'}</span>
-      <button class="text-teal-600 dark:text-teal-400 text-xs font-medium hover:text-teal-700 dark:hover:text-teal-300" data-edit-rccm>Modifier</button>
+      <div class="flex items-center justify-between">
+        <span class="font-medium text-gray-600 dark:text-gray-400">RCCM</span>
+        <button class="text-teal-600 dark:text-teal-400 text-xs font-medium hover:text-teal-700 dark:hover:text-teal-300" data-edit-rccm>Modifier</button>
+      </div>
+      <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded text-gray-900 dark:text-white font-mono text-xs">${org.rccm || 'Non défini'}</div>
     `;
     content.appendChild(rccmDiv);
     
     // NIF
     const nifDiv = document.createElement('div');
-    nifDiv.className = 'flex items-center justify-between text-sm text-gray-700 dark:text-gray-300';
+    nifDiv.className = 'text-sm text-gray-700 dark:text-gray-300 space-y-2';
     nifDiv.innerHTML = `
-      <span class="text-gray-600 dark:text-gray-400">${org.nif || 'NIF-001'}</span>
-      <button class="text-teal-600 dark:text-teal-400 text-xs font-medium hover:text-teal-700 dark:hover:text-teal-300" data-edit-nif>Modifier</button>
+      <div class="flex items-center justify-between">
+        <span class="font-medium text-gray-600 dark:text-gray-400">NIF</span>
+        <button class="text-teal-600 dark:text-teal-400 text-xs font-medium hover:text-teal-700 dark:hover:text-teal-300" data-edit-nif>Modifier</button>
+      </div>
+      <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded text-gray-900 dark:text-white font-mono text-xs">${org.nif || 'Non défini'}</div>
     `;
     content.appendChild(nifDiv);
     
@@ -686,25 +703,46 @@
           <span class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2 block">${label}</span>
           <input type="text" id="edit-input" value="${value}" placeholder="Ex: ${label}-001" class="w-full px-3 py-2 text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" />
         </label>
+        <div id="error-msg" class="text-xs text-red-600 hidden"></div>
       </div>
       <div class="flex gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
         <button class="flex-1 px-4 py-2 text-sm font-medium rounded text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800" data-cancel>Annuler</button>
-        <button class="flex-1 px-4 py-2 text-sm font-medium rounded bg-teal-600 text-white hover:bg-teal-700" data-save>Enregistrer</button>
+        <button class="flex-1 px-4 py-2 text-sm font-medium rounded bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed" data-save>Enregistrer</button>
       </div>
     `;
     
     document.body.appendChild(modal);
     
     const input = modal.querySelector('#edit-input');
+    const saveBtn = modal.querySelector('[data-save]');
+    const cancelBtn = modal.querySelector('[data-cancel]');
+    const closeBtn = modal.querySelector('[data-close]');
+    const errorMsg = modal.querySelector('#error-msg');
+    
     input.focus();
     
-    modal.querySelector('[data-save]')?.addEventListener('click', () => {
-      onSave(input.value.trim());
-      modal.remove();
+    saveBtn?.addEventListener('click', async () => {
+      try {
+        saveBtn.disabled = true;
+        cancelBtn.disabled = true;
+        saveBtn.textContent = 'En cours...';
+        errorMsg.classList.add('hidden');
+        
+        await onSave(input.value.trim());
+        
+        modal.remove();
+      } catch (error) {
+        console.error('Erreur:', error);
+        errorMsg.textContent = error.message || 'Erreur lors de la sauvegarde';
+        errorMsg.classList.remove('hidden');
+        saveBtn.disabled = false;
+        cancelBtn.disabled = false;
+        saveBtn.textContent = 'Enregistrer';
+      }
     });
     
-    modal.querySelector('[data-cancel]')?.addEventListener('click', () => modal.remove());
-    modal.querySelector('[data-close]')?.addEventListener('click', () => modal.remove());
+    cancelBtn?.addEventListener('click', () => modal.remove());
+    closeBtn?.addEventListener('click', () => modal.remove());
   }
 
   // ============ INITIALIZATION ============

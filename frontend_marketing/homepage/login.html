@@ -175,12 +175,19 @@
             
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value.trim();
+            const role = document.querySelector('input[name="role"]:checked').value;
             const errorDiv = document.getElementById('errorMessage');
             const successDiv = document.getElementById('successMessage');
             
             // Hide messages
             errorDiv.classList.add('hidden');
             successDiv.classList.add('hidden');
+            
+            // If agent is selected, redirect to agent login
+            if (role === 'agent') {
+                window.location.href = 'agent-login.html';
+                return;
+            }
             
             // Validation
             if (!email || !password) {

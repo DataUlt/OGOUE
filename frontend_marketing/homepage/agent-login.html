@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Connexion Agent - OGOUE</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#0F766E",
+                        secondary: "#102C4C",
+                        "brand-dark-blue": "#4A6076",
+                        "background-light": "#F5F7FA",
+                        "background-dark": "#111827",
+                        "surface-light": "#FFFFFF",
+                        "surface-dark": "#1F2937",
+                        "text-main-light": "#111827",
+                        "text-main-dark": "#F9FAFB",
+                        "text-muted-light": "#6B7280",
+                        "text-muted-dark": "#9CA3AF",
+                    },
+                    fontFamily: {
+                        sans: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        'xl': '1rem',
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        .glass-overlay {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+
+<body
+    class="bg-gray-100 dark:bg-background-dark font-sans flex items-center justify-center min-h-screen p-4 transition-colors duration-200">
+    <div
+        class="w-full max-w-6xl bg-surface-light dark:bg-surface-dark rounded-xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[700px]">
+        <div class="md:w-1/2 relative bg-brand-dark-blue flex flex-col justify-center items-center p-8 md:p-12 text-white text-center">
+            <div class="absolute inset-0 overflow-hidden z-0 opacity-40">
+                <img alt="Abstract geometric floral background"
+                    class="w-full h-full object-cover opacity-60 mix-blend-overlay"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuABU9UCaupxXiwJ9HHMwz4bECE9sIx-dr4PfQc5pDHVoD1AhueRZJhzXUQYu1D8qLRDs4ktc9ANd1nJFct6mCgQjCUS4iVnZf7_SXe5_L9BiGhDG3mFWDDu0uG_HOZGqCZyA8VoTIxZwqBEtP5_bUPFhC-ZJVw6a2xFJxMDUV5WSqi9qciv2dt8Mdmv380RwoLfyWLXEoqYHB7hVFD49fgAF-Tkye6VlVN7sd4f12iyI8R81yr7Miimd0FCv14Pyp1AnBBm00DtVjI" />
+                <div
+                    class="absolute inset-0 bg-gradient-to-t from-brand-dark-blue via-transparent to-brand-dark-blue opacity-90">
+                </div>
+                <div class="absolute inset-0 bg-gradient-to-r from-brand-dark-blue/80 to-transparent"></div>
+            </div>
+            <div class="relative z-10">
+                <div
+                    class="bg-[#3D5238] w-12 h-12 flex items-center justify-center text-[10px] font-bold tracking-widest uppercase rounded-sm shadow-sm">
+                    ogoué
+                </div>
+            </div>
+            <div class="relative z-10 mb-4 max-w-md">
+                <h1 class="text-3xl md:text-5xl font-bold mb-4 leading-tight">
+                    Accès Agent
+                </h1>
+                <p class="text-gray-200 text-lg md:text-xl font-light leading-relaxed">
+                    Connectez-vous avec votre code d'accès personnel.
+                </p>
+            </div>
+        </div>
+        <div
+            class="md:w-1/2 bg-background-light dark:bg-surface-dark p-8 md:p-12 lg:px-16 flex flex-col justify-center">
+            <div class="mb-8">
+                <h2 class="text-2xl md:text-3xl font-bold text-text-main-light dark:text-text-main-dark mb-2">
+                    Connexion Agent
+                </h2>
+                <p class="text-sm text-text-muted-light dark:text-text-muted-dark">
+                    Entrez le code d'accès fourni par votre manager
+                </p>
+            </div>
+            <div id="errorMessage" class="hidden p-4 mb-6 bg-red-100 border border-red-400 text-red-700 rounded-md"></div>
+            <div id="successMessage" class="hidden p-4 mb-6 bg-green-100 border border-green-400 text-green-700 rounded-md"></div>
+            <form action="#" class="space-y-6" method="POST" onsubmit="handleAgentLogin(event)">
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-text-main-light dark:text-text-main-dark" for="accessCode">
+                        Code d'accès
+                    </label>
+                    <div class="relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="material-icons-outlined text-gray-400 text-xl">vpn_key</span>
+                        </div>
+                        <input
+                            class="focus:ring-primary focus:border-primary block w-full pl-10 pr-3 py-3 sm:text-sm border-gray-300 rounded-md dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:placeholder-gray-500 uppercase font-mono tracking-widest"
+                            id="accessCode" 
+                            name="accessCode" 
+                            placeholder="XXX-XXX-XXX"
+                            type="text"
+                            maxlength="11"
+                            pattern="[A-Z0-9]{3}-[A-Z0-9]{3}-[A-Z0-9]{3}"
+                            required />
+                    </div>
+                    <p class="text-xs text-text-muted-light dark:text-text-muted-dark mt-1">
+                        Format: ABC-DEF-GHI (3 lettres/chiffres par groupe)
+                    </p>
+                </div>
+                <button type="submit" 
+                    class="w-full bg-secondary hover:bg-opacity-90 text-white font-bold py-3 px-4 rounded-md transition-all duration-200 flex items-center justify-center gap-2">
+                    <span class="material-icons-outlined">login</span>
+                    Se connecter
+                </button>
+            </form>
+            <div class="mt-8 pt-8 border-t border-gray-300 dark:border-gray-600">
+                <p class="text-sm text-text-muted-light dark:text-text-muted-dark mb-4">
+                    Pas d'accès encore ?
+                </p>
+                <a href="login.html"
+                    class="w-full bg-primary hover:bg-opacity-90 text-white font-bold py-3 px-4 rounded-md transition-all duration-200 flex items-center justify-center gap-2 text-center">
+                    <span class="material-icons-outlined">arrow_back</span>
+                    Retour à la connexion
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
+            ? 'http://localhost:3001/api'
+            : 'https://ogoue.onrender.com/api';
+
+        async function handleAgentLogin(event) {
+            event.preventDefault();
+            const accessCode = document.getElementById('accessCode').value.trim();
+            const errorMsg = document.getElementById('errorMessage');
+            const successMsg = document.getElementById('successMessage');
+            
+            // Clear messages
+            errorMsg.classList.add('hidden');
+            successMsg.classList.add('hidden');
+
+            try {
+                if (!accessCode) {
+                    throw new Error('Veuillez entrer votre code d\'accès');
+                }
+
+                const response = await fetch(`${API_BASE}/auth/agent-login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ accessCode })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Erreur lors de la connexion');
+                }
+
+                // Store token and user info
+                localStorage.setItem('authToken', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                localStorage.setItem('organization', JSON.stringify(data.organization || {}));
+
+                // Redirect to app
+                successMsg.textContent = 'Connexion réussie! Redirection...';
+                successMsg.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    window.location.href = 'http://localhost:3000/app/module_tableau_bord.html';
+                }, 1500);
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                errorMsg.textContent = error.message || 'Une erreur est survenue';
+                errorMsg.classList.remove('hidden');
+            }
+        }
+
+        // Auto-format code as user types
+        document.getElementById('accessCode').addEventListener('input', function(e) {
+            let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            if (value.length > 3) {
+                value = value.slice(0, 3) + '-' + value.slice(3);
+            }
+            if (value.length > 7) {
+                value = value.slice(0, 7) + '-' + value.slice(7, 10);
+            }
+            e.target.value = value;
+        });
+    </script>
+</body>
+
+</html>
