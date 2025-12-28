@@ -210,3 +210,135 @@ export async function getMe(req, res) {
     return res.status(500).json({ error: "Erreur serveur" });
   }
 }
+
+/**
+ * POST /auth/agent-register
+ * Enregistre un nouvel agent via un code d'accès
+ */
+export async function registerAgent(req, res) {
+  try {
+    const agentRegisterSchema = z.object({
+      accessCode: z.string().min(1),
+      email: z.string().email(),
+      password: z.string().min(6),
+      firstName: z.string().min(1).max(100),
+      lastName: z.string().min(1).max(100),
+    });
+
+    const parsed = agentRegisterSchema.parse(req.body);
+
+    // 1️⃣ Vérifier que le code d'accès est valide et actif
+    const { data: agentRecord, error: agentError } = await supabase
+      .from("agents")
+      .select("id, organization_id, first_name, is_active")
+      .eq("access_code", parsed.accessCode)
+      .eq("is_active", true)
+      .single();
+
+    if (agentError || !agentRecord) {
+      console.error("Agent code invalid:", agentError);
+      return res.status(401).json({ error: "Code d'accès invalide ou désactivé" });
+    }
+
+    // 2️⃣ Créer l'utilisateur dans Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      email: parsed.email,
+      password: parsed.password,
+      email_confirm: true,
+    });
+
+    if (authError || !authData.user) {
+      console.error("Auth error:", authError);
+      return res.status(400).json({ error: authError?.message || "Erreur lors de la création du compte" });
+    }
+
+    const authUserId = authData.user.id;
+
+    // 3️⃣ Créer le record utilisateur dans users avec le rôle 'agent'
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .insert({
+        auth_id: authUserId,
+        first_name: parsed.firstName,
+        last_name: parsed.lastName,
+        email: parsed.email,
+        role: "agent", // Les agents ont toujours le rôle 'agent'
+        organization_id: agentRecord.organization_id,
+      })
+      .select("id, first_name, last_name, email, role, organization_id, created_at")
+      .single();
+
+    if (userError || !userData) {
+      console.error("User record error:", userError);
+      // Supprimer l'utilisateur Auth si ça échoue
+      await supabase.auth.admin.deleteUser(authUserId);
+      return res.status(500).json({ error: "Erreur lors de la création du compte" });
+    }
+
+    // 4️⃣ Générer un token JWT
+    const { data: sessionData, error: sessionError } = await supabase.auth.admin.createSession(authUserId);
+    if (sessionError || !sessionData.session) {
+      console.error("Session error:", sessionError);
+      return res.status(500).json({ error: "Erreur lors de la création de la session" });
+    }
+
+    return res.status(201).json({
+      message: "Agent enregistré avec succès",
+      user: {
+        id: userData.id,
+        firstName: userData.first_name,
+        lastName: userData.last_name,
+        email: userData.email,
+        role: userData.role,
+        organizationId: userData.organization_id,
+      },
+      token: sessionData.session.access_token,
+    });
+  } catch (err) {
+    console.error("Register agent error:", err);
+    if (err instanceof z.ZodError) {
+      return res.status(400).json({ error: "Validation error", details: err.issues });
+    }
+    return res.status(500).json({ error: "Erreur lors de l'enregistrement" });
+  }
+}
+
+/**
+ * POST /auth/agent-login
+ * Permet à un agent de se connecter via code d'accès (sans email/password)
+ */
+export async function loginAgent(req, res) {
+  try {
+    const agentLoginSchema = z.object({
+      accessCode: z.string().min(1),
+    });
+
+    const parsed = agentLoginSchema.parse(req.body);
+
+    // Vérifier que le code d'accès est valide et actif
+    const { data: agentRecord, error: agentError } = await supabase
+      .from("agents")
+      .select("id, organization_id, is_active")
+      .eq("access_code", parsed.accessCode)
+      .eq("is_active", true)
+      .single();
+
+    if (agentError || !agentRecord) {
+      console.error("Agent code invalid:", agentError);
+      return res.status(401).json({ error: "Code d'accès invalide ou désactivé" });
+    }
+
+    // Retourner les infos de l'agent
+    return res.json({
+      agentId: agentRecord.id,
+      organizationId: agentRecord.organization_id,
+      message: "Code valide. Procédez à l'enregistrement ou la connexion.",
+    });
+  } catch (err) {
+    console.error("Login agent error:", err);
+    if (err instanceof z.ZodError) {
+      return res.status(400).json({ error: "Validation error", details: err.issues });
+    }
+    return res.status(500).json({ error: "Erreur lors de la connexion" });
+  }
+}
