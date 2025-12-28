@@ -494,16 +494,21 @@
     `;
     content.appendChild(notifDiv);
     
-    // AGENTS (seulement pour les Gérants)
-    const agentsDiv = document.createElement('div');
-    agentsDiv.innerHTML = `
-      <div class="text-xs font-bold uppercase text-gray-500 dark:text-gray-400 mb-3">Gestion</div>
-      <a href="module_agents.html" class="block w-full px-4 py-2 rounded text-white bg-teal-600 hover:bg-teal-700 font-medium text-sm text-center transition-colors">
-        <span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle; margin-right: 8px;">group</span>
-        Gérer les Agents
-      </a>
-    `;
-    content.appendChild(agentsDiv);
+    // AGENTS (seulement pour les Managers)
+    const user = getUser() || { role: '' };
+    const isAgent = user.role === 'agent';
+    
+    if (!isAgent) {
+      const agentsDiv = document.createElement('div');
+      agentsDiv.innerHTML = `
+        <div class="text-xs font-bold uppercase text-gray-500 dark:text-gray-400 mb-3">Gestion</div>
+        <a href="module_agents.html" class="block w-full px-4 py-2 rounded text-white bg-teal-600 hover:bg-teal-700 font-medium text-sm text-center transition-colors">
+          <span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle; margin-right: 8px;">group</span>
+          Gérer les Agents
+        </a>
+      `;
+      content.appendChild(agentsDiv);
+    }
     
     container.appendChild(content);
     
@@ -587,8 +592,9 @@
 
   // ============ PROFILE RENDER ============
   function renderProfile(popover) {
-    const user = getUser() || { firstName: '', lastName: '', email: '' };
+    const user = getUser() || { firstName: '', lastName: '', email: '', role: '' };
     const org = getOrg() || { name: '', rccm: '', nif: '' };
+    const isAgent = user.role === 'agent';
     
     popover.innerHTML = '';
     const container = document.createElement('div');
@@ -603,8 +609,8 @@
           <span class="material-symbols-outlined text-base text-teal-700 dark:text-teal-300">account_circle</span>
         </div>
         <div class="flex-1 min-w-0">
-          <p class="text-sm font-semibold text-gray-900 dark:text-white">${user.firstName} ${user.lastName}</p>
-          <p class="text-xs text-gray-600 dark:text-gray-400">${user.email}</p>
+          <p class="text-sm font-semibold text-gray-900 dark:text-white">${user.firstName}${user.lastName ? ' ' + user.lastName : ''}</p>
+          ${isAgent ? `<p class="text-xs text-gray-600 dark:text-gray-400">${org.name || org.id || 'Organisation'}</p>` : `<p class="text-xs text-gray-600 dark:text-gray-400">${user.email}</p>`}
         </div>
         <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-400 text-2xl leading-none" data-close>✕</button>
       </div>
@@ -615,38 +621,40 @@
     const content = document.createElement('div');
     content.className = 'px-5 py-4 space-y-4';
     
-    // Organization
-    const orgDiv = document.createElement('div');
-    orgDiv.className = 'text-sm text-gray-700 dark:text-gray-300';
-    orgDiv.innerHTML = `
-      <span class="material-symbols-outlined text-base align-middle mr-2">business</span>
-      <span class="font-medium">${org.name || org.id || 'Organisation'}</span>
-    `;
-    content.appendChild(orgDiv);
-    
-    // RCCM
-    const rccmDiv = document.createElement('div');
-    rccmDiv.className = 'text-sm text-gray-700 dark:text-gray-300 space-y-2';
-    rccmDiv.innerHTML = `
-      <div class="flex items-center justify-between">
-        <span class="font-medium text-gray-600 dark:text-gray-400">RCCM</span>
-        <button class="text-teal-600 dark:text-teal-400 text-xs font-medium hover:text-teal-700 dark:hover:text-teal-300" data-edit-rccm>Modifier</button>
-      </div>
-      <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded text-gray-900 dark:text-white font-mono text-xs">${org.rccm || 'Non défini'}</div>
-    `;
-    content.appendChild(rccmDiv);
-    
-    // NIF
-    const nifDiv = document.createElement('div');
-    nifDiv.className = 'text-sm text-gray-700 dark:text-gray-300 space-y-2';
-    nifDiv.innerHTML = `
-      <div class="flex items-center justify-between">
-        <span class="font-medium text-gray-600 dark:text-gray-400">NIF</span>
-        <button class="text-teal-600 dark:text-teal-400 text-xs font-medium hover:text-teal-700 dark:hover:text-teal-300" data-edit-nif>Modifier</button>
-      </div>
-      <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded text-gray-900 dark:text-white font-mono text-xs">${org.nif || 'Non défini'}</div>
-    `;
-    content.appendChild(nifDiv);
+    // Organization (only for managers, not agents)
+    if (!isAgent) {
+      const orgDiv = document.createElement('div');
+      orgDiv.className = 'text-sm text-gray-700 dark:text-gray-300';
+      orgDiv.innerHTML = `
+        <span class="material-symbols-outlined text-base align-middle mr-2">business</span>
+        <span class="font-medium">${org.name || org.id || 'Organisation'}</span>
+      `;
+      content.appendChild(orgDiv);
+      
+      // RCCM
+      const rccmDiv = document.createElement('div');
+      rccmDiv.className = 'text-sm text-gray-700 dark:text-gray-300 space-y-2';
+      rccmDiv.innerHTML = `
+        <div class="flex items-center justify-between">
+          <span class="font-medium text-gray-600 dark:text-gray-400">RCCM</span>
+          <button class="text-teal-600 dark:text-teal-400 text-xs font-medium hover:text-teal-700 dark:hover:text-teal-300" data-edit-rccm>Modifier</button>
+        </div>
+        <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded text-gray-900 dark:text-white font-mono text-xs">${org.rccm || 'Non défini'}</div>
+      `;
+      content.appendChild(rccmDiv);
+      
+      // NIF
+      const nifDiv = document.createElement('div');
+      nifDiv.className = 'text-sm text-gray-700 dark:text-gray-300 space-y-2';
+      nifDiv.innerHTML = `
+        <div class="flex items-center justify-between">
+          <span class="font-medium text-gray-600 dark:text-gray-400">NIF</span>
+          <button class="text-teal-600 dark:text-teal-400 text-xs font-medium hover:text-teal-700 dark:hover:text-teal-300" data-edit-nif>Modifier</button>
+        </div>
+        <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded text-gray-900 dark:text-white font-mono text-xs">${org.nif || 'Non défini'}</div>
+      `;
+      content.appendChild(nifDiv);
+    }
     
     // Logout
     const logoutLink = document.createElement('div');
