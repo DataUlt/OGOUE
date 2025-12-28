@@ -362,3 +362,84 @@ export async function loginAgent(req, res) {
     return res.status(500).json({ error: "Erreur lors de la connexion" });
   }
 }
+
+/**
+ * POST /auth/forgot-password
+ * Envoie un lien de réinitialisation de mot de passe via Supabase
+ */
+export async function forgotPassword(req, res) {
+  try {
+    const forgotPasswordSchema = z.object({
+      email: z.string().email(),
+    });
+
+    const parsed = forgotPasswordSchema.parse(req.body);
+
+    // Supabase gère automatiquement l'envoi d'email de réinitialisation
+    const { error } = await supabase.auth.resetPasswordForEmail(parsed.email, {
+      redirectTo: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password.html`,
+    });
+
+    if (error) {
+      console.error("Password reset error:", error);
+      // Ne pas révéler si l'email existe ou non (sécurité)
+      return res.status(200).json({ 
+        message: "Si un compte existe avec cet email, vous recevrez un lien de réinitialisation" 
+      });
+    }
+
+    return res.status(200).json({ 
+      message: "Un email de réinitialisation a été envoyé" 
+    });
+  } catch (err) {
+    console.error("Forgot password error:", err);
+    if (err instanceof z.ZodError) {
+      return res.status(400).json({ error: "Validation error", details: err.issues });
+    }
+    return res.status(500).json({ error: "Erreur lors de la réinitialisation du mot de passe" });
+  }
+}
+
+/**
+ * POST /auth/reset-password
+ * Réinitialise le mot de passe avec le token de réinitialisation Supabase
+ */
+export async function resetPassword(req, res) {
+  try {
+    const resetPasswordSchema = z.object({
+      password: z.string().min(6),
+    });
+
+    const parsed = resetPasswordSchema.parse(req.body);
+    const token = req.headers.authorization?.replace('Bearer ', '');
+
+    if (!token) {
+      return res.status(400).json({ error: "Token manquant" });
+    }
+
+    // Utiliser le token pour mettre à jour le mot de passe
+    const { error } = await supabase.auth.updateUser({ 
+      password: parsed.password 
+    }, {
+      // Set the user session with the token
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    if (error) {
+      console.error("Reset password error:", error);
+      return res.status(400).json({ error: error.message || "Erreur lors de la réinitialisation" });
+    }
+
+    return res.status(200).json({ 
+      message: "Mot de passe réinitialisé avec succès" 
+    });
+  } catch (err) {
+    console.error("Reset password error:", err);
+    if (err instanceof z.ZodError) {
+      return res.status(400).json({ error: "Validation error", details: err.issues });
+    }
+    return res.status(500).json({ error: "Erreur lors de la réinitialisation du mot de passe" });
+  }
+}
