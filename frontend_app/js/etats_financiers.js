@@ -1046,7 +1046,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 /**
- * Exporte les données en CSV
+ * Exporte les données en CSV avec modal de sélection
  */
 async function handleExportCSV() {
     try {
@@ -1062,63 +1062,157 @@ async function handleExportCSV() {
             return;
         }
 
-        // Récupérer les ventes et dépenses pour la période
+        // Récupérer les ventes et dépenses
         const ventes = await window.OGOUE.getVentesPourPeriode?.(12, 2025) || [];
         const depenses = await window.OGOUE.getDepensesPourPeriode?.(12, 2025) || [];
 
-        // Créer les fichiers CSV
-        const csvVentes = generateCSV("VENTES", [
-            ["Date", "Description", "Type", "Moyen de paiement", "Montant", "Justificatif"],
-            ...ventes.map(v => [
-                v.saleDate || v.date || "",
-                v.description || "",
-                v.saleType || v.type_vente || "",
-                v.paymentMethod || v.moyen_paiement || "",
-                v.amount || v.montant || "",
-                v.receiptName || v.justificatif || ""
-            ])
-        ]);
+        // Créer le modal
+        const existing = document.getElementById('csvSelectorModal');
+        if (existing) return;
 
-        const csvDepenses = generateCSV("DEPENSES", [
-            ["Date", "Catégorie", "Description", "Montant", "Justificatif"],
-            ...depenses.map(d => [
-                d.date || "",
-                d.category || d.categorie || "",
-                d.description || "",
-                d.amount || d.montant || "",
-                d.receiptName || d.justificatif || ""
-            ])
-        ]);
+        const modal = document.createElement('div');
+        modal.id = 'csvSelectorModal';
+        modal.style = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.4);z-index:9999;';
 
-        // Créer un flux consolidé
-        const allOperations = [
-            ...ventes.map(v => ({
-                Date: v.saleDate || v.date || "",
-                Type: "Vente",
-                Description: v.description || "",
-                Montant: v.amount || v.montant || 0,
-                Catégorie: v.saleType || ""
-            })),
-            ...depenses.map(d => ({
-                Date: d.date || "",
-                Type: "Dépense",
-                Description: d.description || "",
-                Montant: -(d.amount || d.montant || 0),
-                Catégorie: d.category || d.categorie || ""
-            }))
-        ].sort((a, b) => new Date(a.Date) - new Date(b.Date));
+        const box = document.createElement('div');
+        box.style = 'background:white;border-radius:12px;padding:24px;max-width:400px;box-shadow:0 20px 25px rgba(0,0,0,0.15);';
 
-        const csvFlux = generateCSV("FLUX", [
-            ["Date", "Type", "Description", "Montant", "Catégorie"],
-            ...allOperations.map(op => [op.Date, op.Type, op.Description, op.Montant, op.Catégorie])
-        ]);
+        const title = document.createElement('h2');
+        title.textContent = 'Exporter en CSV';
+        title.style = 'font-size:20px;font-weight:bold;margin-bottom:16px;color:#0d1b19;';
 
-        // Télécharger les fichiers
-        downloadCSV(csvVentes, "OGOUE_Ventes.csv");
-        downloadCSV(csvDepenses, "OGOUE_Depenses.csv");
-        downloadCSV(csvFlux, "OGOUE_Flux_Tresorerie.csv");
+        const description = document.createElement('p');
+        description.textContent = 'Cochez les fichiers à télécharger puis cliquez sur Exporter.';
+        description.style = 'font-size:14px;color:#666;margin-bottom:20px;';
 
-        alert("✅ Les 3 fichiers CSV ont été téléchargés !");
+        const checksContainer = document.createElement('div');
+        checksContainer.style = 'display:flex;flex-direction:column;gap:12px;margin-bottom:20px;';
+
+        const options = [
+            { id: 'ventes', label: `Historique des Ventes (${ventes.length})`, checked: true },
+            { id: 'depenses', label: `Historique des Dépenses (${depenses.length})`, checked: true },
+            { id: 'flux', label: 'Tableau de Flux de Trésorerie', checked: true }
+        ];
+
+        const checkboxes = {};
+        options.forEach(opt => {
+            const label = document.createElement('label');
+            label.style = 'display:flex;align-items:center;gap:8px;cursor:pointer;';
+            
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = opt.checked;
+            checkbox.style = 'width:18px;height:18px;cursor:pointer;';
+            checkboxes[opt.id] = checkbox;
+            
+            const labelText = document.createElement('span');
+            labelText.textContent = opt.label;
+            labelText.style = 'font-size:14px;color:#333;';
+            
+            label.appendChild(checkbox);
+            label.appendChild(labelText);
+            checksContainer.appendChild(label);
+        });
+
+        const buttonsContainer = document.createElement('div');
+        buttonsContainer.style = 'display:flex;gap:12px;justify-content:flex-end;';
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Annuler';
+        cancelBtn.style = 'padding:8px 16px;border:1px solid #ddd;border-radius:6px;cursor:pointer;background:#f5f5f5;';
+        cancelBtn.addEventListener('click', () => modal.remove());
+
+        const exportBtn = document.createElement('button');
+        exportBtn.textContent = 'Exporter';
+        exportBtn.style = 'padding:8px 16px;background:#13ecc8;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:bold;';
+        exportBtn.addEventListener('click', async () => {
+            const selected = Object.keys(checkboxes).filter(key => checkboxes[key].checked);
+            if (selected.length === 0) {
+                alert('Sélectionnez au moins un fichier');
+                return;
+            }
+
+            try {
+                // Ventes
+                if (selected.includes('ventes')) {
+                    const csvVentes = generateCSV("VENTES", [
+                        ["Date", "Description", "Type", "Moyen de paiement", "Montant", "Justificatif"],
+                        ...ventes.map(v => [
+                            v.saleDate || v.date || "",
+                            v.description || "",
+                            v.saleType || v.type_vente || "",
+                            v.paymentMethod || v.moyen_paiement || "",
+                            v.amount || v.montant || "",
+                            v.receiptName || v.justificatif || ""
+                        ])
+                    ]);
+                    downloadCSV(csvVentes, "OGOUE_Ventes.csv");
+                }
+
+                // Dépenses
+                if (selected.includes('depenses')) {
+                    const csvDepenses = generateCSV("DEPENSES", [
+                        ["Date", "Catégorie", "Description", "Montant", "Justificatif"],
+                        ...depenses.map(d => [
+                            d.date || "",
+                            d.category || d.categorie || "",
+                            d.description || "",
+                            d.amount || d.montant || "",
+                            d.receiptName || d.justificatif || ""
+                        ])
+                    ]);
+                    downloadCSV(csvDepenses, "OGOUE_Depenses.csv");
+                }
+
+                // Flux
+                if (selected.includes('flux')) {
+                    const allOperations = [
+                        ...ventes.map(v => ({
+                            Date: v.saleDate || v.date || "",
+                            Type: "Vente",
+                            Description: v.description || "",
+                            Montant: v.amount || v.montant || 0,
+                            Catégorie: v.saleType || ""
+                        })),
+                        ...depenses.map(d => ({
+                            Date: d.date || "",
+                            Type: "Dépense",
+                            Description: d.description || "",
+                            Montant: -(d.amount || d.montant || 0),
+                            Catégorie: d.category || d.categorie || ""
+                        }))
+                    ].sort((a, b) => new Date(a.Date) - new Date(b.Date));
+
+                    const csvFlux = generateCSV("FLUX", [
+                        ["Date", "Type", "Description", "Montant", "Catégorie"],
+                        ...allOperations.map(op => [op.Date, op.Type, op.Description, op.Montant, op.Catégorie])
+                    ]);
+                    downloadCSV(csvFlux, "OGOUE_Flux_Tresorerie.csv");
+                }
+
+                alert(`✅ ${selected.length} fichier(s) CSV téléchargé(s) !`);
+                modal.remove();
+            } catch (error) {
+                console.error("Erreur export CSV:", error);
+                alert("❌ Erreur lors de l'export: " + error.message);
+            }
+        });
+
+        buttonsContainer.appendChild(cancelBtn);
+        buttonsContainer.appendChild(exportBtn);
+
+        box.appendChild(title);
+        box.appendChild(description);
+        box.appendChild(checksContainer);
+        box.appendChild(buttonsContainer);
+        modal.appendChild(box);
+        document.body.appendChild(modal);
+
+        // Fermer en cliquant en dehors
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.remove();
+        });
+
     } catch (error) {
         console.error("Erreur export CSV:", error);
         alert("❌ Erreur lors de l'export: " + error.message);
