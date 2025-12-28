@@ -190,7 +190,24 @@
 
                 <!-- Boutons -->
                 <div class="flex flex-wrap justify-end gap-3">
-                    <button id="printAllBtn" class="flex items-center gap-2 rounded-lg h-10 px-4 bg-primary/20 text-sm font-bold">
+                    <div class="relative group">
+                        <button id="exportBtn" class="flex items-center gap-2 rounded-lg h-10 px-4 bg-primary/20 text-sm font-bold hover:bg-primary/30 transition-colors">
+                            <span class="material-symbols-outlined">download</span>
+                            Exporter
+                        </button>
+                        <!-- Dropdown menu -->
+                        <div id="exportDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-10 overflow-hidden">
+                            <button class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-sm">
+                                <span class="material-symbols-outlined text-sm">table_chart</span>
+                                <span>Exporter en CSV</span>
+                            </button>
+                            <button class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-sm border-t border-gray-200 dark:border-gray-700">
+                                <span class="material-symbols-outlined text-sm">file_excel</span>
+                                <span>Exporter en XLSX</span>
+                            </button>
+                        </div>
+                    </div>
+                    <button id="printAllBtn" class="flex items-center gap-2 rounded-lg h-10 px-4 bg-primary/20 text-sm font-bold hover:bg-primary/30 transition-colors">
                         <span class="material-symbols-outlined">print</span>
                         Imprimer
                     </button>
@@ -271,12 +288,171 @@
 <!-- JS dédié aux états financiers -->
 <script src="js/etats_financiers.js"></script>
 <script src="js/topbar-actions.js"></script>
+
+<!-- Export functionality -->
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        if (window.OGOUE?.initTopbarActions) {
-            window.OGOUE.initTopbarActions();
-        }
+  // Fonction pour exporter en CSV
+  function exportToCSV() {
+    const data = window.currentOperations;
+    if (!data) {
+      alert('Aucune donnée à exporter');
+      return;
+    }
+
+    let csv = '';
+    
+    // 1. Historique des Ventes
+    csv += 'HISTORIQUE DES VENTES\n';
+    csv += 'Date,Description,Type,Montant (FCFA),Justificatif\n';
+    if (data.sales && data.sales.length > 0) {
+      data.sales.forEach(sale => {
+        csv += `"${sale.date}","${sale.description || ''}","${sale.type_vente || ''}","${sale.montant || 0}","${sale.justificatif || 'Non'}"\n`;
+      });
+    } else {
+      csv += '(Aucune vente)\n';
+    }
+    csv += '\n\n';
+
+    // 2. Historique des Dépenses
+    csv += 'HISTORIQUE DES DÉPENSES\n';
+    csv += 'Date,Catégorie,Montant (FCFA),Justificatif\n';
+    if (data.expenses && data.expenses.length > 0) {
+      data.expenses.forEach(exp => {
+        csv += `"${exp.date}","${exp.categorie || ''}","${exp.montant || 0}","${exp.justificatif || 'Non'}"\n`;
+      });
+    } else {
+      csv += '(Aucune dépense)\n';
+    }
+    csv += '\n\n';
+
+    // 3. Tableau de Flux
+    csv += 'TABLEAU DE FLUX\n';
+    csv += 'Type,Nombre,Justifiées,Taux\n';
+    const totalSales = data.sales ? data.sales.length : 0;
+    const salesWithReceipt = data.sales ? data.sales.filter(s => s.justificatif && s.justificatif.trim()).length : 0;
+    const totalExpenses = data.expenses ? data.expenses.length : 0;
+    const expensesWithReceipt = data.expenses ? data.expenses.filter(e => e.justificatif && e.justificatif.trim()).length : 0;
+
+    csv += `"Ventes","${totalSales}","${salesWithReceipt}","${totalSales > 0 ? Math.round((salesWithReceipt / totalSales) * 100) : 0}%"\n`;
+    csv += `"Dépenses","${totalExpenses}","${expensesWithReceipt}","${totalExpenses > 0 ? Math.round((expensesWithReceipt / totalExpenses) * 100) : 0}%"\n`;
+
+    // Créer et télécharger le fichier
+    const element = document.createElement('a');
+    element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv));
+    element.setAttribute('download', `etats_financiers_${new Date().toISOString().split('T')[0]}.csv`);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  }
+
+  // Fonction pour exporter en XLSX (utilise SheetJS si disponible)
+  function exportToXLSX() {
+    const data = window.currentOperations;
+    if (!data) {
+      alert('Aucune donnée à exporter');
+      return;
+    }
+
+    // Vérifier si SheetJS est disponible
+    if (typeof XLSX === 'undefined') {
+      // Charger SheetJS depuis CDN
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js';
+      script.onload = () => createXLSXFile(data);
+      document.head.appendChild(script);
+    } else {
+      createXLSXFile(data);
+    }
+  }
+
+  function createXLSXFile(data) {
+    const workbook = XLSX.utils.book_new();
+
+    // Feuille 1: Ventes
+    const salesData = [['Date', 'Description', 'Type', 'Montant (FCFA)', 'Justificatif']];
+    if (data.sales && data.sales.length > 0) {
+      data.sales.forEach(sale => {
+        salesData.push([
+          sale.date,
+          sale.description || '',
+          sale.type_vente || '',
+          sale.montant || 0,
+          sale.justificatif ? 'Oui' : 'Non'
+        ]);
+      });
+    }
+    const salesSheet = XLSX.utils.aoa_to_sheet(salesData);
+    XLSX.utils.book_append_sheet(workbook, salesSheet, 'Ventes');
+
+    // Feuille 2: Dépenses
+    const expensesData = [['Date', 'Catégorie', 'Montant (FCFA)', 'Justificatif']];
+    if (data.expenses && data.expenses.length > 0) {
+      data.expenses.forEach(exp => {
+        expensesData.push([
+          exp.date,
+          exp.categorie || '',
+          exp.montant || 0,
+          exp.justificatif ? 'Oui' : 'Non'
+        ]);
+      });
+    }
+    const expensesSheet = XLSX.utils.aoa_to_sheet(expensesData);
+    XLSX.utils.book_append_sheet(workbook, expensesSheet, 'Dépenses');
+
+    // Feuille 3: Flux
+    const totalSales = data.sales ? data.sales.length : 0;
+    const salesWithReceipt = data.sales ? data.sales.filter(s => s.justificatif && s.justificatif.trim()).length : 0;
+    const totalExpenses = data.expenses ? data.expenses.length : 0;
+    const expensesWithReceipt = data.expenses ? data.expenses.filter(e => e.justificatif && e.justificatif.trim()).length : 0;
+
+    const fluxData = [
+      ['Type', 'Nombre', 'Justifiées', 'Taux'],
+      ['Ventes', totalSales, salesWithReceipt, totalSales > 0 ? Math.round((salesWithReceipt / totalSales) * 100) + '%' : '0%'],
+      ['Dépenses', totalExpenses, expensesWithReceipt, totalExpenses > 0 ? Math.round((expensesWithReceipt / totalExpenses) * 100) + '%' : '0%']
+    ];
+    const fluxSheet = XLSX.utils.aoa_to_sheet(fluxData);
+    XLSX.utils.book_append_sheet(workbook, fluxSheet, 'Tableau de Flux');
+
+    // Télécharger
+    XLSX.writeFile(workbook, `etats_financiers_${new Date().toISOString().split('T')[0]}.xlsx`);
+  }
+
+  // Gestion du dropdown et des boutons
+  document.addEventListener('DOMContentLoaded', () => {
+    const exportBtn = document.getElementById('exportBtn');
+    const exportDropdown = document.getElementById('exportDropdown');
+    const exportOptions = exportDropdown.querySelectorAll('button');
+
+    // Toggle dropdown
+    exportBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      exportDropdown.classList.toggle('hidden');
     });
+
+    // Bouton CSV
+    exportOptions[0].addEventListener('click', () => {
+      exportToCSV();
+      exportDropdown.classList.add('hidden');
+    });
+
+    // Bouton XLSX
+    exportOptions[1].addEventListener('click', () => {
+      exportToXLSX();
+      exportDropdown.classList.add('hidden');
+    });
+
+    // Fermer le dropdown quand on clique ailleurs
+    document.addEventListener('click', (e) => {
+      if (!exportBtn.contains(e.target) && !exportDropdown.contains(e.target)) {
+        exportDropdown.classList.add('hidden');
+      }
+    });
+
+    if (window.OGOUE?.initTopbarActions) {
+      window.OGOUE.initTopbarActions();
+    }
+  });
 </script>
 
 </body>
