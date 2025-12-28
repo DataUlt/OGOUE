@@ -1,5 +1,6 @@
 import { supabase } from "../db/supabase.js";
 import { z } from "zod";
+import jwt from "jsonwebtoken";
 
 const registerSchema = z.object({
   firstName: z.string().min(1).max(100),
@@ -318,7 +319,7 @@ export async function loginAgent(req, res) {
     // Vérifier que le code d'accès est valide et actif
     const { data: agentRecord, error: agentError } = await supabase
       .from("agents")
-      .select("id, organization_id, is_active")
+      .select("id, organization_id, first_name, is_active")
       .eq("access_code", parsed.accessCode)
       .eq("is_active", true)
       .single();
@@ -328,11 +329,30 @@ export async function loginAgent(req, res) {
       return res.status(401).json({ error: "Code d'accès invalide ou désactivé" });
     }
 
-    // Retourner les infos de l'agent
+    // Créer un JWT manuelement avec les données de l'agent
+    const token = jwt.sign(
+      {
+        sub: agentRecord.id,
+        agentId: agentRecord.id,
+        role: "agent",
+        organizationId: agentRecord.organization_id,
+      },
+      process.env.JWT_SECRET || "default_secret",
+      { expiresIn: "24h" }
+    );
+
+    // Retourner le token et les infos utilisateur
     return res.json({
-      agentId: agentRecord.id,
-      organizationId: agentRecord.organization_id,
-      message: "Code valide. Procédez à l'enregistrement ou la connexion.",
+      token,
+      user: {
+        id: agentRecord.id,
+        firstName: agentRecord.first_name,
+        role: "agent",
+        organizationId: agentRecord.organization_id,
+      },
+      organization: {
+        id: agentRecord.organization_id,
+      },
     });
   } catch (err) {
     console.error("Login agent error:", err);

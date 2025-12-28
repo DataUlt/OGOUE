@@ -66,20 +66,38 @@
         // Vérifier que l'utilisateur est un agent
         window.addEventListener('load', () => {
             const user = localStorage.getItem('user');
-            if (!user) {
-                window.location.href = 'http://localhost:3000/login.html';
+            const token = localStorage.getItem('authToken');
+            
+            console.log('User from localStorage:', user);
+            console.log('Token from localStorage:', token ? 'present' : 'missing');
+            
+            alert('Module agent dashboard chargé\nUser: ' + (user ? 'présent' : 'absent') + '\nToken: ' + (token ? 'présent' : 'absent'));
+            
+            if (!user || !token) {
+                alert('❌ User ou token manquant. Redirection vers login...');
+                setTimeout(() => {
+                    window.location.href = 'http://localhost:3000/login.html';
+                }, 2000);
                 return;
             }
 
             try {
                 const userData = JSON.parse(user);
                 console.log('User role:', userData.role);
+                alert('Role: ' + userData.role);
+                
                 if (userData.role !== 'agent') {
+                    alert('⚠️ Cet utilisateur n\'est pas un agent. Redirection vers dashboard normal...');
                     // Si ce n'est pas un agent, le rediriger vers le dashboard normal
-                    window.location.href = 'module_tableau_bord.html';
+                    setTimeout(() => {
+                        window.location.href = 'module_tableau_bord.html';
+                    }, 2000);
                 }
             } catch (e) {
-                window.location.href = 'http://localhost:3000/login.html';
+                alert('❌ Erreur parsing user: ' + e.message);
+                setTimeout(() => {
+                    window.location.href = 'http://localhost:3000/login.html';
+                }, 2000);
             }
         });
     </script>
