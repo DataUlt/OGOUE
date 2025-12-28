@@ -465,10 +465,24 @@ function calculateScores(operations) {
   const expensesWithReceipt = expenses.filter(e => e.justificatif && e.justificatif.trim()).length;
   const expensesPercentage = totalExpenses > 0 ? Math.round((expensesWithReceipt / totalExpenses) * 100) : 0;
 
-  // Score global = moyenne
-  const globalScore = totalSales + totalExpenses > 0 
-    ? Math.round((salesPercentage + expensesPercentage) / 2) 
-    : 0;
+  // Score global = basé sur TOUTES les opérations
+  // Si pas de dépenses, score = score des ventes
+  // Si pas de ventes, score = score des dépenses
+  // Si les deux existent, score = moyenne
+  let globalScore = 0;
+  if (totalSales > 0 && totalExpenses > 0) {
+    // Les deux existent: faire la moyenne
+    globalScore = Math.round((salesPercentage + expensesPercentage) / 2);
+  } else if (totalSales > 0) {
+    // Seulement des ventes
+    globalScore = salesPercentage;
+  } else if (totalExpenses > 0) {
+    // Seulement des dépenses
+    globalScore = expensesPercentage;
+  } else {
+    // Aucune opération
+    globalScore = 0;
+  }
 
   return {
     globalScore,
@@ -593,7 +607,11 @@ function openUploadModal() {
   const expensesWithoutReceipt = ops.expenses.filter(e => !e.justificatif || !e.justificatif.trim());
   const expensesContainer = document.getElementById("expensesListContainer");
   
-  if (expensesWithoutReceipt.length === 0) {
+  if (ops.expenses.length === 0) {
+    // Aucune dépense du tout
+    expensesContainer.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-sm">Aucune dépense enregistrée</p>';
+  } else if (expensesWithoutReceipt.length === 0) {
+    // Des dépenses existent et toutes ont un justificatif
     expensesContainer.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-sm">✅ Toutes les dépenses ont un justificatif</p>';
   } else {
     expensesContainer.innerHTML = expensesWithoutReceipt.map(expense => `
