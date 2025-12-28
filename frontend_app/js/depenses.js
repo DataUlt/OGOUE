@@ -6,7 +6,7 @@
     return;
   }
 
-  const API_BASE_URL = "https://ogoue.onrender.com/api";
+  const API_BASE_URL = "https://ogoue.onrender.com";
   const { appState, addDepense, getDepensesPourPeriode } = window.OGOUE;
 
   // ─────────────────────────────────────────────
@@ -239,7 +239,7 @@
 
   async function deleteDepense(depenseId) {
     try {
-      const response = await fetch(`${API_BASE_URL}/expenses/${depenseId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/expenses/${depenseId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

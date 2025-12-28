@@ -9,17 +9,21 @@ export async function authMiddleware(req, res, next) {
   try {
     // Récupérer le token du header Authorization
     const authHeader = req.headers.authorization;
+    console.log("Authorization header:", authHeader ? "présent" : "ABSENT");
+    
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      console.error("Token manquant ou format invalide");
       return res.status(401).json({ error: "Token manquant" });
     }
 
     const token = authHeader.substring(7); // Enlever "Bearer "
+    console.log("Token length:", token.length);
 
     // Vérifier le token avec Supabase
     const { data: userData, error: userError } = await supabase.auth.getUser(token);
 
     if (userError || !userData.user) {
-      console.error("Token verification error:", userError);
+      console.error("Token verification error:", userError?.message || "Invalid user");
       return res.status(401).json({ error: "Token invalide" });
     }
 

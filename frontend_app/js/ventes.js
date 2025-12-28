@@ -5,7 +5,7 @@
     return;
   }
 
-  const API_BASE_URL = "https://ogoue.onrender.com/api";
+  const API_BASE_URL = "https://ogoue.onrender.com";
   const { appState, addVente, getVentesPourPeriode } = window.OGOUE;
 
   const form = document.getElementById("form-ventes");
@@ -286,7 +286,7 @@
 
   async function deleteVente(venteId) {
     try {
-      const response = await fetch(`${API_BASE_URL}/sales/${venteId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/sales/${venteId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
