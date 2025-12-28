@@ -408,12 +408,6 @@
       ${actionHtml}
     `;
   }
-        <p style="font-size:13px;color:#666;margin:0;" class="dark:text-gray-300">
-          📎 Le fichier justificatif a été enregistré avec succès.
-        </p>
-      </div>
-    `;
-  }
 
   // Cache pour les ventes afin de limiter les appels API
   let ventesCache = [];
