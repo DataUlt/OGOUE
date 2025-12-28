@@ -56,10 +56,18 @@ export async function register(req, res) {
       .single();
 
     if (orgError || !orgData) {
-      console.error("Organization error:", orgError);
+      console.error("❌ Organization error:", {
+        message: orgError?.message,
+        code: orgError?.code,
+        details: orgError?.details,
+        hint: orgError?.hint
+      });
       // Supprimer l'utilisateur Auth si la création de l'organisation échoue
       await supabase.auth.admin.deleteUser(authUserId);
-      return res.status(500).json({ error: "Erreur lors de la création de l'organisation" });
+      return res.status(500).json({ 
+        error: "Erreur lors de la création de l'organisation",
+        details: orgError?.message 
+      });
     }
 
     // 3️⃣ Créer le record utilisateur dans users
