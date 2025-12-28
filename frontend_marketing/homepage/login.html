@@ -222,7 +222,8 @@
                 
                 // Fetch organization details
                 try {
-                    const orgResponse = await fetch(`${API_BASE_URL}/api/organizations`, {
+                    console.log('🔍 Fetching organization from:', `${API_BASE_URL}/api/organization`);
+                    const orgResponse = await fetch(`${API_BASE_URL}/api/organization`, {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json',
@@ -230,12 +231,18 @@
                         }
                     });
                     
+                    console.log('📊 Organization response status:', orgResponse.status);
+                    
                     if (orgResponse.ok) {
                         const orgData = await orgResponse.json();
+                        console.log('✅ Organization data received:', orgData);
                         localStorage.setItem('ogo_org', JSON.stringify(orgData));
+                    } else {
+                        const errorText = await orgResponse.text();
+                        console.error('❌ Organization fetch failed:', orgResponse.status, errorText);
                     }
                 } catch (orgError) {
-                    console.warn('Could not fetch organization:', orgError);
+                    console.error('❌ Could not fetch organization:', orgError);
                 }
                 
                 showSuccess("Connexion réussie ! Redirection...");
