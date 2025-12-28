@@ -1089,9 +1089,9 @@ async function handleExportCSV() {
         checksContainer.style = 'display:flex;flex-direction:column;gap:12px;margin-bottom:20px;';
 
         const options = [
-            { id: 'ventes', label: `Historique des Ventes (${ventes.length})`, checked: true },
-            { id: 'depenses', label: `Historique des Dépenses (${depenses.length})`, checked: true },
-            { id: 'flux', label: 'Tableau de Flux de Trésorerie', checked: true }
+            { id: 'ventes', label: `Historique des Ventes (${ventes.length})`, checked: false },
+            { id: 'depenses', label: `Historique des Dépenses (${depenses.length})`, checked: false },
+            { id: 'flux', label: 'Tableau de Flux de Trésorerie', checked: false }
         ];
 
         const checkboxes = {};
