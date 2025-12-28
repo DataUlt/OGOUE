@@ -233,8 +233,11 @@
     const montant = parseFloat(montantInput.value || "0");
 
     let justificatifFile = "";
+    let file = null;
+    
     if (fileInput && fileInput.files && fileInput.files[0]) {
-      justificatifFile = fileInput.files[0].name;
+      file = fileInput.files[0];
+      justificatifFile = file.name;
     }
 
     return {
@@ -245,7 +248,8 @@
       type_vente: typeVente,
       quantite: isNaN(quantite) ? 0 : quantite,
       montant: isNaN(montant) ? 0 : montant,
-      justificatif: justificatifFile
+      justificatif: justificatifFile,
+      file // Ajouter l'objet File pour l'upload
     };
   }
 
@@ -306,7 +310,7 @@
       <td class="px-6 py-4">
         ${
           vente.justificatif
-            ? `<span class="font-medium text-primary cursor-pointer hover:underline justificatif-link" data-file="${vente.justificatif}">${vente.justificatif}</span>`
+            ? `<span class="font-medium text-primary cursor-pointer hover:underline justificatif-link" data-file="${vente.justificatif}" data-url="${vente.justificatifUrl || ''}">${vente.justificatif}</span>`
             : `-`
         }
       </td>
@@ -316,7 +320,11 @@
     if (vente.justificatif) {
       const link = tr.querySelector('.justificatif-link');
       if (link) {
-        link.addEventListener('click', () => openJustificatifModal(vente.justificatif));
+        link.addEventListener('click', () => {
+          const fileName = link.getAttribute('data-file');
+          const fileUrl = link.getAttribute('data-url');
+          openJustificatifModal(fileName, fileUrl);
+        });
       }
     }
 
@@ -324,7 +332,7 @@
   }
 
   // Modal pour afficher le justificatif
-  function openJustificatifModal(fileName) {
+  function openJustificatifModal(fileName, fileUrl) {
     // Vérifier si un modal existe déjà et le supprimer
     const existingModal = document.getElementById('justificatif-modal');
     if (existingModal) {
@@ -359,12 +367,36 @@
 
     // Remplir le contenu
     const content = document.getElementById('justificatif-content');
+    
+    // Préparer les boutons d'action
+    let actionHtml = '';
+    if (fileUrl) {
+      actionHtml = `
+        <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;">
+          <a href="${fileUrl}" target="_blank" rel="noopener noreferrer" style="padding:8px 16px;background:#4CAF50;color:white;border-radius:6px;text-decoration:none;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;gap:6px;">
+            👁️ Consulter
+          </a>
+          <a href="${fileUrl}" download="${fileName}" style="padding:8px 16px;background:#2196F3;color:white;border-radius:6px;text-decoration:none;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;gap:6px;">
+            ⬇️ Télécharger
+          </a>
+        </div>
+      `;
+    } else {
+      actionHtml = `
+        <div style="padding:20px;background:#fff3cd;border-radius:6px;margin-top:20px;color:#856404;" class="dark:bg-yellow-900">
+          <p style="margin:0;font-size:13px;">⚠️ Fichier non uploadé vers le cloud (ancien enregistrement)</p>
+        </div>
+      `;
+    }
+    
     content.innerHTML = `
       <div style="margin-bottom:20px;">
         <p style="font-size:14px;color:#666;margin-bottom:10px;">Justificatif enregistré:</p>
         <p style="font-size:18px;font-weight:bold;color:#0d1b19;word-break:break-word;" class="dark:text-white">${fileName}</p>
       </div>
-      <div style="padding:20px;background:#f3f4f6;border-radius:6px;margin-top:20px;" class="dark:bg-gray-700">
+      ${actionHtml}
+    `;
+  }
         <p style="font-size:13px;color:#666;margin:0;" class="dark:text-gray-300">
           📎 Le fichier justificatif a été enregistré avec succès.
         </p>

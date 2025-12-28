@@ -59,7 +59,7 @@ const appState = structuredClone(defaultState);
 
 /**
  * Envoie une nouvelle vente à l'API (authentifiée par JWT)
- * @param {Object} vente - { date, description, moyen_paiement, type_vente, quantite, montant, justificatif }
+ * @param {Object} vente - { date, description, moyen_paiement, type_vente, quantite, montant, justificatif, file }
  * @returns {Promise<Object|null>}
  */
 async function addVente(vente) {
@@ -71,24 +71,28 @@ async function addVente(vente) {
   }
 
   try {
-    // Préparer le payload pour l'API
-    const payload = {
-      saleDate: vente.date,
-      description: vente.description || "",
-      saleType: vente.type_vente || "produits",
-      paymentMethod: vente.moyen_paiement || "cash",
-      quantity: vente.quantite || 1,
-      amount: vente.montant || 0,
-      receiptName: vente.justificatif || ""
-    };
+    // Utiliser FormData pour supporter les fichiers
+    const formData = new FormData();
+    formData.append("saleDate", vente.date);
+    formData.append("description", vente.description || "");
+    formData.append("saleType", vente.type_vente || "produits");
+    formData.append("paymentMethod", vente.moyen_paiement || "cash");
+    formData.append("quantity", vente.quantite || 1);
+    formData.append("amount", vente.montant || 0);
+    formData.append("receiptName", vente.justificatif || "");
+    
+    // Ajouter le fichier s'il existe
+    if (vente.file) {
+      formData.append("receipt", vente.file);
+    }
 
     const response = await fetch(`${API_BASE_URL}/api/sales`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         "Authorization": `Bearer ${token}`
+        // Ne pas définir Content-Type: FormData le définit automatiquement avec la bonne limite de boundary
       },
-      body: JSON.stringify(payload)
+      body: formData
     });
 
     if (response.status === 401) {
@@ -114,7 +118,7 @@ async function addVente(vente) {
 
 /**
  * Envoie une nouvelle dépense à l'API (authentifiée par JWT)
- * @param {Object} depense - { date, categorie, moyen_paiement, montant, justificatif }
+ * @param {Object} depense - { date, categorie, moyen_paiement, montant, justificatif, file }
  * @returns {Promise<Object|null>}
  */
 async function addDepense(depense) {
@@ -126,21 +130,26 @@ async function addDepense(depense) {
   }
 
   try {
-    const payload = {
-      expenseDate: depense.date,
-      category: depense.categorie || "",
-      paymentMethod: depense.moyen_paiement || "cash",
-      amount: depense.montant || 0,
-      receiptName: depense.justificatif || ""
-    };
+    // Utiliser FormData pour supporter les fichiers
+    const formData = new FormData();
+    formData.append("expenseDate", depense.date);
+    formData.append("category", depense.categorie || "");
+    formData.append("paymentMethod", depense.moyen_paiement || "cash");
+    formData.append("amount", depense.montant || 0);
+    formData.append("receiptName", depense.justificatif || "");
+    
+    // Ajouter le fichier s'il existe
+    if (depense.file) {
+      formData.append("receipt", depense.file);
+    }
 
     const response = await fetch(`${API_BASE_URL}/api/expenses`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         "Authorization": `Bearer ${token}`
+        // Ne pas définir Content-Type: FormData le définit automatiquement avec la bonne limite de boundary
       },
-      body: JSON.stringify(payload)
+      body: formData
     });
 
     if (response.status === 401) {

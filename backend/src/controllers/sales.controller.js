@@ -1,5 +1,6 @@
 import { supabase } from "../db/supabase.js";
 import { z } from "zod";
+import { uploadFileToSupabase, deleteFileFromSupabase } from "../utils/supabase-storage.js";
 
 const listSchema = z.object({
   month: z.coerce.number().int().min(1).max(12),
@@ -27,7 +28,7 @@ export async function listSales(req, res) {
     // Récupérer les ventes avec Supabase
     const { data: rows, error } = await supabase
       .from("sales")
-      .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, created_at")
+      .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, receipt_url, created_at")
       .eq("organization_id", organizationId)
       .order("sale_date", { ascending: false })
       .order("created_at", { ascending: false });
@@ -52,6 +53,7 @@ export async function listSales(req, res) {
         quantite: row.quantity,
         montant: row.amount,
         justificatif: row.receipt_name,
+        justificatifUrl: row.receipt_url,
         created_at: row.created_at
       }));
     
@@ -72,6 +74,27 @@ export async function createSale(req, res) {
     // Récupérer l'organizationId du JWT
     const organizationId = req.user.organizationId;
 
+    let receiptUrl = null;
+    let receiptStoragePath = null;
+    let receiptName = data.receiptName || null;
+
+    // Uploader le fichier s'il existe
+    if (req.file) {
+      try {
+        const uploadResult = await uploadFileToSupabase(
+          req.file.buffer,
+          req.file.originalname,
+          organizationId
+        );
+        receiptUrl = uploadResult.fileUrl;
+        receiptStoragePath = uploadResult.storagePath;
+        receiptName = uploadResult.fileName;
+      } catch (uploadError) {
+        console.error("❌ File upload failed:", uploadError?.message);
+        return res.status(400).json({ error: "File upload failed", details: uploadError?.message });
+      }
+    }
+
     const { data: row, error } = await supabase
       .from("sales")
       .insert({
@@ -82,13 +105,19 @@ export async function createSale(req, res) {
         payment_method: data.paymentMethod ?? null,
         quantity: data.quantity,
         amount: data.amount,
-        receipt_name: data.receiptName ?? null,
+        receipt_name: receiptName,
+        receipt_url: receiptUrl,
+        receipt_storage_path: receiptStoragePath,
       })
-      .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, created_at")
+      .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, receipt_url, receipt_storage_path, created_at")
       .single();
 
     if (error || !row) {
       console.error("Erreur createSale:", error);
+      // Supprimer le fichier si l'insertion a échoué
+      if (receiptStoragePath) {
+        await deleteFileFromSupabase(receiptStoragePath);
+      }
       return res.status(500).json({ error: "Internal server error" });
     }
     
@@ -102,6 +131,7 @@ export async function createSale(req, res) {
       quantite: row.quantity,
       montant: row.amount,
       justificatif: row.receipt_name,
+      justificatifUrl: row.receipt_url,
       created_at: row.created_at
     };
     
