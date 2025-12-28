@@ -1037,4 +1037,130 @@ document.addEventListener("DOMContentLoaded", function () {
     if (printAllBtn) {
         printAllBtn.addEventListener("click", handlePrintAll);
     }
+
+    // Export CSV
+    const exportCsvBtn = document.getElementById("exportCsvBtn");
+    if (exportCsvBtn) {
+        exportCsvBtn.addEventListener("click", handleExportCSV);
+    }
 });
+
+/**
+ * Exporte les données en CSV
+ */
+async function handleExportCSV() {
+    try {
+        if (!window.OGOUE) {
+            alert("Erreur: données non disponibles");
+            return;
+        }
+
+        // Récupérer les données
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+            alert("Vous devez être connecté");
+            return;
+        }
+
+        // Récupérer les ventes et dépenses pour la période
+        const ventes = await window.OGOUE.getVentesPourPeriode?.(12, 2025) || [];
+        const depenses = await window.OGOUE.getDepensesPourPeriode?.(12, 2025) || [];
+
+        // Créer les fichiers CSV
+        const csvVentes = generateCSV("VENTES", [
+            ["Date", "Description", "Type", "Moyen de paiement", "Montant", "Justificatif"],
+            ...ventes.map(v => [
+                v.saleDate || v.date || "",
+                v.description || "",
+                v.saleType || v.type_vente || "",
+                v.paymentMethod || v.moyen_paiement || "",
+                v.amount || v.montant || "",
+                v.receiptName || v.justificatif || ""
+            ])
+        ]);
+
+        const csvDepenses = generateCSV("DEPENSES", [
+            ["Date", "Catégorie", "Description", "Montant", "Justificatif"],
+            ...depenses.map(d => [
+                d.date || "",
+                d.category || d.categorie || "",
+                d.description || "",
+                d.amount || d.montant || "",
+                d.receiptName || d.justificatif || ""
+            ])
+        ]);
+
+        // Créer un flux consolidé
+        const allOperations = [
+            ...ventes.map(v => ({
+                Date: v.saleDate || v.date || "",
+                Type: "Vente",
+                Description: v.description || "",
+                Montant: v.amount || v.montant || 0,
+                Catégorie: v.saleType || ""
+            })),
+            ...depenses.map(d => ({
+                Date: d.date || "",
+                Type: "Dépense",
+                Description: d.description || "",
+                Montant: -(d.amount || d.montant || 0),
+                Catégorie: d.category || d.categorie || ""
+            }))
+        ].sort((a, b) => new Date(a.Date) - new Date(b.Date));
+
+        const csvFlux = generateCSV("FLUX", [
+            ["Date", "Type", "Description", "Montant", "Catégorie"],
+            ...allOperations.map(op => [op.Date, op.Type, op.Description, op.Montant, op.Catégorie])
+        ]);
+
+        // Télécharger les fichiers
+        downloadCSV(csvVentes, "OGOUE_Ventes.csv");
+        downloadCSV(csvDepenses, "OGOUE_Depenses.csv");
+        downloadCSV(csvFlux, "OGOUE_Flux_Tresorerie.csv");
+
+        alert("✅ Les 3 fichiers CSV ont été téléchargés !");
+    } catch (error) {
+        console.error("Erreur export CSV:", error);
+        alert("❌ Erreur lors de l'export: " + error.message);
+    }
+}
+
+/**
+ * Génère le contenu CSV
+ */
+function generateCSV(title, rows) {
+    // Ajouter un titre
+    const csvContent = [
+        [title],
+        ["Export du", new Date().toLocaleDateString("fr-FR")],
+        [],
+        ...rows
+    ]
+        .map(row => row.map(cell => {
+            // Écapper les guillemets et entourer les cellules contenant des virgules
+            const cellStr = String(cell || "");
+            return cellStr.includes(",") || cellStr.includes('"') 
+                ? `"${cellStr.replace(/"/g, '""')}"` 
+                : cellStr;
+        }).join(","))
+        .join("\n");
+    
+    return csvContent;
+}
+
+/**
+ * Télécharge un fichier CSV
+ */
+function downloadCSV(csvContent, filename) {
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute("href", url);
+    link.setAttribute("download", filename);
+    link.style.visibility = "hidden";
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
