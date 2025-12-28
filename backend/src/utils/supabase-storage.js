@@ -4,6 +4,27 @@ const BUCKET_NAME = "justificatifs";
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 /**
+ * Détermine le content-type MIME selon l'extension du fichier
+ */
+function getMimeType(filename) {
+  const ext = filename.toLowerCase().split(".").pop();
+  const mimeTypes = {
+    pdf: "application/pdf",
+    txt: "text/plain",
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    png: "image/png",
+    gif: "image/gif",
+    webp: "image/webp",
+    doc: "application/msword",
+    docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    xls: "application/vnd.ms-excel",
+    xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  };
+  return mimeTypes[ext] || "application/octet-stream";
+}
+
+/**
  * Crée le bucket s'il n'existe pas
  */
 export async function ensureBucketExists() {
@@ -46,11 +67,14 @@ export async function uploadFileToSupabase(fileBuffer, originalFilename, organiz
     const fileExtension = originalFilename.split(".").pop();
     const fileName = `${organizationId}/${timestamp}_${randomId}.${fileExtension}`;
 
+    // Déterminer le content-type approprié
+    const contentType = getMimeType(originalFilename);
+
     // Upload vers Supabase Storage
     const { data, error } = await supabase.storage
       .from(BUCKET_NAME)
       .upload(fileName, fileBuffer, {
-        contentType: "application/octet-stream",
+        contentType: contentType,
         upsert: false,
       });
 
