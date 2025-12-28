@@ -3,19 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comptabilité Agent - OGOUE</title>
+    <title>Espace Agent - OGOUE</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
 </head>
 <body class="bg-gray-50 dark:bg-gray-900">
-    <div class="min-h-screen flex flex-col" id="app">
-        <!-- Header simplifié -->
-        <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6">
-            <div class="max-w-7xl mx-auto flex justify-between items-center">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Gestion Comptable</h1>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Enregistrez et suivez vos ventes et dépenses</p>
+    <div class="min-h-screen flex flex-col">
+        <!-- Header avec nom agent et déconnexion -->
+        <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+            <div class="max-w-6xl mx-auto flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-teal-200 dark:bg-teal-900 flex items-center justify-center">
+                        <span class="material-icons-outlined text-teal-700 dark:text-teal-300">person</span>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Bienvenue</p>
+                        <p id="agentName" class="text-lg font-bold text-gray-900 dark:text-white">Agent</p>
+                    </div>
                 </div>
                 <button onclick="logout()" class="flex items-center gap-2 text-red-600 hover:text-red-700 font-medium">
                     <span class="material-icons-outlined">logout</span>
@@ -24,71 +29,64 @@
             </div>
         </header>
 
-        <!-- Tabs -->
-        <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-            <div class="max-w-7xl mx-auto px-6 flex gap-8">
-                <button onclick="switchTab('ventes')" id="tab-ventes" class="py-4 px-2 font-medium text-teal-600 border-b-2 border-teal-600 hover:text-teal-700">
-                    Ventes
-                </button>
-                <button onclick="switchTab('depenses')" id="tab-depenses" class="py-4 px-2 font-medium text-gray-600 dark:text-gray-300 border-b-2 border-transparent hover:text-gray-900 dark:hover:text-white">
-                    Dépenses
-                </button>
-                <button onclick="switchTab('resume')" id="tab-resume" class="py-4 px-2 font-medium text-gray-600 dark:text-gray-300 border-b-2 border-transparent hover:text-gray-900 dark:hover:text-white">
-                    Résumé
-                </button>
-            </div>
-        </div>
-
-        <!-- Contenu -->
-        <main class="max-w-7xl mx-auto w-full px-6 py-8 flex-1">
-            <!-- Ventes Tab -->
-            <div id="content-ventes" class="space-y-6">
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-8">
-                    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Enregistrer une nouvelle vente</h2>
-                    <iframe src="module_ventes.html" class="w-full h-screen border-0 rounded-lg"></iframe>
-                </div>
+        <!-- Contenu principal -->
+        <main class="max-w-6xl mx-auto w-full px-6 py-12 flex-1">
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Gestion Comptable</h1>
+                <p class="text-gray-600 dark:text-gray-300">Enregistrez et suivez vos ventes, dépenses et résumés financiers</p>
             </div>
 
-            <!-- Dépenses Tab -->
-            <div id="content-depenses" class="hidden space-y-6">
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-8">
-                    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Enregistrer une nouvelle dépense</h2>
-                    <iframe src="module_depenses.html" class="w-full h-screen border-0 rounded-lg"></iframe>
-                </div>
-            </div>
+            <!-- Grille des modules -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Ventes -->
+                <a href="module_ventes.html" class="group bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition overflow-hidden">
+                    <div class="bg-gradient-to-br from-green-500 to-green-600 h-32 flex items-center justify-center">
+                        <span class="material-icons-outlined text-white text-6xl">trending_up</span>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-green-600 transition">Ventes</h3>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Enregistrez et suivez vos ventes quotidiennes</p>
+                        <div class="flex items-center text-green-600 font-medium text-sm">
+                            Accéder
+                            <span class="material-icons-outlined ml-2 text-lg">arrow_forward</span>
+                        </div>
+                    </div>
+                </a>
 
-            <!-- Résumé Tab -->
-            <div id="content-resume" class="hidden space-y-6">
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-8">
-                    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Résumé Financier</h2>
-                    <iframe src="module_resume_ventes_depenses.html" class="w-full h-screen border-0 rounded-lg"></iframe>
-                </div>
+                <!-- Dépenses -->
+                <a href="module_depenses.html" class="group bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition overflow-hidden">
+                    <div class="bg-gradient-to-br from-orange-500 to-orange-600 h-32 flex items-center justify-center">
+                        <span class="material-icons-outlined text-white text-6xl">receipt</span>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-orange-600 transition">Dépenses</h3>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Enregistrez et suivez vos dépenses</p>
+                        <div class="flex items-center text-orange-600 font-medium text-sm">
+                            Accéder
+                            <span class="material-icons-outlined ml-2 text-lg">arrow_forward</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Résumé -->
+                <a href="module_resume_ventes_depenses.html" class="group bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition overflow-hidden">
+                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 h-32 flex items-center justify-center">
+                        <span class="material-icons-outlined text-white text-6xl">bar_chart</span>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 transition">Résumé</h3>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Consultez votre résumé financier</p>
+                        <div class="flex items-center text-blue-600 font-medium text-sm">
+                            Accéder
+                            <span class="material-icons-outlined ml-2 text-lg">arrow_forward</span>
+                        </div>
+                    </div>
+                </a>
             </div>
         </main>
     </div>
 
     <script>
-        function switchTab(tab) {
-            // Masquer tous les contenus
-            document.getElementById('content-ventes').classList.add('hidden');
-            document.getElementById('content-depenses').classList.add('hidden');
-            document.getElementById('content-resume').classList.add('hidden');
-
-            // Réinitialiser tous les tabs
-            document.getElementById('tab-ventes').classList.remove('text-teal-600', 'border-teal-600');
-            document.getElementById('tab-depenses').classList.remove('text-teal-600', 'border-teal-600');
-            document.getElementById('tab-resume').classList.remove('text-teal-600', 'border-teal-600');
-
-            document.getElementById('tab-ventes').classList.add('text-gray-600', 'dark:text-gray-300', 'border-transparent');
-            document.getElementById('tab-depenses').classList.add('text-gray-600', 'dark:text-gray-300', 'border-transparent');
-            document.getElementById('tab-resume').classList.add('text-gray-600', 'dark:text-gray-300', 'border-transparent');
-
-            // Afficher le contenu sélectionné
-            document.getElementById(`content-${tab}`).classList.remove('hidden');
-            document.getElementById(`tab-${tab}`).classList.remove('text-gray-600', 'dark:text-gray-300', 'border-transparent');
-            document.getElementById(`tab-${tab}`).classList.add('text-teal-600', 'border-teal-600');
-        }
-
         function logout() {
             if(confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
                 localStorage.removeItem('authToken');
@@ -98,11 +96,11 @@
             }
         }
 
-        // Vérifier que l'utilisateur est un agent
+        // Vérifier et afficher le nom de l'agent
         window.addEventListener('load', () => {
             const user = localStorage.getItem('user');
             const token = localStorage.getItem('authToken');
-            
+
             if (!user || !token) {
                 window.location.href = 'http://localhost:3000/login.html';
                 return;
@@ -110,8 +108,14 @@
 
             try {
                 const userData = JSON.parse(user);
+                
+                // Afficher le nom de l'agent
+                const agentName = userData.firstName || userData.name || 'Agent';
+                document.getElementById('agentName').textContent = agentName;
+
+                // Vérifier que c'est bien un agent
                 if (userData.role !== 'agent') {
-                    // Si ce n'est pas un agent, le rediriger vers le dashboard normal
+                    // Si ce n'est pas un agent, le rediriger
                     window.location.href = 'module_tableau_bord.html';
                 }
             } catch (e) {
