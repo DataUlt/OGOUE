@@ -125,3 +125,39 @@ export async function deleteFileFromSupabase(storagePath) {
     console.error(`❌ Error deleting file:`, error?.message);
   }
 }
+
+/**
+ * Vide tout le bucket (pour nettoyer les fichiers avec mauvais content-type)
+ */
+export async function cleanBucket() {
+  try {
+    console.log(`📦 Cleaning bucket ${BUCKET_NAME}...`);
+    const { data: files, error: listError } = await supabase.storage
+      .from(BUCKET_NAME)
+      .list("", { limit: 1000 });
+
+    if (listError) {
+      throw new Error(`Failed to list files: ${listError.message}`);
+    }
+
+    if (!files || files.length === 0) {
+      console.log(`✅ Bucket is already empty`);
+      return;
+    }
+
+    const fileNames = files.filter(f => f.name).map(f => f.name);
+    console.log(`🗑️  Deleting ${fileNames.length} files...`);
+
+    const { error: deleteError } = await supabase.storage
+      .from(BUCKET_NAME)
+      .remove(fileNames);
+
+    if (deleteError) {
+      throw new Error(`Failed to delete files: ${deleteError.message}`);
+    }
+
+    console.log(`✅ Bucket cleaned: ${fileNames.length} files deleted`);
+  } catch (error) {
+    console.error(`❌ Error cleaning bucket:`, error?.message);
+    throw error;
+  }
