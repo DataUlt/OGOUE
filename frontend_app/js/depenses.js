@@ -157,7 +157,18 @@
     dateInputDefault.value = localISO;
   }
 
+  // Initialiser immédiatement
   setTodayAsDefaultDate();
+  
+  // Aussi initialiser quand le document est complètement chargé (en cas de race condition)
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setTodayAsDefaultDate);
+  }
+  
+  // Et quand le formulaire est prêt
+  if (form) {
+    form.addEventListener('loadstart', setTodayAsDefaultDate);
+  }
 
   function generateId() {
     return "depense_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
@@ -367,23 +378,20 @@
   async function renderCompactTable() {
     const depenses = await getDepensesPeriodeCourante();
     
-    // Filtrer pour afficher SEULEMENT les dépenses d'aujourd'hui
-    const today = new Date();
-    const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    // Filtrer pour afficher les dépenses du mois/année courant (pas juste aujourd'hui)
+    // car les dates peuvent avoir un décalage UTC/local
+    const { mois, annee } = appState.periodeCourante || {};
     
     const depensesAujourdhui = depenses.filter((d) => {
       const dateStr = d.date || d.expense_date || d.expenseDate;
       if (!dateStr) return false;
       
-      // Parser la date ISO (ex: "2025-12-22T23:00:00.000Z")
+      // Parser la date ISO
       const dt = new Date(dateStr);
       if (isNaN(dt.getTime())) return false;
       
-      // Créer une date locale sans heure
-      const dDate = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
-      
-      // Comparer les dates
-      return dDate.getTime() === todayDateOnly.getTime();
+      // Comparer par mois et année (pas jour pour éviter les décalages UTC)
+      return dt.getMonth() + 1 === mois && dt.getFullYear() === annee;
     });
 
     tbodyCompact.innerHTML = "";
