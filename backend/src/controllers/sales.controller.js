@@ -199,3 +199,50 @@ export async function updateSaleReceipt(req, res) {
     return res.status(500).json({ error: "Internal server error" });
   }
 }
+
+export async function deleteSale(req, res) {
+  try {
+    const { id } = req.params;
+    const organizationId = req.user.organizationId;
+
+    // Récupérer l'enregistrement avant suppression pour connaître le chemin du fichier
+    const { data: sale, error: fetchError } = await supabase
+      .from("sales")
+      .select("receipt_storage_path")
+      .eq("id", id)
+      .eq("organization_id", organizationId)
+      .single();
+
+    if (fetchError || !sale) {
+      console.error("Vente non trouvée:", fetchError);
+      return res.status(404).json({ error: "Sale not found" });
+    }
+
+    // Supprimer le fichier de Supabase Storage s'il existe
+    if (sale.receipt_storage_path) {
+      try {
+        await deleteFileFromSupabase(sale.receipt_storage_path);
+      } catch (fileError) {
+        console.error("Erreur suppression fichier:", fileError);
+        // Continue même si la suppression du fichier échoue
+      }
+    }
+
+    // Supprimer l'enregistrement de la base de données
+    const { error: deleteError } = await supabase
+      .from("sales")
+      .delete()
+      .eq("id", id)
+      .eq("organization_id", organizationId);
+
+    if (deleteError) {
+      console.error("Erreur deleteSale:", deleteError);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+
+    return res.json({ message: "Sale deleted successfully" });
+  } catch (error) {
+    console.error("Erreur deleteSale:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}

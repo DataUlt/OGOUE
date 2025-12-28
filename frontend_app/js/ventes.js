@@ -5,6 +5,7 @@
     return;
   }
 
+  const API_BASE_URL = "https://ogoue.onrender.com/api";
   const { appState, addVente, getVentesPourPeriode } = window.OGOUE;
 
   const form = document.getElementById("form-ventes");
@@ -283,6 +284,30 @@
     );
   }
 
+  async function deleteVente(venteId) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/sales/${venteId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erreur: ${response.status}`);
+      }
+
+      // Rafraîchir les tableaux
+      await renderCompactTable();
+      renderFullTable();
+
+      alert('Vente supprimée avec succès');
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
+      alert('Erreur lors de la suppression de la vente');
+    }
+  }
+
   function createRow(vente) {
     const tr = document.createElement("tr");
     tr.className = "border-b dark:border-gray-700";
@@ -325,6 +350,11 @@
             : `-`
         }
       </td>
+      <td class="px-6 py-4 text-center">
+        <button class="delete-btn text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-xl" title="Supprimer" data-id="${vente.id}">
+          🗑️
+        </button>
+      </td>
     `;
 
     // Ajouter l'event listener pour ouvrir le modal si justificatif
@@ -337,6 +367,17 @@
           openJustificatifModal(fileName, fileUrl);
         });
       }
+    }
+
+    // Ajouter l'event listener pour supprimer
+    const deleteBtn = tr.querySelector('.delete-btn');
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', () => {
+        const venteId = deleteBtn.getAttribute('data-id');
+        if (confirm('Êtes-vous sûr de vouloir supprimer cette vente ?')) {
+          deleteVente(venteId);
+        }
+      });
     }
 
     return tr;
@@ -382,12 +423,13 @@
     // Préparer les boutons d'action
     let actionHtml = '';
     if (fileUrl) {
+      const viewUrl = fileUrl.includes('?') ? `${fileUrl}&download=` : `${fileUrl}?download=`;
       actionHtml = `
         <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;">
-          <a href="${fileUrl}" target="_blank" rel="noopener noreferrer" style="padding:8px 16px;background:#4CAF50;color:white;border-radius:6px;text-decoration:none;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;gap:6px;">
+          <a href="${viewUrl}" target="_blank" rel="noopener noreferrer" style="padding:8px 16px;background:#4CAF50;color:white;border-radius:6px;text-decoration:none;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;gap:6px;">
             👁️ Consulter
           </a>
-          <a href="${fileUrl}?download=${encodeURIComponent(fileName)}" download="${fileName}" style="padding:8px 16px;background:#2196F3;color:white;border-radius:6px;text-decoration:none;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;gap:6px;">
+          <a href="${fileUrl}" download="${fileName}" style="padding:8px 16px;background:#2196F3;color:white;border-radius:6px;text-decoration:none;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;gap:6px;">
             ⬇️ Télécharger
           </a>
         </div>

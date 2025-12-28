@@ -4,27 +4,6 @@ const BUCKET_NAME = "justificatifs";
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 /**
- * Détermine le content-type MIME selon l'extension du fichier
- */
-function getMimeType(filename) {
-  const ext = filename.toLowerCase().split(".").pop();
-  const mimeTypes = {
-    pdf: "application/pdf",
-    txt: "text/plain",
-    jpg: "image/jpeg",
-    jpeg: "image/jpeg",
-    png: "image/png",
-    gif: "image/gif",
-    webp: "image/webp",
-    doc: "application/msword",
-    docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    xls: "application/vnd.ms-excel",
-    xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  };
-  return mimeTypes[ext] || "application/octet-stream";
-}
-
-/**
  * Crée le bucket s'il n'existe pas
  */
 export async function ensureBucketExists() {
@@ -67,14 +46,11 @@ export async function uploadFileToSupabase(fileBuffer, originalFilename, organiz
     const fileExtension = originalFilename.split(".").pop();
     const fileName = `${organizationId}/${timestamp}_${randomId}.${fileExtension}`;
 
-    // Déterminer le content-type approprié
-    const contentType = getMimeType(originalFilename);
-
     // Upload vers Supabase Storage
     const { data, error } = await supabase.storage
       .from(BUCKET_NAME)
       .upload(fileName, fileBuffer, {
-        contentType: contentType,
+        contentType: "application/octet-stream",
         upsert: false,
       });
 
@@ -125,39 +101,3 @@ export async function deleteFileFromSupabase(storagePath) {
     console.error(`❌ Error deleting file:`, error?.message);
   }
 }
-
-/**
- * Vide tout le bucket (pour nettoyer les fichiers avec mauvais content-type)
- */
-export async function cleanBucket() {
-  try {
-    console.log(`📦 Cleaning bucket ${BUCKET_NAME}...`);
-    const { data: files, error: listError } = await supabase.storage
-      .from(BUCKET_NAME)
-      .list("", { limit: 1000 });
-
-    if (listError) {
-      throw new Error(`Failed to list files: ${listError.message}`);
-    }
-
-    if (!files || files.length === 0) {
-      console.log(`✅ Bucket is already empty`);
-      return;
-    }
-
-    const fileNames = files.filter(f => f.name).map(f => f.name);
-    console.log(`🗑️  Deleting ${fileNames.length} files...`);
-
-    const { error: deleteError } = await supabase.storage
-      .from(BUCKET_NAME)
-      .remove(fileNames);
-
-    if (deleteError) {
-      throw new Error(`Failed to delete files: ${deleteError.message}`);
-    }
-
-    console.log(`✅ Bucket cleaned: ${fileNames.length} files deleted`);
-  } catch (error) {
-    console.error(`❌ Error cleaning bucket:`, error?.message);
-    throw error;
-  }

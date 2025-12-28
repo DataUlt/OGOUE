@@ -188,3 +188,50 @@ export async function updateExpenseReceipt(req, res) {
     return res.status(500).json({ error: "Internal server error" });
   }
 }
+
+export async function deleteExpense(req, res) {
+  try {
+    const { id } = req.params;
+    const organizationId = req.user.organizationId;
+
+    // Récupérer l'enregistrement avant suppression pour connaître le chemin du fichier
+    const { data: expense, error: fetchError } = await supabase
+      .from("expenses")
+      .select("receipt_storage_path")
+      .eq("id", id)
+      .eq("organization_id", organizationId)
+      .single();
+
+    if (fetchError || !expense) {
+      console.error("Dépense non trouvée:", fetchError);
+      return res.status(404).json({ error: "Expense not found" });
+    }
+
+    // Supprimer le fichier de Supabase Storage s'il existe
+    if (expense.receipt_storage_path) {
+      try {
+        await deleteFileFromSupabase(expense.receipt_storage_path);
+      } catch (fileError) {
+        console.error("Erreur suppression fichier:", fileError);
+        // Continue même si la suppression du fichier échoue
+      }
+    }
+
+    // Supprimer l'enregistrement de la base de données
+    const { error: deleteError } = await supabase
+      .from("expenses")
+      .delete()
+      .eq("id", id)
+      .eq("organization_id", organizationId);
+
+    if (deleteError) {
+      console.error("Erreur deleteExpense:", deleteError);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+
+    return res.json({ message: "Expense deleted successfully" });
+  } catch (error) {
+    console.error("Erreur deleteExpense:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
