@@ -1,16 +1,26 @@
 // Frontend API pour la gestion des agents
 const API_BASE_URL = "https://ogoue.onrender.com/api";
 
+// Helper pour obtenir le token
+function getToken() {
+  return localStorage.getItem("authToken");
+}
+
 /**
  * Créer un nouvel agent
  */
 export async function createAgent(firstName) {
   try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Non authentifié - token manquant");
+    }
+
     const response = await fetch(`${API_BASE_URL}/agents`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify({ firstName })
     });
@@ -31,10 +41,15 @@ export async function createAgent(firstName) {
  */
 export async function listAgents() {
   try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Non authentifié - token manquant");
+    }
+
     const response = await fetch(`${API_BASE_URL}/agents`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        'Authorization': `Bearer ${token}`
       }
     });
 
@@ -54,10 +69,15 @@ export async function listAgents() {
  */
 export async function deleteAgent(agentId) {
   try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Non authentifié - token manquant");
+    }
+
     const response = await fetch(`${API_BASE_URL}/agents/${agentId}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        'Authorization': `Bearer ${token}`
       }
     });
 

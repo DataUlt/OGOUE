@@ -33,7 +33,7 @@ export async function getOrganization(req, res) {
 export async function updateOrganization(req, res) {
   try {
     const organizationId = req.user.organizationId;
-    const { name, activity, activityDescription } = req.body;
+    const { name, activity, activityDescription, rccm, nif } = req.body;
 
     const { data: orgData, error } = await supabase
       .from("organizations")
@@ -41,6 +41,8 @@ export async function updateOrganization(req, res) {
         name: name || undefined,
         activity: activity || undefined,
         activity_description: activityDescription || undefined,
+        rccm_number: rccm || undefined,
+        nif_number: nif || undefined,
       })
       .eq("id", organizationId)
       .select("id, name, rccm_number, nif_number, activity, activity_description, created_at")

@@ -273,6 +273,45 @@
   function getOrg(){ try { return JSON.parse(localStorage.getItem(ORG_KEY)||'null'); } catch(e){return null} }
   function saveOrg(o){ localStorage.setItem(ORG_KEY, JSON.stringify(o||{})); }
 
+  async function saveOrgToServer(org) {
+    try {
+      const token = localStorage.getItem('authToken');
+      const API_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
+        ? 'http://localhost:5000/api'
+        : 'https://ogoue.onrender.com/api';
+
+      const response = await fetch(`${API_BASE}/organizations`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          rccm: org.rccm,
+          nif: org.nif
+        })
+      });
+
+      if (!response.ok) {
+        console.error('Erreur mise à jour organisation:', response.status);
+        throw new Error(`Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      // Update local org with server response
+      const updatedOrg = {
+        ...org,
+        rccm: data.organization.rccmNumber,
+        nif: data.organization.nifNumber
+      };
+      saveOrg(updatedOrg);
+      return data;
+    } catch (error) {
+      console.error('Erreur saveOrgToServer:', error);
+      throw error;
+    }
+  }
+
   function createPopover(){
     const el = document.createElement('div');
     el.className = 'fixed z-50 rounded-lg shadow-xl bg-white dark:bg-[#1E293B] border border-gray-300 dark:border-gray-600';
@@ -444,6 +483,17 @@
     `;
     content.appendChild(notifDiv);
     
+    // AGENTS (seulement pour les Gérants)
+    const agentsDiv = document.createElement('div');
+    agentsDiv.innerHTML = `
+      <div class="text-xs font-bold uppercase text-gray-500 dark:text-gray-400 mb-3">Gestion</div>
+      <a href="module_agents.html" class="block w-full px-4 py-2 rounded text-white bg-teal-600 hover:bg-teal-700 font-medium text-sm text-center transition-colors">
+        <span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle; margin-right: 8px;">group</span>
+        Gérer les Agents
+      </a>
+    `;
+    content.appendChild(agentsDiv);
+    
     container.appendChild(content);
     
     // Footer button
@@ -581,15 +631,9 @@
     `;
     content.appendChild(nifDiv);
     
-    // Settings link
-    const settingsLink = document.createElement('div');
-    settingsLink.className = 'text-sm text-gray-700 dark:text-gray-300 pt-2 border-t border-gray-200 dark:border-gray-600';
-    settingsLink.innerHTML = '<button class="text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-medium flex items-center gap-2"><span class="material-symbols-outlined text-base">settings</span> Paramètres</button>';
-    content.appendChild(settingsLink);
-    
     // Logout
     const logoutLink = document.createElement('div');
-    logoutLink.className = 'text-sm text-red-600 dark:text-red-400';
+    logoutLink.className = 'text-sm text-red-600 dark:text-red-400 pt-2 border-t border-gray-200 dark:border-gray-600';
     logoutLink.innerHTML = '<button class="hover:text-red-700 dark:hover:text-red-300 font-medium flex items-center gap-2"><span class="material-symbols-outlined text-base">logout</span> Déconnexion</button>';
     content.appendChild(logoutLink);
     
@@ -597,14 +641,14 @@
     popover.appendChild(container);
     
     // Event listeners
-    popover.querySelector('[data-edit-rccm]')?.addEventListener('click', () => openEditModal('RCCM', org.rccm || '', (val) => {
+    popover.querySelector('[data-edit-rccm]')?.addEventListener('click', () => openEditModal('RCCM', org.rccm || '', async (val) => {
       const newOrg = Object.assign({}, org, { rccm: val });
-      saveOrg(newOrg);
+      await saveOrgToServer(newOrg);
     }));
     
-    popover.querySelector('[data-edit-nif]')?.addEventListener('click', () => openEditModal('NIF', org.nif || '', (val) => {
+    popover.querySelector('[data-edit-nif]')?.addEventListener('click', () => openEditModal('NIF', org.nif || '', async (val) => {
       const newOrg = Object.assign({}, org, { nif: val });
-      saveOrg(newOrg);
+      await saveOrgToServer(newOrg);
     }));
     
     popover.querySelector('[data-close]')?.addEventListener('click', (e) => {
