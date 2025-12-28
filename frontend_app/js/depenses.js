@@ -323,15 +323,12 @@
     // Préparer les boutons d'action
     let actionHtml = '';
     if (fileUrl) {
-      // Construire l'URL pour visualiser (sans forcer le téléchargement)
-      const viewUrl = fileUrl.includes('?') ? `${fileUrl}&download=` : `${fileUrl}?download=`;
-      
       actionHtml = `
         <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;">
-          <a href="${viewUrl}" target="_blank" rel="noopener noreferrer" style="padding:8px 16px;background:#4CAF50;color:white;border-radius:6px;text-decoration:none;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;gap:6px;">
+          <a href="${fileUrl}" target="_blank" rel="noopener noreferrer" style="padding:8px 16px;background:#4CAF50;color:white;border-radius:6px;text-decoration:none;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;gap:6px;">
             👁️ Consulter
           </a>
-          <a href="${fileUrl}" download="${fileName}" style="padding:8px 16px;background:#2196F3;color:white;border-radius:6px;text-decoration:none;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;gap:6px;">
+          <a href="${fileUrl}?download=${encodeURIComponent(fileName)}" download="${fileName}" style="padding:8px 16px;background:#2196F3;color:white;border-radius:6px;text-decoration:none;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;gap:6px;">
             ⬇️ Télécharger
           </a>
         </div>
