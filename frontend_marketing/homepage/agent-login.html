@@ -168,12 +168,15 @@
                 localStorage.setItem('user', JSON.stringify(data.user));
                 localStorage.setItem('organization', JSON.stringify(data.organization || {}));
 
-                // Redirect to app
+                // Redirect to app (env-aware)
                 successMsg.textContent = 'Connexion réussie! Redirection...';
                 successMsg.classList.remove('hidden');
                 
                 setTimeout(() => {
-                    window.location.href = 'http://localhost:3000/app/module_tableau_bord.html';
+                    const APP_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
+                        ? 'http://localhost:3000/app'
+                        : 'https://app.ogoue.com';
+                    window.location.href = `${APP_BASE}/module_tableau_bord.html`;
                 }, 1500);
 
             } catch (error) {

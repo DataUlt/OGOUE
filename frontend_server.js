@@ -25,7 +25,7 @@ const server = http.createServer((req, res) => {
     filePath = path.join(__dirname, 'frontend_marketing', 'homepage', 'login.html');
   }
   // Marketing routes (with or without .html)
-  else if (urlPath.startsWith('/login') || urlPath.startsWith('/signin') || urlPath.startsWith('/apropos')) {
+  else if (urlPath.startsWith('/login') || urlPath.startsWith('/signin') || urlPath.startsWith('/apropos') || urlPath.startsWith('/agent-login')) {
     let fileName = urlPath.replace(/^\//, ''); // Remove leading /
     if (!fileName.endsWith('.html')) {
       fileName += '.html'; // Add .html only if not present

@@ -136,12 +136,18 @@
                         <!-- Admin role removed -->
                     </div>
                 </div>
-                <div>
+                <div id="gerantButton">
                     <button
                         class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-secondary hover:bg-[#0a1e35] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary transition-colors dark:bg-secondary dark:hover:bg-blue-900"
                         type="submit">
                         Se connecter
                     </button>
+                </div>
+                <div id="agentButton" class="hidden">
+                    <a href="/agent-login.html"
+                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-secondary hover:bg-[#0a1e35] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary transition-colors dark:bg-secondary dark:hover:bg-blue-900">
+                        Accéder à mon espace
+                    </a>
                 </div>
                 <div class="text-center">
                     <a class="text-sm text-secondary hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
@@ -175,19 +181,12 @@
             
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value.trim();
-            const role = document.querySelector('input[name="role"]:checked').value;
             const errorDiv = document.getElementById('errorMessage');
             const successDiv = document.getElementById('successMessage');
             
             // Hide messages
             errorDiv.classList.add('hidden');
             successDiv.classList.add('hidden');
-            
-            // If agent is selected, redirect to agent login
-            if (role === 'agent') {
-                window.location.href = 'agent-login.html';
-                return;
-            }
             
             // Validation
             if (!email || !password) {
@@ -285,6 +284,29 @@
             successDiv.textContent = message;
             successDiv.classList.remove('hidden');
         }
+
+        // Toggle button visibility based on role selection
+        document.addEventListener('DOMContentLoaded', function() {
+            const gerantButton = document.getElementById('gerantButton');
+            const agentButton = document.getElementById('agentButton');
+            const roleInputs = document.querySelectorAll('input[name="role"]');
+
+            roleInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    if (this.value === 'agent') {
+                        gerantButton.classList.add('hidden');
+                        agentButton.classList.remove('hidden');
+                        // Redirection automatique après 300ms
+                        setTimeout(() => {
+                            window.location.href = '/agent-login.html';
+                        }, 300);
+                    } else {
+                        gerantButton.classList.remove('hidden');
+                        agentButton.classList.add('hidden');
+                    }
+                });
+            });
+        });
     </script>
 
 </body>
