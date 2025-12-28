@@ -268,7 +268,7 @@
     </div>
 
     <script>
-        const API_BASE_URL = "https://api.ogoue.com";
+        const API_BASE_URL = "https://ogoue.onrender.com";
 
 
         async function handleSignup(event) {
@@ -357,16 +357,19 @@
                 
                 // Redirect to dashboard after 1.5s (env-aware)
                 const APP_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
-                    ? 'http://127.0.0.1:5500/frontend_app'
+                    ? 'http://localhost:3000/app'
                     : 'https://app.ogoue.com';
                 setTimeout(() => {
-                    window.location.href = 'https://app.ogoue.com/module_tableau_bord.html';
+                    window.location.href = APP_BASE + '/module_tableau_bord.html';
                 }, 1500);
                 
             } catch (error) {
                 console.error('Error:', error);
                 showError("Erreur réseau : " + error.message);
                 const submitBtn = event.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent === "Création en cours..." 
+                    ? "Créer mon compte" 
+                    : submitBtn.textContent;
                 submitBtn.textContent = originalText;
                 submitBtn.disabled = false;
             }

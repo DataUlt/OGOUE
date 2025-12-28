@@ -4,7 +4,7 @@
 // ============================================================
 
 // URL de base du backend
-const API_BASE_URL = "https://api.ogoue.com";
+const API_BASE_URL = "https://ogoue.onrender.com";
 
 // ─────────────────────────────────────────────────
 // 🔐 AUTHENTICATION HELPERS
@@ -36,7 +36,7 @@ function handleUnauthorized() {
   localStorage.removeItem("authToken");
   localStorage.removeItem("user");
   const MARKETING_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
-    ? 'http://127.0.0.1:5500/OGOUE_COMBINED/frontend_marketing/homepage'
+    ? 'http://localhost:3000'
     : 'https://www.ogoue.com';
   window.location.href = `${MARKETING_BASE}/login.html`;
 }

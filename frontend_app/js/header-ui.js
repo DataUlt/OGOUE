@@ -618,7 +618,7 @@
         localStorage.removeItem('user');
         // Redirect to marketing login page (env-aware)
         const MARKETING_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
-          ? 'http://127.0.0.1:5500/OGOUE_COMBINED/frontend_marketing/homepage'
+          ? 'http://localhost:3000'
           : 'https://www.ogoue.com';
         window.location.href = `${MARKETING_BASE}/login.html`;
       }
