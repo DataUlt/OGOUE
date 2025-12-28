@@ -19,7 +19,25 @@ export async function authMiddleware(req, res, next) {
     const token = authHeader.substring(7); // Enlever "Bearer "
     console.log("Token length:", token.length);
 
-    // Vérifier le token avec Supabase
+    // 1️⃣ Essayer de vérifier comme JWT agent d'abord
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || "default_secret");
+      if (decoded.role === "agent") {
+        // C'est un agent JWT
+        req.user = {
+          sub: decoded.sub,
+          agentId: decoded.agentId,
+          role: "agent",
+          organizationId: decoded.organizationId,
+        };
+        console.log("✅ Agent JWT vérifié");
+        return next();
+      }
+    } catch (jwtErr) {
+      console.log("❌ Pas un JWT agent valide, essayant Supabase Auth...");
+    }
+
+    // 2️⃣ Si ce n'est pas un JWT agent, vérifier avec Supabase
     const { data: userData, error: userError } = await supabase.auth.getUser(token);
 
     if (userError || !userData.user) {
@@ -46,6 +64,7 @@ export async function authMiddleware(req, res, next) {
       req.user.role = userRecord.role;
     }
 
+    console.log("✅ Supabase Auth token vérifié");
     next();
   } catch (err) {
     console.error("Auth middleware error:", err);
