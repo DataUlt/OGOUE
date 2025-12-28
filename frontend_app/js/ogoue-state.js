@@ -33,12 +33,19 @@ function getCurrentUser() {
  */
 function handleUnauthorized() {
   console.warn("❌ Token expiré ou invalide. Redirection vers login...");
+  const user = getCurrentUser();
+  console.warn("Utilisateur actuel:", user);
   localStorage.removeItem("authToken");
   localStorage.removeItem("user");
   const MARKETING_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
     ? 'http://localhost:3000'
     : 'https://www.ogoue.com';
-  window.location.href = `${MARKETING_BASE}/login.html`;
+  
+  // Délai de 5 secondes pour que l'utilisateur voie l'erreur
+  alert('❌ Session expirée. Redirection vers la connexion dans 5 secondes...');
+  setTimeout(() => {
+    window.location.href = `${MARKETING_BASE}/login.html`;
+  }, 5000);
 }
 
 // ─────────────────────────────────────────────────

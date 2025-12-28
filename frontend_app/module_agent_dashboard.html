@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espace Agent - OGOUE</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+    <div class="min-h-screen flex flex-col">
+        <!-- Header simplifié -->
+        <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6">
+            <div class="max-w-6xl mx-auto flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Espace Agent</h1>
+                <button onclick="logout()" class="flex items-center gap-2 text-red-600 hover:text-red-700 font-medium">
+                    <span class="material-icons-outlined">logout</span>
+                    Déconnexion
+                </button>
+            </div>
+        </header>
+
+        <!-- Contenu principal -->
+        <main class="max-w-6xl mx-auto w-full px-6 py-12">
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 mb-8">
+                <h2 class="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">Bienvenue!</h2>
+                <p class="text-blue-700 dark:text-blue-200">
+                    Votre espace agent est en cours de développement. Vous aurez bientôt accès à tous les outils dont vous avez besoin.
+                </p>
+            </div>
+
+            <!-- Liens vers les modules -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <a href="module_ventes.html" class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition">
+                    <span class="material-icons-outlined text-4xl text-green-600 mb-4">trending_up</span>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Mes Ventes</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">Enregistrez et suivez vos ventes</p>
+                </a>
+
+                <a href="module_depenses.html" class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition">
+                    <span class="material-icons-outlined text-4xl text-orange-600 mb-4">receipt</span>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Mes Dépenses</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">Enregistrez et suivez vos dépenses</p>
+                </a>
+
+                <a href="module_resume_ventes_depenses.html" class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-lg transition">
+                    <span class="material-icons-outlined text-4xl text-blue-600 mb-4">bar_chart</span>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Résumé</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">Consultez votre résumé financier</p>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function logout() {
+            if(confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('user');
+                localStorage.removeItem('organization');
+                window.location.href = 'http://localhost:3000/login.html';
+            }
+        }
+
+        // Vérifier que l'utilisateur est un agent
+        window.addEventListener('load', () => {
+            const user = localStorage.getItem('user');
+            if (!user) {
+                window.location.href = 'http://localhost:3000/login.html';
+                return;
+            }
+
+            try {
+                const userData = JSON.parse(user);
+                console.log('User role:', userData.role);
+                if (userData.role !== 'agent') {
+                    // Si ce n'est pas un agent, le rediriger vers le dashboard normal
+                    window.location.href = 'module_tableau_bord.html';
+                }
+            } catch (e) {
+                window.location.href = 'http://localhost:3000/login.html';
+            }
+        });
+    </script>
+</body>
+</html>
