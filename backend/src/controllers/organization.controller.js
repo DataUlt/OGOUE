@@ -16,15 +16,13 @@ export async function getOrganization(req, res) {
     }
 
     return res.json({
-      organization: {
-        id: orgData.id,
-        name: orgData.name,
-        rccmNumber: orgData.rccm_number,
-        nifNumber: orgData.nif_number,
-        activity: orgData.activity,
-        activityDescription: orgData.activity_description,
-        createdAt: orgData.created_at,
-      },
+      id: orgData.id,
+      name: orgData.name,
+      rccm: orgData.rccm_number,
+      nif: orgData.nif_number,
+      activity: orgData.activity,
+      activityDescription: orgData.activity_description,
+      createdAt: orgData.created_at,
     });
   } catch (error) {
     console.error("GetOrganization error:", error);

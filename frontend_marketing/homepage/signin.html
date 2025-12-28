@@ -353,6 +353,24 @@
                 localStorage.setItem('authToken', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
                 
+                // Fetch organization details
+                try {
+                    const orgResponse = await fetch(`${API_BASE_URL}/api/organizations`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${data.token}`
+                        }
+                    });
+                    
+                    if (orgResponse.ok) {
+                        const orgData = await orgResponse.json();
+                        localStorage.setItem('ogo_org', JSON.stringify(orgData));
+                    }
+                } catch (orgError) {
+                    console.warn('Could not fetch organization:', orgError);
+                }
+                
                 showSuccess("Compte créé avec succès ! Redirection...");
                 
                 // Redirect to dashboard after 1.5s (env-aware)
