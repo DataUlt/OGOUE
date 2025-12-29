@@ -5,7 +5,7 @@
     return;
   }
 
-  const API_BASE_URL = "https://ogoue.onrender.com";
+  const API_BASE_URL = "https://api.ogoue.com";
   const { appState, addVente, getVentesPourPeriode } = window.OGOUE;
 
   const form = document.getElementById("form-ventes");

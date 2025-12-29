@@ -1,5 +1,5 @@
 // Frontend API pour la gestion des agents
-const API_BASE_URL = "https://ogoue.onrender.com/api";
+const API_BASE_URL = "https://api.ogoue.com/api";
 
 // Helper pour obtenir le token
 function getToken() {

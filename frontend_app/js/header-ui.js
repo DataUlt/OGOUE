@@ -282,7 +282,7 @@
 
       const API_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
         ? 'http://localhost:3001/api'
-        : 'https://ogoue.onrender.com/api';
+        : 'https://api.ogoue.com/api';
 
       console.log('Sauvegarde org:', { rccm: org.rccm, nif: org.nif });
 

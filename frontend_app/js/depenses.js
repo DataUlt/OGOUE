@@ -6,7 +6,7 @@
     return;
   }
 
-  const API_BASE_URL = "https://ogoue.onrender.com";
+  const API_BASE_URL = "https://api.ogoue.com";
   const { appState, addDepense, getDepensesPourPeriode } = window.OGOUE;
 
   // ─────────────────────────────────────────────
