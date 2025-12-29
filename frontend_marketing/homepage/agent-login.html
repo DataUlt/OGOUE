@@ -174,7 +174,7 @@
                 
                 setTimeout(() => {
                     const APP_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
-                        ? 'http://localhost:3000/app'
+                        ? 'http://localhost:3000/frontend_app'
                         : 'https://app.ogoue.com';
                     window.location.href = `${APP_BASE}/module_agent_dashboard.html`;
                 }, 1500);

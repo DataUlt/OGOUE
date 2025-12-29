@@ -385,7 +385,7 @@
                 
                 // Redirect to dashboard after 1.5s (env-aware)
                 const APP_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
-                    ? 'http://localhost:3000/app'
+                    ? 'http://localhost:3000/frontend_app'
                     : 'https://app.ogoue.com';
                 setTimeout(() => {
                     window.location.href = APP_BASE + '/module_tableau_bord.html';
