@@ -244,7 +244,7 @@
       const response = await fetch(`${API_BASE_URL}/api/expenses/${depenseId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
         }
       });
 
