@@ -186,6 +186,11 @@
 </div>
 
 <script>
+    // Déterminer l'URL du backend
+    const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+      ? 'http://localhost:3001'
+      : 'https://api.ogoue.com';
+
     // Récupérer les données d'audit
     async function loadDeletionHistory(filters = {}) {
         try {
@@ -194,7 +199,7 @@
             if (filters.month) params.append("month", filters.month);
             if (filters.year) params.append("year", filters.year);
 
-            const response = await fetch(`/api/audit/deletions?${params}`, {
+            const response = await fetch(`${API_BASE_URL}/api/audit/deletions?${params}`, {
                 headers: {
                     "Authorization": `Bearer ${localStorage.getItem("authToken")}`
                 }
@@ -216,7 +221,7 @@
     // Charger les statistiques
     async function loadStats() {
         try {
-            const response = await fetch("/api/audit/stats", {
+            const response = await fetch(`${API_BASE_URL}/api/audit/stats`, {
                 headers: {
                     "Authorization": `Bearer ${localStorage.getItem("authToken")}`
                 }
@@ -290,7 +295,7 @@
     // Afficher les détails d'une suppression
     async function showDeletionDetail(deletionId) {
         try {
-            const response = await fetch(`/api/audit/deletions/${deletionId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/audit/deletions/${deletionId}`, {
                 headers: {
                     "Authorization": `Bearer ${localStorage.getItem("authToken")}`
                 }
