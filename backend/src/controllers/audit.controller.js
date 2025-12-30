@@ -185,3 +185,54 @@ export async function getDeletionStats(req, res) {
     return res.status(500).json({ error: "Internal server error" });
   }
 }
+
+/**
+ * Supprime un enregistrement d'audit (managers only)
+ */
+export async function deleteDeletionRecord(req, res) {
+  try {
+    // Vérifier que c'est un gérant
+    if (req.user.role !== "manager") {
+      return res.status(403).json({ error: "Only managers can delete audit records" });
+    }
+
+    const { id } = req.params;
+    const organizationId = req.user.organizationId;
+
+    if (!id) {
+      return res.status(400).json({ error: "Deletion ID is required" });
+    }
+
+    // Vérifier que le record existe et appartient à l'organisation
+    const { data: existing, error: getError } = await supabase
+      .from("deletion_audit")
+      .select("id")
+      .eq("id", id)
+      .eq("organization_id", organizationId)
+      .single();
+
+    if (getError || !existing) {
+      return res.status(404).json({ error: "Deletion record not found" });
+    }
+
+    // Supprimer le record
+    const { error: deleteError } = await supabase
+      .from("deletion_audit")
+      .delete()
+      .eq("id", id)
+      .eq("organization_id", organizationId);
+
+    if (deleteError) {
+      console.error("❌ Erreur lors de la suppression:", deleteError);
+      return res.status(500).json({ error: "Failed to delete audit record" });
+    }
+
+    return res.json({ 
+      message: "Deletion record deleted successfully",
+      id: id 
+    });
+  } catch (error) {
+    console.error("❌ Erreur deleteDeletionRecord:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}

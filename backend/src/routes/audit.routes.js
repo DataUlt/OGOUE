@@ -2,7 +2,8 @@ import express from "express";
 import { 
   getDeletionHistoryList, 
   getDeletionDetail, 
-  getDeletionStats 
+  getDeletionStats,
+  deleteDeletionRecord
 } from "../controllers/audit.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 
@@ -26,5 +27,11 @@ router.get("/deletions/:id", authMiddleware, getDeletionDetail);
  * Récupère les statistiques sur les suppressions
  */
 router.get("/stats", authMiddleware, getDeletionStats);
+
+/**
+ * DELETE /api/audit/deletions/:id
+ * Supprime un enregistrement d'audit (managers only)
+ */
+router.delete("/deletions/:id", authMiddleware, deleteDeletionRecord);
 
 export default router;
