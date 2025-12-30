@@ -77,8 +77,7 @@ export async function getDeletionHistory(organizationId, filters = {}) {
         deletion_reason,
         deleted_at,
         deleted_by_user_id,
-        deleted_user_first_name,
-        deleted_user_last_name
+        deleted_user_first_name
       `)
       .eq("organization_id", organizationId)
       .order("deleted_at", { ascending: false });
