@@ -1,0 +1,39 @@
+# .gitignore pour le frontend OGOUÉ
+
+# Environnement
+.env
+.env.local
+.env.*.local
+
+# Dépendances
+node_modules/
+package-lock.json
+yarn.lock
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Build/Dist (si vous en avez besoin)
+dist/
+build/
+
+# Fichiers temporaires
+*.swp
+*.swo
+*~
+.tmp/
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
