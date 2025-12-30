@@ -1,6 +1,7 @@
 import { supabase } from "../db/supabase.js";
 import { z } from "zod";
 import { uploadFileToSupabase, deleteFileFromSupabase } from "../utils/supabase-storage.js";
+import { logDeletion } from "../utils/deletion-audit.js";
 
 const listSchema = z.object({
   month: z.coerce.number().int().min(1).max(12),
@@ -203,12 +204,19 @@ export async function updateSaleReceipt(req, res) {
 export async function deleteSale(req, res) {
   try {
     const { id } = req.params;
+    const { reason } = req.body;
     const organizationId = req.user.organizationId;
+    const userId = req.user.id;
 
-    // Récupérer l'enregistrement avant suppression pour connaître le chemin du fichier
+    // Vérifier que le motif est fourni
+    if (!reason || reason.trim().length === 0) {
+      return res.status(400).json({ error: "Deletion reason is required" });
+    }
+
+    // Récupérer l'enregistrement avant suppression
     const { data: sale, error: fetchError } = await supabase
       .from("sales")
-      .select("receipt_storage_path")
+      .select("*")
       .eq("id", id)
       .eq("organization_id", organizationId)
       .single();
@@ -216,6 +224,21 @@ export async function deleteSale(req, res) {
     if (fetchError || !sale) {
       console.error("Vente non trouvée:", fetchError);
       return res.status(404).json({ error: "Sale not found" });
+    }
+
+    // Enregistrer la suppression dans l'audit
+    try {
+      await logDeletion({
+        organizationId,
+        userId,
+        recordType: "sale",
+        recordId: id,
+        recordData: sale,
+        reason: reason.trim()
+      });
+    } catch (auditError) {
+      console.error("❌ Erreur audit:", auditError);
+      return res.status(500).json({ error: "Failed to log deletion" });
     }
 
     // Supprimer le fichier de Supabase Storage s'il existe
