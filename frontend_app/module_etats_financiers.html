@@ -201,7 +201,7 @@
                 </div>
 
                 <!-- Cartes des états -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
 
                     <!-- Compte de Résultat -->
                     <div class="flex flex-col gap-4 p-5 bg-card-light dark:bg-card-dark rounded-xl shadow-sm">
@@ -259,6 +259,20 @@
                         <button id="generateDepensesBtn" class="rounded-lg h-9 px-4 bg-primary/20 text-sm font-bold">Générer l'aperçu</button>
                     </div>
 
+                    <!-- Historique des suppressions -->
+                    <div class="flex flex-col gap-4 p-5 bg-card-light dark:bg-card-dark rounded-xl shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-primary/20 p-2 rounded-lg">
+                                <span class="material-symbols-outlined text-primary">delete_sweep</span>
+                            </div>
+                            <h2 class="text-lg font-bold">Historique suppressions</h2>
+                        </div>
+                        <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary flex-grow">
+                            Suivi des suppressions avec motifs et agents.
+                        </p>
+                        <button id="viewSuppressionHistoryBtn" class="rounded-lg h-9 px-4 bg-primary/20 text-sm font-bold">Consulter l'historique</button>
+                    </div>
+
                 </div>
 
             </div>
@@ -279,6 +293,20 @@
     document.addEventListener('DOMContentLoaded', () => {
         if (window.OGOUE?.initTopbarActions) {
             window.OGOUE.initTopbarActions();
+        }
+
+        // Bouton pour accéder à l'historique des suppressions
+        const viewSuppressionHistoryBtn = document.getElementById('viewSuppressionHistoryBtn');
+        if (viewSuppressionHistoryBtn) {
+            viewSuppressionHistoryBtn.addEventListener('click', () => {
+                // Vérifier si l'utilisateur est manager
+                const userRole = localStorage.getItem('userRole');
+                if (userRole !== 'manager') {
+                    alert('Seuls les gérants peuvent accéder à l\'historique des suppressions.');
+                    return;
+                }
+                window.location.href = 'module_historique_suppressions.html';
+            });
         }
     });
 </script>

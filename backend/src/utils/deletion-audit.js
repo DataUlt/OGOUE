@@ -62,7 +62,8 @@ export async function logDeletion({
  */
 export async function getDeletionHistory(organizationId, filters = {}) {
   try {
-    let query = supabase
+    // Query avec LEFT JOIN manuel pour récupérer les infos de l'utilisateur
+    const { data, error } = await supabase
       .from("deletion_audit")
       .select(`
         id,
@@ -71,33 +72,53 @@ export async function getDeletionHistory(organizationId, filters = {}) {
         deleted_record_data,
         deletion_reason,
         deleted_at,
-        deleted_by_user_id,
-        users!deleted_by_user_id (
-          id,
-          first_name,
-          last_name,
-          email
-        )
+        deleted_by_user_id
       `)
       .eq("organization_id", organizationId)
       .order("deleted_at", { ascending: false });
-
-    // Appliquer les filtres
-    if (filters.recordType) {
-      query = query.eq("deleted_record_type", filters.recordType);
-    }
-
-    const { data, error } = await query;
 
     if (error) {
       console.error("❌ Erreur lors de la récupération de l'historique:", error);
       throw error;
     }
 
-    // Filtrer par mois/année si spécifiés
+    // Pour chaque suppression, récupérer les infos de l'utilisateur
     let results = data || [];
+    
+    // Enrichir les résultats avec les infos utilisateur
+    const enrichedResults = await Promise.all(
+      results.map(async (record) => {
+        if (record.deleted_by_user_id) {
+          // Chercher l'utilisateur par son auth_id (qui correspond à deleted_by_user_id)
+          const { data: userRecord } = await supabase
+            .from("users")
+            .select("id, first_name, last_name, email")
+            .eq("auth_id", record.deleted_by_user_id)
+            .maybeSingle();
+          
+          return {
+            ...record,
+            users: userRecord ? {
+              id: userRecord.id,
+              first_name: userRecord.first_name,
+              last_name: userRecord.last_name,
+              email: userRecord.email
+            } : null
+          };
+        }
+        return { ...record, users: null };
+      })
+    );
+
+    // Appliquer les filtres
+    let filtered = enrichedResults;
+    
+    if (filters.recordType) {
+      filtered = filtered.filter(r => r.deleted_record_type === filters.recordType);
+    }
+
     if (filters.month && filters.year) {
-      results = results.filter(record => {
+      filtered = filtered.filter(record => {
         const date = new Date(record.deleted_at);
         return (
           date.getMonth() + 1 === filters.month &&
@@ -106,7 +127,7 @@ export async function getDeletionHistory(organizationId, filters = {}) {
       });
     }
 
-    return results;
+    return filtered;
   } catch (error) {
     console.error("❌ getDeletionHistory erreur:", error);
     throw error;
