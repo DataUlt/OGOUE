@@ -191,6 +191,9 @@
       ? 'http://localhost:3001'
       : 'https://api.ogoue.com';
 
+    // Initialiser les variables globales
+    let currentDeletions = [];
+
     // Récupérer les données d'audit
     async function loadDeletionHistory(filters = {}) {
         try {
@@ -239,11 +242,12 @@
     }
 
     // Afficher les suppressions dans le tableau
-    function renderDeletions(deletions) {
+    function renderDeletions(deletions = []) {
+        deletions = deletions || [];
         currentDeletions = deletions; // Store for later reference in delete function
         const tbody = document.getElementById("deletions-tbody");
 
-        if (deletions.length === 0) {
+        if (!deletions || deletions.length === 0) {
             tbody.innerHTML = `
                 <tr>
                     <td colspan="5" class="px-6 py-8 text-center text-text-light-secondary dark:text-text-dark-secondary">
@@ -264,12 +268,13 @@
                     </span>
                 </td>
                 <td class="px-6 py-4 text-text-light-secondary dark:text-text-dark-secondary">
-                    ${new Date(deletion.date).toLocaleDateString('fr-FR', { 
+                    ${new Date(deletion.date).toLocaleString('fr-FR', { 
                         year: 'numeric', 
                         month: 'short', 
                         day: 'numeric',
                         hour: '2-digit',
-                        minute: '2-digit'
+                        minute: '2-digit',
+                        hour12: false
                     })}
                 </td>
                 <td class="px-6 py-4">
@@ -321,13 +326,14 @@
 
                         <div>
                             <p class="text-sm font-semibold text-text-light-secondary dark:text-text-dark-secondary">Date</p>
-                            <p class="text-lg">${new Date(deletion.date).toLocaleDateString('fr-FR', { 
+                            <p class="text-lg">${new Date(deletion.date).toLocaleString('fr-FR', { 
                                 year: 'numeric', 
                                 month: 'long', 
                                 day: 'numeric',
                                 hour: '2-digit',
                                 minute: '2-digit',
-                                second: '2-digit'
+                                second: '2-digit',
+                                hour12: false
                             })}</p>
                         </div>
 
