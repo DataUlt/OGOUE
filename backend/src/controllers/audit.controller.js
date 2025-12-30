@@ -33,11 +33,12 @@ export async function getDeletionHistoryList(req, res) {
       type: record.deleted_record_type,
       recordId: record.deleted_record_id,
       motif: record.deletion_reason,
-      supprimePar: record.users ? {
-        id: record.users.id,
+      supprimePar: record.deleted_user_first_name ? {
+        nom: record.deleted_user_first_name,
+      } : (record.users ? {
         nom: `${record.users.first_name} ${record.users.last_name}`,
         email: record.users.email,
-      } : null,
+      } : null),
       date: record.deleted_at,
       donnees: record.deleted_record_data,
     }));
@@ -81,7 +82,8 @@ export async function getDeletionDetail(req, res) {
         deleted_record_data,
         deletion_reason,
         deleted_at,
-        deleted_by_user_id
+        deleted_by_user_id,
+        deleted_user_first_name
       `)
       .eq("id", id)
       .eq("organization_id", organizationId)
@@ -91,9 +93,13 @@ export async function getDeletionDetail(req, res) {
       return res.status(404).json({ error: "Deletion record not found" });
     }
 
-    // Récupérer les infos de l'utilisateur manuellement
+    // Récupérer les infos de l'utilisateur manuellement si pas stockées
     let userInfo = null;
-    if (record.deleted_by_user_id) {
+    if (record.deleted_user_first_name) {
+      userInfo = {
+        nom: record.deleted_user_first_name
+      };
+    } else if (record.deleted_by_user_id) {
       const { data: userRecord } = await supabase
         .from("users")
         .select("id, first_name, last_name, email")
