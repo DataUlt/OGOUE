@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .glass-overlay {
+    @apply bg-white/5 backdrop-blur-[10px];
+  }
+}

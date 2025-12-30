@@ -5,7 +5,13 @@
   "private": true,
   "scripts": {
     "serve": "npx http-server . -p 8080 -c-1",
-    "build": "echo 'Static frontend - no build needed'"
+    "build:css": "tailwindcss -i ./css/input.css -o ./css/output.css --minify",
+    "build": "npm run build:css"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.3.0",
+    "postcss": "^8.4.31",
+    "autoprefixer": "^10.4.16"
   },
   "keywords": [
     "ogoue",

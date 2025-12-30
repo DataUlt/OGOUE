@@ -19,10 +19,19 @@ const allowedOrigins = (process.env.CORS_ORIGIN || "")
 
 console.info && console.info('CORS allowedOrigins:', allowedOrigins);
 
+// Get CORS origins from env var, with fallback for dev
+const corsOriginString = process.env.CORS_ORIGIN || "https://www.ogoue.com,https://ogoue-frontend.netlify.app,http://localhost:3000";
+const allowedOrigins = corsOriginString
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+console.info('✅ CORS allowedOrigins:', allowedOrigins);
+
 app.use(
   cors({
-    origin: "*", // Allow all for now - debug CORS issue
-    credentials: false,
+    origin: allowedOrigins,
+    credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })

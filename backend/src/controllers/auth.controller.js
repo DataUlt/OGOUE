@@ -323,17 +323,36 @@ export async function loginAgent(req, res) {
     });
 
     const parsed = agentLoginSchema.parse(req.body);
+    
+    // DEBUG: Log received code
+    console.log("🔍 [DEBUG] Received accessCode:", JSON.stringify(parsed.accessCode));
+    console.log("🔍 [DEBUG] Code length:", parsed.accessCode.length);
+    console.log("🔍 [DEBUG] Code charCodes:", [...parsed.accessCode].map(c => c.charCodeAt(0)));
 
     // Vérifier que le code d'accès est valide et actif
     const { data: agentRecord, error: agentError } = await supabase
       .from("agents")
-      .select("id, organization_id, first_name, is_active")
+      .select("id, organization_id, first_name, is_active, access_code")
       .eq("access_code", parsed.accessCode)
       .eq("is_active", true)
       .single();
 
     if (agentError || !agentRecord) {
-      console.error("Agent code invalid:", agentError);
+      console.error("❌ [DEBUG] Agent code invalid. Error:", agentError);
+      
+      // Additional debug: try to get ALL agents to compare
+      const { data: allAgents, error: allError } = await supabase
+        .from("agents")
+        .select("id, access_code, is_active");
+      
+      console.log("📋 [DEBUG] All agents in DB:", allAgents?.map(a => ({
+        id: a.id,
+        code: a.access_code,
+        active: a.is_active,
+        received: parsed.accessCode,
+        match: a.access_code === parsed.accessCode
+      })));
+      
       return res.status(401).json({ error: "Code d'accès invalide ou désactivé" });
     }
 
@@ -348,6 +367,12 @@ export async function loginAgent(req, res) {
       process.env.JWT_SECRET || "default_secret",
       { expiresIn: "24h" }
     );
+
+    console.log("✅ [DEBUG] Agent login successful:", {
+      id: agentRecord.id,
+      name: agentRecord.first_name,
+      code: agentRecord.access_code
+    });
 
     // Retourner le token et les infos utilisateur
     return res.json({
