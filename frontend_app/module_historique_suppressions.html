@@ -362,8 +362,60 @@
 
                         <div>
                             <p class="text-sm font-semibold text-text-light-secondary dark:text-text-dark-secondary mb-2">Données supprimées</p>
-                            <div class="p-3 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark overflow-x-auto">
-                                <pre class="text-xs whitespace-pre-wrap break-words">${JSON.stringify(deletion.donnees, null, 2)}</pre>
+                            <div class="p-3 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark">
+                                ${(() => {
+                                    // Champs à exclure
+                                    const fieldsToExclude = ['id', 'created_at', 'updated_at', 'receipt_url', 'organization_id', 'receipt_storage_path'];
+                                    
+                                    // Traduction des champs
+                                    const fieldNames = {
+                                        'amount': 'Montant',
+                                        'quantity': 'Quantité',
+                                        'sale_date': 'Date de vente',
+                                        'sale_type': 'Type de vente',
+                                        'description': 'Description',
+                                        'receipt_name': 'Nom du reçu',
+                                        'payment_method': 'Méthode de paiement',
+                                        'date': 'Date',
+                                        'category': 'Catégorie',
+                                        'beneficiary': 'Bénéficiaire',
+                                        'notes': 'Notes'
+                                    };
+                                    
+                                    // Filtrer et formater les données
+                                    const filteredData = Object.entries(deletion.donnees)
+                                        .filter(([key]) => !fieldsToExclude.includes(key))
+                                        .map(([key, value]) => {
+                                            const displayKey = fieldNames[key] || key;
+                                            let displayValue = value;
+                                            
+                                            // Formater les URLs
+                                            if (typeof value === 'string' && value.startsWith('http')) {
+                                                displayValue = `<a href="${value}" target="_blank" class="text-primary hover:underline">Voir le fichier</a>`;
+                                            }
+                                            // Formater les dates
+                                            else if (key.includes('date') && value) {
+                                                displayValue = new Date(value).toLocaleDateString('fr-FR');
+                                            }
+                                            // Formater les montants
+                                            else if (key.includes('amount') && typeof value === 'number') {
+                                                displayValue = value.toLocaleString('fr-FR', { style: 'currency', currency: 'XAF' });
+                                            }
+                                            
+                                            return { key: displayKey, value: displayValue };
+                                        });
+                                    
+                                    return `
+                                        <div class="space-y-2">
+                                            ${filteredData.map(({ key, value }) => `
+                                                <div class="flex justify-between items-start border-b border-border-light dark:border-border-dark pb-2">
+                                                    <span class="font-medium text-text-light-secondary dark:text-text-dark-secondary">${key}:</span>
+                                                    <span class="text-right max-w-xs">${value}</span>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    `;
+                                })()}
                             </div>
                         </div>
                     </div>
