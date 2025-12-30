@@ -355,7 +355,7 @@
         }
       </td>
       <td class="px-6 py-4">
-        ${vente.agent_name || vente.created_by_name || "-"}
+        ${vente.created_by_name || vente.agent_name || "-"}
       </td>
       <td class="px-6 py-4">
         ${
@@ -555,7 +555,7 @@
       if (!ventesAujourdhui.length) {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td colspan="9" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+          <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
             Aucune vente enregistrée pour aujourd'hui.
           </td>
         `;

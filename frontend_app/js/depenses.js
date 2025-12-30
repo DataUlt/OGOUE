@@ -296,6 +296,9 @@
         }
       </td>
       <td class="px-6 py-4">
+        ${depense.created_by_name || depense.agent_name || "-"}
+      </td>
+      <td class="px-6 py-4">
         ${
           depense.justificatif
             ? `<span class="font-medium text-primary cursor-pointer hover:underline justificatif-link" data-file="${depense.justificatif}" data-url="${depense.justificatifUrl || ''}">${depense.justificatif}</span>`
