@@ -12,7 +12,7 @@ import { authMiddleware } from "./middleware/auth.middleware.js";
 
 export const app = express();
 
-// Use a function for CORS origin checking
+// Use a function for CORS origin checking with regex fallback
 const corsOptions = {
   origin: function (origin, callback) {
     console.log('🔍 [CORS] Incoming origin:', origin);
@@ -30,15 +30,25 @@ const corsOptions = {
       .map((o) => o.trim())
       .filter(Boolean);
     
-    // Check if origin is in allowed list
+    // Check explicit list first
     if (allowedOrigins.includes(origin)) {
-      console.log('✅ [CORS] Origin allowed:', origin);
-      callback(null, true);
-    } else {
-      console.log('❌ [CORS] Origin NOT allowed:', origin);
-      console.log('📋 [CORS] Allowed origins:', allowedOrigins);
-      callback(new Error('CORS policy: origin ' + origin + ' not allowed'));
+      console.log('✅ [CORS] Origin allowed (explicit):', origin);
+      return callback(null, true);
     }
+    
+    // Fallback: Allow any ogoue.com domain or localhost
+    const ogoueRegex = /^https?:\/\/([a-z0-9-]*\.)*ogoue\.com(:\d+)?$/i;
+    const localhostRegex = /^https?:\/\/localhost(:\d+)?$/i;
+    
+    if (ogoueRegex.test(origin) || localhostRegex.test(origin)) {
+      console.log('✅ [CORS] Origin allowed (regex):', origin);
+      return callback(null, true);
+    }
+    
+    console.log('❌ [CORS] Origin NOT allowed:', origin);
+    console.log('📋 [CORS] Allowed origins list:', allowedOrigins);
+    console.log('📋 [CORS] Allowed by regex: *.ogoue.com or localhost');
+    callback(new Error('CORS policy: origin ' + origin + ' not allowed'));
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
