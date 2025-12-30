@@ -196,7 +196,7 @@
 
             const response = await fetch(`/api/audit/deletions?${params}`, {
                 headers: {
-                    "Authorization": `Bearer ${localStorage.getItem("token")}`
+                    "Authorization": `Bearer ${localStorage.getItem("authToken")}`
                 }
             });
 
@@ -218,7 +218,7 @@
         try {
             const response = await fetch("/api/audit/stats", {
                 headers: {
-                    "Authorization": `Bearer ${localStorage.getItem("token")}`
+                    "Authorization": `Bearer ${localStorage.getItem("authToken")}`
                 }
             });
 
@@ -292,7 +292,7 @@
         try {
             const response = await fetch(`/api/audit/deletions/${deletionId}`, {
                 headers: {
-                    "Authorization": `Bearer ${localStorage.getItem("token")}`
+                    "Authorization": `Bearer ${localStorage.getItem("authToken")}`
                 }
             });
 

@@ -156,7 +156,7 @@ export class DeletionAuditManager {
               method: "DELETE",
               headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
               },
               body: JSON.stringify({ reason }),
             });
