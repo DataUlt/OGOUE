@@ -21,14 +21,33 @@ const allowedOrigins = corsOriginString
 
 console.info('✅ CORS allowedOrigins:', allowedOrigins);
 
-app.use(
-  cors({
-    origin: allowedOrigins,
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+// CORS configuration with function for better debugging
+const corsOptions = {
+  origin: function (origin, callback) {
+    console.log('🔍 [CORS] Incoming origin:', origin);
+    
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) {
+      console.log('✅ [CORS] No origin (accepted)');
+      return callback(null, true);
+    }
+    
+    const isAllowed = allowedOrigins.includes(origin);
+    
+    if (isAllowed) {
+      console.log('✅ [CORS] Origin accepted:', origin);
+      callback(null, true);
+    } else {
+      console.error('❌ [CORS] Origin blocked:', origin);
+      callback(new Error(`CORS policy: origin ${origin} not allowed`));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
 
 // make sure preflight is handled
 app.options("*", cors());
