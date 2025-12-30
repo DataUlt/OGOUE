@@ -3,7 +3,7 @@
 
 [build]
   # Dossier racine du projet (pas de build process, fichiers statiques)
-  publish = "frontend"
+  publish = "."
   command = "echo Deploying static frontend"
 
 # Configuration des redirects pour SPA (Single Page Application)
