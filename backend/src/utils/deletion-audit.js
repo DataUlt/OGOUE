@@ -126,13 +126,21 @@ export async function getDeletionHistory(organizationId, filters = {}) {
       filtered = filtered.filter(r => r.deleted_record_type === filters.recordType);
     }
 
-    if (filters.month && filters.year) {
+    if (filters.month || filters.year) {
       filtered = filtered.filter(record => {
         const date = new Date(record.deleted_at);
-        return (
-          date.getMonth() + 1 === filters.month &&
-          date.getFullYear() === filters.year
-        );
+        
+        // Filtrer par mois si spécifié
+        if (filters.month && date.getMonth() + 1 !== filters.month) {
+          return false;
+        }
+        
+        // Filtrer par année si spécifiée
+        if (filters.year && date.getFullYear() !== filters.year) {
+          return false;
+        }
+        
+        return true;
       });
     }
 
