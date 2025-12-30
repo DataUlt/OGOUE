@@ -47,6 +47,21 @@ const corsOptions = {
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
+// TEMP DEBUG MIDDLEWARE: force CORS headers for all responses
+// NOTE: garder uniquement pour debug rapide, retirer une fois résolu
+app.use((req, res, next) => {
+  const origin = req.headers.origin || '*';
+  res.setHeader('Access-Control-Allow-Origin', origin);
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+  next();
+});
+
+// Apply cors with our options as well (keeps existing behavior)
 app.use(cors(corsOptions));
 
 // Handle preflight with same options
