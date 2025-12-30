@@ -484,14 +484,27 @@
 
     // Événements des filtres
     document.getElementById("filter-btn").addEventListener("click", async () => {
-        const filters = {
-            recordType: document.getElementById("type-filter").value,
-            month: document.getElementById("month-filter").value ? parseInt(document.getElementById("month-filter").value) : undefined,
-            year: document.getElementById("year-filter").value ? parseInt(document.getElementById("year-filter").value) : undefined,
-        };
+        try {
+            const filters = {
+                recordType: document.getElementById("type-filter").value || "",
+                month: document.getElementById("month-filter").value ? parseInt(document.getElementById("month-filter").value) : undefined,
+                year: document.getElementById("year-filter").value ? parseInt(document.getElementById("year-filter").value) : undefined,
+            };
 
-        const deletions = await loadDeletionHistory(filters);
-        renderDeletions(deletions);
+            console.log("Filtres appliqués:", filters);
+            
+            const deletions = await loadDeletionHistory(filters);
+            console.log("Résultats après filtrage:", deletions);
+            
+            currentDeletions = deletions;
+            renderDeletions(deletions);
+            
+            // Recharger aussi les statistiques
+            await loadStats();
+        } catch (error) {
+            console.error("Erreur lors de l'application des filtres:", error);
+            alert("Erreur lors de l'application des filtres");
+        }
     });
 
     // Charger au démarrage
