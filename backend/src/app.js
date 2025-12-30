@@ -12,13 +12,6 @@ import { authMiddleware } from "./middleware/auth.middleware.js";
 
 export const app = express();
 
-const allowedOrigins = (process.env.CORS_ORIGIN || "")
-  .split(",")
-  .map((o) => o.trim().toLowerCase())
-  .filter(Boolean);
-
-console.info && console.info('CORS allowedOrigins:', allowedOrigins);
-
 // Get CORS origins from env var, with fallback for dev
 const corsOriginString = process.env.CORS_ORIGIN || "https://www.ogoue.com,https://ogoue-frontend.netlify.app,http://localhost:3000";
 const allowedOrigins = corsOriginString
