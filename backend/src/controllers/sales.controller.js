@@ -29,7 +29,7 @@ export async function listSales(req, res) {
     // Récupérer les ventes avec Supabase
     const { data: rows, error } = await supabase
       .from("sales")
-      .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, receipt_url, created_at")
+      .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, receipt_url, created_at, created_by")
       .eq("organization_id", organizationId)
       .order("sale_date", { ascending: false })
       .order("created_at", { ascending: false });
@@ -40,23 +40,54 @@ export async function listSales(req, res) {
     }
 
     // Filtrer par mois et année en JavaScript
-    const transformedSales = (rows || [])
-      .filter(row => {
-        const date = new Date(row.sale_date);
-        return date.getMonth() + 1 === month && date.getFullYear() === year;
-      })
-      .map(row => ({
-        id: row.id,
-        date: row.sale_date,
-        description: row.description,
-        type_vente: row.sale_type,
-        moyen_paiement: row.payment_method,
-        quantite: row.quantity,
-        montant: row.amount,
-        justificatif: row.receipt_name,
-        justificatifUrl: row.receipt_url,
-        created_at: row.created_at
-      }));
+    const transformedSales = await Promise.all(
+      (rows || [])
+        .filter(row => {
+          const date = new Date(row.sale_date);
+          return date.getMonth() + 1 === month && date.getFullYear() === year;
+        })
+        .map(async (row) => {
+          // Récupérer le prénom de l'agent
+          let agentName = "-";
+          if (row.created_by) {
+            // Chercher dans agents
+            const { data: agent } = await supabase
+              .from("agents")
+              .select("first_name")
+              .eq("user_id", row.created_by)
+              .maybeSingle();
+            
+            if (agent) {
+              agentName = agent.first_name || "-";
+            } else {
+              // Chercher dans users
+              const { data: user } = await supabase
+                .from("users")
+                .select("first_name")
+                .eq("id", row.created_by)
+                .maybeSingle();
+              
+              if (user) {
+                agentName = user.first_name || "-";
+              }
+            }
+          }
+
+          return {
+            id: row.id,
+            date: row.sale_date,
+            description: row.description,
+            type_vente: row.sale_type,
+            moyen_paiement: row.payment_method,
+            quantite: row.quantity,
+            montant: row.amount,
+            justificatif: row.receipt_name,
+            justificatifUrl: row.receipt_url,
+            created_at: row.created_at,
+            agent_name: agentName
+          };
+        })
+    );
     
     return res.json({ sales: transformedSales });
   } catch (error) {
