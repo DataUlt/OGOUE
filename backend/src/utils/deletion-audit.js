@@ -9,6 +9,8 @@ import { supabase } from "../db/supabase.js";
  * @param {string} params.recordId - ID du record supprimé
  * @param {Object} params.recordData - Données complètes du record supprimé
  * @param {string} params.reason - Motif de la suppression
+ * @param {string} params.userFirstName - Prénom de l'utilisateur (optional)
+ * @param {string} params.userLastName - Nom de l'utilisateur (optional)
  * @returns {Promise<Object>} Résultat de l'insertion
  */
 export async function logDeletion({
@@ -17,7 +19,8 @@ export async function logDeletion({
   recordType,
   recordId,
   recordData,
-  reason
+  reason,
+  userFirstName
 }) {
   try {
     if (!organizationId || !userId || !recordType || !recordId || !reason) {
@@ -34,6 +37,7 @@ export async function logDeletion({
           deleted_record_data: recordData,
           deleted_by_user_id: userId,
           deletion_reason: reason,
+          deleted_user_first_name: userFirstName,
         }
       ])
       .select();
@@ -72,7 +76,9 @@ export async function getDeletionHistory(organizationId, filters = {}) {
         deleted_record_data,
         deletion_reason,
         deleted_at,
-        deleted_by_user_id
+        deleted_by_user_id,
+        deleted_user_first_name,
+        deleted_user_last_name
       `)
       .eq("organization_id", organizationId)
       .order("deleted_at", { ascending: false });
@@ -82,31 +88,35 @@ export async function getDeletionHistory(organizationId, filters = {}) {
       throw error;
     }
 
-    // Pour chaque suppression, récupérer les infos de l'utilisateur
+    // Pour chaque suppression, chercher les infos de l'utilisateur si non stockées
     let results = data || [];
     
-    // Enrichir les résultats avec les infos utilisateur
     const enrichedResults = await Promise.all(
       results.map(async (record) => {
-        if (record.deleted_by_user_id) {
-          // Chercher l'utilisateur par son auth_id (qui correspond à deleted_by_user_id)
+        let userFirstName = record.deleted_user_first_name;
+        let userLastName = record.deleted_user_last_name;
+
+        // Si le nom n'est pas stocké, chercher dans users par auth_id
+        if (!userFirstName && !userLastName && record.deleted_by_user_id) {
           const { data: userRecord } = await supabase
             .from("users")
-            .select("id, first_name, last_name, email")
+            .select("first_name, last_name, email")
             .eq("auth_id", record.deleted_by_user_id)
             .maybeSingle();
           
-          return {
-            ...record,
-            users: userRecord ? {
-              id: userRecord.id,
-              first_name: userRecord.first_name,
-              last_name: userRecord.last_name,
-              email: userRecord.email
-            } : null
-          };
+          if (userRecord) {
+            userFirstName = userRecord.first_name;
+            userLastName = userRecord.last_name;
+          }
         }
-        return { ...record, users: null };
+
+        return {
+          ...record,
+          users: userFirstName || userLastName ? {
+            first_name: userFirstName,
+            last_name: userLastName,
+          } : null
+        };
       })
     );
 

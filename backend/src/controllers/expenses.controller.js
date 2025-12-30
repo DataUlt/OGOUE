@@ -196,10 +196,37 @@ export async function deleteExpense(req, res) {
     const { reason } = req.body;
     const organizationId = req.user.organizationId;
     const userId = req.user.userId || req.user.sub;
+    const agentId = req.user.agentId;
+    const role = req.user.role;
 
     // Vérifier que le motif est fourni
     if (!reason || reason.trim().length === 0) {
       return res.status(400).json({ error: "Deletion reason is required" });
+    }
+
+    // Récupérer les infos de l'agent/utilisateur qui supprime
+    let userFirstName = null;
+
+    if (role === "agent" && agentId) {
+      // Chercher dans la table agents (seulement first_name)
+      const { data: agent } = await supabase
+        .from("agents")
+        .select("first_name")
+        .eq("id", agentId)
+        .maybeSingle();
+      if (agent) {
+        userFirstName = agent.first_name;
+      }
+    } else if (role === "manager" && userId) {
+      // Chercher dans la table users
+      const { data: user } = await supabase
+        .from("users")
+        .select("first_name, last_name")
+        .eq("id", userId)
+        .maybeSingle();
+      if (user) {
+        userFirstName = `${user.first_name} ${user.last_name}`;
+      }
     }
 
     // Récupérer l'enregistrement avant suppression
@@ -223,7 +250,8 @@ export async function deleteExpense(req, res) {
         recordType: "expense",
         recordId: id,
         recordData: expense,
-        reason: reason.trim()
+        reason: reason.trim(),
+        userFirstName
       });
     } catch (auditError) {
       console.error("❌ Erreur audit:", auditError);
