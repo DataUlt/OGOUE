@@ -1,0 +1,175 @@
+import { supabase } from "../db/supabase.js";
+import { getDeletionHistory } from "../utils/deletion-audit.js";
+import { z } from "zod";
+
+const historyQuerySchema = z.object({
+  recordType: z.string().optional(),
+  month: z.coerce.number().int().min(1).max(12).optional(),
+  year: z.coerce.number().int().min(2000).max(2100).optional(),
+});
+
+/**
+ * Récupère l'historique des suppressions pour un gérant
+ */
+export async function getDeletionHistoryList(req, res) {
+  try {
+    // Vérifier que c'est un gérant
+    if (req.user.role !== "manager") {
+      return res.status(403).json({ error: "Only managers can view deletion history" });
+    }
+
+    const parsed = historyQuerySchema.parse(req.query);
+    const organizationId = req.user.organizationId;
+
+    const history = await getDeletionHistory(organizationId, {
+      recordType: parsed.recordType,
+      month: parsed.month,
+      year: parsed.year,
+    });
+
+    // Transformer les données
+    const transformed = history.map(record => ({
+      id: record.id,
+      type: record.deleted_record_type,
+      recordId: record.deleted_record_id,
+      motif: record.deletion_reason,
+      supprimePar: record.users ? {
+        id: record.users.id,
+        nom: `${record.users.first_name} ${record.users.last_name}`,
+        email: record.users.email,
+      } : null,
+      date: record.deleted_at,
+      donnees: record.deleted_record_data,
+    }));
+
+    return res.json({
+      history: transformed,
+      total: transformed.length,
+    });
+  } catch (error) {
+    console.error("❌ Erreur getDeletionHistoryList:", error);
+    if (error?.name === "ZodError") {
+      return res.status(400).json({ error: "Validation error", details: error.issues });
+    }
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+/**
+ * Récupère un seul enregistrement supprimé en détail
+ */
+export async function getDeletionDetail(req, res) {
+  try {
+    // Vérifier que c'est un gérant
+    if (req.user.role !== "manager") {
+      return res.status(403).json({ error: "Only managers can view deletion details" });
+    }
+
+    const { id } = req.params;
+    const organizationId = req.user.organizationId;
+
+    if (!id) {
+      return res.status(400).json({ error: "Deletion ID is required" });
+    }
+
+    const { data: record, error } = await supabase
+      .from("deletion_audit")
+      .select(`
+        id,
+        deleted_record_type,
+        deleted_record_id,
+        deleted_record_data,
+        deletion_reason,
+        deleted_at,
+        deleted_by_user_id,
+        users!deleted_by_user_id (
+          id,
+          first_name,
+          last_name,
+          email
+        )
+      `)
+      .eq("id", id)
+      .eq("organization_id", organizationId)
+      .single();
+
+    if (error || !record) {
+      return res.status(404).json({ error: "Deletion record not found" });
+    }
+
+    const transformed = {
+      id: record.id,
+      type: record.deleted_record_type,
+      recordId: record.deleted_record_id,
+      motif: record.deletion_reason,
+      supprimePar: record.users ? {
+        id: record.users.id,
+        nom: `${record.users.first_name} ${record.users.last_name}`,
+        email: record.users.email,
+      } : null,
+      date: record.deleted_at,
+      donnees: record.deleted_record_data,
+    };
+
+    return res.json(transformed);
+  } catch (error) {
+    console.error("❌ Erreur getDeletionDetail:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+/**
+ * Récupère des statistiques sur les suppressions
+ */
+export async function getDeletionStats(req, res) {
+  try {
+    // Vérifier que c'est un gérant
+    if (req.user.role !== "manager") {
+      return res.status(403).json({ error: "Only managers can view deletion stats" });
+    }
+
+    const organizationId = req.user.organizationId;
+
+    // Total suppressions par type
+    const { data: byType } = await supabase
+      .from("deletion_audit")
+      .select("deleted_record_type")
+      .eq("organization_id", organizationId);
+
+    // Suppressions par utilisateur
+    const { data: byUser } = await supabase
+      .from("deletion_audit")
+      .select(`
+        deleted_by_user_id,
+        users!deleted_by_user_id (
+          first_name,
+          last_name
+        )
+      `)
+      .eq("organization_id", organizationId);
+
+    // Calculer les stats
+    const typeStats = {};
+    (byType || []).forEach(record => {
+      typeStats[record.deleted_record_type] = 
+        (typeStats[record.deleted_record_type] || 0) + 1;
+    });
+
+    const userStats = {};
+    (byUser || []).forEach(record => {
+      const userName = record.users 
+        ? `${record.users.first_name} ${record.users.last_name}`
+        : "Unknown";
+      userStats[userName] = (userStats[userName] || 0) + 1;
+    });
+
+    return res.json({
+      totalDeletions: (byType || []).length,
+      byType: typeStats,
+      byUser: userStats,
+    });
+  } catch (error) {
+    console.error("❌ Erreur getDeletionStats:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}

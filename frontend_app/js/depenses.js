@@ -241,22 +241,31 @@
 
   async function deleteDepense(depenseId) {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/expenses/${depenseId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+      // Importer le module d'audit
+      const { default: DeletionAuditManager } = await import("./deletion-audit.js");
+
+      // Utiliser le système d'audit pour la suppression
+      const result = await DeletionAuditManager.deleteWithAudit(
+        `${API_BASE_URL}/api/expenses/${depenseId}`,
+        {
+          title: "Supprimer cette dépense ?",
+          message: "Vous êtes sur le point de supprimer cet enregistrement. Veuillez expliquer le motif de cette suppression.",
+          recordType: "expense",
+          recordId: depenseId
         }
-      });
+      );
 
-      if (!response.ok) {
-        throw new Error(`Erreur: ${response.status}`);
+      if (result.success) {
+        // Rafraîchir les tableaux
+        await renderCompactTable();
+        renderFullTable();
+
+        // Notification succès (optionnel)
+        console.log('✅ Dépense supprimée avec succès');
+      } else {
+        console.error('❌ Erreur suppression:', result.error);
+        alert(`Erreur: ${result.error}`);
       }
-
-      // Rafraîchir les tableaux
-      await renderCompactTable();
-      renderFullTable();
-
-      alert('Dépense supprimée avec succès');
     } catch (error) {
       console.error('Erreur lors de la suppression:', error);
       alert('Erreur lors de la suppression de la dépense');
@@ -317,9 +326,7 @@
     if (deleteBtn) {
       deleteBtn.addEventListener('click', () => {
         const depenseId = deleteBtn.getAttribute('data-id');
-        if (confirm('Êtes-vous sûr de vouloir supprimer cette dépense ?')) {
-          deleteDepense(depenseId);
-        }
+        deleteDepense(depenseId);
       });
     }
 

@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html class="light" lang="fr">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Historique des Suppressions - OGOUE</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap" rel="stylesheet"/>
+
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecc8",
+                        "secondary": "#27AE60",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#10221f",
+                        "card-light": "#FFFFFF",
+                        "card-dark": "#1E293B",
+                        "text-light-primary": "#0d1b19",
+                        "text-dark-primary": "#E2E8F0",
+                        "text-light-secondary": "#566573",
+                        "text-dark-secondary": "#94A3B8",
+                        "border-light": "#E2E8F0",
+                        "border-dark": "#334155",
+                        "success": "#27AE60",
+                        "danger": "#E74C3C",
+                    },
+                    fontFamily: { "display": ["Inter", "sans-serif"] },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.75rem",
+                        "xl": "1rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;
+        }
+    </style>
+</head>
+
+<body class="font-display bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary">
+<div class="relative flex min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+
+    <!-- HEADER -->
+    <header class="sticky top-0 z-10 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-[#cfe7e3] dark:border-gray-700">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between whitespace-nowrap py-3">
+                <div class="flex items-center gap-4 text-[#0d1b19] dark:text-white">
+                    <span class="material-symbols-outlined text-3xl text-primary">security_audit</span>
+                    <h2 class="text-lg font-bold">OGOUE - Audit</h2>
+                </div>
+                <button class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-primary/20 text-[#0d1b19] dark:bg-primary/30 dark:text-white"
+                     onclick="window.history.back()">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-grow">
+        <div class="container mx-auto px-4 py-8">
+            <div class="layout-content-container flex flex-col w-full max-w-7xl mx-auto flex-1 gap-6">
+
+                <!-- TITRE ET STATS -->
+                <div>
+                    <h1 class="text-3xl font-bold mb-2">Historique des Suppressions</h1>
+                    <p class="text-text-light-secondary dark:text-text-dark-secondary">
+                        Consultez tous les enregistrements supprimés avec les motifs et informations de suppression
+                    </p>
+                </div>
+
+                <!-- STATISTIQUES -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="rounded-xl border border-border-light dark:border-border-dark p-6 bg-card-light dark:bg-card-dark shadow-sm">
+                        <p class="text-text-light-secondary dark:text-text-dark-secondary text-sm font-medium mb-1">
+                            Total Suppressions
+                        </p>
+                        <p class="text-3xl font-bold text-primary" id="total-deletions">0</p>
+                    </div>
+                    <div class="rounded-xl border border-border-light dark:border-border-dark p-6 bg-card-light dark:bg-card-dark shadow-sm">
+                        <p class="text-text-light-secondary dark:text-text-dark-secondary text-sm font-medium mb-1">
+                            Dépenses Supprimées
+                        </p>
+                        <p class="text-3xl font-bold text-danger" id="expenses-deleted">0</p>
+                    </div>
+                    <div class="rounded-xl border border-border-light dark:border-border-dark p-6 bg-card-light dark:bg-card-dark shadow-sm">
+                        <p class="text-text-light-secondary dark:text-text-dark-secondary text-sm font-medium mb-1">
+                            Ventes Supprimées
+                        </p>
+                        <p class="text-3xl font-bold text-warning" id="sales-deleted">0</p>
+                    </div>
+                </div>
+
+                <!-- FILTRES -->
+                <div class="flex gap-4 flex-wrap">
+                    <select id="type-filter" class="px-4 py-2 rounded-lg border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark text-text-light-primary dark:text-text-dark-primary">
+                        <option value="">Tous les types</option>
+                        <option value="expense">Dépenses</option>
+                        <option value="sale">Ventes</option>
+                    </select>
+
+                    <select id="month-filter" class="px-4 py-2 rounded-lg border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark text-text-light-primary dark:text-text-dark-primary">
+                        <option value="">Tous les mois</option>
+                        <option value="1">Janvier</option>
+                        <option value="2">Février</option>
+                        <option value="3">Mars</option>
+                        <option value="4">Avril</option>
+                        <option value="5">Mai</option>
+                        <option value="6">Juin</option>
+                        <option value="7">Juillet</option>
+                        <option value="8">Août</option>
+                        <option value="9">Septembre</option>
+                        <option value="10">Octobre</option>
+                        <option value="11">Novembre</option>
+                        <option value="12">Décembre</option>
+                    </select>
+
+                    <select id="year-filter" class="px-4 py-2 rounded-lg border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark text-text-light-primary dark:text-text-dark-primary">
+                        <option value="">Toutes les années</option>
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
+                    </select>
+
+                    <button id="filter-btn" class="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors">
+                        Appliquer les filtres
+                    </button>
+                </div>
+
+                <!-- TABLEAU DES SUPPRESSIONS -->
+                <div class="rounded-xl border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark">
+                                    <th class="px-6 py-3 text-left font-semibold text-text-light-primary dark:text-text-dark-primary">
+                                        Type
+                                    </th>
+                                    <th class="px-6 py-3 text-left font-semibold text-text-light-primary dark:text-text-dark-primary">
+                                        Date
+                                    </th>
+                                    <th class="px-6 py-3 text-left font-semibold text-text-light-primary dark:text-text-dark-primary">
+                                        Supprimé par
+                                    </th>
+                                    <th class="px-6 py-3 text-left font-semibold text-text-light-primary dark:text-text-dark-primary">
+                                        Motif
+                                    </th>
+                                    <th class="px-6 py-3 text-center font-semibold text-text-light-primary dark:text-text-dark-primary">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="deletions-tbody">
+                                <tr>
+                                    <td colspan="5" class="px-6 py-8 text-center text-text-light-secondary dark:text-text-dark-secondary">
+                                        <span class="material-symbols-outlined inline-block mr-2">hourglass_empty</span>
+                                        Chargement...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+</div>
+
+<script>
+    // Récupérer les données d'audit
+    async function loadDeletionHistory(filters = {}) {
+        try {
+            const params = new URLSearchParams();
+            if (filters.recordType) params.append("recordType", filters.recordType);
+            if (filters.month) params.append("month", filters.month);
+            if (filters.year) params.append("year", filters.year);
+
+            const response = await fetch(`/api/audit/deletions?${params}`, {
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error("Erreur lors du chargement des données");
+            }
+
+            const data = await response.json();
+            return data.history || [];
+        } catch (error) {
+            console.error("❌ Erreur:", error);
+            alert("Erreur lors du chargement de l'historique");
+            return [];
+        }
+    }
+
+    // Charger les statistiques
+    async function loadStats() {
+        try {
+            const response = await fetch("/api/audit/stats", {
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
+                }
+            });
+
+            if (!response.ok) throw new Error("Erreur stats");
+
+            const data = await response.json();
+            document.getElementById("total-deletions").textContent = data.totalDeletions;
+            document.getElementById("expenses-deleted").textContent = data.byType?.expense || 0;
+            document.getElementById("sales-deleted").textContent = data.byType?.sale || 0;
+        } catch (error) {
+            console.error("❌ Erreur stats:", error);
+        }
+    }
+
+    // Afficher les suppressions dans le tableau
+    function renderDeletions(deletions) {
+        const tbody = document.getElementById("deletions-tbody");
+
+        if (deletions.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="px-6 py-8 text-center text-text-light-secondary dark:text-text-dark-secondary">
+                        <span class="material-symbols-outlined inline-block mr-2">search_off</span>
+                        Aucun enregistrement trouvé
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = deletions.map(deletion => `
+            <tr class="border-b border-border-light dark:border-border-dark hover:bg-background-light dark:hover:bg-background-dark transition-colors">
+                <td class="px-6 py-4">
+                    <span class="inline-block px-2 py-1 rounded-lg text-xs font-semibold
+                        ${deletion.type === 'expense' ? 'bg-danger/20 text-danger' : 'bg-warning/20 text-warning'}">
+                        ${deletion.type === 'expense' ? '💰 Dépense' : '📊 Vente'}
+                    </span>
+                </td>
+                <td class="px-6 py-4 text-text-light-secondary dark:text-text-dark-secondary">
+                    ${new Date(deletion.date).toLocaleDateString('fr-FR', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })}
+                </td>
+                <td class="px-6 py-4">
+                    ${deletion.supprimePar ? `
+                        <div class="font-medium">${deletion.supprimePar.nom}</div>
+                        <div class="text-xs text-text-light-secondary dark:text-text-dark-secondary">
+                            ${deletion.supprimePar.email}
+                        </div>
+                    ` : 'Utilisateur supprimé'}
+                </td>
+                <td class="px-6 py-4 text-text-light-secondary dark:text-text-dark-secondary max-w-xs truncate">
+                    ${deletion.motif}
+                </td>
+                <td class="px-6 py-4 text-center">
+                    <button class="inline-block px-3 py-1 rounded-lg bg-primary/20 text-primary hover:bg-primary/30 transition-colors"
+                         onclick="showDeletionDetail('${deletion.id}')">
+                        <span class="material-symbols-outlined text-lg">visibility</span>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // Afficher les détails d'une suppression
+    async function showDeletionDetail(deletionId) {
+        try {
+            const response = await fetch(`/api/audit/deletions/${deletionId}`, {
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
+                }
+            });
+
+            if (!response.ok) throw new Error("Erreur");
+
+            const deletion = await response.json();
+
+            const modal = document.createElement("div");
+            modal.className = "fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4";
+            modal.innerHTML = `
+                <div class="bg-card-light dark:bg-card-dark rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+                    <h2 class="text-2xl font-bold mb-4">Détails de la Suppression</h2>
+
+                    <div class="space-y-4 mb-6">
+                        <div>
+                            <p class="text-sm font-semibold text-text-light-secondary dark:text-text-dark-secondary">Type</p>
+                            <p class="text-lg">${deletion.type}</p>
+                        </div>
+
+                        <div>
+                            <p class="text-sm font-semibold text-text-light-secondary dark:text-text-dark-secondary">Date</p>
+                            <p class="text-lg">${new Date(deletion.date).toLocaleDateString('fr-FR', { 
+                                year: 'numeric', 
+                                month: 'long', 
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                second: '2-digit'
+                            })}</p>
+                        </div>
+
+                        <div>
+                            <p class="text-sm font-semibold text-text-light-secondary dark:text-text-dark-secondary">Supprimé par</p>
+                            <p class="text-lg font-medium">${deletion.supprimePar?.nom || 'Inconnu'}</p>
+                            <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary">${deletion.supprimePar?.email || ''}</p>
+                        </div>
+
+                        <div>
+                            <p class="text-sm font-semibold text-text-light-secondary dark:text-text-dark-secondary mb-2">Motif</p>
+                            <div class="p-3 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark">
+                                <p class="whitespace-pre-wrap">${deletion.motif}</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <p class="text-sm font-semibold text-text-light-secondary dark:text-text-dark-secondary mb-2">Données supprimées</p>
+                            <div class="p-3 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark overflow-x-auto">
+                                <pre class="text-xs whitespace-pre-wrap break-words">${JSON.stringify(deletion.donnees, null, 2)}</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button onclick="this.closest('.fixed').remove()" 
+                             class="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors">
+                            Fermer
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+            modal.addEventListener("click", (e) => {
+                if (e.target === modal) modal.remove();
+            });
+        } catch (error) {
+            console.error("❌ Erreur:", error);
+            alert("Erreur lors du chargement des détails");
+        }
+    }
+
+    // Événements des filtres
+    document.getElementById("filter-btn").addEventListener("click", async () => {
+        const filters = {
+            recordType: document.getElementById("type-filter").value,
+            month: document.getElementById("month-filter").value ? parseInt(document.getElementById("month-filter").value) : undefined,
+            year: document.getElementById("year-filter").value ? parseInt(document.getElementById("year-filter").value) : undefined,
+        };
+
+        const deletions = await loadDeletionHistory(filters);
+        renderDeletions(deletions);
+    });
+
+    // Charger au démarrage
+    (async () => {
+        await loadStats();
+        const deletions = await loadDeletionHistory();
+        renderDeletions(deletions);
+    })();
+</script>
+
+</body>
+</html>
