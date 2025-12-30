@@ -300,7 +300,10 @@
         if (viewSuppressionHistoryBtn) {
             viewSuppressionHistoryBtn.addEventListener('click', () => {
                 // Vérifier si l'utilisateur est manager
-                const userRole = localStorage.getItem('userRole');
+                const userStr = localStorage.getItem('user');
+                const user = userStr ? JSON.parse(userStr) : null;
+                const userRole = user ? user.role : null;
+                
                 if (userRole !== 'manager') {
                     alert('Seuls les gérants peuvent accéder à l\'historique des suppressions.');
                     return;
