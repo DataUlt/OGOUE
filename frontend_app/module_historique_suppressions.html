@@ -268,14 +268,19 @@
                     </span>
                 </td>
                 <td class="px-6 py-4 text-text-light-secondary dark:text-text-dark-secondary">
-                    ${new Date(deletion.date).toLocaleString('fr-FR', { 
-                        year: 'numeric', 
-                        month: 'short', 
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: false
-                    })}
+                    ${(() => {
+                        const date = new Date(deletion.date);
+                        // Ajouter 1 heure pour le fuseau horaire du Gabon (UTC+1)
+                        date.setHours(date.getHours() + 1);
+                        return date.toLocaleString('fr-FR', { 
+                            year: 'numeric', 
+                            month: 'short', 
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false
+                        });
+                    })()}
                 </td>
                 <td class="px-6 py-4">
                     ${deletion.supprimePar ? `
@@ -326,15 +331,20 @@
 
                         <div>
                             <p class="text-sm font-semibold text-text-light-secondary dark:text-text-dark-secondary">Date</p>
-                            <p class="text-lg">${new Date(deletion.date).toLocaleString('fr-FR', { 
-                                year: 'numeric', 
-                                month: 'long', 
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                                second: '2-digit',
-                                hour12: false
-                            })}</p>
+                            <p class="text-lg">${(() => {
+                                const date = new Date(deletion.date);
+                                // Ajouter 1 heure pour le fuseau horaire du Gabon (UTC+1)
+                                date.setHours(date.getHours() + 1);
+                                return date.toLocaleString('fr-FR', { 
+                                    year: 'numeric', 
+                                    month: 'long', 
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    second: '2-digit',
+                                    hour12: false
+                                });
+                            })()}</p>
                         </div>
 
                         <div>
