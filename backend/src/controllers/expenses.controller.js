@@ -195,7 +195,7 @@ export async function deleteExpense(req, res) {
     const { id } = req.params;
     const { reason } = req.body;
     const organizationId = req.user.organizationId;
-    const userId = req.user.id;
+    const userId = req.user.userId || req.user.sub;
 
     // Vérifier que le motif est fourni
     if (!reason || reason.trim().length === 0) {
