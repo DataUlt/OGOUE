@@ -49,8 +49,8 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// make sure preflight is handled
-app.options("*", cors());
+// Handle preflight with same options
+app.options("*", cors(corsOptions));
 
 app.use(express.json({ limit: "200kb" }));
 
