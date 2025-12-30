@@ -21,40 +21,8 @@ console.info && console.info('CORS allowedOrigins:', allowedOrigins);
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      try {
-        const normalizedOrigin = (origin || "").toLowerCase();
-        console.debug && console.debug('CORS check:', { origin, normalizedOrigin, allowedOrigins });
-
-        // allow server-to-server / curl / same-origin (no Origin header)
-        if (!origin) return callback(null, true);
-
-        // if no env var set, allow all (dev fallback)
-        if (allowedOrigins.length === 0) return callback(null, true);
-
-        // wildcard support
-        if (allowedOrigins.includes('*')) return callback(null, true);
-
-        // compare in lowercase - check both with and without protocol variations
-        const isAllowed = allowedOrigins.some(allowed => {
-          return normalizedOrigin === allowed || 
-                 normalizedOrigin.includes(allowed) ||
-                 allowed.includes(normalizedOrigin);
-        });
-
-        if (isAllowed) {
-          console.debug(`✅ CORS allowed for origin: ${origin}`);
-          return callback(null, true);
-        }
-
-        console.warn(`❌ CORS blocked for origin: ${origin}`);
-        return callback(null, false);
-      } catch (err) {
-        console.error('CORS origin check error:', err && err.stack ? err.stack : err);
-        return callback(null, false);
-      }
-    },
-    credentials: true,
+    origin: "*", // Allow all for now - debug CORS issue
+    credentials: false,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
