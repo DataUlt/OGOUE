@@ -296,7 +296,7 @@
         }
       </td>
       <td class="px-6 py-4">
-        ${depense.created_by_name || depense.agent_name || "-"}
+        ${depense.created_by_name || "-"}
       </td>
       <td class="px-6 py-4">
         ${

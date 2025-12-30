@@ -29,7 +29,7 @@ export async function listSales(req, res) {
     // Récupérer les ventes avec Supabase
     const { data: rows, error } = await supabase
       .from("sales")
-      .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, receipt_url, created_at")
+      .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, receipt_url, created_at, created_by")
       .eq("organization_id", organizationId)
       .order("sale_date", { ascending: false })
       .order("created_at", { ascending: false });
@@ -39,8 +39,52 @@ export async function listSales(req, res) {
       return res.status(500).json({ error: "Internal server error" });
     }
 
+    // Enrichir les données avec les infos de créateur
+    let enrichedRows = rows || [];
+    
+    if (enrichedRows.length > 0) {
+      // Récupérer les infos des agents et utilisateurs
+      const createdByIds = [...new Set(enrichedRows.map(r => r.created_by).filter(Boolean))];
+      
+      if (createdByIds.length > 0) {
+        // Récupérer les agents
+        const { data: agents } = await supabase
+          .from("agents")
+          .select("id, first_name")
+          .in("id", createdByIds);
+        
+        // Récupérer les utilisateurs (managers)
+        const { data: users } = await supabase
+          .from("users")
+          .select("id, first_name")
+          .in("id", createdByIds);
+        
+        const agentMap = {};
+        const userMap = {};
+        
+        (agents || []).forEach(a => { agentMap[a.id] = a.first_name; });
+        (users || []).forEach(u => { userMap[u.id] = u.first_name; });
+        
+        // Ajouter le created_by_name à chaque ligne
+        enrichedRows = enrichedRows.map(row => {
+          let createdByName = "-";
+          
+          if (row.created_by) {
+            // Vérifier si c'est un agent ou un utilisateur
+            if (agentMap[row.created_by]) {
+              createdByName = agentMap[row.created_by]; // Prénom de l'agent
+            } else if (userMap[row.created_by]) {
+              createdByName = "Gérant"; // C'est un manager
+            }
+          }
+          
+          return { ...row, created_by_name: createdByName };
+        });
+      }
+    }
+
     // Filtrer par mois et année en JavaScript
-    const transformedSales = (rows || [])
+    const transformedSales = enrichedRows
       .filter(row => {
         const date = new Date(row.sale_date);
         return date.getMonth() + 1 === month && date.getFullYear() === year;
@@ -55,7 +99,8 @@ export async function listSales(req, res) {
         montant: row.amount,
         justificatif: row.receipt_name,
         justificatifUrl: row.receipt_url,
-        created_at: row.created_at
+        created_at: row.created_at,
+        created_by_name: row.created_by_name
       }));
     
     return res.json({ sales: transformedSales });

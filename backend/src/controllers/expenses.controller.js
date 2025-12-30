@@ -26,7 +26,7 @@ export async function listExpenses(req, res) {
 
     const { data: rows, error } = await supabase
       .from("expenses")
-      .select("id, expense_date, category, payment_method, amount, receipt_name, receipt_url, created_at")
+      .select("id, expense_date, category, payment_method, amount, receipt_name, receipt_url, created_at, created_by")
       .eq("organization_id", organizationId)
       .order("expense_date", { ascending: false })
       .order("created_at", { ascending: false });
@@ -36,22 +36,69 @@ export async function listExpenses(req, res) {
       return res.status(500).json({ error: "Internal server error" });
     }
 
+    // Enrichir les données avec les infos de créateur
+    let enrichedRows = rows || [];
+    
+    if (enrichedRows.length > 0) {
+      // Récupérer les infos des agents et utilisateurs
+      const createdByIds = [...new Set(enrichedRows.map(r => r.created_by).filter(Boolean))];
+      
+      if (createdByIds.length > 0) {
+        // Récupérer les agents
+        const { data: agents } = await supabase
+          .from("agents")
+          .select("id, first_name")
+          .in("id", createdByIds);
+        
+        // Récupérer les utilisateurs (managers)
+        const { data: users } = await supabase
+          .from("users")
+          .select("id, first_name")
+          .in("id", createdByIds);
+        
+        const agentMap = {};
+        const userMap = {};
+        
+        (agents || []).forEach(a => { agentMap[a.id] = a.first_name; });
+        (users || []).forEach(u => { userMap[u.id] = u.first_name; });
+        
+        // Ajouter le created_by_name à chaque ligne
+        enrichedRows = enrichedRows.map(row => {
+          let createdByName = "-";
+          
+          if (row.created_by) {
+            // Vérifier si c'est un agent ou un utilisateur
+            if (agentMap[row.created_by]) {
+              createdByName = agentMap[row.created_by]; // Prénom de l'agent
+            } else if (userMap[row.created_by]) {
+              createdByName = "Gérant"; // C'est un manager
+            }
+          }
+          
+          return { ...row, created_by_name: createdByName };
+        });
+      }
+    }
+
     // Filtrer par mois et année en JavaScript
-    const transformedExpenses = (rows || [])
+    const transformedExpenses = enrichedRows
       .filter(row => {
         const date = new Date(row.expense_date);
         return date.getMonth() + 1 === month && date.getFullYear() === year;
       })
-      .map(row => ({
-        id: row.id,
-        date: row.expense_date,
-        categorie: row.category,
-        moyen_paiement: row.payment_method,
-        montant: row.amount,
-        justificatif: row.receipt_name,
-        justificatifUrl: row.receipt_url,
-        created_at: row.created_at
-      }));
+      .map(row => {
+        return {
+          id: row.id,
+          date: row.expense_date,
+          categorie: row.category,
+          moyen_paiement: row.payment_method,
+          montant: row.amount,
+          justificatif: row.receipt_name,
+          justificatifUrl: row.receipt_url,
+          created_at: row.created_at,
+          created_by_name: row.created_by_name
+        };
+      });
     
     return res.json({ expenses: transformedExpenses });
   } catch (error) {

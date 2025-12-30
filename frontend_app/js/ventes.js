@@ -355,7 +355,7 @@
         }
       </td>
       <td class="px-6 py-4">
-        ${vente.created_by_name || vente.agent_name || "-"}
+        ${vente.created_by_name || "-"}
       </td>
       <td class="px-6 py-4">
         ${
