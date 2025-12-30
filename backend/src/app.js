@@ -12,33 +12,32 @@ import { authMiddleware } from "./middleware/auth.middleware.js";
 
 export const app = express();
 
-// Get CORS origins from env var, with fallback for dev
-const corsOriginString = process.env.CORS_ORIGIN || "https://ogoue.com,https://www.ogoue.com,https://ogoue-frontend.netlify.app,http://localhost:3000,http://localhost:3001";
-const allowedOrigins = corsOriginString
-  .split(",")
-  .map((o) => o.trim())
-  .filter(Boolean);
-
-console.info('✅ CORS allowedOrigins:', allowedOrigins);
-
 // Use a function for CORS origin checking
 const corsOptions = {
   origin: function (origin, callback) {
-    console.log('🔍 CORS check for origin:', origin);
+    console.log('🔍 [CORS] Incoming origin:', origin);
     
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) {
-      console.log('✅ No origin (allowed for mobile/curl)');
+      console.log('✅ [CORS] No origin (accepted)');
       return callback(null, true);
     }
     
+    // Get allowed origins from env or use defaults
+    const corsOriginString = process.env.CORS_ORIGIN || "https://ogoue.com,https://www.ogoue.com,https://app.ogoue.com,https://ogoue-frontend.netlify.app,http://localhost:3000,http://localhost:3001";
+    const allowedOrigins = corsOriginString
+      .split(",")
+      .map((o) => o.trim())
+      .filter(Boolean);
+    
     // Check if origin is in allowed list
     if (allowedOrigins.includes(origin)) {
-      console.log('✅ Origin allowed:', origin);
+      console.log('✅ [CORS] Origin allowed:', origin);
       callback(null, true);
     } else {
-      console.log('❌ Origin NOT allowed:', origin);
-      callback(new Error('Not allowed by CORS'));
+      console.log('❌ [CORS] Origin NOT allowed:', origin);
+      console.log('📋 [CORS] Allowed origins:', allowedOrigins);
+      callback(new Error('CORS policy: origin ' + origin + ' not allowed'));
     }
   },
   credentials: true,
