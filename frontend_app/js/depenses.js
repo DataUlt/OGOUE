@@ -227,6 +227,15 @@
     return d.toLocaleDateString("fr-FR");
   }
 
+  function formatHeure(value) {
+    if (!value) return "-";
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return "-";
+    // Ajouter 1 heure pour le fuseau horaire du Gabon (UTC+1)
+    d.setHours(d.getHours() + 1);
+    return d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+  }
+
   function formatMontant(montant) {
     // Convertir en nombre si c'est une string
     const val = typeof montant === "string" ? parseFloat(montant) : montant;
@@ -244,6 +253,9 @@
       // Importer le module d'audit
       const { default: DeletionAuditManager } = await import("./deletion-audit.js");
 
+      // Trouver et mémoriser la ligne à supprimer
+      const rowToDelete = document.querySelector(`tr[data-depense-id="${depenseId}"]`);
+
       // Utiliser le système d'audit pour la suppression
       const result = await DeletionAuditManager.deleteWithAudit(
         `${API_BASE_URL}/api/expenses/${depenseId}`,
@@ -256,11 +268,21 @@
       );
 
       if (result.success) {
-        // Rafraîchir les tableaux
-        await renderCompactTable();
-        renderFullTable();
+        // Supprimer la ligne immédiatement du DOM avec animation
+        if (rowToDelete) {
+          rowToDelete.style.opacity = '0';
+          rowToDelete.style.transition = 'opacity 0.3s ease';
+          rowToDelete.style.height = rowToDelete.offsetHeight + 'px';
+          setTimeout(() => {
+            rowToDelete.style.height = '0px';
+            rowToDelete.style.overflow = 'hidden';
+            setTimeout(() => {
+              rowToDelete.remove();
+            }, 300);
+          }, 50);
+        }
 
-        // Notification succès (optionnel)
+        // Notification succès
         console.log('✅ Dépense supprimée avec succès');
       } else {
         console.error('❌ Erreur suppression:', result.error);
@@ -275,10 +297,14 @@
   function createRow(depense) {
     const tr = document.createElement("tr");
     tr.className = "border-b dark:border-gray-700";
+    tr.setAttribute('data-depense-id', depense.id);
 
     tr.innerHTML = `
       <td class="px-6 py-4 font-medium text-[#0d1b19] dark:text-white whitespace-nowrap">
         ${formatDateFr(depense.date)}
+      </td>
+      <td class="px-6 py-4 text-sm">
+        ${formatHeure(depense.created_at)}
       </td>
       <td class="px-6 py-4">
         ${depense.categorie || "-"}
@@ -455,7 +481,7 @@
     if (!depensesAujourdhui.length) {
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+        <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
           Aucune dépense enregistrée pour aujourd'hui.
         </td>
       `;
@@ -496,7 +522,7 @@
       if (!depensesAujourdhui.length) {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+          <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
             Aucune dépense enregistrée pour aujourd'hui.
           </td>
         `;

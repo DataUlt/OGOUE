@@ -39,55 +39,59 @@ export async function listSales(req, res) {
       return res.status(500).json({ error: "Internal server error" });
     }
 
-    // Enrichir les données avec les infos de créateur
+    // Enrichir avec les noms des créateurs
     let enrichedRows = rows || [];
     
     if (enrichedRows.length > 0) {
-      // Récupérer les infos des agents et utilisateurs
-      const createdByIds = [...new Set(enrichedRows.map(r => r.created_by).filter(Boolean))];
-      
-      if (createdByIds.length > 0) {
-        // Récupérer les agents
-        const { data: agents } = await supabase
-          .from("agents")
-          .select("id, first_name")
-          .in("id", createdByIds);
+      try {
+        // Récupérer les IDs uniques de créateurs
+        const createdByIds = [...new Set(enrichedRows.map(r => r.created_by).filter(Boolean))];
         
-        // Récupérer les utilisateurs (managers)
-        const { data: users } = await supabase
-          .from("users")
-          .select("id, first_name")
-          .in("id", createdByIds);
-        
-        const agentMap = {};
-        const userMap = {};
-        
-        (agents || []).forEach(a => { agentMap[a.id] = a.first_name; });
-        (users || []).forEach(u => { userMap[u.id] = u.first_name; });
-        
-        // Ajouter le created_by_name à chaque ligne
-        enrichedRows = enrichedRows.map(row => {
-          let createdByName = "-";
+        if (createdByIds.length > 0) {
+          // Récupérer les agents et managers
+          const [{ data: agents }, { data: users }] = await Promise.all([
+            supabase.from("agents").select("id, first_name").in("id", createdByIds),
+            supabase.from("users").select("id, first_name").in("id", createdByIds)
+          ]);
           
-          if (row.created_by) {
-            // Vérifier si c'est un agent ou un utilisateur
-            if (agentMap[row.created_by]) {
-              createdByName = agentMap[row.created_by]; // Prénom de l'agent
-            } else if (userMap[row.created_by]) {
-              createdByName = "Gérant"; // C'est un manager
+          const agentMap = {};
+          const userMap = {};
+          
+          (agents || []).forEach(a => { agentMap[a.id] = a.first_name; });
+          (users || []).forEach(u => { userMap[u.id] = u.first_name; });
+          
+          // Ajouter le created_by_name à chaque ligne
+          enrichedRows = enrichedRows.map(row => {
+            let createdByName = "-";
+            if (row.created_by) {
+              if (agentMap[row.created_by]) {
+                createdByName = agentMap[row.created_by];
+              } else if (userMap[row.created_by]) {
+                createdByName = "Gérant";
+              }
             }
-          }
-          
-          return { ...row, created_by_name: createdByName };
-        });
+            return { ...row, created_by_name: createdByName };
+          });
+        } else {
+          enrichedRows = enrichedRows.map(row => ({ ...row, created_by_name: "-" }));
+        }
+      } catch (enrichError) {
+        console.error("❌ Erreur enrichissement sales:", enrichError);
+        enrichedRows = enrichedRows.map(row => ({ ...row, created_by_name: "-" }));
       }
     }
+
+    console.log(`📊 listSales: ${enrichedRows.length} ventes brutes, filtre: mois=${month}, année=${year}`);
 
     // Filtrer par mois et année en JavaScript
     const transformedSales = enrichedRows
       .filter(row => {
         const date = new Date(row.sale_date);
-        return date.getMonth() + 1 === month && date.getFullYear() === year;
+        const rowMonth = date.getMonth() + 1;
+        const rowYear = date.getFullYear();
+        const match = rowMonth === month && rowYear === year;
+        console.log(`  Vente ${row.id}: date=${row.sale_date} -> mois=${rowMonth}, année=${rowYear}, match=${match}`);
+        return match;
       })
       .map(row => ({
         id: row.id,
@@ -154,6 +158,7 @@ export async function createSale(req, res) {
         receipt_name: receiptName,
         receipt_url: receiptUrl,
         receipt_storage_path: receiptStoragePath,
+        created_by: req.user.userId || req.user.sub || req.user.id,
       })
       .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, receipt_url, receipt_storage_path, created_at")
       .single();

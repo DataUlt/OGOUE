@@ -42,6 +42,13 @@ document.addEventListener("DOMContentLoaded", function () {
         return `${d}/${m}/${y}`;
     }
 
+    function formatHeureGabon(dateObj) {
+        if (!dateObj || isNaN(dateObj.getTime())) return "-";
+        // Ajouter 1 heure pour le fuseau horaire du Gabon (UTC+1)
+        dateObj.setHours(dateObj.getHours() + 1);
+        return dateObj.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+    }
+
     function getDaysInMonth(year, monthIndex) {
         return new Date(year, monthIndex + 1, 0).getDate();
     }
@@ -483,10 +490,13 @@ document.addEventListener("DOMContentLoaded", function () {
                     <thead>
                         <tr class="bg-background-light dark:bg-background-dark border-b border-[#cfe7e3] dark:border-gray-700">
                             <th class="px-4 py-3 text-left font-semibold">Date</th>
+                            <th class="px-4 py-3 text-left font-semibold">Heure</th>
                             <th class="px-4 py-3 text-left font-semibold">Produit</th>
                             <th class="px-4 py-3 text-center font-semibold">Quantité</th>
                             <th class="px-4 py-3 text-right font-semibold">Montant</th>
                             <th class="px-4 py-3 text-left font-semibold">Moyen Paiement</th>
+                            <th class="px-4 py-3 text-left font-semibold">Type</th>
+                            <th class="px-4 py-3 text-left font-semibold">Créé par</th>
                             <th class="px-4 py-3 text-left font-semibold">Justificatif</th>
                         </tr>
                     </thead>
@@ -496,20 +506,25 @@ document.addEventListener("DOMContentLoaded", function () {
         ventes.forEach(v => {
             const rawDate = v.date || v.saleDate || v.sale_date || "";
             const localDate = rawDate ? getLocalDateString(new Date(rawDate)) : "";
+            const heure = v.created_at ? formatHeureGabon(new Date(v.created_at)) : "-";
             const produit = v.description || "-";
             const quantite = v.quantite || 1;
             const montantNum = parseFloat(v.montant) || 0;
             const paiement = v.moyen_paiement || v.moyenPaiement || "-";
-
+            const type = v.type_vente === "produits" ? "Produits" : v.type_vente === "services" ? "Service" : v.type_vente || "-";
+            const creePar = v.created_by_name || "-";
             const justificatif = v.justificatif || v.receipt || "-";
 
             html += `
                         <tr class="border-b border-[#cfe7e3] dark:border-gray-700">
                             <td class="px-4 py-3">${formatDateFR(localDate)}</td>
+                            <td class="px-4 py-3">${heure}</td>
                             <td class="px-4 py-3">${produit}</td>
                             <td class="px-4 py-3 text-center">${quantite}</td>
                             <td class="px-4 py-3 text-right font-semibold">${montantNum.toFixed(2).replace('.', ',')} FCFA</td>
                             <td class="px-4 py-3">${paiement}</td>
+                            <td class="px-4 py-3">${type}</td>
+                            <td class="px-4 py-3">${creePar}</td>
                             <td class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">${justificatif}</td>
                         </tr>
             `;
@@ -538,9 +553,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     <thead>
                         <tr class="bg-background-light dark:bg-background-dark border-b border-[#cfe7e3] dark:border-gray-700">
                             <th class="px-4 py-3 text-left font-semibold">Date</th>
+                            <th class="px-4 py-3 text-left font-semibold">Heure</th>
                             <th class="px-4 py-3 text-left font-semibold">Catégorie</th>
                             <th class="px-4 py-3 text-right font-semibold">Montant</th>
                             <th class="px-4 py-3 text-left font-semibold">Moyen Paiement</th>
+                            <th class="px-4 py-3 text-left font-semibold">Créé par</th>
                             <th class="px-4 py-3 text-left font-semibold">Justificatif</th>
                         </tr>
                     </thead>
@@ -550,17 +567,21 @@ document.addEventListener("DOMContentLoaded", function () {
         depenses.forEach(d => {
             const rawDate = d.date || d.expenseDate || "";
             const localDate = rawDate ? getLocalDateString(new Date(rawDate)) : "";
+            const heure = d.created_at ? formatHeureGabon(new Date(d.created_at)) : "-";
             const categorie = d.categorie || d.category || "-";
             const montantNum = parseFloat(d.montant) || 0;
             const paiement = d.moyen_paiement || d.moyenPaiement || "-";
+            const creePar = d.created_by_name || "-";
             const justificatif = d.justificatif || "-";
 
             html += `
                         <tr class="border-b border-[#cfe7e3] dark:border-gray-700">
                             <td class="px-4 py-3">${formatDateFR(localDate)}</td>
+                            <td class="px-4 py-3">${heure}</td>
                             <td class="px-4 py-3">${categorie}</td>
                             <td class="px-4 py-3 text-right font-semibold">${montantNum.toFixed(2).replace('.', ',')} FCFA</td>
                             <td class="px-4 py-3">${paiement}</td>
+                            <td class="px-4 py-3">${creePar}</td>
                             <td class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">${justificatif}</td>
                         </tr>
             `;
