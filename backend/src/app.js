@@ -21,50 +21,35 @@ const allowedOrigins = corsOriginString
 
 console.info('✅ CORS allowedOrigins:', allowedOrigins);
 
-// CORS configuration with function for better debugging
+// Use a function for CORS origin checking
 const corsOptions = {
   origin: function (origin, callback) {
-    console.log('🔍 [CORS] Incoming origin:', origin);
+    console.log('🔍 CORS check for origin:', origin);
     
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) {
-      console.log('✅ [CORS] No origin (accepted)');
+      console.log('✅ No origin (allowed for mobile/curl)');
       return callback(null, true);
     }
     
-    const isAllowed = allowedOrigins.includes(origin);
-    
-    if (isAllowed) {
-      console.log('✅ [CORS] Origin accepted:', origin);
+    // Check if origin is in allowed list
+    if (allowedOrigins.includes(origin)) {
+      console.log('✅ Origin allowed:', origin);
       callback(null, true);
     } else {
-      console.error('❌ [CORS] Origin blocked:', origin);
-      callback(new Error(`CORS policy: origin ${origin} not allowed`));
+      console.log('❌ Origin NOT allowed:', origin);
+      callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
+  optionsSuccessStatus: 200,
 };
 
-// TEMP DEBUG MIDDLEWARE: force CORS headers for all responses
-// NOTE: garder uniquement pour debug rapide, retirer une fois résolu
-app.use((req, res, next) => {
-  const origin = req.headers.origin || '*';
-  res.setHeader('Access-Control-Allow-Origin', origin);
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(204);
-  }
-  next();
-});
-
-// Apply cors with our options as well (keeps existing behavior)
 app.use(cors(corsOptions));
 
-// Handle preflight with same options
+// make sure preflight is handled
 app.options("*", cors(corsOptions));
 
 app.use(express.json({ limit: "200kb" }));
