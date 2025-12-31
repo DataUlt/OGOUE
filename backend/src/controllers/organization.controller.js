@@ -4,6 +4,7 @@ export async function getOrganization(req, res) {
   try {
     const organizationId = req.user.organizationId;
 
+    console.log("➡️ Fetching organization id:", organizationId);
     const { data: orgData, error } = await supabase
       .from("organizations")
       .select("id, name, rccm_number, nif_number, activity, activity_description, created_at")
@@ -35,6 +36,7 @@ export async function updateOrganization(req, res) {
     const organizationId = req.user.organizationId;
     const { name, activity, activityDescription, rccm, nif } = req.body;
 
+    console.log("➡️ Updating organization id:", organizationId);
     const { data: orgData, error } = await supabase
       .from("organizations")
       .update({

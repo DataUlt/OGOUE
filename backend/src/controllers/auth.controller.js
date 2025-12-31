@@ -43,6 +43,7 @@ export async function register(req, res) {
     const authUserId = authData.user.id;
 
     // 2️⃣ Créer l'organisation
+    console.log("➡️ Attempting to insert organization into table 'organizations':", parsed.organizationName);
     const { data: orgData, error: orgError } = await supabase
       .from("organizations")
       .insert({
