@@ -43,8 +43,9 @@ export async function register(req, res) {
     const authUserId = authData.user.id;
 
     // 2️⃣ Créer l'organisation
+    console.log("➡️ Attempting to insert organization into table 'organizations':", parsed.organizationName);
     const { data: orgData, error: orgError } = await supabase
-      .from("public.organizations")
+      .from("organizations")
       .insert({
         name: parsed.organizationName,
         rccm_number: parsed.rccmNumber || null,
@@ -88,7 +89,7 @@ export async function register(req, res) {
       console.error("User record error:", userError);
       // Supprimer l'utilisateur Auth et l'organisation si ça échoue
       await supabase.auth.admin.deleteUser(authUserId);
-      await supabase.from("public.organizations").delete().eq("id", orgData.id);
+      await supabase.from("organizations").delete().eq("id", orgData.id);
       return res.status(500).json({ error: "Erreur lors de la création du profil utilisateur" });
     }
 
