@@ -86,11 +86,10 @@ export async function listSales(req, res) {
     // Filtrer par mois et année en JavaScript
     const transformedSales = enrichedRows
       .filter(row => {
-        const date = new Date(row.sale_date);
-        const rowMonth = date.getMonth() + 1;
-        const rowYear = date.getFullYear();
-        const match = rowMonth === month && rowYear === year;
-        console.log(`  Vente ${row.id}: date=${row.sale_date} -> mois=${rowMonth}, année=${rowYear}, match=${match}`);
+        // Parser la date au format YYYY-MM-DD directement sans conversion UTC
+        const [year, month, day] = row.sale_date.split('T')[0].split('-').map(Number);
+        const match = month === parsed.month && year === parsed.year;
+        console.log(`  Vente ${row.id}: date=${row.sale_date} -> mois=${month}, année=${year}, match=${match}`);
         return match;
       })
       .map(row => ({
