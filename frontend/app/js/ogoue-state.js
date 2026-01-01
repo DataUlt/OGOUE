@@ -53,9 +53,10 @@ function handleUnauthorized() {
 // ─────────────────────────────────────────────────
 // État global simplifié (cache mémoire)
 // ─────────────────────────────────────────────────
+const today = new Date();
 const defaultState = {
   utilisateur: null,
-  periodeCourante: { mois: 12, annee: 2025 },
+  periodeCourante: { mois: today.getMonth() + 1, annee: today.getFullYear() },
   ventes: [],
   depenses: []
 };
