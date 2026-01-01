@@ -517,9 +517,9 @@
   async function renderCompactTable() {
     const ventes = await getVentesPeriodeCourante();
     
-    // Filtrer pour afficher les ventes du mois/année courant (pas juste aujourd'hui)
-    // car les dates peuvent avoir un décalage UTC/local
-    const { mois, annee } = appState.periodeCourante || {};
+    // Filtrer pour afficher SEULEMENT les ventes d'aujourd'hui
+    const today = new Date();
+    const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     
     const ventesAujourdhui = ventes.filter((v) => {
       const dateStr = v.date || v.sale_date || v.saleDate;
@@ -529,8 +529,11 @@
       const d = new Date(dateStr);
       if (isNaN(d.getTime())) return false;
       
-      // Comparer par mois et année (pas jour pour éviter les décalages UTC)
-      return d.getMonth() + 1 === mois && d.getFullYear() === annee;
+      // Créer une date locale sans heure
+      const vDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      
+      // Comparer les dates (jour exact)
+      return vDate.getTime() === todayDateOnly.getTime();
     });
 
     tbodyCompact.innerHTML = "";
