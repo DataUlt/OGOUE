@@ -22,8 +22,9 @@ const loginSchema = z.object({
 
 /**
  * Helper: Sync user and organization to secondary Supabase
- * PRIMARY: organizations → SECONDARY: pmes
- * PRIMARY: users → SECONDARY: users
+ * PRIMARY schema → SECONDARY schema mapping:
+ * - PRIMARY: users (first_name, last_name, email, auth_id) → SECONDARY: users (full_name, email, password_hash, role)
+ * - PRIMARY: organizations → SECONDARY: pmes (linked via user_id)
  */
 async function syncToSecondarySupabase(authUserId, orgData, userData) {
   if (!supabaseSecondary) {
@@ -34,39 +35,25 @@ async function syncToSecondarySupabase(authUserId, orgData, userData) {
   try {
     console.log("🔄 Syncing to secondary Supabase...");
     
-    // 1️⃣ Sync organization (from 'organizations' to 'pmes' table)
-    const { data: secondaryPmeData, error: secondaryPmeError } = await supabaseSecondary
-      .from("pmes")
-      .insert({
-        id: orgData.id, // Keep the same UUID for consistency
-        name: orgData.name,
-        rccm_number: orgData.rccm_number,
-        nif_number: orgData.nif_number,
-        activity: orgData.activity,
-        activity_description: orgData.activity_description,
-        created_at: orgData.created_at,
-      })
-      .select("id")
-      .single();
-
-    if (secondaryPmeError) {
-      console.error("❌ Secondary pmes sync error:", secondaryPmeError);
-      return { success: false, reason: "PME sync failed", error: secondaryPmeError };
-    }
-
-    console.log("✅ PME synced to secondary Supabase");
-
-    // 2️⃣ Sync user to secondary (same 'users' table)
+    // 1️⃣ Create user in secondary 'users' table
+    // Combine first_name + last_name into full_name
+    const fullName = `${userData.first_name} ${userData.last_name}`;
+    
+    // Map role: 'manager' → 'pme', 'agent' → 'pme'
+    const secondaryRole = userData.role === 'manager' ? 'pme' : 'pme';
+    
+    // Use a placeholder for password_hash (can't get actual hash from Supabase Auth)
+    const placeholderHash = `AUTH_${authUserId}`;
+    
     const { data: secondaryUserData, error: secondaryUserError } = await supabaseSecondary
       .from("users")
       .insert({
-        id: userData.id, // Keep the same UUID for consistency
-        auth_id: authUserId,
-        first_name: userData.first_name,
-        last_name: userData.last_name,
+        id: userData.id, // Keep same UUID for consistency
         email: userData.email,
-        role: userData.role,
-        organization_id: orgData.id,
+        password_hash: placeholderHash, // Placeholder since we use Supabase Auth
+        role: secondaryRole, // 'pme' for registered users
+        full_name: fullName, // Combined first + last name
+        is_active: true,
         created_at: userData.created_at,
       })
       .select("id")
@@ -74,17 +61,39 @@ async function syncToSecondarySupabase(authUserId, orgData, userData) {
 
     if (secondaryUserError) {
       console.error("❌ Secondary user sync error:", secondaryUserError);
-      // Try to rollback pme sync
-      await supabaseSecondary
-        .from("pmes")
-        .delete()
-        .eq("id", orgData.id)
-        .catch(err => console.error("Rollback pme sync failed:", err));
       return { success: false, reason: "User sync failed", error: secondaryUserError };
     }
 
-    console.log("✅ User synced to secondary Supabase");
-    console.log("✅ Successfully synced to secondary Supabase (pmes + users)");
+    console.log("✅ User synced to secondary Supabase:", secondaryUserData.id);
+
+    // 2️⃣ Create PME in secondary 'pmes' table (linked to user via user_id)
+    const { data: secondaryPmeData, error: secondaryPmeError } = await supabaseSecondary
+      .from("pmes")
+      .insert({
+        user_id: secondaryUserData.id, // Reference to the user just created
+        company_name: orgData.name,
+        rccm_number: orgData.rccm_number || null,
+        nif_number: orgData.nif_number || null,
+        sector: orgData.activity || null,
+        activity_description: orgData.activity_description || null,
+        created_at: orgData.created_at,
+      })
+      .select("id")
+      .single();
+
+    if (secondaryPmeError) {
+      console.error("❌ Secondary pmes sync error:", secondaryPmeError);
+      // Try to rollback user sync
+      await supabaseSecondary
+        .from("users")
+        .delete()
+        .eq("id", secondaryUserData.id)
+        .catch(err => console.error("Rollback user sync failed:", err));
+      return { success: false, reason: "PME sync failed", error: secondaryPmeError };
+    }
+
+    console.log("✅ PME synced to secondary Supabase:", secondaryPmeData.id);
+    console.log("✅ Successfully synced to secondary Supabase (users + pmes)");
     return { success: true };
   } catch (error) {
     console.error("❌ Sync to secondary Supabase error:", error);
