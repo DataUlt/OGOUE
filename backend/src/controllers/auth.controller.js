@@ -1,4 +1,4 @@
-import { supabase } from "../db/supabase.js";
+import { supabase, supabaseSecondary } from "../db/supabase.js";
 import { z } from "zod";
 import jwt from "jsonwebtoken";
 
@@ -19,6 +19,78 @@ const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
 });
+
+/**
+ * Helper: Sync user and organization to secondary Supabase
+ * PRIMARY: organizations → SECONDARY: pmes
+ * PRIMARY: users → SECONDARY: users
+ */
+async function syncToSecondarySupabase(authUserId, orgData, userData) {
+  if (!supabaseSecondary) {
+    console.warn("⚠️  Secondary Supabase not configured, skipping sync");
+    return { success: false, reason: "Secondary Supabase not configured" };
+  }
+
+  try {
+    console.log("🔄 Syncing to secondary Supabase...");
+    
+    // 1️⃣ Sync organization (from 'organizations' to 'pmes' table)
+    const { data: secondaryPmeData, error: secondaryPmeError } = await supabaseSecondary
+      .from("pmes")
+      .insert({
+        id: orgData.id, // Keep the same UUID for consistency
+        name: orgData.name,
+        rccm_number: orgData.rccm_number,
+        nif_number: orgData.nif_number,
+        activity: orgData.activity,
+        activity_description: orgData.activity_description,
+        created_at: orgData.created_at,
+      })
+      .select("id")
+      .single();
+
+    if (secondaryPmeError) {
+      console.error("❌ Secondary pmes sync error:", secondaryPmeError);
+      return { success: false, reason: "PME sync failed", error: secondaryPmeError };
+    }
+
+    console.log("✅ PME synced to secondary Supabase");
+
+    // 2️⃣ Sync user to secondary (same 'users' table)
+    const { data: secondaryUserData, error: secondaryUserError } = await supabaseSecondary
+      .from("users")
+      .insert({
+        id: userData.id, // Keep the same UUID for consistency
+        auth_id: authUserId,
+        first_name: userData.first_name,
+        last_name: userData.last_name,
+        email: userData.email,
+        role: userData.role,
+        organization_id: orgData.id,
+        created_at: userData.created_at,
+      })
+      .select("id")
+      .single();
+
+    if (secondaryUserError) {
+      console.error("❌ Secondary user sync error:", secondaryUserError);
+      // Try to rollback pme sync
+      await supabaseSecondary
+        .from("pmes")
+        .delete()
+        .eq("id", orgData.id)
+        .catch(err => console.error("Rollback pme sync failed:", err));
+      return { success: false, reason: "User sync failed", error: secondaryUserError };
+    }
+
+    console.log("✅ User synced to secondary Supabase");
+    console.log("✅ Successfully synced to secondary Supabase (pmes + users)");
+    return { success: true };
+  } catch (error) {
+    console.error("❌ Sync to secondary Supabase error:", error);
+    return { success: false, reason: "Sync exception", error };
+  }
+}
 
 /**
  * POST /auth/register
@@ -93,6 +165,13 @@ export async function register(req, res) {
       return res.status(500).json({ error: "Erreur lors de la création du profil utilisateur" });
     }
 
+    // 3️⃣ Sync to secondary Supabase (optional, non-blocking)
+    const syncResult = await syncToSecondarySupabase(authUserId, orgData, userData);
+    if (!syncResult.success) {
+      console.warn("⚠️  Sync failed but continuing:", syncResult.reason);
+      // Don't fail registration if sync fails - it can be retried later
+    }
+
     // 4️⃣ Créer une session en loggant avec l'email et password
     const { data: sessionData, error: sessionError } = await supabase.auth.signInWithPassword({
       email: parsed.email,
@@ -119,6 +198,13 @@ export async function register(req, res) {
       organization: {
         id: orgData.id,
         name: orgData.name,
+      },
+      sync: {
+        primary: true,
+        secondary: syncResult.success,
+        message: syncResult.success 
+          ? "User and organization created in both Supabase instances" 
+          : `Created in primary Supabase only. Secondary sync: ${syncResult.reason}`
       },
     });
   } catch (err) {

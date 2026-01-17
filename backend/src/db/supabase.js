@@ -25,19 +25,37 @@ if (fs.existsSync(envPath)) {
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+// Second Supabase instance for sync
+const SUPABASE_URL_SECONDARY = process.env.SUPABASE_URL_SECONDARY || "https://xqqusftebfmzuwoueqcg.supabase.co";
+const SUPABASE_SERVICE_ROLE_KEY_SECONDARY = process.env.SUPABASE_SERVICE_ROLE_KEY_SECONDARY;
+
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   console.error("❌ SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY manquante.");
   console.error("👉 Vérifiez votre fichier backend/.env");
   process.exit(1);
 }
 
-// Créer le client Supabase avec la clé Service Role (pour l'admin)
+if (!SUPABASE_SERVICE_ROLE_KEY_SECONDARY) {
+  console.warn("⚠️  SUPABASE_SERVICE_ROLE_KEY_SECONDARY manquante - Sync désactivé");
+}
+
+// Créer le client Supabase avec la clé Service Role (pour l'admin) - PRIMARY
 export const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: {
     autoRefreshToken: false,
     persistSession: false,
   },
 });
+
+// Créer le client Supabase SECONDAIRE pour la synchronisation
+export const supabaseSecondary = SUPABASE_SERVICE_ROLE_KEY_SECONDARY
+  ? createClient(SUPABASE_URL_SECONDARY, SUPABASE_SERVICE_ROLE_KEY_SECONDARY, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    })
+  : null;
 
 // Pour les requêtes authentifiées côté frontend
 export const supabaseAnon = (anonKey) => {
@@ -49,4 +67,7 @@ export const supabaseAnon = (anonKey) => {
   });
 };
 
-console.log("✅ Supabase client initialized");
+console.log("✅ Supabase client initialized (PRIMARY)");
+if (supabaseSecondary) {
+  console.log("✅ Supabase SECONDARY client initialized (SYNC)");
+}
