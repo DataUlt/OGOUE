@@ -40,7 +40,7 @@ function handleUnauthorized() {
   localStorage.removeItem("authToken");
   localStorage.removeItem("user");
   const MARKETING_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
-    ? 'http://localhost:3000'
+    ? 'http://localhost:8080'
     : 'https://www.ogoue.com';
   
   // Délai de 5 secondes pour que l'utilisateur voie l'erreur

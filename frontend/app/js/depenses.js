@@ -460,9 +460,9 @@
   async function renderCompactTable() {
     const depenses = await getDepensesPeriodeCourante();
     
-    // Filtrer pour afficher les dépenses du mois/année courant (pas juste aujourd'hui)
-    // car les dates peuvent avoir un décalage UTC/local
-    const { mois, annee } = appState.periodeCourante || {};
+    // Filtrer pour afficher SEULEMENT les dépenses d'aujourd'hui
+    const today = new Date();
+    const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     
     const depensesAujourdhui = depenses.filter((d) => {
       const dateStr = d.date || d.expense_date || d.expenseDate;
@@ -472,8 +472,11 @@
       const dt = new Date(dateStr);
       if (isNaN(dt.getTime())) return false;
       
-      // Comparer par mois et année (pas jour pour éviter les décalages UTC)
-      return dt.getMonth() + 1 === mois && dt.getFullYear() === annee;
+      // Créer une date locale sans heure
+      const dDate = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+      
+      // Comparer les dates (aujourd'hui uniquement)
+      return dDate.getTime() === todayDateOnly.getTime();
     });
 
     tbodyCompact.innerHTML = "";

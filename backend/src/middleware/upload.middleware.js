@@ -18,6 +18,7 @@ const upload = multer({
       "application/msword",
       "application/vnd.ms-excel",
       "text/plain",
+      "application/octet-stream", // Fichiers génériques
     ];
 
     if (allowedMimes.includes(file.mimetype)) {
