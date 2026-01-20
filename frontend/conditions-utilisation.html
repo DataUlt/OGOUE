@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-  <title>Conditions d'Utilisation - OGOUE</title>
+  <title>Conditions d'Utilisation - OGOUÉ</title>
 
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -47,8 +47,8 @@
   </style>
 </head>
 
-<body class="bg-background-light font-display text-text-light antialiased">
-  <div class="relative w-full overflow-x-hidden">
+<body class="bg-background-light font-display text-text-light antialiased flex flex-col min-h-screen">
+  <div class="relative w-full overflow-x-hidden flex flex-col flex-1">
 
     <!-- HEADER -->
     <header class="sticky top-0 z-50 w-full bg-background-light/80 backdrop-blur-md">
@@ -60,7 +60,7 @@
                 <path d="M44 11.2727C44 14.0109 39.8386 16.3957 33.69 17.6364C39.8386 18.877 44 21.2618 44 24C44 26.7382 39.8386 29.123 33.69 30.3636C39.8386 31.6043 44 33.9891 44 36.7273C44 40.7439 35.0457 44 24 44C12.9543 44 4 40.7439 4 36.7273C4 33.9891 8.16144 31.6043 14.31 30.3636C8.16144 29.123 4 26.7382 4 24C4 21.2618 8.16144 18.877 14.31 17.6364C8.16144 16.3957 4 14.0109 4 11.2727C4 7.25611 12.9543 4 24 4C35.0457 4 44 7.25611 44 11.2727Z" fill="currentColor"></path>
               </svg>
             </div>
-            <a href="/index.html" class="text-text-light text-xl font-bold tracking-tight">OGOUE</a>
+            <a href="/index.html" class="text-text-light text-xl font-bold tracking-tight">OGOUÉ</a>
           </div>
 
           <nav class="hidden md:flex items-center gap-8">
@@ -77,7 +77,7 @@
       </div>
     </header>
 
-    <main>
+    <main class="flex-1">
 
       <!-- PAGE HEADER -->
       <section class="py-16 sm:py-20 border-b border-black/10">
@@ -218,19 +218,16 @@
     </main>
 
     <!-- FOOTER -->
-    <footer class="bg-white border-t border-black/10">
-      <div class="max-w-7xl mx-auto px-6 lg:px-8 py-8">
-        <div class="flex flex-col md:flex-row justify-between items-center gap-8">
+    <footer class="flex-shrink-0 bg-white border-t border-black/10 py-16">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20">
           <div class="flex items-center gap-4">
-            <div class="size-6 text-primary">
-              <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M44 11.2727C44 14.0109 39.8386 16.3957 33.69 17.6364C39.8386 18.877 44 21.2618 44 24C44 26.7382 39.8386 29.123 33.69 30.3636C39.8386 31.6043 44 33.9891 44 36.7273C44 40.7439 35.0457 44 24 44C12.9543 44 4 40.7439 4 36.7273C4 33.9891 8.16144 31.6043 14.31 30.3636C8.16144 29.123 4 26.7382 4 24C4 21.2618 8.16144 18.877 14.31 17.6364C8.16144 16.3957 4 14.0109 4 11.2727C4 7.25611 12.9543 4 24 4C35.0457 4 44 7.25611 44 11.2727Z" fill="currentColor"></path>
-              </svg>
-            </div>
-            <span class="text-text-light text-lg font-bold tracking-tight">OGOUE</span>
+            <a href="/index.html" class="flex items-center gap-2">
+              <img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-28 w-auto">
+            </a>
           </div>
 
-          <p class="text-sm text-text-light-muted">© 2026 OGOUE. Tous droits réservés.</p>
+          <p class="text-sm text-text-light-muted">© 2026 OGOUÉ. Tous droits réservés.</p>
         </div>
       </div>
     </footer>

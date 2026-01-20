@@ -82,54 +82,46 @@
   </style>
 </head>
 
-<body class="font-display bg-background-light dark:bg-background-dark text-[#0a0c0a] dark:text-gray-100 min-h-screen flex flex-col">
-<div class="relative flex min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<body class="font-display bg-background-light dark:bg-background-dark text-[#0a0c0a] dark:text-gray-100">
+<div class="relative flex min-h-screen w-full flex-col group/design-root">
 
   <!-- ===== HEADER OGOUE ===== -->
-  <header class="sticky top-0 z-10 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-[#e8ede8] dark:border-gray-700">
+  <header class="z-10 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-[#e8ede8] dark:border-gray-700">
     <div class="container mx-auto px-4">
-      <div class="flex items-center justify-between whitespace-nowrap py-3">
-        <div class="flex items-center gap-4 text-[#0a0c0a] dark:text-white">
-          <span class="material-symbols-outlined text-3xl text-primary">insights</span>
-          <h2 class="text-lg font-bold leading-tight tracking-[-0.015em]">OGOUE</h2>
-        </div>
-
-        <div class="hidden md:flex items-center gap-9">
-          <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
-             href="module_tableau_bord.html">Tableau de Bord</a>
-
-          <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
-             href="module_ventes.html">Comptabilité</a>
-
-          <a class="text-primary text-sm font-bold leading-normal"
-             href="module_scoring.html">Financement</a>
-        </div>
-
-        <!-- Menu mobile -->
-        <div id="mobile-menu" class="md:hidden absolute top-full left-0 right-0 bg-background-light dark:bg-background-dark border-b border-[#e8ede8] dark:border-gray-700 hidden">
-          <div class="flex flex-col gap-2 p-4">
-            <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_tableau_bord.html">Tableau de Bord</a>
-            <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_ventes.html">Comptabilité</a>
-            <a class="text-primary text-sm font-bold leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_scoring.html">Financement</a>
-          </div>
-        </div>
-
-        <!-- Bouton menu mobile -->
-        <button id="menu-toggle" class="md:hidden flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white">
-          <span class="material-symbols-outlined">menu</span>
-        </button>
-
-        <div class="flex items-center gap-2">
-          <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white" data-action="notifications">
-            <span class="material-symbols-outlined">notifications</span>
-          </button>
-          <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white" data-action="settings">
-            <span class="material-symbols-outlined">settings</span>
-          </button>
-
-          <!-- ✅ PROFIL (corrigé + fiable) -->
-          <button
-            id="profileBtn"
+      <div class="flex items-center justify-between whitespace-nowrap h-20">
+                <div class="flex items-center gap-4">
+                    <a href="/index.html"><img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-28 w-auto"></a>
+                </div>
+                <div class="hidden md:flex items-center gap-9">
+                    <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
+                       href="module_tableau_bord.html">Tableau de Bord</a>
+                    <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
+                       href="module_ventes.html">Comptabilité</a>
+                    <a class="text-primary text-sm font-bold leading-normal"
+                       href="module_scoring.html">Financement</a>
+                </div>
+                <!-- Menu mobile -->
+                <div id="mobile-menu" class="md:hidden absolute top-full left-0 right-0 bg-background-light dark:bg-background-dark border-b border-[#e8ede8] dark:border-gray-700 hidden">
+                    <div class="flex flex-col gap-2 p-4">
+                        <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_tableau_bord.html">Tableau de Bord</a>
+                        <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_ventes.html">Comptabilité</a>
+                        <a class="text-primary text-sm font-bold leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_scoring.html">Financement</a>
+                    </div>
+                </div>
+                <!-- Bouton menu mobile -->
+                <button id="menu-toggle" class="md:hidden flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+                <div class="flex items-center gap-2">
+                    <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white" data-action="notifications">
+                        <span class="material-symbols-outlined">notifications</span>
+                    </button>
+                    <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white" data-action="settings">
+                        <span class="material-symbols-outlined">settings</span>
+                    </button>
+                    <!-- ✅ PROFIL (corrigé + fiable) -->
+                    <button
+                      id="profileBtn"
             class="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer bg-primary/20 dark:bg-primary/30 text-[#0a0c0a] dark:text-white hover:bg-primary/30 dark:hover:bg-primary/40 transition-colors"
             data-action="profile"
             title="Profil"
@@ -165,7 +157,7 @@
           </a>
           
           <!-- Tooltip -->
-          <div class="absolute left-0 top-full mt-2 w-96 bg-white dark:bg-card-dark rounded-lg shadow-lg border border-[#e7f3f1] dark:border-[#1e3b36] p-6 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 pointer-events-none group-hover:pointer-events-auto">
+          <div class="absolute left-auto right-0 top-full mt-2 w-96 bg-white dark:bg-card-dark rounded-lg shadow-lg border border-[#e7f3f1] dark:border-[#1e3b36] p-6 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 pointer-events-none group-hover:pointer-events-auto">
             <h3 class="text-lg font-bold text-[#0a0c0a] dark:text-white mb-3">Espace Partenaire</h3>
             
             <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
@@ -237,7 +229,7 @@
     </div>
 
     <!-- Content Grid -->
-    <div class="flex flex-col lg:grid lg:grid-cols-12 gap-6">
+    <div class="w-full flex flex-col lg:grid lg:grid-cols-12 gap-6">
       <!-- Left Column: Main Score & Stats (8 cols) -->
       <div class="lg:col-span-8 flex flex-col gap-6">
         <!-- Hero Score Card -->
@@ -334,7 +326,7 @@
         <!-- Education Block -->
         <div class="bg-[#10221f] rounded-xl p-6 text-white relative overflow-hidden group">
           <!-- Abstract Background pattern -->
-          <div class="absolute top-0 right-0 -mr-8 -mt-8 size-32 bg-primary/20 rounded-full blur-2xl group-hover:bg-primary/30 transition-all"></div>
+          <div class="absolute top-0 right-0 size-32 bg-primary/20 rounded-full blur-2xl group-hover:bg-primary/30 transition-all"></div>
           <div class="relative z-10 flex flex-col gap-3">
             <div class="flex items-center gap-2 mb-1 text-primary">
               <span class="material-symbols-outlined">lightbulb</span>
