@@ -5,14 +5,13 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Gestion Comptable - Ventes</title>
 
-    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com" rel="preconnect"/>
-    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin/>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <!-- Fonts & icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
 
     <script>
         tailwind.config = {
@@ -20,32 +19,17 @@
             theme: {
                 extend: {
                     colors: {
-                        /* Palette OGOUÉ - Redesign */
                         "primary": "#1de22e",
-                        "secondary": "#1E3A5F",
                         "background-light": "#f6f8f6",
                         "background-dark": "#111712",
-                        "card-light": "#FFFFFF",
-                        "card-dark": "#1a2622",
-                        "text-light-primary": "#0a0c0a",
-                        "text-dark-primary": "#f6f8f6",
-                        "text-light-secondary": "#5c6c60",
-                        "text-dark-secondary": "#9ca3a8",
-                        "border-light": "#e8ede8",
-                        "border-dark": "#2a3a32",
-                        "success": "#27AE60",
-                        "danger": "#E74C3C",
                     },
                     fontFamily: { "display": ["Manrope", "sans-serif"] },
                     borderRadius: {
-                        "DEFAULT": "1rem",
-                        "lg": "2rem",
-                        "xl": "3rem",
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
                         "full": "9999px"
                     },
-                    boxShadow: {
-                        "soft": "0 8px 20px rgba(29, 226, 46, 0.08)"
-                    }
                 },
             },
         }
@@ -62,7 +46,6 @@
             box-sizing: border-box !important;
             line-height: 56px !important;          /* centre le texte */
             position: relative;                     /* pour positionner l'indicateur */
-            color-scheme: light dark;               /* Active le datepicker adapté au mode sombre */
         }
 
         /* Chrome / WebKit: positionner l'indicateur à l'extrême droite */
@@ -75,7 +58,6 @@
             height: 20px;
             opacity: 1;
             cursor: pointer;
-            filter: invert(0.8);
         }
 
         .date-input::-webkit-datetime-edit{
@@ -83,29 +65,10 @@
             padding: 0 !important;
         }
 
-        /* Mode sombre: icône du calendrier en clair */
-        html.dark .date-input::-webkit-calendar-picker-indicator {
-            filter: invert(1) brightness(0.9);
-        }
-
         /* Firefox */
         .date-input::-moz-calendar-picker-indicator {
             margin-left: auto;
             margin-right: 12px;
-            filter: invert(0.8);
-        }
-
-        html.dark .date-input::-moz-calendar-picker-indicator {
-            filter: invert(1) brightness(0.9);
-        }
-
-        /* Améliorations pour le calendrier du navigateur en mode sombre */
-        @media (prefers-color-scheme: dark) {
-            input[type="date"],
-            input[type="time"],
-            input[type="datetime-local"] {
-                color-scheme: dark;
-            }
         }
     </style>
 </head>
@@ -122,12 +85,18 @@
                     <h2 class="text-lg font-bold leading-tight tracking-[-0.015em]">OGOUE</h2>
                 </div>
                 <div class="hidden md:flex items-center gap-9">
-
+                    <a class="text-[#0d1b19] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
+                       href="module_tableau_bord.html">
+                        Tableau de Bord
+                    </a>
                     <a class="text-primary text-sm font-bold leading-normal"
                        href="module_ventes.html">
                         Comptabilité
                     </a>
-                
+                    <a class="text-[#0d1b19] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
+                       href="module_scoring.html">
+                        Financement
+                    </a>
                 </div>
                 <div class="flex items-center gap-2">
                     <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary/20 text-[#0d1b19] dark:bg-primary/30 dark:text-white" data-action="notifications">
@@ -167,17 +136,21 @@
                 <!-- Onglets -->
                 <div class="border-b border-gray-200 dark:border-gray-700">
                     <nav class="flex gap-8 -mb-px">
-                        <a href="module_agent_dashboard.html"
+                        <a href="module_ventes.html"
                            class="flex flex-col items-center justify-center border-b-[3px] border-b-primary text-[#0d1b19] dark:text-white pb-3 pt-4 px-2">
                             <p class="text-sm font-bold leading-normal tracking-[0.015em]">Ventes</p>
                         </a>
-                        <a href="module_agent_depenses.html"
+                        <a href="module_depenses.html"
                            class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
                             <p class="text-sm font-bold leading-normal tracking-[0.015em]">Dépenses</p>
                         </a>
-                        <a href="module_agent_resume.html"
+                        <a href="module_resume_ventes_depenses.html"
                            class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
                             <p class="text-sm font-bold leading-normal tracking-[0.015em]">Résumé</p>
+                        </a>
+                        <a href="module_etats_financiers.html"
+                           class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
+                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">Analyse financière</p>
                         </a>
                     </nav>
                 </div>
@@ -346,7 +319,7 @@
                 <!-- Tableau des ventes récentes (vue compacte) -->
                 <div class="mt-4">
                     <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-xl font-bold text-[#0d1b19] dark:text:white">
+                        <h2 class="text-xl font-bold text-[#0d1b19] dark:text-white">
                             Ventes récentes d'aujourd'hui
                         </h2>
                         <button
@@ -425,7 +398,6 @@
                         <th class="px-6 py-4" scope="col">Prix Total</th>
                         <th class="px-6 py-4" scope="col">Paiement</th>
                         <th class="px-6 py-4" scope="col">Type</th>
-                        <th class="px-6 py-4" scope="col">Créé par</th>
                         <th class="px-6 py-4" scope="col">Justificatif</th>
                         <th class="px-6 py-4 text-center" scope="col">Action</th>
                     </tr>

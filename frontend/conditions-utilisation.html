@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Conditions d'Utilisation - OGOUE</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" crossorigin href="https://fonts.gstatic.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#1de22e",
+            "background-light": "#f6f8f6",
+            "background-dark": "#111712",
+            "text-light": "#0a0c0a",
+            "text-light-muted": "#5c6c60",
+            secondary: "#1E3A5F",
+          },
+          fontFamily: {
+            display: ["Manrope", "sans-serif"],
+          },
+          borderRadius: {
+            DEFAULT: "1rem",
+            lg: "2rem",
+            xl: "3rem",
+            full: "9999px",
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+</head>
+
+<body class="bg-background-light font-display text-text-light antialiased">
+  <div class="relative w-full overflow-x-hidden">
+
+    <!-- HEADER -->
+    <header class="sticky top-0 z-50 w-full bg-background-light/80 backdrop-blur-md">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20 border-b border-black/10">
+          <div class="flex items-center gap-4">
+            <div class="size-6 text-primary">
+              <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M44 11.2727C44 14.0109 39.8386 16.3957 33.69 17.6364C39.8386 18.877 44 21.2618 44 24C44 26.7382 39.8386 29.123 33.69 30.3636C39.8386 31.6043 44 33.9891 44 36.7273C44 40.7439 35.0457 44 24 44C12.9543 44 4 40.7439 4 36.7273C4 33.9891 8.16144 31.6043 14.31 30.3636C8.16144 29.123 4 26.7382 4 24C4 21.2618 8.16144 18.877 14.31 17.6364C8.16144 16.3957 4 14.0109 4 11.2727C4 7.25611 12.9543 4 24 4C35.0457 4 44 7.25611 44 11.2727Z" fill="currentColor"></path>
+              </svg>
+            </div>
+            <a href="/index.html" class="text-text-light text-xl font-bold tracking-tight">OGOUE</a>
+          </div>
+
+          <nav class="hidden md:flex items-center gap-8">
+            <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/index.html">Accueil</a>
+            <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/index.html#features">Fonctionnalités</a>
+            <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/index.html#benefits">Avantages</a>
+            <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/apropos.html">À propos</a>
+          </nav>
+
+          <div class="hidden md:flex items-center gap-3">
+            <a href="/login.html" class="text-text-light-muted hover:text-text-light text-sm font-semibold transition-colors">Se connecter</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+
+      <!-- PAGE HEADER -->
+      <section class="py-16 sm:py-20 border-b border-black/10">
+        <div class="max-w-4xl mx-auto px-6 lg:px-8">
+          <h1 class="text-4xl font-black tracking-tighter text-text-light sm:text-5xl">
+            Conditions d'Utilisation
+          </h1>
+          <p class="mt-3 text-text-light-muted">
+            Dernière mise à jour : janvier 2026
+          </p>
+        </div>
+      </section>
+
+      <!-- CONTENT -->
+      <section class="py-16 sm:py-20">
+        <div class="max-w-4xl mx-auto px-6 lg:px-8 space-y-12">
+
+          <!-- Section 1 -->
+          <div class="space-y-4">
+            <h2 class="text-2xl font-bold text-text-light">1. Acceptation des conditions</h2>
+            <p class="text-text-light-muted leading-relaxed">
+              En accédant et en utilisant OGOUE, vous acceptez sans réserve ces conditions d'utilisation. Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser la plateforme. OGOUE se réserve le droit de modifier ces conditions à tout moment, sans préavis.
+            </p>
+          </div>
+
+          <!-- Section 2 -->
+          <div class="space-y-4">
+            <h2 class="text-2xl font-bold text-text-light">2. Description du service</h2>
+            <p class="text-text-light-muted leading-relaxed">
+              OGOUE est une plateforme logicielle de gestion financière conçue pour les petites et moyennes entreprises (PME). La plateforme fournit des outils pour la gestion des finances, l'audit de données et la génération de rapports financiers.
+            </p>
+          </div>
+
+          <!-- Section 3 -->
+          <div class="space-y-4">
+            <h2 class="text-2xl font-bold text-text-light">3. Eligibilité des utilisateurs</h2>
+            <p class="text-text-light-muted leading-relaxed">
+              Vous confirmez que vous avez au moins 18 ans et que vous êtes légalement autorisé à conclure des contrats. OGOUE ne peut être utilisée que par les entreprises légalement constituées et représentées par une personne autorisée.
+            </p>
+          </div>
+
+          <!-- Section 4 -->
+          <div class="space-y-4">
+            <h2 class="text-2xl font-bold text-text-light">4. Confidentialité et sécurité des données</h2>
+            <p class="text-text-light-muted leading-relaxed">
+              Vous vous engagez à maintenir la confidentialité de vos identifiants de connexion. OGOUE utilise les meilleures pratiques de sécurité pour protéger vos données financières. Cependant, aucune transmission sur Internet n'est entièrement sécurisée. Vous utilisez OGOUE à vos propres risques.
+            </p>
+          </div>
+
+          <!-- Section 5 -->
+          <div class="space-y-4">
+            <h2 class="text-2xl font-bold text-text-light">5. Utilisation acceptable</h2>
+            <p class="text-text-light-muted leading-relaxed mb-4">
+              Vous vous engagez à ne pas :
+            </p>
+            <ul class="space-y-2 text-text-light-muted">
+              <li class="flex gap-3">
+                <span class="text-primary font-bold">•</span>
+                <span>Violer les lois et réglementations en vigueur</span>
+              </li>
+              <li class="flex gap-3">
+                <span class="text-primary font-bold">•</span>
+                <span>Transmettre des données frauduleuses ou inexactes</span>
+              </li>
+              <li class="flex gap-3">
+                <span class="text-primary font-bold">•</span>
+                <span>Accéder à d'autres comptes sans autorisation</span>
+              </li>
+              <li class="flex gap-3">
+                <span class="text-primary font-bold">•</span>
+                <span>Surcharger les serveurs ou perturber le service</span>
+              </li>
+              <li class="flex gap-3">
+                <span class="text-primary font-bold">•</span>
+                <span>Tenter de contourner les mesures de sécurité</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Section 6 -->
+          <div class="space-y-4">
+            <h2 class="text-2xl font-bold text-text-light">6. Responsabilité limitée</h2>
+            <p class="text-text-light-muted leading-relaxed">
+              OGOUE et ses prestataires ne sont pas responsables des dommages indirects, accessoires ou consécutifs résultant de votre utilisation de la plateforme. La responsabilité totale d'OGOUE ne dépassera pas le montant des frais payés par vous au cours des 12 derniers mois.
+            </p>
+          </div>
+
+          <!-- Section 7 -->
+          <div class="space-y-4">
+            <h2 class="text-2xl font-bold text-text-light">7. Propriété intellectuelle</h2>
+            <p class="text-text-light-muted leading-relaxed">
+              Tout le contenu de la plateforme OGOUE, y compris les textes, graphiques, logos et logiciels, est la propriété intellectuelle d'OGOUE ou de ses concédants de licence. Vous ne pouvez pas reproduire, distribuer ou transmettre ce contenu sans permission écrite.
+            </p>
+          </div>
+
+          <!-- Section 8 -->
+          <div class="space-y-4">
+            <h2 class="text-2xl font-bold text-text-light">8. Résiliation du compte</h2>
+            <p class="text-text-light-muted leading-relaxed">
+              OGOUE se réserve le droit de suspendre ou de résilier votre compte à tout moment, avec ou sans préavis, en cas de violation de ces conditions ou pour toute autre raison. Vous pouvez également résilier votre compte en envoyant une demande écrite.
+            </p>
+          </div>
+
+          <!-- Section 9 -->
+          <div class="space-y-4">
+            <h2 class="text-2xl font-bold text-text-light">9. Conformité légale</h2>
+            <p class="text-text-light-muted leading-relaxed">
+              Vous acceptez que vos données financières soient traitées conformément aux lois applicables en matière de protection des données. OGOUE respecte les normes de confidentialité internationales et met en place les mesures de sécurité nécessaires.
+            </p>
+          </div>
+
+          <!-- Section 10 -->
+          <div class="space-y-4">
+            <h2 class="text-2xl font-bold text-text-light">10. Dispositions finales</h2>
+            <p class="text-text-light-muted leading-relaxed mb-4">
+              Ces conditions constituent l'intégralité de l'accord entre vous et OGOUE. Si une disposition est jugée invalide, les autres dispositions resteront en vigueur. OGOUE peut céder ses droits sans votre consentement.
+            </p>
+            <p class="text-text-light-muted leading-relaxed">
+              Pour toute question relative à ces conditions, veuillez nous contacter à : <a href="mailto:legal@ogoue.com" class="text-primary hover:text-text-light transition-colors">legal@ogoue.com</a>
+            </p>
+          </div>
+
+          <!-- CTA -->
+          <div class="mt-16 pt-8 border-t border-black/10">
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+              <a href="/signin.html" class="px-8 py-3 rounded-lg bg-primary text-background-dark font-bold hover:bg-text-light transition-colors text-center">
+                Créer un compte
+              </a>
+              <a href="/index.html" class="px-8 py-3 rounded-lg border border-black/10 text-text-light font-bold hover:bg-black/5 transition-colors text-center">
+                Retour à l'accueil
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-black/10">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8 py-8">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-8">
+          <div class="flex items-center gap-4">
+            <div class="size-6 text-primary">
+              <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M44 11.2727C44 14.0109 39.8386 16.3957 33.69 17.6364C39.8386 18.877 44 21.2618 44 24C44 26.7382 39.8386 29.123 33.69 30.3636C39.8386 31.6043 44 33.9891 44 36.7273C44 40.7439 35.0457 44 24 44C12.9543 44 4 40.7439 4 36.7273C4 33.9891 8.16144 31.6043 14.31 30.3636C8.16144 29.123 4 26.7382 4 24C4 21.2618 8.16144 18.877 14.31 17.6364C8.16144 16.3957 4 14.0109 4 11.2727C4 7.25611 12.9543 4 24 4C35.0457 4 44 7.25611 44 11.2727Z" fill="currentColor"></path>
+              </svg>
+            </div>
+            <span class="text-text-light text-lg font-bold tracking-tight">OGOUE</span>
+          </div>
+
+          <p class="text-sm text-text-light-muted">© 2026 OGOUE. Tous droits réservés.</p>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+</body>
+</html>

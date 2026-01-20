@@ -514,6 +514,10 @@ document.addEventListener("DOMContentLoaded", function () {
             const type = v.type_vente === "produits" ? "Produits" : v.type_vente === "services" ? "Service" : v.type_vente || "-";
             const creePar = v.created_by_name || "-";
             const justificatif = v.justificatif || v.receipt || "-";
+            const justificatifUrl = v.justificatifUrl || v.receiptUrl || "";
+            const justificatifHtml = justificatif !== "-"
+              ? `<span class="font-medium text-primary cursor-pointer hover:underline justificatif-link" data-file="${justificatif}" data-url="${justificatifUrl}">${justificatif}</span>`
+              : "-";
 
             html += `
                         <tr class="border-b border-[#cfe7e3] dark:border-gray-700">
@@ -525,7 +529,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             <td class="px-4 py-3">${paiement}</td>
                             <td class="px-4 py-3">${type}</td>
                             <td class="px-4 py-3">${creePar}</td>
-                            <td class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">${justificatif}</td>
+                            <td class="px-4 py-3 text-xs">${justificatifHtml}</td>
                         </tr>
             `;
         });
@@ -573,6 +577,10 @@ document.addEventListener("DOMContentLoaded", function () {
             const paiement = d.moyen_paiement || d.moyenPaiement || "-";
             const creePar = d.created_by_name || "-";
             const justificatif = d.justificatif || "-";
+            const justificatifUrl = d.justificatifUrl || "";
+            const justificatifHtml = justificatif !== "-"
+              ? `<span class="font-medium text-primary cursor-pointer hover:underline justificatif-link" data-file="${justificatif}" data-url="${justificatifUrl}">${justificatif}</span>`
+              : "-";
 
             html += `
                         <tr class="border-b border-[#cfe7e3] dark:border-gray-700">
@@ -582,7 +590,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             <td class="px-4 py-3 text-right font-semibold">${montantNum.toFixed(2).replace('.', ',')} FCFA</td>
                             <td class="px-4 py-3">${paiement}</td>
                             <td class="px-4 py-3">${creePar}</td>
-                            <td class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">${justificatif}</td>
+                            <td class="px-4 py-3 text-xs">${justificatifHtml}</td>
                         </tr>
             `;
         });
@@ -756,6 +764,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 </div>`;
             resultsContainer.innerHTML = ventesHtml;
 
+            // Ajouter les event listeners pour les justificatifs
+            const justificatifLinks = resultsContainer.querySelectorAll('.justificatif-link');
+            justificatifLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    const fileName = link.getAttribute('data-file');
+                    const fileUrl = link.getAttribute('data-url');
+                    openJustificatifModal(fileName, fileUrl);
+                });
+            });
+
             window.etatFinanciersData = window.etatFinanciersData || {};
             window.etatFinanciersData.ventes = ventesFiltered;
             window.etatFinanciersData.ventesHtml = ventesHtml;
@@ -805,6 +823,16 @@ document.addEventListener("DOMContentLoaded", function () {
                     ${renderHistoriqueDepenses(depensesFiltered)}
                 </div>`;
             resultsContainer.innerHTML = depensesHtml;
+
+            // Ajouter les event listeners pour les justificatifs
+            const justificatifLinks = resultsContainer.querySelectorAll('.justificatif-link');
+            justificatifLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    const fileName = link.getAttribute('data-file');
+                    const fileUrl = link.getAttribute('data-url');
+                    openJustificatifModal(fileName, fileUrl);
+                });
+            });
 
             window.etatFinanciersData = window.etatFinanciersData || {};
             window.etatFinanciersData.depenses = depensesFiltered;
@@ -1278,4 +1306,90 @@ function downloadCSV(csvContent, filename) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+}
+
+/**
+ * Modal pour afficher et télécharger le justificatif
+ */
+function openJustificatifModal(fileName, fileUrl) {
+    // Vérifier si un modal existe déjà et le supprimer
+    const existingModal = document.getElementById('justificatif-modal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    const modal = document.createElement('div');
+    modal.id = 'justificatif-modal';
+    modal.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-9999';
+    
+    const modalContent = document.createElement('div');
+    modalContent.className = 'bg-card-light dark:bg-card-dark rounded-xl max-w-md w-full mx-4 shadow-lg p-8 relative border border-[#e8ede8] dark:border-[#2a3a32]';
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.id = 'close-justificatif';
+    closeBtn.className = 'absolute top-4 right-4 w-8 h-8 rounded-full bg-[#f0f0f0] dark:bg-[#2a3a32] flex items-center justify-center text-[#666] dark:text-[#999] hover:bg-[#e0e0e0] dark:hover:bg-[#3a4a42] transition-colors';
+    closeBtn.innerHTML = '<span class="material-symbols-outlined">close</span>';
+    closeBtn.type = 'button';
+    
+    const title = document.createElement('h2');
+    title.className = 'text-lg font-bold text-text-light-primary dark:text-text-dark-primary mb-2 text-center font-display';
+    title.textContent = 'Justificatif enregistré:';
+    
+    const fileName_elem = document.createElement('p');
+    fileName_elem.className = 'text-sm text-text-light-secondary dark:text-text-dark-secondary text-center mb-6 break-words font-medium';
+    fileName_elem.textContent = fileName;
+    
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'flex gap-3 justify-center';
+    
+    if (fileUrl) {
+        const viewUrl = fileUrl.includes('?') ? `${fileUrl}&download=` : `${fileUrl}?download=`;
+        
+        const consultBtn = document.createElement('a');
+        consultBtn.href = viewUrl;
+        consultBtn.target = '_blank';
+        consultBtn.rel = 'noopener noreferrer';
+        consultBtn.className = 'inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-success/10 text-success hover:bg-success/20 transition-colors font-medium text-sm font-display border border-success/20 hover:border-success/40';
+        consultBtn.innerHTML = '<span class="material-symbols-outlined" style="font-variation-settings: \'FILL\' 1;">visibility</span> Consulter';
+        
+        const downloadBtn = document.createElement('a');
+        downloadBtn.href = fileUrl;
+        downloadBtn.download = fileName;
+        downloadBtn.className = 'inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-background-light hover:bg-primary/90 transition-colors font-medium text-sm font-display shadow-soft';
+        downloadBtn.innerHTML = '<span class="material-symbols-outlined" style="font-variation-settings: \'FILL\' 1;">download</span> Télécharger';
+        
+        actionsDiv.appendChild(consultBtn);
+        actionsDiv.appendChild(downloadBtn);
+    } else {
+        const noFileDiv = document.createElement('div');
+        noFileDiv.className = 'p-4 bg-danger/10 dark:bg-danger/5 rounded-lg text-danger text-sm text-center border border-danger/20';
+        noFileDiv.textContent = 'Fichier non disponible';
+        actionsDiv.appendChild(noFileDiv);
+    }
+    
+    modalContent.appendChild(closeBtn);
+    modalContent.appendChild(title);
+    modalContent.appendChild(fileName_elem);
+    modalContent.appendChild(actionsDiv);
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+
+    // Fermer le modal au clic sur le bouton
+    closeBtn.addEventListener('click', () => {
+        modal.remove();
+    });
+    
+    // Fermer le modal au clic en dehors
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+
+    // Fermer le modal au clic en dehors
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
 }

@@ -362,7 +362,7 @@
     return tr;
   }
 
-  // Modal pour afficher le justificatif
+  // Modal pour afficher et télécharger le justificatif
   function openJustificatifModal(fileName, fileUrl) {
     // Vérifier si un modal existe déjà et le supprimer
     const existingModal = document.getElementById('justificatif-modal');
@@ -372,64 +372,71 @@
 
     const modal = document.createElement('div');
     modal.id = 'justificatif-modal';
-    modal.innerHTML = `
-      <div style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;" class="modal-overlay">
-        <div style="background:white;border-radius:8px;max-width:500px;width:90%;position:relative;box-shadow:0 10px 40px rgba(0,0,0,0.3);" class="dark:bg-gray-800">
-          <button id="close-justificatif" style="position:absolute;top:12px;right:12px;background:#e5e7eb;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;z-index:10;" class="dark:bg-gray-700">
-            ✕
-          </button>
-          <div id="justificatif-content" style="padding:40px;text-align:center;"></div>
-        </div>
-      </div>
-    `;
+    modal.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-9999';
+    
+    const modalContent = document.createElement('div');
+    modalContent.className = 'bg-card-light dark:bg-card-dark rounded-xl max-w-md w-full mx-4 shadow-lg p-8 relative border border-[#e8ede8] dark:border-[#2a3a32]';
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.id = 'close-justificatif';
+    closeBtn.className = 'absolute top-4 right-4 w-8 h-8 rounded-full bg-[#f0f0f0] dark:bg-[#2a3a32] flex items-center justify-center text-[#666] dark:text-[#999] hover:bg-[#e0e0e0] dark:hover:bg-[#3a4a42] transition-colors';
+    closeBtn.innerHTML = '<span class="material-symbols-outlined">close</span>';
+    closeBtn.type = 'button';
+    
+    const title = document.createElement('h2');
+    title.className = 'text-lg font-bold text-text-light-primary dark:text-text-dark-primary mb-2 text-center font-display';
+    title.textContent = 'Justificatif enregistré:';
+    
+    const fileName_elem = document.createElement('p');
+    fileName_elem.className = 'text-sm text-text-light-secondary dark:text-text-dark-secondary text-center mb-6 break-words font-medium';
+    fileName_elem.textContent = fileName;
+    
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'flex gap-3 justify-center';
+    
+    if (fileUrl) {
+        const viewUrl = fileUrl.includes('?') ? `${fileUrl}&download=` : `${fileUrl}?download=`;
+        
+        const consultBtn = document.createElement('a');
+        consultBtn.href = viewUrl;
+        consultBtn.target = '_blank';
+        consultBtn.rel = 'noopener noreferrer';
+        consultBtn.className = 'inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-success/10 text-success hover:bg-success/20 transition-colors font-medium text-sm font-display border border-success/20 hover:border-success/40';
+        consultBtn.innerHTML = '<span class="material-symbols-outlined" style="font-variation-settings: \'FILL\' 1;">visibility</span> Consulter';
+        
+        const downloadBtn = document.createElement('a');
+        downloadBtn.href = fileUrl;
+        downloadBtn.download = fileName;
+        downloadBtn.className = 'inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-background-light hover:bg-primary/90 transition-colors font-medium text-sm font-display shadow-soft';
+        downloadBtn.innerHTML = '<span class="material-symbols-outlined" style="font-variation-settings: \'FILL\' 1;">download</span> Télécharger';
+        
+        actionsDiv.appendChild(consultBtn);
+        actionsDiv.appendChild(downloadBtn);
+    } else {
+        const noFileDiv = document.createElement('div');
+        noFileDiv.className = 'p-4 bg-danger/10 dark:bg-danger/5 rounded-lg text-danger text-sm text-center border border-danger/20';
+        noFileDiv.textContent = 'Fichier non disponible';
+        actionsDiv.appendChild(noFileDiv);
+    }
+    
+    modalContent.appendChild(closeBtn);
+    modalContent.appendChild(title);
+    modalContent.appendChild(fileName_elem);
+    modalContent.appendChild(actionsDiv);
+    modal.appendChild(modalContent);
     document.body.appendChild(modal);
 
     // Fermer le modal au clic sur le bouton
-    document.getElementById('close-justificatif').addEventListener('click', () => {
-      modal.remove();
-    });
-
-    // Fermer le modal au clic en dehors
-    modal.querySelector('.modal-overlay').addEventListener('click', (e) => {
-      if (e.target === modal.querySelector('.modal-overlay')) {
+    closeBtn.addEventListener('click', () => {
         modal.remove();
-      }
     });
-
-    // Remplir le contenu
-    const content = document.getElementById('justificatif-content');
     
-    // Préparer les boutons d'action
-    let actionHtml = '';
-    if (fileUrl) {
-      // Construire l'URL pour visualiser (sans forcer le téléchargement)
-      const viewUrl = fileUrl.includes('?') ? `${fileUrl}&download=` : `${fileUrl}?download=`;
-      
-      actionHtml = `
-        <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;">
-          <a href="${viewUrl}" target="_blank" rel="noopener noreferrer" style="padding:8px 16px;background:#4CAF50;color:white;border-radius:6px;text-decoration:none;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;gap:6px;">
-            👁️ Consulter
-          </a>
-          <a href="${fileUrl}" download="${fileName}" style="padding:8px 16px;background:#2196F3;color:white;border-radius:6px;text-decoration:none;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;gap:6px;">
-            ⬇️ Télécharger
-          </a>
-        </div>
-      `;
-    } else {
-      actionHtml = `
-        <div style="padding:20px;background:#fff3cd;border-radius:6px;margin-top:20px;color:#856404;" class="dark:bg-yellow-900">
-          <p style="margin:0;font-size:13px;">⚠️ Fichier non uploadé vers le cloud (ancien enregistrement)</p>
-        </div>
-      `;
-    }
-    
-    content.innerHTML = `
-      <div style="margin-bottom:20px;">
-        <p style="font-size:14px;color:#666;margin-bottom:10px;">Justificatif enregistré:</p>
-        <p style="font-size:18px;font-weight:bold;color:#0d1b19;word-break:break-word;" class="dark:text-white">${fileName}</p>
-      </div>
-      ${actionHtml}
-    `;
+    // Fermer le modal au clic en dehors
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
   }
 
   // Cache pour les dépenses afin de limiter les appels API
@@ -460,9 +467,9 @@
   async function renderCompactTable() {
     const depenses = await getDepensesPeriodeCourante();
     
-    // Filtrer pour afficher les dépenses du mois/année courant (pas juste aujourd'hui)
-    // car les dates peuvent avoir un décalage UTC/local
-    const { mois, annee } = appState.periodeCourante || {};
+    // Filtrer pour afficher SEULEMENT les dépenses d'aujourd'hui
+    const today = new Date();
+    const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     
     const depensesAujourdhui = depenses.filter((d) => {
       const dateStr = d.date || d.expense_date || d.expenseDate;
@@ -472,8 +479,11 @@
       const dt = new Date(dateStr);
       if (isNaN(dt.getTime())) return false;
       
-      // Comparer par mois et année (pas jour pour éviter les décalages UTC)
-      return dt.getMonth() + 1 === mois && dt.getFullYear() === annee;
+      // Créer une date locale sans heure
+      const dDate = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+      
+      // Comparer les dates (aujourd'hui uniquement)
+      return dDate.getTime() === todayDateOnly.getTime();
     });
 
     tbodyCompact.innerHTML = "";

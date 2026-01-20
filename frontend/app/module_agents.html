@@ -1,41 +1,121 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion des Agents - OGOUE</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#1de22e",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#111712",
+                        "text-light": "#0a0c0a",
+                        "text-light-muted": "#5c6c60",
+                        secondary: "#1E3A5F",
+                    },
+                    fontFamily: {
+                        display: ["Manrope", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "1rem",
+                        lg: "2rem",
+                        xl: "3rem",
+                        full: "9999px",
+                    },
+                },
+            },
+        };
+    </script>
+
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900">
-    <div class="min-h-screen">
-        <!-- Header -->
-        <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-            <div class="max-w-6xl mx-auto px-6 py-6 flex justify-between items-center">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Gestion des Agents</h1>
-                    <p class="text-gray-600 dark:text-gray-400 mt-1">Créez et gérez les accès des agents à votre boutique</p>
+<body class="font-display bg-background-light text-text-light antialiased">
+    <div class="relative w-full overflow-x-hidden min-h-screen flex flex-col">
+        <!-- HEADER -->
+        <header class="sticky top-0 z-50 w-full bg-background-light/80 backdrop-blur-md border-b border-black/10">
+            <div class="max-w-7xl mx-auto px-6 lg:px-8">
+                <div class="flex items-center justify-between h-20">
+                    <div class="flex items-center gap-4">
+                        <div class="size-6 text-primary">
+                            <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path d="M44 11.2727C44 14.0109 39.8386 16.3957 33.69 17.6364C39.8386 18.877 44 21.2618 44 24C44 26.7382 39.8386 29.123 33.69 30.3636C39.8386 31.6043 44 33.9891 44 36.7273C44 40.7439 35.0457 44 24 44C12.9543 44 4 40.7439 4 36.7273C4 33.9891 8.16144 31.6043 14.31 30.3636C8.16144 29.123 4 26.7382 4 24C4 21.2618 8.16144 18.877 14.31 17.6364C8.16144 16.3957 4 14.0109 4 11.2727C4 7.25611 12.9543 4 24 4C35.0457 4 44 7.25611 44 11.2727Z" fill="currentColor"></path>
+                            </svg>
+                        </div>
+                        <a href="module_tableau_bord.html" class="text-text-light text-xl font-bold tracking-tight">OGOUE</a>
+                    </div>
+
+                    <div class="hidden md:flex items-center gap-8">
+                        <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="module_tableau_bord.html">Tableau de Bord</a>
+                        <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="module_ventes.html">Comptabilité</a>
+                        <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="module_scoring.html">Financement</a>
+                    </div>
+
+                    <!-- Menu mobile -->
+                    <div id="mobile-menu" class="md:hidden absolute top-full left-0 right-0 bg-background-light border-b border-black/10 hidden">
+                        <div class="flex flex-col gap-2 p-4">
+                            <a class="text-text-light text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100" href="module_tableau_bord.html">Tableau de Bord</a>
+                            <a class="text-text-light text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100" href="module_ventes.html">Comptabilité</a>
+                            <a class="text-text-light text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100" href="module_scoring.html">Financement</a>
+                        </div>
+                    </div>
+
+                    <!-- Bouton menu mobile -->
+                    <button id="menu-toggle" class="md:hidden flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 text-text-light">
+                        <span class="material-symbols-outlined">menu</span>
+                    </button>
+
+                    <div class="flex items-center gap-2">
+                        <button class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-primary/20 text-text-light" data-action="notifications">
+                            <span class="material-symbols-outlined">notifications</span>
+                        </button>
+                        <button class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-primary/20 text-text-light" data-action="settings">
+                            <span class="material-symbols-outlined">settings</span>
+                        </button>
+                        <button class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-primary/20 text-[#0a0c0a] hover:bg-primary/30 transition-colors"
+                             data-action="profile"
+                             title="Profil utilisateur">
+                            <span class="material-symbols-outlined text-2xl">account_circle</span>
+                        </button>
+                    </div>
                 </div>
-                <button 
-                    onclick="window.history.back()"
-                    class="flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-                >
-                    <span class="material-symbols-outlined" style="font-size: 20px;">arrow_back</span>
-                    Retour
-                </button>
             </div>
         </header>
 
-        <!-- Contenu principal -->
-        <main class="max-w-6xl mx-auto px-6 py-12">
+        <!-- MAIN CONTENT -->
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 py-12">
+            <!-- Titre page -->
+            <div class="mb-12 flex items-center gap-4">
+                <button 
+                    onclick="history.back()" 
+                    class="flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 text-primary hover:bg-primary/30 transition-colors"
+                    title="Retour"
+                >
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </button>
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-black tracking-tight text-text-light mb-2">Gestion des Agents</h1>
+                    <p class="text-text-light-muted">Créez et gérez les accès des agents à votre organisation</p>
+                </div>
+            </div>
+
             <!-- Section de création -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-8 mb-8">
-                <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Créer un nouvel agent</h2>
+            <div class="bg-white rounded-xl shadow-sm p-8 mb-8">
+                <h2 class="text-xl font-bold text-text-light mb-6">Créer un nouvel agent</h2>
                 
                 <form id="agentForm" class="space-y-4">
                     <div>
-                        <label for="firstName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label for="firstName" class="block text-sm font-semibold text-text-light mb-2">
                             Prénom de l'agent
                         </label>
                         <input 
@@ -43,36 +123,41 @@
                             id="firstName" 
                             name="firstName" 
                             placeholder="Ex: Jean"
-                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                            class="w-full px-4 py-3 border border-black/10 rounded-lg bg-white text-text-light placeholder-text-light-muted/60 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
                             required
                         >
                     </div>
                     
                     <button 
                         type="submit" 
-                        class="w-full bg-teal-600 hover:bg-teal-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                        class="w-full py-3 px-4 rounded-lg bg-primary text-background-light font-bold text-sm hover:bg-text-light transition-colors"
                     >
-                        <span class="material-symbols-outlined inline mr-2" style="font-size: 20px; vertical-align: middle;">add</span>
+                        <span class="material-symbols-outlined inline mr-2" style="font-size: 18px; vertical-align: middle;">add</span>
                         Créer l'agent
                     </button>
                 </form>
             </div>
 
             <!-- Section de liste des agents -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
-                <div class="p-8 border-b border-gray-200 dark:border-gray-700">
-                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">Mes agents</h2>
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                <div class="p-8 border-b border-black/10">
+                    <h2 class="text-xl font-bold text-text-light">Mes agents</h2>
                 </div>
 
-                <div id="agentsList" class="divide-y divide-gray-200 dark:divide-gray-700">
+                <div id="agentsList" class="divide-y divide-black/10">
                     <!-- Les agents seront affichés ici -->
-                    <div class="p-8 text-center text-gray-500 dark:text-gray-400">
+                    <div class="p-8 text-center text-text-light-muted">
                         Chargement des agents...
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
+    </main>
     </div>
+
+    <script src="js/ogoue-state.js"></script>
+    <script src="js/header-ui.js"></script>
+    <script src="js/mobile-menu.js"></script>
 
     <script type="module">
         import { createAgent, listAgents, deleteAgent, copyAccessCode } from './js/agents-management.js';
@@ -98,7 +183,7 @@
             
             if (agents.length === 0) {
                 agentsList.innerHTML = `
-                    <div class="p-8 text-center text-gray-500 dark:text-gray-400">
+                    <div class="p-8 text-center text-text-light-muted">
                         <p>Aucun agent pour le moment</p>
                     </div>
                 `;
@@ -106,26 +191,26 @@
             }
 
             agentsList.innerHTML = agents.map((agent) => `
-                <div class="p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <div class="p-6 hover:bg-gray-50 transition-colors">
                     <div class="flex items-center justify-between">
                         <div class="flex-1">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">${agent.firstName}</h3>
+                            <h3 class="text-lg font-semibold text-text-light">${agent.firstName}</h3>
                             <div class="mt-3 space-y-2">
                                 <div class="flex items-center gap-3">
-                                    <span class="text-sm text-gray-600 dark:text-gray-400">Code d'accès :</span>
-                                    <code class="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded font-mono text-sm text-gray-900 dark:text-gray-100">
+                                    <span class="text-sm text-text-light-muted">Code d'accès :</span>
+                                    <code class="bg-gray-100 px-3 py-1 rounded font-mono text-sm text-text-light">
                                         ${agent.accessCode}
                                     </code>
                                     <button 
                                         type="button"
                                         onclick="navigator.clipboard.writeText('${agent.accessCode}').then(() => alert('Code copié !'))"
-                                        class="text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 text-sm font-medium transition-colors"
+                                        class="text-primary hover:text-text-light text-sm font-medium transition-colors"
                                     >
                                         <span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle;">content_copy</span>
                                         Copier
                                     </button>
                                 </div>
-                                <div class="text-xs text-gray-500 dark:text-gray-400">
+                                <div class="text-xs text-text-light-muted">
                                     Créé le : ${new Date(agent.createdAt).toLocaleDateString('fr-FR')}
                                 </div>
                             </div>
@@ -133,7 +218,7 @@
                         <button 
                             type="button"
                             onclick="if (confirm('Êtes-vous sûr de vouloir supprimer cet agent ?')) { deleteAgentHandler('${agent.id}'); }"
-                            class="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                            class="text-red-600 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition-colors"
                             title="Supprimer l'agent"
                         >
                             <span class="material-symbols-outlined" style="font-size: 24px;">delete</span>

@@ -1,299 +1,408 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>À Propos - OGOUE</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap"
-        rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        primary: "#0F766E",
-                        secondary: "#102C4C",
-                        "brand-dark-blue": "#4A6076",
-                        "background-light": "#F5F7FA",
-                        "background-dark": "#111827",
-                        "surface-light": "#FFFFFF",
-                        "surface-dark": "#1F2937",
-                        "text-main-light": "#111827",
-                        "text-main-dark": "#F9FAFB",
-                        "text-muted-light": "#6B7280",
-                        "text-muted-dark": "#9CA3AF",
-                    },
-                    fontFamily: {
-                        sans: ["Inter", "sans-serif"],
-                    },
-                    borderRadius: {
-                        DEFAULT: "0.5rem",
-                        'xl': '1rem',
-                    },
-                },
-            },
-        };
-    </script>
-    <style>
-        body {
-            font-family: "Inter", sans-serif;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>À Propos - OGOUE</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" crossorigin href="https://fonts.gstatic.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#1de22e",
+            "background-light": "#f6f8f6",
+            "background-dark": "#111712",
+            "text-light": "#0a0c0a",
+            "text-light-muted": "#5c6c60",
+            secondary: "#1E3A5F",
+          },
+          fontFamily: {
+            display: ["Manrope", "sans-serif"],
+          },
+          borderRadius: {
+            DEFAULT: "1rem",
+            lg: "2rem",
+            xl: "3rem",
+            full: "9999px",
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
 </head>
 
-<body
-    class="bg-background-light dark:bg-background-dark font-sans text-text-main-light dark:text-text-main-dark transition-colors duration-200">
-    <!-- NAVIGATION -->
-    <nav
-        class="sticky top-0 z-50 bg-white/90 dark:bg-card-dark/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <div class="flex-shrink-0 flex items-center gap-2">
-                    <div
-                        class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-xl">
-                        O</div>
-                    <span class="font-bold text-xl tracking-tight text-secondary dark:text-white">OGOUE</span>
-                </div>
-                <div class="hidden lg:flex space-x-6 items-center">
-                    <a class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition font-medium"
-                        href="index.html">Accueil</a>
-                    <div class="relative group">
-                        <button
-                            class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition font-medium flex items-center gap-1 focus:outline-none">
-                            Pour qui? <span class="material-icons-outlined text-base">expand_more</span>
-                        </button>
-                        <div
-                            class="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none hidden group-hover:block transition-all duration-200 z-50">
-                            <div aria-orientation="vertical" class="py-1" role="menu">
-                                <a class="block px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                    href="pourqui/pme.html" role="menuitem">
-                                    <div class="font-bold">Pour les PME</div>
-                                    <div class="text-xs text-gray-500 mt-0.5">Gestion et accès au financement</div>
-                                </a>
-                                <a class="block px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                    href="pourqui/microfinances.html" role="menuitem">
-                                    <div class="font-bold">Institutions Financières</div>
-                                    <div class="text-xs text-gray-500 mt-0.5">Données fiables et monitoring</div>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    <a class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition font-medium"
-                        href="index.html#features">Fonctionnalités</a>
-                    <a class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition font-medium"
-                        href="index.html#benefits">Avantages</a>
-                        <a class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition font-medium"
-                            href="index.html#partners">Partenaires</a>
-                    <a class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition font-medium"
-                        href="apropos.html">À propos</a>
-                </div>
-                <div class="hidden lg:flex items-center space-x-4">
-                    <a class="text-secondary dark:text-gray-200 font-medium hover:text-primary transition"
-                        href="login.html">Se connecter</a>
-                    <a class="bg-primary hover:bg-opacity-90 text-white px-5 py-2 rounded-lg font-medium transition shadow-lg shadow-primary/30"
-                        href="signin.html">Créer un compte</a>
-                </div>
-                <div class="lg:hidden flex items-center">
-                    <button
-                        class="text-gray-600 dark:text-gray-300 hover:text-gray-900 focus:outline-none p-2 rounded-md"
-                        onclick="toggleMobileMenu()">
-                        <span class="material-icons-outlined text-3xl">menu</span>
-                    </button>
-                </div>
+<body class="bg-background-light font-display text-text-light antialiased">
+  <div class="relative w-full overflow-x-hidden">
+
+    <!-- HEADER -->
+    <header class="sticky top-0 z-50 w-full bg-background-light/80 backdrop-blur-md">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20 border-b border-black/10">
+          <div class="flex items-center gap-4">
+            <div class="size-6 text-primary">
+              <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M44 11.2727C44 14.0109 39.8386 16.3957 33.69 17.6364C39.8386 18.877 44 21.2618 44 24C44 26.7382 39.8386 29.123 33.69 30.3636C39.8386 31.6043 44 33.9891 44 36.7273C44 40.7439 35.0457 44 24 44C12.9543 44 4 40.7439 4 36.7273C4 33.9891 8.16144 31.6043 14.31 30.3636C8.16144 29.123 4 26.7382 4 24C4 21.2618 8.16144 18.877 14.31 17.6364C8.16144 16.3957 4 14.0109 4 11.2727C4 7.25611 12.9543 4 24 4C35.0457 4 44 7.25611 44 11.2727Z" fill="currentColor"></path>
+              </svg>
             </div>
+            <a href="/index.html" class="text-text-light text-xl font-bold tracking-tight">OGOUE</a>
+          </div>
+
+          <nav class="hidden md:flex items-center gap-8">
+            <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/index.html">Accueil</a>
+            <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/index.html#features">Fonctionnalités</a>
+            <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/index.html#benefits">Avantages</a>
+            <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/index.html#partners">Partenaires</a>
+            <a class="text-text-light hover:text-text-light text-sm font-medium transition-colors" href="/apropos.html">À propos</a>
+          </nav>
+
+          <div class="hidden md:flex items-center gap-3">
+            <a href="/login.html" class="text-text-light-muted hover:text-text-light text-sm font-semibold transition-colors">Se connecter</a>
+            <a href="/signin.html"
+               class="flex min-w-[84px] items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-primary text-background-dark text-sm font-bold tracking-wide hover:bg-text-light transition-colors">
+              <span class="truncate">Commencer</span>
+            </a>
+          </div>
+
+          <!-- Mobile -->
+          <button id="mobileBtn" class="md:hidden inline-flex items-center justify-center rounded-full h-10 w-10 border border-black/10 bg-white hover:bg-white/60 transition"
+                  aria-label="Ouvrir le menu">
+            <span class="material-symbols-outlined">menu</span>
+          </button>
         </div>
-        <div class="hidden lg:hidden bg-white dark:bg-card-dark border-t border-gray-200 dark:border-gray-700 absolute w-full left-0 top-16 shadow-xl"
-            id="mobile-menu">
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <a class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800"
-                    href="index.html">Accueil</a>
-                <button
-                    class="w-full text-left flex justify-between items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800"
-                    onclick="toggleDropdown()">
-                    <span>Pour qui?</span>
-                    <span class="material-icons-outlined text-sm">expand_more</span>
-                </button>
-                <div class="hidden pl-6 space-y-1" id="mobile-dropdown">
-                    <a class="block px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-white"
-                        href="pourqui/pme.html">PME</a>
-                    <a class="block px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-white"
-                        href="pourqui/microfinances.html">Institutions Financières</a>
-                </div>
-                <a class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800"
-                    href="index.html#features">Fonctionnalités</a>
-                <a class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800"
-                    href="index.html#benefits">Avantages</a>
-                    <a class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800"
-                        href="index.html#partners">Partenaires</a>
-                <a class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800"
-                    href="apropos.html">À propos</a>
-                <div class="pt-4 border-t border-gray-200 dark:border-gray-700 mt-4 flex flex-col gap-2">
-                    <a class="block w-full text-center px-5 py-3 rounded-md font-medium text-secondary dark:text-gray-200 bg-gray-50 dark:bg-gray-800"
-                        href="login.html">Se connecter</a>
-                    <a class="block w-full text-center px-5 py-3 rounded-md font-medium text-white bg-primary"
-                        href="signin.html">Créer un compte</a>
-                </div>
+
+        <div id="mobileMenu" class="hidden md:hidden py-4 border-b border-black/10">
+          <div class="flex flex-col gap-2">
+            <a class="rounded-xl px-4 py-3 text-sm font-medium text-text-light-muted hover:text-text-light hover:bg-white/60 transition" href="/index.html">Accueil</a>
+            <a class="rounded-xl px-4 py-3 text-sm font-medium text-text-light-muted hover:text-text-light hover:bg-white/60 transition" href="/index.html#features">Fonctionnalités</a>
+            <a class="rounded-xl px-4 py-3 text-sm font-medium text-text-light-muted hover:text-text-light hover:bg-white/60 transition" href="/index.html#benefits">Avantages</a>
+            <a class="rounded-xl px-4 py-3 text-sm font-medium text-text-light-muted hover:text-text-light hover:bg-white/60 transition" href="/index.html#partners">Partenaires</a>
+            <a class="rounded-xl px-4 py-3 text-sm font-medium text-text-light hover:bg-white/60 transition" href="/apropos.html">À propos</a>
+            <div class="pt-2 flex flex-col gap-2">
+              <a href="/login.html" class="rounded-full h-11 px-6 inline-flex items-center justify-center border border-black/10 bg-white hover:bg-white/60 text-sm font-bold transition">Se connecter</a>
+              <a href="/signin.html" class="rounded-full h-11 px-6 inline-flex items-center justify-center bg-primary text-background-dark text-sm font-bold hover:bg-text-light transition">Créer un compte</a>
             </div>
+          </div>
         </div>
-    </nav>
 
-    <!-- MAIN CONTENT -->
-    <main class="flex-grow">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <!-- En-tête -->
-            <div class="text-center mb-16">
-                <h1 class="text-4xl lg:text-5xl font-bold mb-4">À Propos d'OGOUE</h1>
-                <p class="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                    La plateforme de gestion financière conçue pour les entreprises gabonaises
-                </p>
-            </div>
+      </div>
+    </header>
 
-            <!-- Notre Mission -->
-            <div class="grid lg:grid-cols-2 gap-12 items-center mb-20">
-                <div>
-                    <h2 class="text-3xl font-bold mb-6">Notre Mission</h2>
-                    <p class="text-lg text-gray-700 dark:text-gray-300 mb-4">
-                        OGOUE est née d'une vision simple : democratiser l'accès à la gestion financière professionnelle
-                        pour les PME et microentreprises gabonaises.
-                    </p>
-                    <p class="text-lg text-gray-700 dark:text-gray-300">
-                        Nous croyons que chaque entreprise, quelle que soit sa taille, mérite des outils puissants pour
-                        digitaliser sa comptabilité et accéder au financement bancaire.
-                    </p>
-                </div>
-                <div class="bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg p-8 h-80 flex items-center justify-center">
-                    <div class="text-center">
-                        <span class="material-icons-outlined text-6xl text-primary">mission</span>
-                        <p class="text-gray-700 dark:text-gray-300 mt-4 font-semibold">Digitaliser le Gabon</p>
-                    </div>
-                </div>
-            </div>
+    <main>
 
-            <!-- Nos Valeurs -->
-            <div class="mb-20">
-                <h2 class="text-3xl font-bold mb-12 text-center">Nos Valeurs</h2>
-                <div class="grid md:grid-cols-3 gap-8">
-                    <div class="bg-white dark:bg-card-dark rounded-lg p-8 shadow-sm">
-                        <span class="material-icons-outlined text-4xl text-primary mb-4 block">verified</span>
-                        <h3 class="text-xl font-bold mb-3">Transparence</h3>
-                        <p class="text-gray-600 dark:text-gray-400">
-                            Nous croyons en la clarté et l'honnêteté dans chaque interaction avec nos clients.
-                        </p>
-                    </div>
-                    <div class="bg-white dark:bg-card-dark rounded-lg p-8 shadow-sm">
-                        <span class="material-icons-outlined text-4xl text-primary mb-4 block">security</span>
-                        <h3 class="text-xl font-bold mb-3">Sécurité</h3>
-                        <p class="text-gray-600 dark:text-gray-400">
-                            Vos données financières sont protégées avec les standards de sécurité les plus élevés.
-                        </p>
-                    </div>
-                    <div class="bg-white dark:bg-card-dark rounded-lg p-8 shadow-sm">
-                        <span class="material-icons-outlined text-4xl text-primary mb-4 block">favorite</span>
-                        <h3 class="text-xl font-bold mb-3">Excellence</h3>
-                        <p class="text-gray-600 dark:text-gray-400">
-                            Nous nous engageons à fournir le meilleur service possible à chaque instant.
-                        </p>
-                    </div>
-                </div>
-            </div>
+      <!-- HERO -->
+      <section class="relative py-24 sm:py-32 lg:py-40">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 text-center relative z-10">
+          <h1 class="text-4xl font-black tracking-tighter text-text-light sm:text-6xl lg:text-7xl">
+            À propos<br class="hidden sm:block" />
+            <span class="text-primary">d'OGOUE</span>
+          </h1>
 
-            <!-- Notre Équipe (Concept) -->
-            <div class="bg-gradient-to-r from-secondary/10 to-primary/10 rounded-lg p-12 text-center mb-20">
-                <h2 class="text-3xl font-bold mb-4">Construite Par Des Experts</h2>
-                <p class="text-lg text-gray-700 dark:text-gray-300 max-w-2xl mx-auto mb-8">
-                    Notre équipe regroupe des experts en fintech, comptabilité et développement logiciel,
-                    passionnés par la transformation digitale des entreprises gabonaises.
-                </p>
-                <div class="flex justify-center gap-4">
-                    <div class="text-center">
-                        <span class="material-icons-outlined text-5xl text-primary mx-auto">engineering</span>
-                        <p class="mt-2 font-semibold">Tech</p>
-                    </div>
-                    <div class="text-center">
-                        <span class="material-icons-outlined text-5xl text-secondary mx-auto">calculate</span>
-                        <p class="mt-2 font-semibold">Finance</p>
-                    </div>
-                    <div class="text-center">
-                        <span class="material-icons-outlined text-5xl text-primary mx-auto">business</span>
-                        <p class="mt-2 font-semibold">Stratégie</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- CTA -->
-            <div class="text-center">
-                <h2 class="text-3xl font-bold mb-4">Prêt à Rejoindre OGOUE ?</h2>
-                <p class="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-xl mx-auto">
-                    Commencez votre transformation digitale dès aujourd'hui
-                </p>
-                <a href="signin.html"
-                    class="inline-block bg-primary hover:bg-opacity-90 text-white px-8 py-3 rounded-lg font-semibold transition shadow-lg">
-                    Créer un compte gratuitement
-                </a>
-            </div>
+          <h2 class="mt-6 text-lg font-normal text-text-light-muted max-w-3xl mx-auto">
+            OGOUÉ est une application web de <span class="text-text-light font-semibold">gestion financière</span> et de
+            <span class="text-text-light font-semibold">préparation au financement</span>, pensée pour les PME gabonaises et plus largement les entreprises d'Afrique centrale.
+          </h2>
         </div>
+      </section>
+
+      <!-- MISSION -->
+      <section class="py-24 sm:py-32">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <p class="text-primary font-bold text-sm tracking-wide uppercase">Notre mission</p>
+              <h2 class="mt-3 text-3xl font-bold tracking-tighter text-text-light sm:text-5xl">
+                Rendre la gestion financière professionnelle accessible
+              </h2>
+
+              <p class="mt-6 text-lg text-text-light-muted">
+                OGOUÉ est née d'un constat simple : beaucoup de PME ne disposent pas de données financières suffisamment
+                <span class="text-text-light font-semibold">propres, continues et exploitables</span> pour piloter leur activité… et encore moins pour préparer un financement.
+              </p>
+
+              <p class="mt-4 text-lg text-text-light-muted">
+                Notre mission est de permettre aux entrepreneurs de structurer leur gestion au quotidien (ventes, dépenses, tableaux de bord et documents financiers),
+                puis de transformer ces éléments en un outil de <span class="text-text-light font-semibold">préparation</span> et de <span class="text-text-light font-semibold">compréhension</span> des attentes des institutions financières.
+              </p>
+
+              <p class="mt-4 text-lg text-text-light-muted">
+                OGOUÉ ne fait pas de crédit et ne remplace pas les banques : la plateforme accompagne <span class="text-text-light font-semibold">en amont</span>,
+                pour éclairer les décisions, renforcer la crédibilité du dossier, et aider les PME à progresser.
+              </p>
+            </div>
+
+            <div class="flex items-center justify-center">
+              <div class="rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center p-12 w-full h-80">
+                <span class="material-symbols-outlined text-7xl text-primary">lightbulb</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VALUES -->
+      <section class="py-24 sm:py-32 bg-white/50">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+          <div class="text-center max-w-3xl mx-auto">
+            <p class="text-primary font-bold text-sm tracking-wide uppercase">Nos principes</p>
+            <h2 class="mt-3 text-3xl font-bold tracking-tighter text-text-light sm:text-5xl">
+              Des valeurs simples, utiles, concrètes
+            </h2>
+          </div>
+
+          <div class="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3">
+            <div class="rounded-xl border border-black/10 bg-white p-8 transition-all hover:bg-white/50 hover:-translate-y-1">
+              <div class="flex items-center justify-center size-12 rounded-lg bg-primary/10 text-primary mb-4">
+                <span class="material-symbols-outlined text-3xl">visibility</span>
+              </div>
+              <h3 class="text-text-light text-lg font-bold">Clarté</h3>
+              <p class="text-text-light-muted text-sm mt-3">
+                Nous rendons les données et les indicateurs compréhensibles, même pour des utilisateurs non experts en finance.
+              </p>
+            </div>
+
+            <div class="rounded-xl border border-black/10 bg-white p-8 transition-all hover:bg-white/50 hover:-translate-y-1">
+              <div class="flex items-center justify-center size-12 rounded-lg bg-primary/10 text-primary mb-4">
+                <span class="material-symbols-outlined text-3xl">shield</span>
+              </div>
+              <h3 class="text-text-light text-lg font-bold">Sécurité</h3>
+              <p class="text-text-light-muted text-sm mt-3">
+                Les informations financières sont sensibles : nous priorisons la protection et la confidentialité des données.
+              </p>
+            </div>
+
+            <div class="rounded-xl border border-black/10 bg-white p-8 transition-all hover:bg-white/50 hover:-translate-y-1">
+              <div class="flex items-center justify-center size-12 rounded-lg bg-primary/10 text-primary mb-4">
+                <span class="material-symbols-outlined text-3xl">handshake</span>
+              </div>
+              <h3 class="text-text-light text-lg font-bold">Pragmatisme</h3>
+              <p class="text-text-light-muted text-sm mt-3">
+                Pas de promesses floues : OGOUÉ avance par étapes, avec des fonctionnalités utiles et directement actionnables.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TEAM -->
+      <section class="py-24 sm:py-32">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+          <div class="text-center">
+            <p class="text-primary font-bold text-sm tracking-wide uppercase">Notre équipe</p>
+            <h2 class="mt-3 text-3xl font-bold tracking-tighter text-text-light sm:text-5xl">
+              Une équipe pluridisciplinaire
+            </h2>
+            <p class="mt-4 text-lg text-text-light-muted max-w-2xl mx-auto">
+              OGOUÉ est porté par une équipe mêlant développement logiciel, analyse de données et compréhension des enjeux concrets des PME.
+              Notre priorité : construire un outil simple, fiable et réellement utile sur le terrain.
+            </p>
+          </div>
+
+          <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="rounded-xl border border-black/10 bg-white p-8 text-center">
+              <div class="flex items-center justify-center size-16 rounded-lg bg-primary/10 text-primary mx-auto mb-4">
+                <span class="material-symbols-outlined text-4xl">engineering</span>
+              </div>
+              <h3 class="text-text-light text-lg font-bold">Produit & Technologie</h3>
+              <p class="text-text-light-muted text-sm mt-3">
+                Une base solide pour une application fluide, scalable et facile à utiliser au quotidien.
+              </p>
+            </div>
+
+            <div class="rounded-xl border border-black/10 bg-white p-8 text-center">
+              <div class="flex items-center justify-center size-16 rounded-lg bg-primary/10 text-primary mx-auto mb-4">
+                <span class="material-symbols-outlined text-4xl">calculate</span>
+              </div>
+              <h3 class="text-text-light text-lg font-bold">Finance & Indicateurs</h3>
+              <p class="text-text-light-muted text-sm mt-3">
+                Des tableaux de bord et documents structurés pour rendre les performances lisibles et exploitables.
+              </p>
+            </div>
+
+            <div class="rounded-xl border border-black/10 bg-white p-8 text-center">
+              <div class="flex items-center justify-center size-16 rounded-lg bg-primary/10 text-primary mx-auto mb-4">
+                <span class="material-symbols-outlined text-4xl">business</span>
+              </div>
+              <h3 class="text-text-light text-lg font-bold">PME & Terrain</h3>
+              <p class="text-text-light-muted text-sm mt-3">
+                Une attention constante aux réalités locales : simplicité, contraintes, usages et adoption.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- JOURNEY -->
+      <section class="py-24 sm:py-32 bg-background-dark text-white">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+          <div class="text-center">
+            <h2 class="text-3xl font-bold tracking-tighter sm:text-5xl">
+              Notre parcours
+            </h2>
+            <p class="mt-4 text-lg text-white/80 max-w-2xl mx-auto">
+              OGOUÉ se construit étape par étape : d'abord la gestion quotidienne, puis la préparation au financement, toujours avec une logique pragmatique.
+            </p>
+          </div>
+
+          <div class="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+            <div class="flex flex-col gap-4 items-center text-center">
+              <div class="flex items-center justify-center size-12 rounded-lg bg-primary/20 flex-shrink-0">
+                <span class="material-symbols-outlined text-2xl text-primary">check_circle</span>
+              </div>
+              <div>
+                <h3 class="text-white text-lg font-bold">Constat & cadrage</h3>
+                <p class="text-white/80 text-sm mt-2">
+                  Observation des difficultés récurrentes : données non structurées, suivi irrégulier, manque d'outils simples et adaptés.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-4 items-center text-center">
+              <div class="flex items-center justify-center size-12 rounded-lg bg-primary/20 flex-shrink-0">
+                <span class="material-symbols-outlined text-2xl text-primary">check_circle</span>
+              </div>
+              <div>
+                <h3 class="text-white text-lg font-bold">MVP opérationnel</h3>
+                <p class="text-white/80 text-sm mt-2">
+                  Mise en place des fonctionnalités essentielles : ventes, dépenses, dashboard, et génération de documents financiers.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-4 items-center text-center">
+              <div class="flex items-center justify-center size-12 rounded-lg bg-primary/20 flex-shrink-0">
+                <span class="material-symbols-outlined text-2xl text-primary">check_circle</span>
+              </div>
+              <div>
+                <h3 class="text-white text-lg font-bold">Préparation au financement</h3>
+                <p class="text-white/80 text-sm mt-2">
+                  Ajout d'un module de simulation pédagogique, basé sur les critères définis par les institutions financières.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-4 items-center text-center">
+              <div class="flex items-center justify-center size-12 rounded-lg bg-primary/20 flex-shrink-0">
+                <span class="material-symbols-outlined text-2xl text-primary">check_circle</span>
+              </div>
+              <div>
+                <h3 class="text-white text-lg font-bold">Aujourd'hui</h3>
+                <p class="text-white/80 text-sm mt-2">
+                  OGOUÉ aide les PME à piloter leur activité et à mieux se préparer avant toute démarche de financement.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA -->
+      <section class="py-24 sm:py-32">
+        <div class="max-w-5xl mx-auto px-6 lg:px-8">
+          <div class="rounded-3xl p-10 sm:p-14 bg-background-dark text-center relative overflow-hidden shadow-2xl ring-1 ring-black/10">
+            <div class="absolute top-0 left-0 -ml-10 -mt-10 w-40 h-40 bg-white/5 rounded-full blur-2xl"></div>
+            <div class="absolute bottom-0 right-0 -mr-10 -mb-10 w-40 h-40 bg-primary/20 rounded-full blur-2xl"></div>
+
+            <h2 class="text-3xl sm:text-5xl font-black tracking-tighter text-white relative z-10">
+              Commencez avec OGOUÉ
+            </h2>
+            <p class="mt-4 text-white/80 text-lg max-w-2xl mx-auto relative z-10">
+              Structurez vos finances, suivez vos performances, et préparez vos démarches de financement avec une vision plus claire.
+            </p>
+
+            <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4 relative z-10">
+              <a href="/signin.html"
+                class="rounded-full h-12 px-8 inline-flex items-center justify-center bg-primary text-background-dark text-base font-bold hover:bg-white transition w-full sm:w-auto">
+                Créer un compte gratuit
+              </a>
+              <a href="/login.html"
+                class="rounded-full h-12 px-8 inline-flex items-center justify-center bg-white/90 text-text-light text-base font-bold hover:bg-white transition w-full sm:w-auto">
+                Se connecter
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
     </main>
 
     <!-- FOOTER -->
-    <footer class="bg-secondary dark:bg-gray-900 text-white py-8 mt-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid md:grid-cols-4 gap-8 mb-8">
-                <div>
-                    <h3 class="font-bold mb-4">OGOUE</h3>
-                    <p class="text-sm text-gray-300">
-                        Plateforme de gestion financière pour PME gabonaises.
-                    </p>
-                </div>
-                <div>
-                    <h4 class="font-semibold mb-4">Produit</h4>
-                    <ul class="space-y-2 text-sm text-gray-300">
-                        <li><a href="index.html" class="hover:text-white">Accueil</a></li>
-                        <li><a href="pourqui/pme.html" class="hover:text-white">Pour les PME</a></li>
-                        <li><a href="pourqui/microfinances.html" class="hover:text-white">Pour les Institutions</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-semibold mb-4">Entreprise</h4>
-                    <ul class="space-y-2 text-sm text-gray-300">
-                        <li><a href="apropos.html" class="hover:text-white">À Propos</a></li>
-                        <li><a href="apropos.html" class="hover:text-white">Contact</a></li>
-                        <li><a href="apropos.html" class="hover:text-white">Blog</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-semibold mb-4">Légal</h4>
-                    <ul class="space-y-2 text-sm text-gray-300">
-                        <li><a href="apropos.html" class="hover:text-white">Conditions</a></li>
-                        <li><a href="apropos.html" class="hover:text-white">Confidentialité</a></li>
-                        <li><a href="apropos.html" class="hover:text-white">Cookies</a></li>
-                    </ul>
-                </div>
+    <footer class="bg-white">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8 py-12">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-8">
+          <div class="flex items-center gap-4">
+            <div class="size-6 text-primary">
+              <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M44 11.2727C44 14.0109 39.8386 16.3957 33.69 17.6364C39.8386 18.877 44 21.2618 44 24C44 26.7382 39.8386 29.123 33.69 30.3636C39.8386 31.6043 44 33.9891 44 36.7273C44 40.7439 35.0457 44 24 44C12.9543 44 4 40.7439 4 36.7273C4 33.9891 8.16144 31.6043 14.31 30.3636C8.16144 29.123 4 26.7382 4 24C4 21.2618 8.16144 18.877 14.31 17.6364C8.16144 16.3957 4 14.0109 4 11.2727C4 7.25611 12.9543 4 24 4C35.0457 4 44 7.25611 44 11.2727Z" fill="currentColor"></path>
+              </svg>
             </div>
-            <div class="border-t border-gray-700 pt-8 text-center text-sm text-gray-300">
-                <p>&copy; 2025 OGOUE. Tous les droits réservés.</p>
-            </div>
+            <span class="text-text-light text-xl font-bold tracking-tight">OGOUE</span>
+          </div>
+
+          <p class="text-sm text-text-light-muted">© 2026 OGOUE. Tous droits réservés.</p>
+
+          <div class="hidden md:flex items-center gap-6 text-sm">
+            <a class="text-text-light-muted hover:text-text-light transition-colors" href="/index.html">Accueil</a>
+            <a class="text-text-light-muted hover:text-text-light transition-colors" href="/apropos.html">À propos</a>
+            <a class="text-text-light-muted hover:text-text-light transition-colors" href="/index.html#partners">Partenaires</a>
+          </div>
         </div>
+      </div>
     </footer>
 
-    <script>
-        function toggleMobileMenu() {
-            const menu = document.getElementById('mobile-menu');
-            if (menu.classList.contains('hidden')) {
-                menu.classList.remove('hidden');
-            } else {
-                menu.classList.add('hidden');
-            }
-        }
+  </div>
 
-        function toggleDropdown() {
-            const dropdown = document.getElementById('mobile-dropdown');
-            dropdown.classList.toggle('hidden');
-        }
-    </script>
+  <script>
+    // Mobile menu
+    const btn = document.getElementById("mobileBtn");
+    const menu = document.getElementById("mobileMenu");
+    btn?.addEventListener("click", () => {
+      menu.classList.toggle("hidden");
+    });
+
+    // Smooth scroll with header offset
+    document.addEventListener('DOMContentLoaded', function () {
+      const offset = 88; // header height
+
+      function scrollToHash(hash) {
+        const el = document.querySelector(hash);
+        if (!el) return;
+        const y = el.getBoundingClientRect().top + window.pageYOffset - offset;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+
+      if (location.hash) scrollToHash(location.hash);
+
+      document.querySelectorAll('a[href^="#"], a[href*="#"]').forEach(function (a) {
+        a.addEventListener('click', function (e) {
+          const href = this.getAttribute('href') || '';
+          const idx = href.indexOf('#');
+          if (idx === -1) return;
+          const hash = href.slice(idx);
+          const target = document.querySelector(hash);
+          if (!target) return;
+          e.preventDefault();
+          scrollToHash(hash);
+          history.pushState(null, '', hash);
+          if (!menu.classList.contains('hidden')) menu.classList.add('hidden');
+        });
+      });
+    });
+  </script>
 </body>
-
 </html>

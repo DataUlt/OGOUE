@@ -14,7 +14,7 @@ function getAPIBaseURL() {
     // En local pour le développement
     if (window.location.hostname === 'localhost' || 
         window.location.hostname === '127.0.0.1') {
-        return 'http://localhost:3000'; // ou le port de votre backend local
+        return 'http://localhost:3001'; // ou le port de votre backend local
     }
     
     // En préproduction sur Netlify (preview)

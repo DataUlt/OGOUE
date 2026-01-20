@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html class="light" lang="fr">
 <head>
     <meta charset="utf-8"/>
@@ -9,8 +9,10 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 
     <script>
         tailwind.config = {
@@ -18,23 +20,32 @@
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#13ecc8",
-                        "background-light": "#f6f8f8",
-                        "background-dark": "#10221f",
-                        "card-light": "#ffffff",
-                        "card-dark": "#182c29",
-                        "text-light-secondary": "#4c9a8d",
-                        "text-dark-secondary": "#78b8ae"
+                        /* Palette OGOUÉ - Redesign */
+                        "primary": "#1de22e",
+                        "secondary": "#1E3A5F",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#111712",
+                        "card-light": "#FFFFFF",
+                        "card-dark": "#1a2622",
+                        "text-light-primary": "#0a0c0a",
+                        "text-dark-primary": "#f6f8f6",
+                        "text-light-secondary": "#5c6c60",
+                        "text-dark-secondary": "#9ca3a8",
+                        "border-light": "#e8ede8",
+                        "border-dark": "#2a3a32",
+                        "success": "#27AE60",
+                        "danger": "#E74C3C",
                     },
-                    fontFamily: {
-                        "display": ["Inter", "sans-serif"]
-                    },
+                    fontFamily: { "display": ["Manrope", "sans-serif"] },
                     borderRadius: {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
                         "full": "9999px"
                     },
+                    boxShadow: {
+                        "soft": "0 8px 20px rgba(29, 226, 46, 0.08)"
+                    }
                 },
             },
         }
@@ -42,28 +53,24 @@
 
     <style>
         .material-symbols-outlined {
-            font-variation-settings:
-                'FILL' 0,
-                'wght' 400,
-                'GRAD' 0,
-                'opsz' 24
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
         }
     </style>
 </head>
 
-<body class="font-display bg-background-light dark:bg-background-dark text-[#0d1b19] dark:text-gray-200">
+<body class="font-display bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary">
 <div class="relative flex w-full flex-col group/design-root overflow-x-hidden">
 
     <!-- ===== HEADER OGOUE (identique à Dépenses) ===== -->
-    <header class="sticky top-0 z-10 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-[#cfe7e3] dark:border-gray-700">
+    <header class="sticky top-0 z-10 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-[#e8ede8] dark:border-gray-700">
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-between whitespace-nowrap py-3">
-                <div class="flex items-center gap-4 text-[#0d1b19] dark:text-white">
+                <div class="flex items-center gap-4 text-[#0a0c0a] dark:text-white">
                     <span class="material-symbols-outlined text-3xl text-primary">insights</span>
                     <h2 class="text-lg font-bold leading-tight tracking-[-0.015em]">OGOUE</h2>
                 </div>
                 <div class="hidden md:flex items-center gap-9">
-                    <a class="text-[#0d1b19] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
+                    <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
                        href="module_tableau_bord.html">
                         Tableau de Bord
                     </a>
@@ -71,24 +78,35 @@
                        href="module_ventes.html">
                         Comptabilité
                     </a>
-                    <a class="text-[#0d1b19] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
+                    <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
                        href="module_scoring.html">
                         Financement
                     </a>
                 </div>
+                <!-- Menu mobile -->
+                <div id="mobile-menu" class="md:hidden absolute top-full left-0 right-0 bg-background-light dark:bg-background-dark border-b border-[#e8ede8] dark:border-gray-700 hidden">
+                    <div class="flex flex-col gap-2 p-4">
+                        <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_tableau_bord.html">Tableau de Bord</a>
+                        <a class="text-primary text-sm font-bold leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_ventes.html">Comptabilité</a>
+                        <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_scoring.html">Financement</a>
+                    </div>
+                </div>
+                <!-- Bouton menu mobile -->
+                <button id="menu-toggle" class="md:hidden flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
                 <div class="flex items-center gap-2">
-                    <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-primary/20 text-[#0d1b19] dark:bg-primary/30 dark:text-white" data-action="notifications">
+                    <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white" data-action="notifications">
                         <span class="material-symbols-outlined">notifications</span>
                     </button>
-                    <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-primary/20 text-[#0d1b19] dark:bg-primary/30 dark:text-white" data-action="settings">
+                    <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white" data-action="settings">
                         <span class="material-symbols-outlined">settings</span>
                     </button>
-                    <button class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-300 hover:bg-teal-200 dark:hover:bg-teal-800 transition-colors"
+                    <button class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-primary/20 dark:bg-primary/30 text-[#0a0c0a] dark:text-white hover:bg-primary/30 dark:hover:bg-primary/40 transition-colors"
                          data-action="profile"
                          title="Profil utilisateur">
                         <span class="material-symbols-outlined text-2xl">account_circle</span>
                     </button>
-                    </div>
                 </div>
             </div>
         </div>
@@ -103,7 +121,7 @@
                 <!-- Titre page -->
                 <header class="flex flex-wrap justify-between items-center gap-3 mb-2">
                     <div class="flex flex-col gap-1">
-                        <h1 class="text-[#0d1b19] dark:text-white text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em]">
+                        <h1 class="text-[#0a0c0a] dark:text-white text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em]">
                             Gestion Comptable
                         </h1>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
@@ -127,7 +145,7 @@
                                 <p class="text-sm font-bold leading-normal tracking-[0.015em]">Dépenses</p>
                             </a>
                             <a href="module_resume_ventes_depenses.html"
-                               class="flex flex-col items-center justify-center border-b-[3px] border-b-primary text-[#0d1b19] dark:text-white pb-3 pt-4 px-2">
+                               class="flex flex-col items-center justify-center border-b-[3px] border-b-primary text-[#0a0c0a] dark:text-white pb-3 pt-4 px-2">
                                 <p class="text-sm font-bold leading-normal tracking-[0.015em]">Résumé</p>
                             </a>
                             <a href="module_etats_financiers.html"
@@ -137,7 +155,7 @@
                         </nav>
 
                         <!-- Filtre par date aligné à droite -->
-                        <div class="relative rounded-lg border border-[#cfe7e3] dark:border-gray-700 bg-card-light dark:bg-card-dark px-3 py-2 shadow-sm w-[240px]">
+                        <div class="relative rounded-lg border border-[#e8ede8] dark:border-gray-700 bg-card-light dark:bg-card-dark px-3 py-2 shadow-sm w-[240px]">
                             <p class="text-[10px] font-semibold uppercase tracking-wide text-text-light-secondary dark:text-text-dark-secondary mb-1">
                                 Filtrer par date
                             </p>
@@ -159,14 +177,14 @@
                             <!-- Panel calendrier -->
                             <div
                                 id="dateFilterPanel"
-                                class="absolute right-0 mt-2 w-[300px] rounded-xl border border-[#cfe7e3] dark:border-gray-700 bg-white dark:bg-[#182c29] shadow-xl p-4 hidden z-20"
+                                class="absolute right-0 mt-2 w-[300px] rounded-xl border border-[#e8ede8] dark:border-gray-700 bg-white dark:bg-card-dark shadow-xl p-4 hidden z-20"
                             >
                                 <!-- Header mois + navigation -->
                                 <div class="flex items-center justify-between mb-3">
                                     <button id="prevMonth" type="button" class="p-1.5 rounded-full hover:bg-background-light dark:hover:bg-background-dark">
                                         <span class="material-symbols-outlined text-base text-gray-600 dark:text-gray-300">chevron_left</span>
                                     </button>
-                                    <p id="monthLabel" class="text-sm font-semibold text-[#0d1b19] dark:text-gray-100"></p>
+                                    <p id="monthLabel" class="text-sm font-semibold text-[#0a0c0a] dark:text-gray-100"></p>
                                     <button id="nextMonth" type="button" class="p-1.5 rounded-full hover:bg-background-light dark:hover:bg-background-dark">
                                         <span class="material-symbols-outlined text-base text-gray-600 dark:text-gray-300">chevron_right</span>
                                     </button>
@@ -183,7 +201,7 @@
                                 </div>
 
                                 <!-- Actions -->
-                                <div class="flex justify-between items-center pt-3 mt-3 border-t border-[#cfe7e3] dark:border-gray-700">
+                                <div class="flex justify-between items-center pt-3 mt-3 border-t border-[#e8ede8] dark:border-gray-700">
                                     <button
                                         id="resetRange"
                                         type="button"
@@ -194,7 +212,7 @@
                                     <button
                                         id="closeCalendar"
                                         type="button"
-                                        class="text-xs px-3 py-1.5 rounded-lg bg-primary text-[#0d1b19] hover:bg-primary/90"
+                                        class="text-xs px-3 py-1.5 rounded-lg bg-primary text-[#0a0c0a] hover:bg-primary/90"
                                     >
                                         Fermer
                                     </button>
@@ -234,7 +252,7 @@
                             <h2 class="text-lg font-bold leading-tight tracking-[-0.015em] px-6 pt-5 pb-3 text-gray-900 dark:text-white">
                                 Répartition des ventes
                             </h2>
-                            <div id="repartition-ventes" class="p-2 px-6 grid grid-cols-1 sm:grid-cols-2">
+                            <div id="repartition-ventes" class="p-2 px-6 grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-8 items-start">
                                 <!-- Rempli en JS -->
                             </div>
                         </div>
@@ -244,7 +262,7 @@
                             <h2 class="text-lg font-bold leading-tight tracking-[-0.015em] px-6 pt-5 pb-3 text-gray-900 dark:text-white">
                                 Répartition des moyens de paiement
                             </h2>
-                            <div id="repartition-paiement-ventes" class="p-2 px-6 grid grid-cols-1 sm:grid-cols-2">
+                            <div id="repartition-paiement-ventes" class="p-2 px-6 grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-8 items-start">
                                 <!-- Rempli en JS -->
                             </div>
                         </div>
@@ -254,7 +272,7 @@
                             <h2 class="text-lg font-bold leading-tight tracking-[-0.015em] px-6 pt-5 pb-3 text-gray-900 dark:text-white">
                                 Répartition des moyens de paiement pour les dépenses
                             </h2>
-                            <div id="repartition-paiement-depenses" class="p-2 px-6 grid grid-cols-1 sm:grid-cols-2">
+                            <div id="repartition-paiement-depenses" class="p-2 px-6 grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-8 items-start">
                                 <!-- Rempli en JS -->
                             </div>
                         </div>
@@ -282,6 +300,7 @@
 <!-- Store OGOUÉ -->
 <script src="js/ogoue-state.js"></script>
 <script src="js/header-ui.js"></script>
+<script src="js/mobile-menu.js"></script>
 
 <!-- JS dédié à la page Résumé -->
 <script src="js/resume.js"></script>

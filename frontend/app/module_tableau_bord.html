@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html class="light" lang="fr">
 <head>
     <meta charset="utf-8"/>
@@ -11,8 +11,8 @@
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin/>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 
     <script>
         tailwind.config = {
@@ -20,33 +20,31 @@
             theme: {
                 extend: {
                     colors: {
-                        /* Palette OGOUÉ */
-                        "primary": "#13ecc8",
-                        "secondary": "#27AE60",
-                        "background-light": "#f6f8f8",
-                        "background-dark": "#10221f",
-
-                        /* Cartes / textes / bordures */
+                        /* Palette OGOUÉ - Redesign */
+                        "primary": "#1de22e",
+                        "secondary": "#1E3A5F",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#111712",
                         "card-light": "#FFFFFF",
-                        "card-dark": "#1E293B",
-                        "text-light-primary": "#0d1b19",
-                        "text-dark-primary": "#E2E8F0",
-                        "text-light-secondary": "#566573",
-                        "text-dark-secondary": "#94A3B8",
-                        "border-light": "#E2E8F0",
-                        "border-dark": "#334155",
+                        "card-dark": "#1a2622",
+                        "text-light-primary": "#0a0c0a",
+                        "text-dark-primary": "#f6f8f6",
+                        "text-light-secondary": "#5c6c60",
+                        "text-dark-secondary": "#9ca3a8",
+                        "border-light": "#e8ede8",
+                        "border-dark": "#2a3a32",
                         "success": "#27AE60",
                         "danger": "#E74C3C",
                     },
-                    fontFamily: { "display": ["Inter", "sans-serif"] },
+                    fontFamily: { "display": ["Manrope", "sans-serif"] },
                     borderRadius: {
-                        "DEFAULT": "0.5rem",
-                        "lg": "0.75rem",
-                        "xl": "1rem",
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
                         "full": "9999px"
                     },
                     boxShadow: {
-                        "soft": "0 8px 20px rgba(15, 23, 42, 0.06)"
+                        "soft": "0 8px 20px rgba(29, 226, 46, 0.08)"
                     }
                 },
             },
@@ -55,7 +53,7 @@
 
     <style>
         .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
         }
     </style>
 </head>
@@ -64,26 +62,38 @@
 <div class="relative flex min-h-screen w-full flex-col group/design-root overflow-x-hidden">
 
     <!-- ===== HEADER OGOUE ===== -->
-    <header class="sticky top-0 z-10 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-[#cfe7e3] dark:border-gray-700">
+    <header class="sticky top-0 z-10 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-[#e8ede8] dark:border-gray-700">
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-between whitespace-nowrap py-3">
-                <div class="flex items-center gap-4 text-[#0d1b19] dark:text-white">
+                <div class="flex items-center gap-4 text-[#0a0c0a] dark:text-white">
                     <span class="material-symbols-outlined text-3xl text-primary">insights</span>
                     <h2 class="text-lg font-bold leading-tight tracking-[-0.015em]">OGOUE</h2>
                 </div>
                 <div class="hidden md:flex items-center gap-9">
                     <a class="text-primary text-sm font-bold leading-normal" href="module_tableau_bord.html">Tableau de Bord</a>
-                    <a class="text-[#0d1b19] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal" href="module_ventes.html">Comptabilité</a>
-                    <a class="text-[#0d1b19] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal" href="module_scoring.html">Financement</a>
+                    <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal" href="module_ventes.html">Comptabilité</a>
+                    <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal" href="module_scoring.html">Financement</a>
                 </div>
+                <!-- Menu mobile -->
+                <div id="mobile-menu" class="md:hidden absolute top-full left-0 right-0 bg-background-light dark:bg-background-dark border-b border-[#e8ede8] dark:border-gray-700 hidden">
+                    <div class="flex flex-col gap-2 p-4">
+                        <a class="text-primary text-sm font-bold leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_tableau_bord.html">Tableau de Bord</a>
+                        <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_ventes.html">Comptabilité</a>
+                        <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_scoring.html">Financement</a>
+                    </div>
+                </div>
+                <!-- Bouton menu mobile -->
+                <button id="menu-toggle" class="md:hidden flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
                 <div class="flex items-center gap-2">
-                    <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-primary/20 text-[#0d1b19] dark:bg-primary/30 dark:text-white" data-action="notifications">
+                    <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white" data-action="notifications">
                         <span class="material-symbols-outlined">notifications</span>
                     </button>
-                    <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-primary/20 text-[#0d1b19] dark:bg-primary/30 dark:text-white" data-action="settings">
+                    <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white" data-action="settings">
                         <span class="material-symbols-outlined">settings</span>
                     </button>
-                    <button class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-300 hover:bg-teal-200 dark:hover:bg-teal-800 transition-colors"
+                    <button class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white"
                          data-action="profile"
                          title="Profil utilisateur">
                         <span class="material-symbols-outlined text-2xl">account_circle</span>
@@ -153,7 +163,7 @@
                             <!-- Panel calendrier -->
                             <div
                                 id="dateFilterPanel"
-                                class="absolute right-0 mt-2 w-[320px] rounded-xl border border-border-light dark:border-border-dark bg-white dark:bg-[#182c29] shadow-xl p-4 hidden z-20"
+                                class="absolute right-0 mt-2 w-[320px] rounded-xl border border-border-light dark:border-border-dark bg-white dark:bg-card-dark shadow-xl p-4 hidden z-20"
                             >
                                 <!-- Header (mois + année éditable) -->
                                 <div class="flex items-center justify-between gap-2 mb-3">
@@ -202,7 +212,7 @@
                                     <button
                                         id="closeCalendar"
                                         type="button"
-                                        class="text-xs px-3 py-1.5 rounded-lg bg-primary text-[#0d1b19] hover:bg-primary/90"
+                                        class="text-xs px-3 py-1.5 rounded-lg bg-primary text-[#0a0c0a] hover:bg-primary/90"
                                     >
                                         Fermer
                                     </button>
@@ -413,9 +423,9 @@
             let colors = "hover:bg-primary/15 dark:hover:bg-primary/20";
 
             if (isStart || isEnd) {
-                colors = "bg-primary text-[#0d1b19] font-semibold";
+                colors = "bg-primary text-[#0a0c0a] font-semibold";
             } else if (isIn) {
-                colors = "bg-primary/20 text-[#0d1b19] dark:text-white";
+                colors = "bg-primary/20 text-[#0a0c0a] dark:text-white";
             } else {
                 colors += " text-text-light-primary dark:text-text-dark-primary";
             }
@@ -510,6 +520,7 @@
 
 <script src="js/dashboard.js"></script>
 <script src="js/topbar-actions.js"></script>
+<script src="js/mobile-menu.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         if (window.OGOUE?.initTopbarActions) {

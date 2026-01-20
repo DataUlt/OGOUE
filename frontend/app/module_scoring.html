@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html class="light" lang="fr">
 <head>
   <meta charset="utf-8"/>
@@ -11,8 +11,8 @@
   <!-- Fonts & icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 
   <script>
     tailwind.config = {
@@ -20,28 +20,41 @@
       theme: {
         extend: {
           colors: {
-            "primary": "#13ecc8",
-            "background-light": "#f6f8f8",
-            "background-dark": "#10221f",
-            "card-light": "#ffffff",
-            "card-dark": "#162e2a",
+            /* Palette OGOUÉ - Redesign */
+            "primary": "#1de22e",
+            "secondary": "#1E3A5F",
+            "background-light": "#f6f8f6",
+            "background-dark": "#111712",
+            "card-light": "#FFFFFF",
+            "card-dark": "#1a2622",
+            "text-light-primary": "#0a0c0a",
+            "text-dark-primary": "#f6f8f6",
+            "text-light-secondary": "#5c6c60",
+            "text-dark-secondary": "#9ca3a8",
+            "border-light": "#e8ede8",
+            "border-dark": "#2a3a32",
+            "success": "#27AE60",
+            "danger": "#E74C3C",
           },
-          fontFamily: {
-            "display": ["Inter", "sans-serif"]
-          },
+          fontFamily: { "display": ["Manrope", "sans-serif"] },
           borderRadius: {
-            "DEFAULT": "0.25rem",
-            "lg": "0.5rem",
-            "xl": "0.75rem",
-            "2xl": "1rem",
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
             "full": "9999px"
           },
+          boxShadow: {
+            "soft": "0 8px 20px rgba(29, 226, 46, 0.08)"
+          }
         },
       },
     }
   </script>
 
   <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+    }
     .circular-chart {
       display: block;
       margin: 0 auto;
@@ -69,41 +82,55 @@
   </style>
 </head>
 
-<body class="font-display bg-background-light dark:bg-background-dark text-[#0d1b19] dark:text-gray-100 min-h-screen flex flex-col">
+<body class="font-display bg-background-light dark:bg-background-dark text-[#0a0c0a] dark:text-gray-100 min-h-screen flex flex-col">
 <div class="relative flex min-h-screen w-full flex-col group/design-root overflow-x-hidden">
 
   <!-- ===== HEADER OGOUE ===== -->
-  <header class="sticky top-0 z-10 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-[#cfe7e3] dark:border-gray-700">
+  <header class="sticky top-0 z-10 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-[#e8ede8] dark:border-gray-700">
     <div class="container mx-auto px-4">
       <div class="flex items-center justify-between whitespace-nowrap py-3">
-        <div class="flex items-center gap-4 text-[#0d1b19] dark:text-white">
+        <div class="flex items-center gap-4 text-[#0a0c0a] dark:text-white">
           <span class="material-symbols-outlined text-3xl text-primary">insights</span>
           <h2 class="text-lg font-bold leading-tight tracking-[-0.015em]">OGOUE</h2>
         </div>
 
         <div class="hidden md:flex items-center gap-9">
-          <a class="text-[#0d1b19] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
+          <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
              href="module_tableau_bord.html">Tableau de Bord</a>
 
-          <a class="text-[#0d1b19] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
+          <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
              href="module_ventes.html">Comptabilité</a>
 
           <a class="text-primary text-sm font-bold leading-normal"
              href="module_scoring.html">Financement</a>
         </div>
 
+        <!-- Menu mobile -->
+        <div id="mobile-menu" class="md:hidden absolute top-full left-0 right-0 bg-background-light dark:bg-background-dark border-b border-[#e8ede8] dark:border-gray-700 hidden">
+          <div class="flex flex-col gap-2 p-4">
+            <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_tableau_bord.html">Tableau de Bord</a>
+            <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_ventes.html">Comptabilité</a>
+            <a class="text-primary text-sm font-bold leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_scoring.html">Financement</a>
+          </div>
+        </div>
+
+        <!-- Bouton menu mobile -->
+        <button id="menu-toggle" class="md:hidden flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+
         <div class="flex items-center gap-2">
-          <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-primary/20 text-[#0d1b19] dark:bg-primary/30 dark:text-white" data-action="notifications">
+          <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white" data-action="notifications">
             <span class="material-symbols-outlined">notifications</span>
           </button>
-          <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-primary/20 text-[#0d1b19] dark:bg-primary/30 dark:text-white" data-action="settings">
+          <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white" data-action="settings">
             <span class="material-symbols-outlined">settings</span>
           </button>
 
           <!-- ✅ PROFIL (corrigé + fiable) -->
           <button
             id="profileBtn"
-            class="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-300 hover:bg-teal-200 dark:hover:bg-teal-800 transition-colors"
+            class="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer bg-primary/20 dark:bg-primary/30 text-[#0a0c0a] dark:text-white hover:bg-primary/30 dark:hover:bg-primary/40 transition-colors"
             data-action="profile"
             title="Profil"
             type="button"
@@ -120,7 +147,7 @@
   <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Page Heading -->
     <div class="flex flex-col gap-2 mb-8">
-      <h1 class="text-[#0d1b19] dark:text-white text-3xl sm:text-4xl font-black leading-tight tracking-[-0.033em]">
+      <h1 class="text-[#0a0c0a] dark:text-white text-3xl sm:text-4xl font-black leading-tight tracking-[-0.033em]">
         Parcours de financement
       </h1>
       <p class="text-gray-500 dark:text-gray-400 text-base sm:text-lg font-normal leading-normal max-w-3xl">
@@ -129,7 +156,7 @@
     </div>
 
     <!-- Tabs -->
-    <div class="mb-8 border-b border-[#cfe7e3] dark:border-[#2d4a46]">
+    <div class="mb-8 border-b border-[#e8ede8] dark:border-[#2d4a46]">
       <nav aria-label="Tabs" class="flex gap-8">
         <div class="relative group">
           <a class="border-b-[3px] border-transparent text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400 pb-3 px-1 flex items-center gap-2 cursor-help" href="#">
@@ -139,7 +166,7 @@
           
           <!-- Tooltip -->
           <div class="absolute left-0 top-full mt-2 w-96 bg-white dark:bg-card-dark rounded-lg shadow-lg border border-[#e7f3f1] dark:border-[#1e3b36] p-6 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 pointer-events-none group-hover:pointer-events-auto">
-            <h3 class="text-lg font-bold text-[#0d1b19] dark:text-white mb-3">Espace Partenaire</h3>
+            <h3 class="text-lg font-bold text-[#0a0c0a] dark:text-white mb-3">Espace Partenaire</h3>
             
             <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
               L'espace partenaire sera un espace dédié à la préparation au financement. Il permettra de faire le lien entre la gestion quotidienne et les critères réellement utilisés par les institutions financières.
@@ -148,7 +175,7 @@
             <div class="space-y-4">
               <!-- Section 1 -->
               <div>
-                <h4 class="font-semibold text-[#0d1b19] dark:text-white mb-2 flex items-center gap-2">
+                <h4 class="font-semibold text-[#0a0c0a] dark:text-white mb-2 flex items-center gap-2">
                   <span class="material-symbols-outlined text-base text-primary">trending_up</span>
                   Évaluer votre crédibilité financière
                 </h4>
@@ -162,7 +189,7 @@
 
               <!-- Section 2 -->
               <div>
-                <h4 class="font-semibold text-[#0d1b19] dark:text-white mb-2 flex items-center gap-2">
+                <h4 class="font-semibold text-[#0a0c0a] dark:text-white mb-2 flex items-center gap-2">
                   <span class="material-symbols-outlined text-base text-primary">checklist</span>
                   Vous préparer à une demande de financement
                 </h4>
@@ -175,7 +202,7 @@
 
               <!-- Section 3 -->
               <div>
-                <h4 class="font-semibold text-[#0d1b19] dark:text-white mb-2 flex items-center gap-2">
+                <h4 class="font-semibold text-[#0a0c0a] dark:text-white mb-2 flex items-center gap-2">
                   <span class="material-symbols-outlined text-base text-primary">folder_open</span>
                   Constituer un dossier clair
                 </h4>
@@ -188,7 +215,7 @@
 
               <!-- Section 4 -->
               <div>
-                <h4 class="font-semibold text-[#0d1b19] dark:text-white mb-2 flex items-center gap-2">
+                <h4 class="font-semibold text-[#0a0c0a] dark:text-white mb-2 flex items-center gap-2">
                   <span class="material-symbols-outlined text-base text-primary">verified</span>
                   Valoriser le sérieux de votre gestion
                 </h4>
@@ -197,7 +224,7 @@
 
               <!-- En résumé -->
               <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
-                <h4 class="font-semibold text-[#0d1b19] dark:text-white mb-2 flex items-center gap-2">
+                <h4 class="font-semibold text-[#0a0c0a] dark:text-white mb-2 flex items-center gap-2">
                   <span class="material-symbols-outlined text-base text-primary">summarize</span>
                   En résumé
                 </h4>
@@ -226,7 +253,7 @@
                                   a 15.9155 15.9155 0 0 1 0 -31.831" stroke-dasharray="0, 100"></path>
             </svg>
             <div class="absolute inset-0 flex flex-col items-center justify-center">
-              <span id="globalScoreValue" class="text-4xl font-black text-[#0d1b19] dark:text-white tracking-tighter">—</span>
+              <span id="globalScoreValue" class="text-4xl font-black text-[#0a0c0a] dark:text-white tracking-tighter">—</span>
               <span class="text-xs font-medium text-gray-400 uppercase tracking-widest mt-1">Global</span>
             </div>
           </div>
@@ -237,7 +264,7 @@
               <span class="material-symbols-outlined text-sm font-bold">verified</span>
               <span class="text-sm font-bold" id="scoreBadgeText">Excellent niveau de traçabilité</span>
             </div>
-            <h3 class="text-xl font-bold text-[#0d1b19] dark:text-white">Score de traçabilité</h3>
+            <h3 class="text-xl font-bold text-[#0a0c0a] dark:text-white">Score de traçabilité</h3>
             <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
               Ce score mesure la part de vos ventes et dépenses associées à un justificatif valide. Un score élevé augmente vos chances d'obtenir un financement.
             </p>
@@ -263,14 +290,14 @@
             <div>
               <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Ventes justifiées</p>
               <div class="flex items-baseline gap-2 mt-1">
-                <h4 id="salesScore" class="text-2xl font-bold text-[#0d1b19] dark:text-white">—</h4>
+                <h4 id="salesScore" class="text-2xl font-bold text-[#0a0c0a] dark:text-white">—</h4>
                 <span class="text-sm text-gray-400 font-medium" id="salesTotalSpan">/ —</span>
               </div>
             </div>
             <!-- Progress Bar -->
             <div class="flex flex-col gap-2">
               <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5">
-                <div id="salesProgress" class="bg-emerald-400 h-2.5 rounded-full" style="width: 0%"></div>
+                <div id="salesProgress" class="h-2.5 rounded-full" style="width: 0%; background-color: #27AE60;"></div>
               </div>
               <p id="salesMessage" class="text-xs text-primary font-medium mt-1">—</p>
             </div>
@@ -287,14 +314,14 @@
             <div>
               <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Dépenses justifiées</p>
               <div class="flex items-baseline gap-2 mt-1">
-                <h4 id="expensesScore" class="text-2xl font-bold text-[#0d1b19] dark:text-white">—</h4>
+                <h4 id="expensesScore" class="text-2xl font-bold text-[#0a0c0a] dark:text-white">—</h4>
                 <span class="text-sm text-gray-400 font-medium" id="expensesTotalSpan">/ —</span>
               </div>
             </div>
             <!-- Progress Bar -->
             <div class="flex flex-col gap-2">
               <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5">
-                <div id="expensesProgress" class="bg-primary h-2.5 rounded-full" style="width: 0%"></div>
+                <div id="expensesProgress" class="h-2.5 rounded-full" style="width: 0%; background-color: #27AE60;"></div>
               </div>
               <p id="expensesMessage" class="text-xs text-primary font-medium mt-1">—</p>
             </div>
@@ -315,14 +342,14 @@
             </div>
             <h3 class="text-lg font-bold">Qu'est-ce que le score ?</h3>
             <p class="text-gray-300 text-sm leading-relaxed">
-              C'est un indicateur de confiance pour les banques. Il prouve que vos flux financiers sont réels et documentés. Plus il est haut, plus vous êtes éligible aux crédits.
-            </p>
+Un score est un indicateur synthétique qui résume une situation à partir de plusieurs données.
+Il permet d’évaluer rapidement un niveau, de comparer et de suivre une évolution dans le temps.            </p>
           </div>
         </div>
 
         <!-- Action Checklist -->
         <div class="bg-white dark:bg-card-dark rounded-xl border border-[#e7f3f1] dark:border-[#1e3b36] shadow-sm p-6 flex-1">
-          <h3 class="text-lg font-bold text-[#0d1b19] dark:text-white mb-4">Comment améliorer mon score ?</h3>
+          <h3 class="text-lg font-bold text-[#0a0c0a] dark:text-white mb-4">Comment améliorer mon score ?</h3>
           <div class="flex flex-col gap-4">
             <!-- Action Item 1 -->
             <div class="flex gap-3 items-start group">
@@ -330,7 +357,7 @@
                 <span class="material-symbols-outlined text-primary text-xl">add_a_photo</span>
               </div>
               <div class="flex flex-col">
-                <p class="text-sm font-semibold text-[#0d1b19] dark:text-gray-200 group-hover:text-primary transition-colors cursor-pointer">Ajouter les justificatifs manquants</p>
+                <p class="text-sm font-semibold text-[#0a0c0a] dark:text-gray-200 group-hover:text-primary transition-colors cursor-pointer">Ajouter les justificatifs manquants</p>
                 <p class="text-xs text-gray-500">Prenez en photo vos factures et reçus récents.</p>
               </div>
             </div>
@@ -342,13 +369,13 @@
                 <span class="material-symbols-outlined text-primary text-xl">update</span>
               </div>
               <div class="flex flex-col">
-                <p class="text-sm font-semibold text-[#0d1b19] dark:text-gray-200 group-hover:text-primary transition-colors cursor-pointer">Mise à jour régulière</p>
+                <p class="text-sm font-semibold text-[#0a0c0a] dark:text-gray-200 group-hover:text-primary transition-colors cursor-pointer">Mise à jour régulière</p>
                 <p class="text-xs text-gray-500">Connectez-vous chaque semaine pour valider vos comptes.</p>
               </div>
             </div>
           </div>
 
-          <button class="mt-6 w-full py-2.5 rounded-lg bg-primary hover:bg-[#0fdaba] text-[#0d1b19] font-bold text-sm transition-colors flex items-center justify-center gap-2" id="addDocumentBtn">
+          <button class="mt-6 w-full py-2.5 rounded-lg bg-primary hover:bg-[#0fdaba] text-[#0a0c0a] font-bold text-sm transition-colors flex items-center justify-center gap-2" id="addDocumentBtn">
             <span class="material-symbols-outlined text-lg">upload_file</span>
             Ajouter un document
           </button>
@@ -361,7 +388,7 @@
   <div id="uploadModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
     <div class="bg-white dark:bg-card-dark rounded-xl shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
       <div class="sticky top-0 bg-white dark:bg-card-dark border-b border-[#e7f3f1] dark:border-[#1e3b36] p-6 flex items-center justify-between">
-        <h2 class="text-xl font-bold text-[#0d1b19] dark:text-white">Ajouter les justificatifs manquants</h2>
+        <h2 class="text-xl font-bold text-[#0a0c0a] dark:text-white">Ajouter les justificatifs manquants</h2>
         <button type="button" id="closeModalBtn" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-50" disabled>
           <span class="material-symbols-outlined">close</span>
         </button>
@@ -370,7 +397,7 @@
       <div class="p-6 space-y-6">
         <!-- Ventes sans justificatif -->
         <div>
-          <h3 class="text-lg font-bold text-[#0d1b19] dark:text-white mb-4">Ventes sans justificatif</h3>
+          <h3 class="text-lg font-bold text-[#0a0c0a] dark:text-white mb-4">Ventes sans justificatif</h3>
           <div id="salesListContainer" class="space-y-3">
             <p class="text-gray-500 dark:text-gray-400 text-sm">Chargement...</p>
           </div>
@@ -378,7 +405,7 @@
 
         <!-- Dépenses sans justificatif -->
         <div>
-          <h3 class="text-lg font-bold text-[#0d1b19] dark:text-white mb-4">Dépenses sans justificatif</h3>
+          <h3 class="text-lg font-bold text-[#0a0c0a] dark:text-white mb-4">Dépenses sans justificatif</h3>
           <div id="expensesListContainer" class="space-y-3">
             <p class="text-gray-500 dark:text-gray-400 text-sm">Chargement...</p>
           </div>
@@ -386,7 +413,7 @@
       </div>
 
       <div class="sticky bottom-0 bg-white dark:bg-card-dark border-t border-[#e7f3f1] dark:border-[#1e3b36] p-6 flex gap-3">
-        <button type="button" id="cancelModalBtn" class="flex-1 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-[#0d1b19] dark:text-white font-bold text-sm transition-colors">
+        <button type="button" id="cancelModalBtn" class="flex-1 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-[#0a0c0a] dark:text-white font-bold text-sm transition-colors">
           Annuler
         </button>
       </div>
@@ -395,6 +422,7 @@
 
 <script src="js/ogoue-state.js"></script>
 <script src="js/header-ui.js"></script>
+<script src="js/mobile-menu.js"></script>
 <script>
 // ============================================================
 // CALCUL DYNAMIQUE DU SCORE DE TRAÇABILITÉ
@@ -499,10 +527,9 @@ function calculateScores(operations) {
  * Retourne le label et couleur basé sur le score
  */
 function getScoreLabel(score) {
-  if (score >= 80) return { label: "Excellent", color: "primary" };
-  if (score >= 60) return { label: "Bon", color: "primary" };
-  if (score >= 40) return { label: "Moyen", color: "orange" };
-  return { label: "Faible", color: "red" };
+  if (score >= 70) return { label: "Excellent", color: "#27AE60" }; // >70% = vert (success)
+  if (score >= 40) return { label: "Bon", color: "#FF9800" }; // 40-70% = orange
+  return { label: "Faible", color: "#E74C3C" }; // <40% = rouge (danger)
 }
 
 /**
@@ -518,17 +545,21 @@ function updateUI(scores) {
   document.getElementById("globalScoreValue").textContent = `${globalScore}%`;
   document.getElementById("scoreBadgeText").textContent = `${globalLabel.label} niveau de traçabilité`;
   
-  // Mettre à jour le cercle de progression
+  // Mettre à jour le cercle de progression avec la couleur appropriée
   const circle = document.getElementById("globalScoreCircle");
   const dasharray = (globalScore / 100) * 100 + ", 100";
   circle.setAttribute("stroke-dasharray", dasharray);
+  circle.setAttribute("stroke", globalLabel.color); // Colorer selon le score
+  circle.classList.remove("stroke-current"); // Enlever la classe stroke-current
 
   // === VENTES ===
   const salesLabel = getScoreLabel(salesPercentage);
   document.getElementById("salesScore").textContent = salesWithReceipt;
   document.getElementById("salesTotalSpan").textContent = `/ ${salesCount}`;
   document.getElementById("salesBadge").textContent = salesLabel.label;
-  document.getElementById("salesProgress").style.width = `${salesPercentage}%`;
+  const salesProgressBar = document.getElementById("salesProgress");
+  salesProgressBar.style.width = `${salesPercentage}%`;
+  salesProgressBar.style.backgroundColor = salesLabel.color;
   
   const salesNoReceipt = salesCount - salesWithReceipt;
   const salesMsg = salesCount > 0 
@@ -541,7 +572,9 @@ function updateUI(scores) {
   document.getElementById("expensesScore").textContent = expensesWithReceipt;
   document.getElementById("expensesTotalSpan").textContent = `/ ${expensesCount}`;
   document.getElementById("expensesBadge").textContent = expensesLabel.label;
-  document.getElementById("expensesProgress").style.width = `${expensesPercentage}%`;
+  const expensesProgressBar = document.getElementById("expensesProgress");
+  expensesProgressBar.style.width = `${expensesPercentage}%`;
+  expensesProgressBar.style.backgroundColor = expensesLabel.color;
   
   const expensesNoReceipt = expensesCount - expensesWithReceipt;
   const expensesMsg = expensesCount > 0
@@ -595,7 +628,7 @@ function openUploadModal() {
       <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
         <input type="checkbox" class="sale-checkbox" data-id="${sale.id}" data-type="sales">
         <div class="flex-1">
-          <p class="text-sm font-medium text-[#0d1b19] dark:text-white">${sale.description || 'Sans description'}</p>
+          <p class="text-sm font-medium text-[#0a0c0a] dark:text-white">${sale.description || 'Sans description'}</p>
           <p class="text-xs text-gray-500 dark:text-gray-400">${sale.date} • ${sale.montant} FCFA</p>
         </div>
         <input type="file" class="file-input" data-id="${sale.id}" data-type="sales" style="width: 150px;">
@@ -618,7 +651,7 @@ function openUploadModal() {
       <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
         <input type="checkbox" class="expense-checkbox" data-id="${expense.id}" data-type="expenses">
         <div class="flex-1">
-          <p class="text-sm font-medium text-[#0d1b19] dark:text-white">${expense.categorie || 'Sans catégorie'}</p>
+          <p class="text-sm font-medium text-[#0a0c0a] dark:text-white">${expense.categorie || 'Sans catégorie'}</p>
           <p class="text-xs text-gray-500 dark:text-gray-400">${expense.date} • ${expense.montant} FCFA</p>
         </div>
         <input type="file" class="file-input" data-id="${expense.id}" data-type="expenses" style="width: 150px;">

@@ -39,12 +39,13 @@ function handleUnauthorized() {
   console.warn("Utilisateur actuel:", user);
   localStorage.removeItem("authToken");
   localStorage.removeItem("user");
+  localStorage.removeItem("ogo_org");
   const MARKETING_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
-    ? 'http://localhost:3000'
+    ? 'http://127.0.0.1:8080'
     : 'https://www.ogoue.com';
   
   // Délai de 5 secondes pour que l'utilisateur voie l'erreur
-  alert('❌ Session expirée. Redirection vers la connexion dans 5 secondes...');
+  console.warn('❌ Session expirée. Redirection vers la connexion dans 5 secondes...');
   setTimeout(() => {
     window.location.href = `${MARKETING_BASE}/login.html`;
   }, 5000);

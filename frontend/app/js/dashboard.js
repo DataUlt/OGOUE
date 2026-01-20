@@ -608,37 +608,25 @@ async function loadAndDisplayChartRepartition(startDateISO, endDateISO) {
 
     const repartitionContainer = document.getElementById("chart-repartition");
     if (repartitionContainer) {
-      let legendHTML = '<div class="grid grid-cols-2 gap-x-4 gap-y-2 pt-2 border-t border-border-light dark:border-border-dark text-sm">';
+      let badgesHTML = '<div class="flex flex-wrap gap-2">';
       top4.forEach((item, idx) => {
-        const colorClass = colors[idx];
-        const colorMap = {
-          "#a855f7": "bg-purple-400",
-          "#13ecc8": "bg-teal-400",
-          "#fb923c": "bg-orange-400",
-          "#3b82f6": "bg-blue-400"
-        };
-        legendHTML += `
-          <div class="flex items-center gap-2">
-            <div class="size-2.5 rounded-full ${colorMap[colorClass]}"></div>
-            <span>${item.cat} (${item.percent.toFixed(1)}%)</span>
-          </div>
+        badgesHTML += `
+          <span class="px-3 py-2 rounded-full text-sm font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200">
+            ${item.cat}: ${item.percent.toFixed(1)}%
+          </span>
         `;
       });
-      legendHTML += "</div>";
+      badgesHTML += "</div>";
 
       repartitionContainer.innerHTML = `
-        <p class="text-lg font-semibold">Répartition du CA par Catégorie</p>
-        <div class="flex-1 flex items-center justify-center min-h-[220px] relative">
-          <svg class="w-full h-full" viewBox="0 0 36 36">
-            ${svgCircles}
-            <circle class="stroke-current text-gray-200" cx="18" cy="18" r="${radius}" fill="transparent" stroke-width="3.5" stroke-dasharray="${circumference}" stroke-dashoffset="0" opacity="0.1"/>
-          </svg>
-          <div class="absolute flex flex-col items-center">
-            <span class="text-xs text-text-light-secondary dark:text-text-dark-secondary">Total</span>
-            <span class="text-2xl font-bold">${formatTotalForDisplay(totalCA)}</span>
+        <div>
+          <p class="text-lg font-semibold mb-4">Répartition du CA par Catégorie</p>
+          ${badgesHTML}
+          <div class="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
+            <span class="text-sm text-text-muted-light dark:text-text-muted-dark">Total: </span>
+            <span class="text-lg font-bold">${formatTotalForDisplay(totalCA)}</span>
           </div>
         </div>
-        ${legendHTML}
       `;
     }
 

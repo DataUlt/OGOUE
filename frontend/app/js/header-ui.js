@@ -424,14 +424,14 @@
     popover.innerHTML = '';
     
     const container = document.createElement('div');
-    container.className = 'w-80';
+    container.className = 'w-80 bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden';
     
     // Header
     const header = document.createElement('div');
-    header.className = 'px-5 py-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-600';
+    header.className = 'px-5 py-4 flex items-center justify-between border-b border-black/10 dark:border-gray-700';
     header.innerHTML = `
-      <h3 class="text-base font-semibold text-gray-900 dark:text-white">Paramètres</h3>
-      <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-400 text-2xl leading-none" data-close>✕</button>
+      <h3 class="text-base font-bold text-text-light dark:text-white">Paramètres</h3>
+      <button class="text-text-light-muted hover:text-text-light dark:text-gray-400 dark:hover:text-gray-300 text-2xl leading-none transition-colors" data-close>✕</button>
     `;
     container.appendChild(header);
     
@@ -502,8 +502,8 @@
       const agentsDiv = document.createElement('div');
       agentsDiv.innerHTML = `
         <div class="text-xs font-bold uppercase text-gray-500 dark:text-gray-400 mb-3">Gestion</div>
-        <a href="module_agents.html" class="block w-full px-4 py-2 rounded text-white bg-teal-600 hover:bg-teal-700 font-medium text-sm text-center transition-colors">
-          <span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle; margin-right: 8px;">group</span>
+        <a href="module_agents.html" class="block w-full px-4 py-2 rounded-lg text-background-light bg-primary hover:bg-text-light font-medium text-sm text-center transition-colors inline-flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined" style="font-size: 18px;">group</span>
           Gérer les Agents
         </a>
       `;
@@ -515,7 +515,7 @@
     // Footer button
     const footer = document.createElement('div');
     footer.className = 'px-5 py-4 border-t border-gray-200 dark:border-gray-600';
-    footer.innerHTML = '<button class="w-full px-4 py-2 rounded text-white bg-teal-600 hover:bg-teal-700 font-medium text-sm" data-close>Fermer</button>';
+    footer.innerHTML = '<button class="w-full px-4 py-2 rounded-lg text-background-light bg-primary hover:bg-text-light font-medium text-sm transition-colors" data-close>Fermer</button>';
     container.appendChild(footer);
     
     popover.appendChild(container);
@@ -591,10 +591,25 @@
   }
 
   // ============ PROFILE RENDER ============
-  function renderProfile(popover) {
-    const user = getUser() || { firstName: '', lastName: '', email: '', role: '' };
+  async function renderProfile(popover) {
+    const user = getUser() || { firstName: '', lastName: '', email: '', role: '', organization_id: '' };
     const org = getOrg() || { name: '', rccm: '', nif: '' };
     const isAgent = user.role === 'agent';
+    
+    // For agents, fetch organization details
+    let orgName = org.name || 'Organisation';
+    if (isAgent && !org.name) {
+      // Si org.name n'existe pas, on utilise ce qui est stocké dans localStorage
+      const storedOrg = localStorage.getItem('ogo_org');
+      if (storedOrg) {
+        try {
+          const orgData = JSON.parse(storedOrg);
+          orgName = orgData.name || orgName;
+        } catch (error) {
+          console.warn('Erreur parsing organisation du localStorage:', error);
+        }
+      }
+    }
     
     popover.innerHTML = '';
     const container = document.createElement('div');
@@ -610,7 +625,7 @@
         </div>
         <div class="flex-1 min-w-0">
           <p class="text-sm font-semibold text-gray-900 dark:text-white">${user.firstName}${user.lastName ? ' ' + user.lastName : ''}</p>
-          ${isAgent ? `<p class="text-xs text-gray-600 dark:text-gray-400">${org.name || org.id || 'Organisation'}</p>` : `<p class="text-xs text-gray-600 dark:text-gray-400">${user.email}</p>`}
+          <p class="text-xs text-gray-600 dark:text-gray-400">${orgName}</p>
         </div>
         <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-400 text-2xl leading-none" data-close>✕</button>
       </div>
@@ -687,7 +702,7 @@
         localStorage.removeItem('user');
         // Redirect to marketing login page (env-aware)
         const MARKETING_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
-          ? 'http://localhost:3000'
+          ? 'http://localhost:8080'
           : 'https://www.ogoue.com';
         window.location.href = `${MARKETING_BASE}/login.html`;
       }
@@ -798,11 +813,11 @@
     }
 
     if(profileEl) {
-      profileEl.addEventListener('click', function(e){
+      profileEl.addEventListener('click', async function(e){
         e.stopPropagation();
         if(profilePopover){ profilePopover.remove(); profilePopover=null; return; }
         profilePopover = createPopover();
-        renderProfile(profilePopover);
+        await renderProfile(profilePopover);
         document.body.appendChild(profilePopover);
         setTimeout(() => positionPopover(profilePopover, profileEl), 0);
       });
