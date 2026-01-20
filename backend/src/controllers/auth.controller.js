@@ -1,4 +1,4 @@
-import { supabase } from "../db/supabase.js";
+import { supabase, supabaseSecondary } from "../db/supabase.js";
 import { z } from "zod";
 import jwt from "jsonwebtoken";
 
@@ -19,6 +19,87 @@ const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
 });
+
+/**
+ * Helper: Sync user and organization to secondary Supabase
+ * PRIMARY schema → SECONDARY schema mapping:
+ * - PRIMARY: users (first_name, last_name, email, auth_id) → SECONDARY: users (full_name, email, password_hash, role)
+ * - PRIMARY: organizations → SECONDARY: pmes (linked via user_id)
+ */
+async function syncToSecondarySupabase(authUserId, orgData, userData) {
+  if (!supabaseSecondary) {
+    console.warn("⚠️  Secondary Supabase not configured, skipping sync");
+    return { success: false, reason: "Secondary Supabase not configured" };
+  }
+
+  try {
+    console.log("🔄 Syncing to secondary Supabase...");
+    
+    // 1️⃣ Create user in secondary 'users' table
+    // Combine first_name + last_name into full_name
+    const fullName = `${userData.first_name} ${userData.last_name}`;
+    
+    // Map role: 'manager' → 'pme', 'agent' → 'pme'
+    const secondaryRole = userData.role === 'manager' ? 'pme' : 'pme';
+    
+    // Use a placeholder for password_hash (can't get actual hash from Supabase Auth)
+    const placeholderHash = `AUTH_${authUserId}`;
+    
+    const { data: secondaryUserData, error: secondaryUserError } = await supabaseSecondary
+      .from("users")
+      .insert({
+        id: userData.id, // Keep same UUID for consistency
+        email: userData.email,
+        password_hash: placeholderHash, // Placeholder since we use Supabase Auth
+        role: secondaryRole, // 'pme' for registered users
+        full_name: fullName, // Combined first + last name
+        is_active: true,
+        created_at: userData.created_at,
+      })
+      .select("id")
+      .single();
+
+    if (secondaryUserError) {
+      console.error("❌ Secondary user sync error:", secondaryUserError);
+      return { success: false, reason: "User sync failed", error: secondaryUserError };
+    }
+
+    console.log("✅ User synced to secondary Supabase:", secondaryUserData.id);
+
+    // 2️⃣ Create PME in secondary 'pmes' table (linked to user via user_id)
+    const { data: secondaryPmeData, error: secondaryPmeError } = await supabaseSecondary
+      .from("pmes")
+      .insert({
+        user_id: secondaryUserData.id, // Reference to the user just created
+        company_name: orgData.name,
+        rccm_number: orgData.rccm_number || null,
+        nif_number: orgData.nif_number || null,
+        sector: orgData.activity || null,
+        activity_description: orgData.activity_description || null,
+        created_at: orgData.created_at,
+      })
+      .select("id")
+      .single();
+
+    if (secondaryPmeError) {
+      console.error("❌ Secondary pmes sync error:", secondaryPmeError);
+      // Try to rollback user sync
+      await supabaseSecondary
+        .from("users")
+        .delete()
+        .eq("id", secondaryUserData.id)
+        .catch(err => console.error("Rollback user sync failed:", err));
+      return { success: false, reason: "PME sync failed", error: secondaryPmeError };
+    }
+
+    console.log("✅ PME synced to secondary Supabase:", secondaryPmeData.id);
+    console.log("✅ Successfully synced to secondary Supabase (users + pmes)");
+    return { success: true };
+  } catch (error) {
+    console.error("❌ Sync to secondary Supabase error:", error);
+    return { success: false, reason: "Sync exception", error };
+  }
+}
 
 /**
  * POST /auth/register
@@ -93,6 +174,13 @@ export async function register(req, res) {
       return res.status(500).json({ error: "Erreur lors de la création du profil utilisateur" });
     }
 
+    // 3️⃣ Sync to secondary Supabase (optional, non-blocking)
+    const syncResult = await syncToSecondarySupabase(authUserId, orgData, userData);
+    if (!syncResult.success) {
+      console.warn("⚠️  Sync failed but continuing:", syncResult.reason);
+      // Don't fail registration if sync fails - it can be retried later
+    }
+
     // 4️⃣ Créer une session en loggant avec l'email et password
     const { data: sessionData, error: sessionError } = await supabase.auth.signInWithPassword({
       email: parsed.email,
@@ -119,6 +207,13 @@ export async function register(req, res) {
       organization: {
         id: orgData.id,
         name: orgData.name,
+      },
+      sync: {
+        primary: true,
+        secondary: syncResult.success,
+        message: syncResult.success 
+          ? "User and organization created in both Supabase instances" 
+          : `Created in primary Supabase only. Secondary sync: ${syncResult.reason}`
       },
     });
   } catch (err) {
