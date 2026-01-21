@@ -34,6 +34,23 @@ async function syncToSecondarySupabase(authUserId, orgData, userData) {
 
   try {
     console.log("🔄 Syncing to secondary Supabase...");
+    console.log("📋 [DEBUG] User data to sync:", {
+      id: userData.id,
+      email: userData.email,
+      first_name: userData.first_name,
+      last_name: userData.last_name,
+      role: userData.role,
+      created_at: userData.created_at,
+    });
+    console.log("📋 [DEBUG] Organization data to sync:", {
+      id: orgData.id,
+      name: orgData.name,
+      rccm_number: orgData.rccm_number,
+      nif_number: orgData.nif_number,
+      activity: orgData.activity,
+      activity_description: orgData.activity_description,
+      created_at: orgData.created_at,
+    });
     
     // 1️⃣ Create user in secondary 'users' table
     // Combine first_name + last_name into full_name
@@ -44,6 +61,16 @@ async function syncToSecondarySupabase(authUserId, orgData, userData) {
     
     // Use a placeholder for password_hash (can't get actual hash from Supabase Auth)
     const placeholderHash = `AUTH_${authUserId}`;
+    
+    console.log("➡️ Inserting into secondary users table:", {
+      id: userData.id,
+      email: userData.email,
+      password_hash: placeholderHash,
+      role: secondaryRole,
+      full_name: fullName,
+      is_active: true,
+      created_at: userData.created_at,
+    });
     
     const { data: secondaryUserData, error: secondaryUserError } = await supabaseSecondary
       .from("users")
@@ -60,13 +87,29 @@ async function syncToSecondarySupabase(authUserId, orgData, userData) {
       .single();
 
     if (secondaryUserError) {
-      console.error("❌ Secondary user sync error:", secondaryUserError);
+      console.error("❌ Secondary user sync error:", {
+        message: secondaryUserError.message,
+        code: secondaryUserError.code,
+        details: secondaryUserError.details,
+        hint: secondaryUserError.hint,
+        status: secondaryUserError.status,
+      });
       return { success: false, reason: "User sync failed", error: secondaryUserError };
     }
 
     console.log("✅ User synced to secondary Supabase:", secondaryUserData.id);
 
     // 2️⃣ Create PME in secondary 'pmes' table (linked to user via user_id)
+    console.log("➡️ Inserting into secondary pmes table:", {
+      user_id: secondaryUserData.id,
+      company_name: orgData.name,
+      rccm_number: orgData.rccm_number || null,
+      nif_number: orgData.nif_number || null,
+      sector: orgData.activity || null,
+      activity_description: orgData.activity_description || null,
+      created_at: orgData.created_at,
+    });
+
     const { data: secondaryPmeData, error: secondaryPmeError } = await supabaseSecondary
       .from("pmes")
       .insert({
@@ -82,7 +125,13 @@ async function syncToSecondarySupabase(authUserId, orgData, userData) {
       .single();
 
     if (secondaryPmeError) {
-      console.error("❌ Secondary pmes sync error:", secondaryPmeError);
+      console.error("❌ Secondary pmes sync error:", {
+        message: secondaryPmeError.message,
+        code: secondaryPmeError.code,
+        details: secondaryPmeError.details,
+        hint: secondaryPmeError.hint,
+        status: secondaryPmeError.status,
+      });
       // Try to rollback user sync
       await supabaseSecondary
         .from("users")
@@ -96,7 +145,11 @@ async function syncToSecondarySupabase(authUserId, orgData, userData) {
     console.log("✅ Successfully synced to secondary Supabase (users + pmes)");
     return { success: true };
   } catch (error) {
-    console.error("❌ Sync to secondary Supabase error:", error);
+    console.error("❌ Sync to secondary Supabase exception:", {
+      message: error?.message,
+      stack: error?.stack,
+      name: error?.name,
+    });
     return { success: false, reason: "Sync exception", error };
   }
 }
