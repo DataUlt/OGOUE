@@ -187,7 +187,7 @@ export async function register(req, res) {
         activity: parsed.activity || null,
         activity_description: parsed.activityDescription || null,
       })
-      .select("id, name, created_at")
+      .select("id, name, rccm_number, nif_number, activity, activity_description, created_at")
       .single();
 
     if (orgError || !orgData) {
