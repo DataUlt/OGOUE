@@ -199,7 +199,7 @@
       notifs.push({
         id: 108,
         text: 'Bravo 🎉 : meilleur chiffre d\'affaires de la semaine',
-        time: formatDate(4),
+        time: formatDate(0),
         type: 'success',
         read: true
       });
@@ -210,7 +210,7 @@
       notifs.push({
         id: 109,
         text: 'Excellente performance aujourd\'hui',
-        time: formatDate(5),
+        time: formatDate(0),
         type: 'success',
         read: true
       });
@@ -221,7 +221,7 @@
       notifs.push({
         id: 110,
         text: 'Vos ventes sont en hausse par rapport à la semaine dernière',
-        time: formatDate(6),
+        time: formatDate(0),
         type: 'success',
         read: true
       });
@@ -232,7 +232,7 @@
       notifs.push({
         id: 111,
         text: 'Très bon mois : résultat positif',
-        time: formatDate(7),
+        time: formatDate(0),
         type: 'success',
         read: true
       });
@@ -243,7 +243,7 @@
       notifs.push({
         id: 112,
         text: 'Dépenses mieux maîtrisées que le mois dernier',
-        time: formatDate(8),
+        time: formatDate(0),
         type: 'success',
         read: true
       });
@@ -360,7 +360,7 @@
     // Title
     const title = document.createElement('div');
     title.className = 'px-5 py-4 text-base font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-600';
-    title.textContent = 'Notifications';
+    title.textContent = 'Analyse';
     container.appendChild(title);
     
     // List
