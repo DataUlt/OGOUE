@@ -593,7 +593,7 @@
       if (!ventesAujourdhui.length) {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td colspan="9" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+          <td colspan="10" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
             Aucune vente enregistrée pour aujourd'hui.
           </td>
         `;
@@ -621,6 +621,7 @@
         "Prix Total",
         "Paiement",
         "Type",
+        "Créé par",
         "Justificatif"
       ];
 
@@ -634,6 +635,7 @@
           v.montant != null ? String(v.montant).replace(".", ",") : "",
           v.moyen_paiement || "",
           v.type_vente || "",
+          v.created_by_name || "",
           v.justificatif || ""
         ];
 

@@ -532,7 +532,7 @@
       if (!depensesAujourdhui.length) {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+          <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
             Aucune dépense enregistrée pour aujourd'hui.
           </td>
         `;
@@ -557,6 +557,7 @@
         "Description",
         "Montant",
         "Moyen de paiement",
+        "Créé par",
         "Justificatif"
       ];
 
@@ -569,6 +570,7 @@
           d.description || "",
           d.montant != null ? String(d.montant).replace(".", ",") : "",
           d.moyen_paiement || "",
+          d.created_by_name || "",
           d.justificatif || ""
         ];
 
