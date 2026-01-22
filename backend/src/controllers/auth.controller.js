@@ -21,12 +21,12 @@ const loginSchema = z.object({
 });
 
 /**
- * Helper: Sync user and organization to secondary Supabase
+ * Helper: Sync user and organization to secondary Supabase with real Auth
  * PRIMARY schema → SECONDARY schema mapping:
- * - PRIMARY: users (first_name, last_name, email, auth_id) → SECONDARY: users (full_name, email, password_hash, role)
+ * - PRIMARY: users (first_name, last_name, email, auth_id) → SECONDARY: users (full_name, email, auth_id, role)
  * - PRIMARY: organizations → SECONDARY: pmes (linked via user_id)
  */
-async function syncToSecondarySupabase(authUserId, orgData, userData) {
+async function syncToSecondarySupabase(email, password, orgData, userData) {
   if (!supabaseSecondary) {
     console.warn("⚠️  Secondary Supabase not configured, skipping sync");
     return { success: false, reason: "Secondary Supabase not configured" };
@@ -34,38 +34,31 @@ async function syncToSecondarySupabase(authUserId, orgData, userData) {
 
   try {
     console.log("🔄 Syncing to secondary Supabase...");
-    console.log("📋 [DEBUG] User data to sync:", {
-      id: userData.id,
-      email: userData.email,
-      first_name: userData.first_name,
-      last_name: userData.last_name,
-      role: userData.role,
-      created_at: userData.created_at,
-    });
-    console.log("📋 [DEBUG] Organization data to sync:", {
-      id: orgData.id,
-      name: orgData.name,
-      rccm_number: orgData.rccm_number,
-      nif_number: orgData.nif_number,
-      activity: orgData.activity,
-      activity_description: orgData.activity_description,
-      created_at: orgData.created_at,
-    });
     
-    // 1️⃣ Create user in secondary 'users' table
-    // Combine first_name + last_name into full_name
+    // 1️⃣ Create user in secondary Supabase Auth
+    console.log("➡️ Creating auth user in secondary database...");
+    const { data: secondaryAuthData, error: secondaryAuthError } = await supabaseSecondary.auth.admin.createUser({
+      email: email,
+      password: password,
+      email_confirm: true,
+    });
+
+    if (secondaryAuthError || !secondaryAuthData.user) {
+      console.error("❌ Secondary auth error:", secondaryAuthError);
+      return { success: false, reason: "Secondary auth creation failed", error: secondaryAuthError };
+    }
+
+    const secondaryAuthUserId = secondaryAuthData.user.id;
+    console.log("✅ Secondary auth user created:", secondaryAuthUserId);
+
+    // 2️⃣ Create user record in secondary 'users' table
     const fullName = `${userData.first_name} ${userData.last_name}`;
-    
-    // Map role: 'manager' → 'pme', 'agent' → 'pme'
     const secondaryRole = userData.role === 'manager' ? 'pme' : 'pme';
-    
-    // Use a placeholder for password_hash (can't get actual hash from Supabase Auth)
-    const placeholderHash = `AUTH_${authUserId}`;
     
     console.log("➡️ Inserting into secondary users table:", {
       id: userData.id,
       email: userData.email,
-      password_hash: placeholderHash,
+      auth_id: secondaryAuthUserId,
       role: secondaryRole,
       full_name: fullName,
       is_active: true,
@@ -75,11 +68,11 @@ async function syncToSecondarySupabase(authUserId, orgData, userData) {
     const { data: secondaryUserData, error: secondaryUserError } = await supabaseSecondary
       .from("users")
       .insert({
-        id: userData.id, // Keep same UUID for consistency
+        id: userData.id,
         email: userData.email,
-        password_hash: placeholderHash, // Placeholder since we use Supabase Auth
-        role: secondaryRole, // 'pme' for registered users
-        full_name: fullName, // Combined first + last name
+        auth_id: secondaryAuthUserId, // Link to secondary Auth
+        role: secondaryRole,
+        full_name: fullName,
         is_active: true,
         created_at: userData.created_at,
       })
@@ -91,15 +84,17 @@ async function syncToSecondarySupabase(authUserId, orgData, userData) {
         message: secondaryUserError.message,
         code: secondaryUserError.code,
         details: secondaryUserError.details,
-        hint: secondaryUserError.hint,
-        status: secondaryUserError.status,
       });
+      // Try to rollback auth user
+      await supabaseSecondary.auth.admin.deleteUser(secondaryAuthUserId).catch(err => 
+        console.error("Rollback auth user failed:", err)
+      );
       return { success: false, reason: "User sync failed", error: secondaryUserError };
     }
 
     console.log("✅ User synced to secondary Supabase:", secondaryUserData.id);
 
-    // 2️⃣ Create PME in secondary 'pmes' table (linked to user via user_id)
+    // 3️⃣ Create PME in secondary 'pmes' table
     console.log("➡️ Inserting into secondary pmes table:", {
       user_id: secondaryUserData.id,
       company_name: orgData.name,
@@ -107,13 +102,12 @@ async function syncToSecondarySupabase(authUserId, orgData, userData) {
       nif_number: orgData.nif_number || null,
       sector: orgData.activity || null,
       activity_description: orgData.activity_description || null,
-      created_at: orgData.created_at,
     });
 
     const { data: secondaryPmeData, error: secondaryPmeError } = await supabaseSecondary
       .from("pmes")
       .insert({
-        user_id: secondaryUserData.id, // Reference to the user just created
+        user_id: secondaryUserData.id,
         company_name: orgData.name,
         rccm_number: orgData.rccm_number || null,
         nif_number: orgData.nif_number || null,
@@ -129,21 +123,22 @@ async function syncToSecondarySupabase(authUserId, orgData, userData) {
         message: secondaryPmeError.message,
         code: secondaryPmeError.code,
         details: secondaryPmeError.details,
-        hint: secondaryPmeError.hint,
-        status: secondaryPmeError.status,
       });
-      // Try to rollback user sync
+      // Try to rollback user and auth
       await supabaseSecondary
         .from("users")
         .delete()
         .eq("id", secondaryUserData.id)
         .catch(err => console.error("Rollback user sync failed:", err));
+      await supabaseSecondary.auth.admin.deleteUser(secondaryAuthUserId).catch(err => 
+        console.error("Rollback auth user failed:", err)
+      );
       return { success: false, reason: "PME sync failed", error: secondaryPmeError };
     }
 
     console.log("✅ PME synced to secondary Supabase:", secondaryPmeData.id);
-    console.log("✅ Successfully synced to secondary Supabase (users + pmes)");
-    return { success: true };
+    console.log("✅ Successfully synced to secondary Supabase (auth + users + pmes)");
+    return { success: true, secondaryAuthUserId };
   } catch (error) {
     console.error("❌ Sync to secondary Supabase exception:", {
       message: error?.message,
@@ -228,7 +223,7 @@ export async function register(req, res) {
     }
 
     // 3️⃣ Sync to secondary Supabase (optional, non-blocking)
-    const syncResult = await syncToSecondarySupabase(authUserId, orgData, userData);
+    const syncResult = await syncToSecondarySupabase(parsed.email, parsed.password, orgData, userData);
     if (!syncResult.success) {
       console.warn("⚠️  Sync failed but continuing:", syncResult.reason);
       // Don't fail registration if sync fails - it can be retried later
@@ -623,5 +618,193 @@ export async function resetPassword(req, res) {
       return res.status(400).json({ error: "Validation error", details: err.issues });
     }
     return res.status(500).json({ error: "Erreur lors de la réinitialisation du mot de passe" });
+  }
+}
+
+/**
+ * POST /auth-secondary/login
+ * Authentifie un utilisateur sur la base de données secondaire
+ */
+export async function loginSecondary(req, res) {
+  try {
+    const parsed = loginSchema.parse(req.body);
+
+    if (!supabaseSecondary) {
+      return res.status(503).json({ error: "Secondary database not configured" });
+    }
+
+    // Authentifier avec Supabase Auth SECONDARY
+    const { data: authData, error: authError } = await supabaseSecondary.auth.signInWithPassword({
+      email: parsed.email,
+      password: parsed.password,
+    });
+
+    if (authError || !authData.session) {
+      console.error("Secondary auth error:", authError);
+      return res.status(401).json({ error: "Email ou mot de passe incorrect" });
+    }
+
+    // Récupérer les infos utilisateur depuis secondary users table
+    const { data: userData, error: userError } = await supabaseSecondary
+      .from("users")
+      .select("id, full_name, email, role")
+      .eq("auth_id", authData.user.id)
+      .maybeSingle();
+
+    if (userError || !userData) {
+      console.error("Secondary user record error:", userError);
+      return res.status(500).json({ error: "Erreur lors de la récupération du profil utilisateur" });
+    }
+
+    // Get PME info if exists
+    const { data: pmeData } = await supabaseSecondary
+      .from("pmes")
+      .select("id, company_name, user_id")
+      .eq("user_id", userData.id)
+      .maybeSingle();
+
+    return res.json({
+      message: "Connexion réussie (Secondary)",
+      token: authData.session.access_token,
+      refreshToken: authData.session.refresh_token,
+      database: "secondary",
+      user: {
+        id: userData.id,
+        fullName: userData.full_name,
+        email: userData.email,
+        role: userData.role,
+      },
+      pme: pmeData ? {
+        id: pmeData.id,
+        companyName: pmeData.company_name,
+      } : null,
+    });
+  } catch (err) {
+    console.error("Secondary login error:", err);
+    if (err?.name === "ZodError") {
+      return res.status(400).json({ error: "Validation error", details: err.issues });
+    }
+    return res.status(500).json({ error: "Erreur lors de la connexion" });
+  }
+}
+
+/**
+ * POST /auth-secondary/register
+ * Crée un compte utilisateur sur la base de données secondaire
+ */
+export async function registerSecondary(req, res) {
+  try {
+    const secondaryRegisterSchema = z.object({
+      firstName: z.string().min(1).max(100),
+      lastName: z.string().min(1).max(100),
+      email: z.string().email(),
+      password: z.string().min(6),
+      companyName: z.string().min(1).max(200),
+      rccmNumber: z.string().optional().nullable(),
+      nifNumber: z.string().optional().nullable(),
+      sector: z.string().optional().nullable(),
+      activityDescription: z.string().optional().nullable(),
+    });
+
+    const parsed = secondaryRegisterSchema.parse(req.body);
+
+    if (!supabaseSecondary) {
+      return res.status(503).json({ error: "Secondary database not configured" });
+    }
+
+    // 1️⃣ Create user in secondary Supabase Auth
+    const { data: authData, error: authError } = await supabaseSecondary.auth.admin.createUser({
+      email: parsed.email,
+      password: parsed.password,
+      email_confirm: true,
+    });
+
+    if (authError || !authData.user) {
+      console.error("Secondary auth error:", authError);
+      return res.status(400).json({ error: authError?.message || "Erreur lors de la création du compte" });
+    }
+
+    const authUserId = authData.user.id;
+
+    // 2️⃣ Create user record in secondary users table
+    const fullName = `${parsed.firstName} ${parsed.lastName}`;
+    const { data: userData, error: userError } = await supabaseSecondary
+      .from("users")
+      .insert({
+        email: parsed.email,
+        auth_id: authUserId,
+        full_name: fullName,
+        role: "pme",
+        is_active: true,
+      })
+      .select("id, full_name, email, role, created_at")
+      .single();
+
+    if (userError || !userData) {
+      console.error("Secondary user record error:", userError);
+      // Delete auth user on failure
+      await supabaseSecondary.auth.admin.deleteUser(authUserId);
+      return res.status(500).json({ error: "Erreur lors de la création du profil utilisateur" });
+    }
+
+    // 3️⃣ Create PME record in secondary pmes table
+    const { data: pmeData, error: pmeError } = await supabaseSecondary
+      .from("pmes")
+      .insert({
+        user_id: userData.id,
+        company_name: parsed.companyName,
+        rccm_number: parsed.rccmNumber || null,
+        nif_number: parsed.nifNumber || null,
+        sector: parsed.sector || null,
+        activity_description: parsed.activityDescription || null,
+      })
+      .select("id, company_name")
+      .single();
+
+    if (pmeError) {
+      console.error("Secondary PME error:", pmeError);
+      // Try to rollback user and auth
+      await supabaseSecondary
+        .from("users")
+        .delete()
+        .eq("id", userData.id)
+        .catch(err => console.error("Rollback user failed:", err));
+      await supabaseSecondary.auth.admin.deleteUser(authUserId);
+      return res.status(500).json({ error: "Erreur lors de la création de la PME" });
+    }
+
+    // 4️⃣ Create session by logging in
+    const { data: sessionData, error: sessionError } = await supabaseSecondary.auth.signInWithPassword({
+      email: parsed.email,
+      password: parsed.password
+    });
+
+    if (sessionError || !sessionData.session) {
+      console.error("Secondary session error:", sessionError);
+      return res.status(500).json({ error: "Erreur lors de la création de la session" });
+    }
+
+    return res.status(201).json({
+      message: "Inscription réussie (Secondary)",
+      token: sessionData.session.access_token,
+      refreshToken: sessionData.session.refresh_token,
+      database: "secondary",
+      user: {
+        id: userData.id,
+        fullName: userData.full_name,
+        email: userData.email,
+        role: userData.role,
+      },
+      pme: {
+        id: pmeData.id,
+        companyName: pmeData.company_name,
+      },
+    });
+  } catch (err) {
+    console.error("Secondary register error:", err);
+    if (err?.name === "ZodError") {
+      return res.status(400).json({ error: "Validation error", details: err.issues });
+    }
+    return res.status(500).json({ error: "Erreur lors de l'inscription" });
   }
 }
