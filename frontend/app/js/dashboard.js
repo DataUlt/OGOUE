@@ -611,7 +611,7 @@ async function loadAndDisplayChartRepartition(startDateISO, endDateISO) {
       let badgesHTML = '<div class="flex flex-wrap gap-2">';
       top4.forEach((item, idx) => {
         badgesHTML += `
-          <span class="px-3 py-2 rounded-full text-sm font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200">
+          <span class="px-3 py-2 rounded-full text-sm font-semibold bg-cyan-100 text-cyan-700 dark:bg-cyan-900 dark:text-cyan-200">
             ${item.cat}: ${item.percent.toFixed(1)}%
           </span>
         `;

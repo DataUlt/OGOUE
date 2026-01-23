@@ -21,7 +21,7 @@
                 extend: {
                     colors: {
                         /* Palette OGOUÉ - Redesign */
-                        "primary": "#1de22e",
+                        "primary": "#0088CC",
                         "secondary": "#1E3A5F",
                         "background-light": "#f6f8f6",
                         "background-dark": "#111712",
@@ -87,7 +87,7 @@
                 </button>
                 <div class="flex items-center gap-2">
                     <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white" data-action="notifications">
-                        <span class="material-symbols-outlined">search</span>
+                        <span class="material-symbols-outlined">search_insights</span>
                     </button>
                     <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white" data-action="settings">
                         <span class="material-symbols-outlined">settings</span>
@@ -143,7 +143,7 @@
                         </a>
 
                         <!-- Filtre par date -->
-                        <div class="relative rounded-lg border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark px-3 py-2 shadow-sm w-full md:w-[240px]">
+                        <div class="relative rounded-lg border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark px-6 py-4 shadow-sm w-full md:w-[320px]">
                             <p class="text-[10px] font-semibold uppercase tracking-wide text-text-light-secondary dark:text-text-dark-secondary mb-1">
                                 Filtrer par date
                             </p>
@@ -263,12 +263,12 @@
                             <svg fill="none" height="100%" preserveAspectRatio="none" viewBox="0 0 472 150" width="100%" xmlns="http://www.w3.org/2000/svg">
                                 <defs>
                                     <linearGradient id="chartGradient" x1="236" x2="236" y1="1" y2="149" gradientUnits="userSpaceOnUse">
-                                        <stop stop-color="#27AE60" stop-opacity="0.2"/>
-                                        <stop offset="1" stop-color="#27AE60" stop-opacity="0"/>
+                                        <stop stop-color="#0088CC" stop-opacity="0.2"/>
+                                        <stop offset="1" stop-color="#0088CC" stop-opacity="0"/>
                                     </linearGradient>
                                 </defs>
                                 <path d="M0 115C18.1538 115 18.1538 30 36.3077 30C54.4615 30 54.4615 50 72.6154 50C90.7692 50 90.7692 100 108.923 100C127.077 100 127.077 40 145.231 40C163.385 40 163.385 110 181.538 110C199.692 110 199.692 70 217.846 70C236 70 236 55 254.154 55C272.308 55 272.308 130 290.462 130C308.615 130 308.615 140 326.769 140C344.923 140 344.923 10 363.077 10C381.231 10 381.231 90 399.385 90C417.538 90 417.538 135 435.692 135C453.846 135 453.846 35 472 35" stroke="#94A3B8" stroke-dasharray="4 4" stroke-linecap="round" stroke-width="2"/>
-                                <path d="M0 109C18.1538 109 18.1538 21 36.3077 21C54.4615 21 54.4615 41 72.6154 41C90.7692 41 90.7692 93 108.923 93C127.077 93 127.077 33 145.231 33C163.385 33 163.385 101 181.538 101C199.692 101 199.692 61 217.846 61C236 61 236 45 254.154 45C272.308 45 272.308 121 290.462 121C308.615 121 308.615 149 326.769 149C344.923 149 344.923 1 363.077 1C381.231 1 381.231 81 399.385 81C417.538 81 417.538 129 435.692 129C453.846 129 453.846 25 472 25" stroke="#27AE60" stroke-linecap="round" stroke-width="3"/>
+                                <path d="M0 109C18.1538 109 18.1538 21 36.3077 21C54.4615 21 54.4615 41 72.6154 41C90.7692 41 90.7692 93 108.923 93C127.077 93 127.077 33 145.231 33C163.385 33 163.385 101 181.538 101C199.692 101 199.692 61 217.846 61C236 61 236 45 254.154 45C272.308 45 272.308 121 290.462 121C308.615 121 308.615 149 326.769 149C344.923 149 344.923 1 363.077 1C381.231 1 381.231 81 399.385 81C417.538 81 417.538 129 435.692 129C453.846 129 453.846 25 472 25" stroke="#0088CC" stroke-linecap="round" stroke-width="3"/>
                                 <path d="M0 109C18.1538 109 18.1538 21 36.3077 21C54.4615 21 54.4615 41 72.6154 41C90.7692 41 90.7692 93 108.923 93C127.077 93 127.077 33 145.231 33C163.385 33 163.385 101 181.538 101C199.692 101 199.692 61 217.846 61C236 61 236 45 254.154 45C272.308 45 272.308 121 290.462 121C308.615 121 308.615 149 326.769 149C344.923 149 344.923 1 363.077 1C381.231 1 381.231 81 399.385 81C417.538 81 417.538 129 435.692 129C453.846 129 453.846 25 472 25V150H0V109Z" fill="url(#chartGradient)"/>
                             </svg>
                         </div>
@@ -278,10 +278,10 @@
                         <p class="text-lg font-semibold">Répartition du CA par Catégorie</p>
                         <div class="flex-1 flex items-center justify-center min-h-[220px] relative">
                             <svg class="w-full h-full" viewBox="0 0 36 36">
-                                <circle class="stroke-current text-purple-400" cx="18" cy="18" r="15.9155" fill="transparent" stroke-width="3.5" stroke-dasharray="35 100" stroke-dashoffset="0"/>
-                                <circle class="stroke-current text-teal-400" cx="18" cy="18" r="15.9155" fill="transparent" stroke-width="3.5" stroke-dasharray="30 100" stroke-dashoffset="-35"/>
-                                <circle class="stroke-current text-orange-400" cx="18" cy="18" r="15.9155" fill="transparent" stroke-width="3.5" stroke-dasharray="20 100" stroke-dashoffset="-65"/>
-                                <circle class="stroke-current text-sky-400" cx="18" cy="18" r="15.9155" fill="transparent" stroke-width="3.5" stroke-dasharray="15 100" stroke-dashoffset="-85"/>
+                                <circle class="stroke-current text-cyan-400" cx="18" cy="18" r="15.9155" fill="transparent" stroke-width="3.5" stroke-dasharray="35 100" stroke-dashoffset="0"/>
+                                <circle class="stroke-current text-cyan-400" cx="18" cy="18" r="15.9155" fill="transparent" stroke-width="3.5" stroke-dasharray="30 100" stroke-dashoffset="-35"/>
+                                <circle class="stroke-current text-cyan-400" cx="18" cy="18" r="15.9155" fill="transparent" stroke-width="3.5" stroke-dasharray="20 100" stroke-dashoffset="-65"/>
+                                <circle class="stroke-current text-cyan-400" cx="18" cy="18" r="15.9155" fill="transparent" stroke-width="3.5" stroke-dasharray="15 100" stroke-dashoffset="-85"/>
                             </svg>
                             <div class="absolute flex flex-col items-center">
                                 <span class="text-xs text-text-light-secondary dark:text-text-dark-secondary">Total</span>
@@ -289,10 +289,10 @@
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-x-4 gap-y-2 pt-2 border-t border-border-light dark:border-border-dark text-sm">
-                            <div class="flex items-center gap-2"><div class="size-2.5 rounded-full bg-purple-400"></div><span>Plomberie</span></div>
-                            <div class="flex items-center gap-2"><div class="size-2.5 rounded-full bg-teal-400"></div><span>Matériaux</span></div>
-                            <div class="flex items-center gap-2"><div class="size-2.5 rounded-full bg-orange-400"></div><span>Outillage</span></div>
-                            <div class="flex items-center gap-2"><div class="size-2.5 rounded-full bg-sky-400"></div><span>Peinture</span></div>
+                            <div class="flex items-center gap-2"><div class="size-2.5 rounded-full bg-cyan-400"></div><span>Plomberie</span></div>
+                            <div class="flex items-center gap-2"><div class="size-2.5 rounded-full bg-cyan-400"></div><span>Matériaux</span></div>
+                            <div class="flex items-center gap-2"><div class="size-2.5 rounded-full bg-cyan-400"></div><span>Outillage</span></div>
+                            <div class="flex items-center gap-2"><div class="size-2.5 rounded-full bg-cyan-400"></div><span>Peinture</span></div>
                         </div>
                     </div>
                 </section>

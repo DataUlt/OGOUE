@@ -1432,12 +1432,12 @@ function openJustificatifModal(fileName, fileUrl) {
     
     const closeBtn = document.createElement('button');
     closeBtn.id = 'close-justificatif';
-    closeBtn.className = 'absolute top-4 right-4 w-8 h-8 rounded-full bg-[#f0f0f0] dark:bg-[#2a3a32] flex items-center justify-center text-[#666] dark:text-[#999] hover:bg-[#e0e0e0] dark:hover:bg-[#3a4a42] transition-colors z-10';
+    closeBtn.className = 'absolute top-6 right-6 w-8 h-8 rounded-full bg-[#f0f0f0] dark:bg-[#2a3a32] flex items-center justify-center text-[#666] dark:text-[#999] hover:bg-[#e0e0e0] dark:hover:bg-[#3a4a42] transition-colors z-10';
     closeBtn.innerHTML = '<span class="material-symbols-outlined">close</span>';
     closeBtn.type = 'button';
     
     const headerDiv = document.createElement('div');
-    headerDiv.className = 'p-2 sm:p-3 border-b border-[#e8ede8] dark:border-[#2a3a32] flex justify-between items-start gap-2 flex-shrink-0';
+    headerDiv.className = 'p-4 sm:p-6 border-b border-[#e8ede8] dark:border-[#2a3a32] flex justify-between items-start gap-2 flex-shrink-0';
     
     const titleDiv = document.createElement('div');
     titleDiv.className = 'flex flex-col';

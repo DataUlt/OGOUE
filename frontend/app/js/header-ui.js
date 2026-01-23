@@ -411,12 +411,6 @@
     
     container.appendChild(content);
     
-    // Footer
-    const footer = document.createElement('div');
-    footer.className = 'px-5 py-3 border-t border-gray-200 dark:border-gray-600';
-    footer.innerHTML = '<button class="text-sm font-medium text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300">Tout marquer comme lu</button>';
-    container.appendChild(footer);
-    
     popover.appendChild(container);
   }
 

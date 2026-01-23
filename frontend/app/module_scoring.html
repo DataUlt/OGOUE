@@ -21,7 +21,7 @@
         extend: {
           colors: {
             /* Palette OGOUÉ - Redesign */
-            "primary": "#1de22e",
+            "primary": "#0088CC",
             "secondary": "#1E3A5F",
             "background-light": "#f6f8f6",
             "background-dark": "#111712",
@@ -114,7 +114,7 @@
                 </button>
                 <div class="flex items-center gap-2">
                     <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white" data-action="notifications">
-                        <span class="material-symbols-outlined">search</span>
+                        <span class="material-symbols-outlined">search_insights</span>
                     </button>
                     <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white" data-action="settings">
                         <span class="material-symbols-outlined">settings</span>
@@ -195,7 +195,7 @@
             <div class="mt-2 flex gap-2 text-xs text-gray-400">
               <div class="flex items-center gap-1"><div class="size-2 rounded-full bg-red-400"></div>&lt;40%</div>
               <div class="flex items-center gap-1"><div class="size-2 rounded-full bg-orange-400"></div>40-70%</div>
-              <div class="flex items-center gap-1"><div class="size-2 rounded-full bg-primary"></div>&gt;70%</div>
+              <div class="flex items-center gap-1"><div class="size-2 rounded-full bg-[#27AE60]"></div>&gt;70%</div>
             </div>
           </div>
         </div>
@@ -205,10 +205,10 @@
           <!-- Sales Card -->
           <div class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-[#e7f3f1] dark:border-[#1e3b36] p-6 flex flex-col gap-4">
             <div class="flex justify-between items-start">
-              <div class="bg-emerald-50 dark:bg-emerald-900/20 p-2 rounded-lg text-primary">
+              <div class="bg-cyan-50 dark:bg-cyan-900/20 p-2 rounded-lg text-primary">
                 <span class="material-symbols-outlined">shopping_cart</span>
               </div>
-              <span id="salesBadge" class="text-primary dark:text-emerald-400 font-bold text-sm bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 rounded">—</span>
+              <span id="salesBadge" class="text-primary dark:text-cyan-400 font-bold text-sm bg-cyan-100 dark:bg-cyan-900/40 px-2 py-0.5 rounded">—</span>
             </div>
             <div>
               <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Ventes justifiées</p>
@@ -220,7 +220,7 @@
             <!-- Progress Bar -->
             <div class="flex flex-col gap-2">
               <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5">
-                <div id="salesProgress" class="h-2.5 rounded-full" style="width: 0%; background-color: #27AE60;"></div>
+                <div id="salesProgress" class="h-2.5 rounded-full" style="width: 0%; background-color: #0088CC;"></div>
               </div>
               <p id="salesMessage" class="text-xs text-primary font-medium mt-1">—</p>
             </div>
@@ -229,10 +229,10 @@
           <!-- Expenses Card -->
           <div class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-[#e7f3f1] dark:border-[#1e3b36] p-6 flex flex-col gap-4">
             <div class="flex justify-between items-start">
-              <div class="bg-emerald-50 dark:bg-emerald-900/20 p-2 rounded-lg text-primary">
+              <div class="bg-cyan-50 dark:bg-cyan-900/20 p-2 rounded-lg text-primary">
                 <span class="material-symbols-outlined">receipt_long</span>
               </div>
-              <span id="expensesBadge" class="text-primary dark:text-emerald-400 font-bold text-sm bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 rounded">—</span>
+              <span id="expensesBadge" class="text-primary dark:text-cyan-400 font-bold text-sm bg-cyan-100 dark:bg-cyan-900/40 px-2 py-0.5 rounded">—</span>
             </div>
             <div>
               <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Dépenses justifiées</p>
@@ -244,7 +244,7 @@
             <!-- Progress Bar -->
             <div class="flex flex-col gap-2">
               <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5">
-                <div id="expensesProgress" class="h-2.5 rounded-full" style="width: 0%; background-color: #27AE60;"></div>
+                <div id="expensesProgress" class="h-2.5 rounded-full" style="width: 0%; background-color: #0088CC;"></div>
               </div>
               <p id="expensesMessage" class="text-xs text-primary font-medium mt-1">—</p>
             </div>

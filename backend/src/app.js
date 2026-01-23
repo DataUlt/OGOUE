@@ -24,7 +24,7 @@ const corsOptions = {
     }
     
     // Get allowed origins from env or use defaults
-    const corsOriginString = process.env.CORS_ORIGIN || "https://ogoue.com,https://www.ogoue.com,https://app.ogoue.com,https://ogoue-frontend.netlify.app,http://localhost:3000,http://localhost:3001";
+    const corsOriginString = process.env.CORS_ORIGIN || "https://ogoue.com,https://www.ogoue.com,https://app.ogoue.com,https://ogoue-frontend.netlify.app,http://localhost:3000,http://localhost:3001,http://localhost:8080,http://127.0.0.1:8080";
     const allowedOrigins = corsOriginString
       .split(",")
       .map((o) => o.trim())
@@ -38,7 +38,7 @@ const corsOptions = {
     
     // Fallback: Allow any ogoue.com domain or localhost
     const ogoueRegex = /^https?:\/\/([a-z0-9-]*\.)*ogoue\.com(:\d+)?$/i;
-    const localhostRegex = /^https?:\/\/localhost(:\d+)?$/i;
+    const localhostRegex = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i;
     
     if (ogoueRegex.test(origin) || localhostRegex.test(origin)) {
       console.log('✅ [CORS] Origin allowed (regex):', origin);
