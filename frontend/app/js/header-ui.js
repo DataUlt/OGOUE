@@ -3,6 +3,9 @@
   const NOTIF_KEY = 'ogo_notifications';
   const PREFS_KEY = 'ogo_preferences';
   const ORG_KEY = 'ogo_org';
+  const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:3001'
+    : 'https://api.ogoue.com';
 
   function qs(sel, ctx = document) { return ctx.querySelector(sel); }
 
@@ -598,15 +601,35 @@
     
     // For agents, fetch organization details
     let orgName = org.name || 'Organisation';
-    if (isAgent && !org.name) {
-      // Si org.name n'existe pas, on utilise ce qui est stocké dans localStorage
-      const storedOrg = localStorage.getItem('ogo_org');
-      if (storedOrg) {
+    if (isAgent) {
+      // Priority: org.name, then org.company_name, then user.organization_name, then fallback
+      orgName = org.name || org.company_name || user.organization_name || user.organization || 'Organisation';
+      
+      // If still no name, try to fetch from API
+      if (orgName === 'Organisation' && user.organization_id) {
         try {
-          const orgData = JSON.parse(storedOrg);
-          orgName = orgData.name || orgName;
+          const token = localStorage.getItem('authToken');
+          if (token) {
+            const response = await fetch(`${API_BASE_URL}/api/organizations/${user.organization_id}`, {
+              method: 'GET',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            });
+            
+            if (response.ok) {
+              const orgData = await response.json();
+              if (orgData && orgData.name) {
+                orgName = orgData.name;
+                // Save to localStorage for future use
+                const updatedOrg = { ...org, name: orgName };
+                localStorage.setItem('ogo_org', JSON.stringify(updatedOrg));
+              }
+            }
+          }
         } catch (error) {
-          console.warn('Erreur parsing organisation du localStorage:', error);
+          console.warn('Erreur lors de la récupération du nom de l\'organisation:', error);
         }
       }
     }

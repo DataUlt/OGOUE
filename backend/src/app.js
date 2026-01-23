@@ -36,9 +36,9 @@ const corsOptions = {
       return callback(null, true);
     }
     
-    // Fallback: Allow any ogoue.com domain or localhost or 127.0.0.1
+    // Fallback: Allow any ogoue.com domain or localhost
     const ogoueRegex = /^https?:\/\/([a-z0-9-]*\.)*ogoue\.com(:\d+)?$/i;
-    const localhostRegex = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i;
+    const localhostRegex = /^https?:\/\/localhost(:\d+)?$/i;
     
     if (ogoueRegex.test(origin) || localhostRegex.test(origin)) {
       console.log('✅ [CORS] Origin allowed (regex):', origin);

@@ -500,6 +500,13 @@ export async function loginAgent(req, res) {
       return res.status(401).json({ error: "Code d'accès invalide ou désactivé" });
     }
 
+    // Récupérer les informations de l'organisation
+    const { data: orgData, error: orgError } = await supabase
+      .from("organizations")
+      .select("id, name, rccm_number, nif_number")
+      .eq("id", agentRecord.organization_id)
+      .single();
+
     // Créer un JWT manuelement avec les données de l'agent
     const token = jwt.sign(
       {
@@ -526,9 +533,13 @@ export async function loginAgent(req, res) {
         firstName: agentRecord.first_name,
         role: "agent",
         organizationId: agentRecord.organization_id,
+        organization_name: orgData?.name || '',
       },
       organization: {
         id: agentRecord.organization_id,
+        name: orgData?.name || '',
+        rccm: orgData?.rccm_number || '',
+        nif: orgData?.nif_number || '',
       },
     });
   } catch (err) {
