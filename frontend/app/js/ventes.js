@@ -25,6 +25,140 @@
   }
 
   // =========================
+  // 📁 GESTION DES UPLOADS
+  // =========================
+  const fileInput = document.getElementById("file-upload");
+  const uploadZoneDefault = document.getElementById("upload-zone-default");
+  const uploadZoneSelected = document.getElementById("upload-zone-selected");
+  const uploadZoneUploading = document.getElementById("upload-zone-uploading");
+  const uploadZoneSuccess = document.getElementById("upload-zone-success");
+  const uploadZoneError = document.getElementById("upload-zone-error");
+  const btnClearFile = document.getElementById("btn-clear-file");
+  const btnRetryFile = document.getElementById("btn-retry-file");
+  const fileName = document.getElementById("file-name");
+  const fileSize = document.getElementById("file-size");
+  const fileSuccessName = document.getElementById("file-success-name");
+  const uploadErrorMessage = document.getElementById("upload-error-message");
+  const uploadProgressBar = document.getElementById("upload-progress-bar");
+  const uploadProgressText = document.getElementById("upload-progress-text");
+
+  const ALLOWED_TYPES = ['application/pdf', 'image/jpeg', 'image/png'];
+  const MAX_SIZE = 5 * 1024 * 1024; // 5 Mo
+
+  function hideAllUploadZones() {
+    uploadZoneDefault?.classList.add("hidden");
+    uploadZoneSelected?.classList.add("hidden");
+    uploadZoneUploading?.classList.add("hidden");
+    uploadZoneSuccess?.classList.add("hidden");
+    uploadZoneError?.classList.add("hidden");
+  }
+
+  function showUploadZoneDefault() {
+    hideAllUploadZones();
+    uploadZoneDefault?.classList.remove("hidden");
+  }
+
+  function showUploadZoneSelected(file) {
+    hideAllUploadZones();
+    if (fileName) fileName.textContent = file.name;
+    if (fileSize) {
+      const sizeMo = (file.size / (1024 * 1024)).toFixed(2);
+      fileSize.textContent = `${sizeMo} Mo`;
+    }
+    uploadZoneSelected?.classList.remove("hidden");
+  }
+
+  function showUploadZoneUploading() {
+    hideAllUploadZones();
+    uploadZoneUploading?.classList.remove("hidden");
+    resetProgressBar();
+  }
+
+  function updateProgressBar(percent) {
+    if (uploadProgressBar) uploadProgressBar.style.width = `${percent}%`;
+    if (uploadProgressText) uploadProgressText.textContent = `${Math.round(percent)}%`;
+  }
+
+  function resetProgressBar() {
+    updateProgressBar(0);
+  }
+
+  function showUploadZoneSuccess(file) {
+    hideAllUploadZones();
+    if (fileSuccessName) fileSuccessName.textContent = file.name;
+    uploadZoneSuccess?.classList.remove("hidden");
+  }
+
+  function showUploadZoneError(errorMsg) {
+    hideAllUploadZones();
+    if (uploadErrorMessage) uploadErrorMessage.textContent = errorMsg;
+    uploadZoneError?.classList.remove("hidden");
+  }
+
+  function validateFile(file) {
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return "Format non autorisé. Utilisez PDF, JPEG ou PNG.";
+    }
+    if (file.size > MAX_SIZE) {
+      return "Fichier trop volumineux. Taille max : 5 Mo.";
+    }
+    return null;
+  }
+
+  // Gestion de la sélection de fichier
+  fileInput?.addEventListener("change", (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const error = validateFile(file);
+      if (error) {
+        showUploadZoneError(error);
+        fileInput.value = ""; // Réinitialiser l'input
+      } else {
+        showUploadZoneSelected(file);
+      }
+    } else {
+      showUploadZoneDefault();
+    }
+  });
+
+  // Bouton pour effacer le fichier
+  btnClearFile?.addEventListener("click", () => {
+    fileInput.value = "";
+    showUploadZoneDefault();
+  });
+
+  // Bouton pour réessayer après une erreur
+  btnRetryFile?.addEventListener("click", () => {
+    fileInput.click();
+  });
+
+  // Drag and drop
+  uploadZoneDefault?.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    uploadZoneDefault.classList.add("border-primary", "bg-primary/5");
+  });
+
+  uploadZoneDefault?.addEventListener("dragleave", () => {
+    uploadZoneDefault.classList.remove("border-primary", "bg-primary/5");
+  });
+
+  uploadZoneDefault?.addEventListener("drop", (e) => {
+    e.preventDefault();
+    uploadZoneDefault.classList.remove("border-primary", "bg-primary/5");
+    
+    const file = e.dataTransfer?.files?.[0];
+    if (file) {
+      const error = validateFile(file);
+      if (error) {
+        showUploadZoneError(error);
+      } else {
+        fileInput.files = e.dataTransfer.files;
+        showUploadZoneSelected(file);
+      }
+    }
+  });
+
+  // =========================
   // ✅ LOGIQUE "ARTICLES" (Option B)
   // =========================
   const STORAGE_KEY_ARTICLES = "ogoue.ventes.articles";
@@ -428,60 +562,132 @@
     if (existingModal) {
       existingModal.remove();
     }
+    
+    // Fermer les autres modals (comme le tableau d'export)
+    const otherModals = document.querySelectorAll('[role="dialog"], .modal, [class*="modal"]');
+    otherModals.forEach(m => {
+      if (m && m.id !== 'justificatif-modal') {
+        const closeBtn = m.querySelector('[aria-label="close"], .close, button:first-of-type');
+        if (closeBtn) closeBtn.click();
+      }
+    });
 
     const modal = document.createElement('div');
     modal.id = 'justificatif-modal';
-    modal.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-9999';
+    modal.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[99999] p-1 sm:p-2';
+    modal.style.position = 'fixed';
+    modal.style.width = '100vw';
+    modal.style.height = '100vh';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.zIndex = '99999';
     
     const modalContent = document.createElement('div');
-    modalContent.className = 'bg-card-light dark:bg-card-dark rounded-xl max-w-md w-full mx-4 shadow-lg p-8 relative border border-[#e8ede8] dark:border-[#2a3a32]';
+    modalContent.className = 'bg-card-light dark:bg-card-dark rounded-lg sm:rounded-xl w-[99vw] sm:w-[98vw] h-[99vh] sm:h-[98vh] shadow-lg overflow-hidden border border-[#e8ede8] dark:border-[#2a3a32] flex flex-col';
+    modalContent.style.maxWidth = 'calc(100vw - 4px)';
+    modalContent.style.maxHeight = 'calc(100vh - 4px)';
     
     const closeBtn = document.createElement('button');
     closeBtn.id = 'close-justificatif';
-    closeBtn.className = 'absolute top-4 right-4 w-8 h-8 rounded-full bg-[#f0f0f0] dark:bg-[#2a3a32] flex items-center justify-center text-[#666] dark:text-[#999] hover:bg-[#e0e0e0] dark:hover:bg-[#3a4a42] transition-colors';
+    closeBtn.className = 'absolute top-4 right-4 w-8 h-8 rounded-full bg-[#f0f0f0] dark:bg-[#2a3a32] flex items-center justify-center text-[#666] dark:text-[#999] hover:bg-[#e0e0e0] dark:hover:bg-[#3a4a42] transition-colors z-10';
     closeBtn.innerHTML = '<span class="material-symbols-outlined">close</span>';
     closeBtn.type = 'button';
     
+    const headerDiv = document.createElement('div');
+    headerDiv.className = 'p-2 sm:p-3 border-b border-[#e8ede8] dark:border-[#2a3a32] flex justify-between items-start gap-2 flex-shrink-0';
+    
+    const titleDiv = document.createElement('div');
+    titleDiv.className = 'flex-1';
+    
     const title = document.createElement('h2');
-    title.className = 'text-lg font-bold text-text-light-primary dark:text-text-dark-primary mb-2 text-center font-display';
-    title.textContent = 'Justificatif enregistré:';
+    title.className = 'text-lg font-bold text-text-light-primary dark:text-text-dark-primary font-display';
+    title.textContent = 'Aperçu du justificatif';
     
     const fileName_elem = document.createElement('p');
-    fileName_elem.className = 'text-sm text-text-light-secondary dark:text-text-dark-secondary text-center mb-6 break-words font-medium';
+    fileName_elem.className = 'text-sm text-text-light-secondary dark:text-text-dark-secondary break-words font-medium mt-2';
     fileName_elem.textContent = fileName;
     
-    const actionsDiv = document.createElement('div');
-    actionsDiv.className = 'flex gap-3 justify-center';
+    titleDiv.appendChild(title);
+    titleDiv.appendChild(fileName_elem);
+    headerDiv.appendChild(titleDiv);
+    headerDiv.appendChild(closeBtn);
+    
+    const previewDiv = document.createElement('div');
+    previewDiv.className = 'flex-1 overflow-auto flex items-center justify-center bg-white dark:bg-gray-800 relative';
+    previewDiv.style.minHeight = '200px';
+    
+    // Déterminer le type de fichier et créer l'aperçu approprié
+    const fileExtension = fileName.split('.').pop().toLowerCase();
+    const isPDF = fileExtension === 'pdf';
+    const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension);
     
     if (fileUrl) {
-        const viewUrl = fileUrl.includes('?') ? `${fileUrl}&download=` : `${fileUrl}?download=`;
-        
-        const consultBtn = document.createElement('a');
-        consultBtn.href = viewUrl;
-        consultBtn.target = '_blank';
-        consultBtn.rel = 'noopener noreferrer';
-        consultBtn.className = 'inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-success/10 text-success hover:bg-success/20 transition-colors font-medium text-sm font-display border border-success/20 hover:border-success/40';
-        consultBtn.innerHTML = '<span class="material-symbols-outlined" style="font-variation-settings: \'FILL\' 1;">visibility</span> Consulter';
-        
+      if (isPDF) {
+        // Affichage avec Google Docs Viewer (simple et sans folkore)
+        const googleViewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(fileUrl)}&embedded=true`;
+        const iframe = document.createElement('iframe');
+        iframe.src = googleViewerUrl;
+        iframe.className = 'w-full h-full';
+        iframe.style.minHeight = '600px';
+        iframe.style.border = 'none';
+        previewDiv.appendChild(iframe);
+      } else if (isImage) {
+        // Pour les images, créer un img tag
+        const img = document.createElement('img');
+        img.src = fileUrl;
+        img.alt = fileName;
+        img.className = 'max-w-full max-h-full object-contain rounded-lg';
+        img.style.maxHeight = 'calc(98vh - 80px)';
+        img.onerror = () => {
+          img.style.display = 'none';
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'text-center';
+          errorDiv.innerHTML = `
+            <span class="material-symbols-outlined text-6xl text-red-400 mb-4 block">image_not_supported</span>
+            <p class="text-text-light-secondary dark:text-text-dark-secondary mb-4">Impossible de charger l'image</p>
+            <p class="text-sm text-gray-500 dark:text-gray-500">L'URL du fichier pourrait être invalide ou le fichier supprimé</p>
+          `;
+          previewDiv.appendChild(errorDiv);
+        };
+        previewDiv.appendChild(img);
+      } else {
+        // Fichier non supporté pour l'aperçu
+        const noPreviewDiv = document.createElement('div');
+        noPreviewDiv.className = 'text-center';
+        noPreviewDiv.innerHTML = `
+          <span class="material-symbols-outlined text-6xl text-gray-400 dark:text-gray-600 mb-4 block">description</span>
+          <p class="text-text-light-secondary dark:text-text-dark-secondary mb-4">Aperçu non disponible pour ce type de fichier</p>
+          <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary">Utilisez le bouton télécharger pour ouvrir le fichier</p>
+        `;
+        previewDiv.appendChild(noPreviewDiv);
+      }
+    } else {
+      const noFileDiv = document.createElement('div');
+      noFileDiv.className = 'text-center';
+      noFileDiv.innerHTML = `
+        <span class="material-symbols-outlined text-6xl text-gray-400 dark:text-gray-600 mb-4 block">warning</span>
+        <p class="text-text-light-secondary dark:text-text-dark-secondary mb-4">URL du fichier non disponible</p>
+        <p class="text-sm text-gray-500 dark:text-gray-500">Le fichier n'a pas d'URL de téléchargement associée</p>
+      `;
+      previewDiv.appendChild(noFileDiv);
+    }
+    
+    const footerDiv = document.createElement('div');
+    footerDiv.className = 'p-2 sm:p-3 border-t border-[#e8ede8] dark:border-[#2a3a32] flex gap-2 sm:gap-3 justify-center flex-shrink-0';
+    
+    if (fileUrl) {
         const downloadBtn = document.createElement('a');
         downloadBtn.href = fileUrl;
         downloadBtn.download = fileName;
-        downloadBtn.className = 'inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-background-light hover:bg-primary/90 transition-colors font-medium text-sm font-display shadow-soft';
+        downloadBtn.className = 'inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-primary text-background-light hover:bg-primary/90 transition-colors font-medium text-sm font-display shadow-soft';
         downloadBtn.innerHTML = '<span class="material-symbols-outlined" style="font-variation-settings: \'FILL\' 1;">download</span> Télécharger';
         
-        actionsDiv.appendChild(consultBtn);
-        actionsDiv.appendChild(downloadBtn);
-    } else {
-        const noFileDiv = document.createElement('div');
-        noFileDiv.className = 'p-4 bg-danger/10 dark:bg-danger/5 rounded-lg text-danger text-sm text-center border border-danger/20';
-        noFileDiv.textContent = 'Fichier non disponible';
-        actionsDiv.appendChild(noFileDiv);
+        footerDiv.appendChild(downloadBtn);
     }
     
-    modalContent.appendChild(closeBtn);
-    modalContent.appendChild(title);
-    modalContent.appendChild(fileName_elem);
-    modalContent.appendChild(actionsDiv);
+    modalContent.appendChild(headerDiv);
+    modalContent.appendChild(previewDiv);
+    modalContent.appendChild(footerDiv);
     modal.appendChild(modalContent);
     document.body.appendChild(modal);
 
@@ -513,7 +719,9 @@
 
     // Sinon, faire l'appel API
     if (typeof getVentesPourPeriode === "function") {
-      const ventes = await getVentesPourPeriode(mois, annee);
+      let ventes = await getVentesPourPeriode(mois, annee);
+      
+      // Le backend retourne déjà justificatifUrl mappé, pas besoin de remappe
       // Mettre à jour le cache
       ventesCache = ventes;
       ventesCacheMois = mois;
@@ -689,15 +897,32 @@
     // ✅ Persist article avant reset, et bascule UI si besoin
     persistArticleIfNeeded(data.description);
 
-    // ✅ Appeler l'API (asynchrone)
-    const result = await addVente(data);
+    // ✅ Afficher la zone d'upload appropriée si fichier présent
+    if (data.file) {
+      showUploadZoneUploading();
+    }
+
+    // ✅ Appeler l'API (asynchrone) avec suivi de progression
+    const onProgress = (percent) => {
+      updateProgressBar(percent);
+    };
+
+    const result = await addVente(data, onProgress);
+    
     if (!result) {
-      // addVente a déjà affichéun message d'erreur
+      // Afficher la zone d'erreur
+      showUploadZoneError("Erreur lors de l'enregistrement de la vente");
       return;
+    }
+
+    // ✅ Afficher la zone de succès si fichier
+    if (data.file) {
+      showUploadZoneSuccess(data.file);
     }
 
     form.reset();
     setTodayAsDefaultDate();
+    showUploadZoneDefault(); // Réinitialiser la zone d'upload
     
     // Rafraîchir le cache et le tableau
     ventesCacheMois = null;

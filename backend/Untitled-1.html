@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OGOUÉ - Dashboard POC</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,100..900;1,100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13eca4",
+                        "primary-dark": "#0eb57d",
+                        "background-light": "#f6f8f7",
+                        "background-dark": "#10221c",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#162e26",
+                        "text-main": "#111816",
+                        "text-secondary": "#61897c",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        aside.collapsed {
+            width: 80px;
+        }
+        aside.collapsed .sidebar-text {
+            display: none;
+        }
+        aside.collapsed .sidebar-header {
+            flex-direction: column;
+            justify-content: center;
+            padding: 12px;
+        }
+        aside.collapsed .sidebar-header h1,
+        aside.collapsed .sidebar-header p {
+            display: none;
+        }
+        aside.collapsed .sidebar-header .size-10 {
+            margin: 0;
+        }
+        aside.collapsed .sidebar-nav {
+            padding: 8px;
+        }
+        aside.collapsed .sidebar-nav a {
+            padding: 12px;
+            justify-content: center;
+        }
+        aside.collapsed .sidebar-user {
+            padding: 8px;
+            flex-direction: column;
+            align-items: center;
+        }
+        aside.collapsed .sidebar-user > div:last-child {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-main dark:text-white font-display overflow-hidden">
+<div class="flex h-screen w-full">
+<aside id="sidebar" class="w-64 flex flex-col border-r border-[#dbe6e2] dark:border-[#2a4038] bg-surface-light dark:bg-surface-dark shrink-0 transition-all duration-300">
+<div class="sidebar-header p-6 flex items-center gap-3">
+<button id="sidebarToggle" class="flex-shrink-0 p-1.5 hover:bg-background-light dark:hover:bg-background-dark rounded-lg transition-colors">
+<span class="material-symbols-outlined text-xl">menu</span>
+</button>
+</div>
+<nav class="sidebar-nav flex-1 px-4 flex flex-col gap-2 mt-4">
+<a class="flex items-center gap-3 px-3 py-3 rounded-xl bg-primary/10 text-primary-dark dark:text-primary font-medium" href="institution-tableau-bord.html">
+<span class="material-symbols-outlined icon-filled">dashboard</span>
+<span class="sidebar-text">Vue d'Ensemble</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-xl text-text-secondary hover:bg-background-light dark:hover:bg-background-dark hover:text-text-main transition-colors" href="institution-liste-produits.html">
+<span class="material-symbols-outlined">payments</span>
+<span class="sidebar-text">Produits</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-xl text-text-secondary hover:bg-background-light dark:hover:bg-background-dark hover:text-text-main transition-colors" href="institution-liste-modeles.html">
+<span class="material-symbols-outlined">table_chart</span>
+<span class="sidebar-text">Modèles</span>
+</a>
+</nav>
+<div class="p-4 mt-auto">
+<div class="sidebar-user bg-[#f0f4f3] dark:bg-[#1c332b] rounded-xl p-4 flex items-center gap-3">
+<div class="size-8 rounded-full bg-cover bg-center" data-alt="User profile picture" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCRIT7ff6v9rrUcAhYe0OOUrUpnKRPk116GNykQEkHvpkm8OcnbFIHebI_9s2BLSgjCDBIiCeTAyUqjsiPk6ByM9xta6qZ1RWzIhxls9I4Sk5sNcDyDiKiJf5ycTmKrqubfo50DZ8awUuPWSee77ZLhFpXooySZDpCEyN09_mGL6P3cfWBrKmY-W59JNITG3gg73Gcfexu3E4wl2e-ftUXVW2HngUX2vEFC-gITs_jcsGdd2m05m69kA6GmDheaVmMJx3vZ3B9VR24');"></div>
+<div class="overflow-hidden">
+<p class="text-sm font-semibold text-text-main dark:text-white truncate" id="sidebarOrgName">Institution</p>
+<p class="text-xs text-text-secondary truncate" id="sidebarContactName">Contact</p>
+<p class="text-xs text-text-secondary truncate" id="sidebarOrgEmail">email@example.com</p>
+</div>
+</div>
+<button id="logoutBtn" class="w-full mt-3 flex items-center justify-center gap-2 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors text-sm font-semibold">
+<span class="material-symbols-outlined text-[18px]">logout</span>
+<span class="sidebar-text">Déconnexion</span>
+</button>
+</div>
+</aside>
+<main class="flex-1 flex flex-col h-full overflow-hidden">
+<header class="px-8 py-6 border-b border-[#dbe6e2] dark:border-[#2a4038] bg-surface-light dark:bg-surface-dark flex flex-wrap justify-between items-end gap-4 shrink-0 z-10">
+<div class="flex flex-col gap-1">
+<h2 class="text-3xl font-black tracking-tight text-text-main dark:text-white">Vue d'ensemble des simulations de financement</h2>
+<p class="text-text-secondary dark:text-gray-400">Suivi global des scores et du positionnement des PME vis-à-vis de vos produits.</p>
+</div>
+</header>
+<div class="flex-1 overflow-y-auto p-8">
+<div class="max-w-7xl mx-auto flex flex-col gap-8">
+<!-- Date Range Picker Button -->
+<div class="relative">
+<button id="dateRangeBtn" class="flex items-center gap-2 h-10 px-4 rounded-lg border border-[#dbe6e2] dark:border-[#2a4038] bg-white dark:bg-background-dark hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm font-semibold text-text-main dark:text-white">
+<span class="material-symbols-outlined text-[20px]">calendar_month</span>
+<span id="dateRangeDisplay">01/01/2026 - 04/01/2026</span>
+</button>
+
+<!-- Date Range Picker Modal -->
+<div id="dateRangeModal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+<div class="fixed inset-0 bg-black/30 dark:bg-black/60" id="dateRangeBackdrop"></div>
+<div class="relative bg-surface-light dark:bg-surface-dark rounded-xl shadow-2xl border border-[#dbe6e2] dark:border-[#2a4038] p-6 w-96">
+<!-- Header -->
+<div class="flex justify-between items-center mb-4">
+<div class="flex items-center gap-2">
+<button id="prevMonthBtn" class="p-1.5 hover:bg-background-light dark:hover:bg-background-dark rounded transition-colors">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<div class="flex items-center gap-2 min-w-[180px]">
+<select id="monthSelect" class="flex-1 px-2 py-1 rounded border border-[#dbe6e2] dark:border-[#2a4038] bg-white dark:bg-gray-800 text-text-main dark:text-white text-sm">
+<option value="0">Janvier</option>
+<option value="1">Février</option>
+<option value="2">Mars</option>
+<option value="3">Avril</option>
+<option value="4">Mai</option>
+<option value="5">Juin</option>
+<option value="6">Juillet</option>
+<option value="7">Août</option>
+<option value="8">Septembre</option>
+<option value="9">Octobre</option>
+<option value="10">Novembre</option>
+<option value="11">Décembre</option>
+</select>
+<input type="number" id="yearInput" min="1900" max="2200" class="w-20 px-2 py-1 rounded border border-[#dbe6e2] dark:border-[#2a4038] bg-white dark:bg-gray-800 text-text-main dark:text-white text-sm" />
+</div>
+<button id="nextMonthBtn" class="p-1.5 hover:bg-background-light dark:hover:bg-background-dark rounded transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+<button id="resetDateRangeBtn" class="ml-auto p-1.5 hover:bg-background-light dark:hover:bg-background-dark rounded transition-colors text-primary" title="Réinitialiser">
+<span class="material-symbols-outlined text-sm">refresh</span>
+</button>
+</div>
+
+<!-- Calendar Grid -->
+<div class="mb-4">
+<div class="grid grid-cols-7 gap-1 mb-2">
+<div class="text-center text-xs font-semibold text-text-secondary p-1">Lun</div>
+<div class="text-center text-xs font-semibold text-text-secondary p-1">Mar</div>
+<div class="text-center text-xs font-semibold text-text-secondary p-1">Mer</div>
+<div class="text-center text-xs font-semibold text-text-secondary p-1">Jeu</div>
+<div class="text-center text-xs font-semibold text-text-secondary p-1">Ven</div>
+<div class="text-center text-xs font-semibold text-text-secondary p-1">Sam</div>
+<div class="text-center text-xs font-semibold text-text-secondary p-1">Dim</div>
+</div>
+<div id="calendarDays" class="grid grid-cols-7 gap-1">
+<!-- Days will be inserted here -->
+</div>
+</div>
+
+<!-- Actions -->
+<div class="flex gap-3">
+<button id="closeDateRangeBtn" class="flex-1 px-4 h-10 rounded-lg border border-[#dbe6e2] dark:border-[#2a4038] bg-white dark:bg-gray-800 text-text-main dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Annuler</button>
+<button id="confirmDateRangeBtn" class="flex-1 px-4 h-10 rounded-lg bg-primary text-text-main font-medium hover:bg-primary/90 transition-colors">Confirmer</button>
+</div>
+</div>
+</div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl p-6 border border-[#dbe6e2] dark:border-[#2a4038] shadow-sm flex items-center gap-5">
+<div>
+<p class="text-sm text-text-secondary dark:text-gray-400 font-medium mb-1">Simulations totales</p>
+<p class="text-3xl font-bold text-text-main dark:text-white" id="totalSimulations">-</p>
+</div>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl p-6 border border-[#dbe6e2] dark:border-[#2a4038] shadow-sm flex items-center gap-5">
+<div>
+<p class="text-sm text-text-secondary dark:text-gray-400 font-medium mb-1">Score moyen</p>
+<p class="text-3xl font-bold text-text-main dark:text-white" id="averageScore">-<span class="text-xl text-gray-400 font-medium">/100</span></p>
+</div>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl p-6 border border-[#dbe6e2] dark:border-[#2a4038] shadow-sm flex items-center gap-5">
+<div>
+<p class="text-sm text-text-secondary dark:text-gray-400 font-medium mb-1">Produits actifs</p>
+<p class="text-3xl font-bold text-text-main dark:text-white" id="activeProducts">-</p>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+<div class="lg:col-span-3 flex flex-col gap-6">
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl border border-[#dbe6e2] dark:border-[#2a4038] shadow-sm flex flex-col h-full">
+<div class="px-6 py-5 border-b border-[#dbe6e2] dark:border-[#2a4038] flex justify-between items-center">
+<h3 class="text-lg font-bold text-text-main dark:text-white">Performance par Produit</h3>
+<a href="institution-tous-produits.html" class="text-primary text-sm font-semibold hover:underline">Voir tout</a>
+</div>
+<div class="overflow-x-auto rounded-b-xl">
+<table class="w-full text-left border-collapse">
+<thead class="bg-[#f8fafa] dark:bg-[#1c332b]/50">
+<tr>
+<th class="px-6 py-4 text-xs font-semibold uppercase text-text-secondary tracking-wider">Nom du Produit</th>
+<th class="px-6 py-4 text-xs font-semibold uppercase text-text-secondary tracking-wider text-center">Simulations</th>
+<th class="px-6 py-4 text-xs font-semibold uppercase text-text-secondary tracking-wider text-center">Score Moyen</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-[#dbe6e2] dark:divide-[#2a4038]" id="productsTableBody">
+<tr class="hover:bg-gray-50 dark:hover:bg-[#1c332b]/30 transition-colors">
+<td class="px-6 py-4 text-center text-text-secondary" colspan="3">Chargement...</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="lg:col-span-2 bg-surface-light dark:bg-surface-dark rounded-xl border border-[#dbe6e2] dark:border-[#2a4038] shadow-sm flex flex-col">
+<div class="px-6 py-5 border-b border-[#dbe6e2] dark:border-[#2a4038] flex justify-between items-center">
+<div>
+<h3 class="text-lg font-bold text-text-main dark:text-white">Distribution des Scores</h3>
+<p class="text-text-secondary text-sm mt-1">Répartition des scores de simulation par catégorie</p>
+</div>
+<button class="p-2 hover:bg-background-light dark:hover:bg-background-dark rounded-lg transition-colors">
+<span class="material-symbols-outlined text-text-secondary">more_horiz</span>
+</button>
+</div>
+<div class="p-6 md:p-8 flex flex-col justify-center gap-6 h-full">
+<!-- Range < 40 (Risque) -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-end mb-1">
+<div class="flex items-center gap-2">
+<div class="size-3 rounded-full bg-red-400"></div>
+<span class="text-sm font-semibold text-text-main dark:text-white">Critique (< 40)</span>
+</div>
+<span class="text-sm font-bold text-text-main dark:text-white"><span id="count-risque">0</span> <span class="text-text-secondary font-normal text-xs ml-1" id="percent-risque">(0%)</span></span>
+</div>
+<div class="w-full h-4 bg-background-light dark:bg-background-dark/50 rounded-full overflow-hidden relative">
+<div class="absolute top-0 left-0 h-full bg-red-400 rounded-full" id="bar-risque" style="width: 0%"></div>
+</div>
+</div>
+<!-- Range 40-60 (Moyen) -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-end mb-1">
+<div class="flex items-center gap-2">
+<div class="size-3 rounded-full bg-yellow-400"></div>
+<span class="text-sm font-semibold text-text-main dark:text-white">Moyen (40-60)</span>
+</div>
+<span class="text-sm font-bold text-text-main dark:text-white"><span id="count-moyen">0</span> <span class="text-text-secondary font-normal text-xs ml-1" id="percent-moyen">(0%)</span></span>
+</div>
+<div class="w-full h-4 bg-background-light dark:bg-background-dark/50 rounded-full overflow-hidden relative">
+<div class="absolute top-0 left-0 h-full bg-yellow-400 rounded-full" id="bar-moyen" style="width: 0%"></div>
+</div>
+</div>
+<!-- Range 60-80 (Bon) -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-end mb-1">
+<div class="flex items-center gap-2">
+<div class="size-3 rounded-full bg-primary"></div>
+<span class="text-sm font-semibold text-text-main dark:text-white">Bon (60-80)</span>
+</div>
+<span class="text-sm font-bold text-text-main dark:text-white"><span id="count-bon">0</span> <span class="text-text-secondary font-normal text-xs ml-1" id="percent-bon">(0%)</span></span>
+</div>
+<div class="w-full h-4 bg-background-light dark:bg-background-dark/50 rounded-full overflow-hidden relative">
+<div class="absolute top-0 left-0 h-full bg-primary rounded-full" id="bar-bon" style="width: 0%"></div>
+</div>
+</div>
+<!-- Range > 80 (Excellent) -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-end mb-1">
+<div class="flex items-center gap-2">
+<div class="size-3 rounded-full bg-green-600"></div>
+<span class="text-sm font-semibold text-text-main dark:text-white">Excellent (> 80)</span>
+</div>
+<span class="text-sm font-bold text-text-main dark:text-white"><span id="count-excellent">0</span> <span class="text-text-secondary font-normal text-xs ml-1" id="percent-excellent">(0%)</span></span>
+</div>
+<div class="w-full h-4 bg-background-light dark:bg-background-dark/50 rounded-full overflow-hidden relative">
+<div class="absolute top-0 left-0 h-full bg-green-600 rounded-full" id="bar-excellent" style="width: 0%"></div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</main>
+
+<!-- Simulations Modal -->
+<div id="simulationsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+<div class="fixed inset-0 bg-black/30 dark:bg-black/60" id="simulationsModalBackdrop"></div>
+<div class="relative bg-surface-light dark:bg-surface-dark rounded-xl shadow-2xl border border-[#dbe6e2] dark:border-[#2a4038] w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+<!-- Header -->
+<div class="px-6 py-5 border-b border-[#dbe6e2] dark:border-[#2a4038] flex justify-between items-center shrink-0">
+<div>
+<h3 class="text-lg font-bold text-text-main dark:text-white" id="simulationsModalTitle">Simulations</h3>
+<p class="text-text-secondary text-sm mt-1">Détails des simulations et variables saisies</p>
+</div>
+<button id="closeSimulationsModalBtn" class="p-2 hover:bg-background-light dark:hover:bg-background-dark rounded-lg transition-colors">
+<span class="material-symbols-outlined text-text-secondary">close</span>
+</button>
+</div>
+<!-- Content -->
+<div class="overflow-y-auto flex-1 p-6">
+<div id="simulationsModalContent" class="space-y-4">
+<!-- Simulations will be inserted here -->
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script type="module">
+import { sessionAPI, productsAPI, simulationsAPI } from './api.js';
+
+// Check authentication
+if (!sessionAPI.isLoggedIn()) {
+  window.location.href = './institution-login.html';
+}
+
+const user = sessionAPI.getUser();
+
+// Update sidebar with user info
+function updateSidebarUserInfo() {
+  try {
+    const institution = sessionAPI.getInstitution();
+    const user = sessionAPI.getUser();
+    
+    console.log('📊 Institution data:', institution);
+    console.log('👤 User data:', user);
+    
+    const orgNameEl = document.getElementById('sidebarOrgName');
+    const contactNameEl = document.getElementById('sidebarContactName');
+    const orgEmailEl = document.getElementById('sidebarOrgEmail');
+    
+    // Use institution data if available, otherwise use user data
+    if (institution) {
+      console.log('✅ Using institution data');
+      if (orgNameEl && institution.name) {
+        console.log('Setting org name to:', institution.name);
+        orgNameEl.textContent = institution.name;
+      }
+      if (contactNameEl && institution.full_name) {
+        console.log('Setting contact name to:', institution.full_name);
+        contactNameEl.textContent = institution.full_name;
+      }
+      if (orgEmailEl && institution.email) {
+        console.log('Setting email to:', institution.email);
+        orgEmailEl.textContent = institution.email;
+      }
+    } else if (user) {
+      console.log('⚠️ No institution data, using user fallback');
+      // Fallback to user data if no institution stored
+      if (orgEmailEl && user.email) {
+        orgEmailEl.textContent = user.email;
+      }
+      if (contactNameEl && user.full_name) {
+        contactNameEl.textContent = user.full_name;
+      }
+      // If no institution, show a placeholder or first part of email
+      if (orgNameEl) {
+        orgNameEl.textContent = 'Institution';
+      }
+    }
+  } catch (error) {
+    console.error('Error updating sidebar user info:', error);
+  }
+}
+
+updateSidebarUserInfo();
+
+// Sidebar toggle logic
+const sidebar = document.getElementById('sidebar');
+const sidebarToggle = document.getElementById('sidebarToggle');
+const navLinks = document.querySelectorAll('.sidebar-nav a');
+
+sidebarToggle.addEventListener('click', () => {
+  sidebar.classList.toggle('collapsed');
+  localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+});
+
+navLinks.forEach(link => {
+  link.addEventListener('click', () => {
+    sidebar.classList.add('collapsed');
+    localStorage.setItem('sidebarCollapsed', 'true');
+  });
+});
+
+if (localStorage.getItem('sidebarCollapsed') === 'true') {
+  sidebar.classList.add('collapsed');
+}
+
+// Logout button
+const logoutBtn = document.getElementById('logoutBtn');
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', () => {
+    sessionAPI.logout();
+    window.location.href = './institution-login.html';
+  });
+}
+
+// Load dashboard data
+async function loadDashboardData() {
+  try {
+    const token = sessionAPI.getToken();
+    const institution = sessionAPI.getInstitution();
+    
+    if (!institution || !institution.id) {
+      throw new Error('Institution data not found');
+    }
+    
+    // Load products
+    const productsRes = await productsAPI.getInstitutionProducts(token);
+    const products = productsRes.products || [];
+    
+    // Load simulations stats for this institution with error handling
+    let stats = null;
+    let simulations = [];
+    try {
+      stats = await simulationsAPI.getInstitutionSimulationStats(token, institution.id);
+      simulations = await simulationsAPI.getInstitutionSimulations(token, institution.id);
+      console.log('✅ Simulations stats loaded:', stats);
+      console.log('✅ Simulations loaded:', simulations.length);
+    } catch (simError) {
+      console.warn('⚠️ Failed to load simulations, continuing without them:', simError.message);
+      // Continue without simulations - don't block the rest of the dashboard
+      simulations = [];
+      stats = {
+        total_simulations: 0,
+        average_score: 0,
+        percentage_above_60: 0
+      };
+    }
+    
+    // Update stats - simulations totales should be the count of actual simulations done by PMEs
+    document.getElementById('totalSimulations').textContent = stats.total_simulations || 0;
+    document.getElementById('activeProducts').textContent = products.length;
+    
+    // Update average score
+    const avgScoreEl = document.getElementById('averageScore');
+    if (avgScoreEl) {
+      avgScoreEl.textContent = (stats.average_score || 0) + '';
+      const spanEl = avgScoreEl.querySelector('span') || document.createElement('span');
+      spanEl.className = 'text-xl text-gray-400 font-medium';
+      spanEl.textContent = '/100';
+      if (!avgScoreEl.querySelector('span')) {
+        avgScoreEl.appendChild(spanEl);
+      }
+    }
+    
+    // Update percentage of high scores (>= 60)
+    // Removed - now displayed in the "Distribution des Scores" section
+    
+    // Update score distribution chart
+    try {
+      const simsRes = await simulationsAPI.getInstitutionSimulations(token, institution.id);
+      const allSimulations = simsRes || [];
+      
+      // Calculate distribution
+      const distribution = {
+        risque: 0,    // < 40
+        moyen: 0,     // 40-60
+        bon: 0,       // 60-80
+        excellent: 0  // > 80
+      };
+      
+      allSimulations.forEach(sim => {
+        if (sim.calculated_score !== null) {
+          const score = sim.calculated_score;
+          if (score < 40) distribution.risque++;
+          else if (score < 60) distribution.moyen++;
+          else if (score < 80) distribution.bon++;
+          else distribution.excellent++;
+        }
+      });
+      
+      // Calculate total and percentages
+      const total = Object.values(distribution).reduce((a, b) => a + b, 0);
+      
+      // Update bars with percentages
+      const updateBar = (countId, percentId, barId, count) => {
+        const countEl = document.getElementById(countId);
+        const percentEl = document.getElementById(percentId);
+        const barEl = document.getElementById(barId);
+        
+        countEl.textContent = count;
+        
+        const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
+        percentEl.textContent = `(${percentage}%)`;
+        barEl.style.width = percentage + '%';
+      };
+      
+      updateBar('count-risque', 'percent-risque', 'bar-risque', distribution.risque);
+      updateBar('count-moyen', 'percent-moyen', 'bar-moyen', distribution.moyen);
+      updateBar('count-bon', 'percent-bon', 'bar-bon', distribution.bon);
+      updateBar('count-excellent', 'percent-excellent', 'bar-excellent', distribution.excellent);
+      
+      console.log('✅ Score distribution updated:', distribution);
+    } catch (e) {
+      console.warn('⚠️ Could not load simulation distribution:', e.message);
+      // Show 0 for all categories
+      document.getElementById('count-risque').textContent = '0';
+      document.getElementById('percent-risque').textContent = '(0%)';
+      document.getElementById('count-moyen').textContent = '0';
+      document.getElementById('percent-moyen').textContent = '(0%)';
+      document.getElementById('count-bon').textContent = '0';
+      document.getElementById('percent-bon').textContent = '(0%)';
+      document.getElementById('count-excellent').textContent = '0';
+      document.getElementById('percent-excellent').textContent = '(0%)';
+    }
+    
+    // Populate products table
+    const tableBody = document.getElementById('productsTableBody');
+    tableBody.innerHTML = '';
+    
+    if (products.length === 0) {
+      tableBody.innerHTML = `
+        <tr class="hover:bg-gray-50 dark:hover:bg-[#1c332b]/30 transition-colors">
+          <td class="px-6 py-4 text-center text-text-secondary" colspan="3">Aucun produit pour le moment</td>
+        </tr>
+      `;
+    } else {
+      // Load stats for each product
+      for (const product of products) {
+        try {
+          const statsRes = await fetch(`http://localhost:3001/api/simulations/product/${product.id}/stats`);
+          if (statsRes.ok) {
+            const productStats = await statsRes.json();
+            product.simulation_count = productStats.total_simulations || 0;
+            product.average_score = productStats.average_score || 0;
+            console.log(`✅ Stats loaded for ${product.name}:`, productStats);
+          }
+        } catch (e) {
+          console.warn(`⚠️ Could not load stats for product ${product.id}:`, e.message);
+          product.simulation_count = 0;
+          product.average_score = 0;
+        }
+      }
+      
+      // Sort by average score descending
+      const sortedProducts = [...products].sort((a, b) => 
+        (b.average_score || 0) - (a.average_score || 0)
+      ).slice(0, 10);
+      
+      sortedProducts.forEach(product => {
+        const score = product.average_score ? Math.round(product.average_score) : '-';
+        const simulationCount = product.simulation_count || 0;
+        
+        // Determine score badge color
+        let badgeColor = 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
+        if (product.average_score) {
+          if (product.average_score < 40) {
+            badgeColor = 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
+          } else if (product.average_score < 60) {
+            badgeColor = 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
+          } else if (product.average_score < 80) {
+            badgeColor = 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
+          } else {
+            badgeColor = 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
+          }
+        }
+        
+        const icons = {
+          'Prêt Équipement': 'precision_manufacturing',
+          'Trésorerie Court Terme': 'payments',
+          'Crédit Bail': 'directions_car',
+          'Découvert Autorisé': 'account_balance'
+        };
+        
+        const iconColors = {
+          'Prêt Équipement': 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
+          'Trésorerie Court Terme': 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
+          'Crédit Bail': 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
+          'Découvert Autorisé': 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+        };
+        
+        const iconName = icons[product.name] || 'payments';
+        const iconColor = iconColors[product.name] || 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300';
+        
+        tableBody.innerHTML += `
+          <tr class="hover:bg-gray-50 dark:hover:bg-[#1c332b]/30 transition-colors cursor-pointer product-row" data-product-id="${product.id}" data-product-name="${product.name}">
+            <td class="px-6 py-4">
+              <div>
+                <p class="font-semibold text-text-main dark:text-white text-sm">${product.name}</p>
+                <p class="text-xs text-text-secondary">${product.description || ''}</p>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-sm text-text-main dark:text-white font-medium text-center">${simulationCount}</td>
+            <td class="px-6 py-4 text-center">
+              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${badgeColor}">${score}</span>
+            </td>
+          </tr>
+        `;
+      });
+    }
+    
+    // Update insight
+    if (products.length > 0) {
+      const topProduct = products.reduce((max, p) => 
+        (p.average_score || 0) > (max.average_score || 0) ? p : max
+      );
+      
+      if (topProduct && topProduct.average_score) {
+        const insight = `Le produit "${topProduct.name}" obtient en moyenne un score de ${Math.round(topProduct.average_score)}/100, indiquant une bonne préparation des PME pour ce type de financement.`;
+        document.getElementById('insightText').textContent = insight;
+      }
+    }
+    
+  } catch (error) {
+    console.error('Error loading dashboard data:', error);
+    document.getElementById('insightText').textContent = 'Erreur lors du chargement des données.';
+  }
+}
+
+// Load on page load
+loadDashboardData();
+
+// ==================== SIMULATIONS MODAL ====================
+const simulationsModal = document.getElementById('simulationsModal');
+const simulationsModalBackdrop = document.getElementById('simulationsModalBackdrop');
+const closeSimulationsModalBtn = document.getElementById('closeSimulationsModalBtn');
+
+function closeSimulationsModal() {
+  simulationsModal.classList.add('hidden');
+}
+
+simulationsModalBackdrop.addEventListener('click', closeSimulationsModal);
+closeSimulationsModalBtn.addEventListener('click', closeSimulationsModal);
+
+// Open simulations modal when clicking on a product row
+document.addEventListener('click', async (e) => {
+  const productRow = e.target.closest('.product-row');
+  if (!productRow) return;
+  
+  const productId = productRow.getAttribute('data-product-id');
+  const productName = productRow.getAttribute('data-product-name');
+  
+  // Update modal title
+  document.getElementById('simulationsModalTitle').textContent = `Simulations - ${productName}`;
+  
+  // Open modal
+  simulationsModal.classList.remove('hidden');
+  
+  // Load simulations for this product
+  try {
+    const token = sessionAPI.getToken();
+    const institution = sessionAPI.getInstitution();
+    
+    // Fetch all simulations
+    const simsRes = await simulationsAPI.getInstitutionSimulations(token, institution.id);
+    const allSimulations = simsRes || [];
+    
+    console.log('All simulations:', allSimulations);
+    console.log('Product ID to filter:', productId);
+    
+    // Filter by product_id if available, otherwise show all simulations
+    let productSimulations = allSimulations.filter(sim => sim.product_id === productId);
+    
+    // If no results with product_id filter, try showing all (data structure might be different)
+    if (productSimulations.length === 0) {
+      console.warn('No simulations found with product_id filter, showing all simulations');
+      productSimulations = allSimulations;
+    }
+    
+    const contentDiv = document.getElementById('simulationsModalContent');
+    
+    if (productSimulations.length === 0) {
+      contentDiv.innerHTML = '<p class="text-text-secondary text-center py-8">Aucune simulation disponible</p>';
+      return;
+    }
+    
+    // Display each simulation
+    contentDiv.innerHTML = productSimulations.map((sim, index) => {
+      let variables = '';
+      
+      console.log(`Simulation ${index + 1} complete data:`, sim);
+      console.log(`Simulation ${index + 1} simulation_data:`, sim.simulation_data);
+      console.log(`Simulation ${index + 1} product_variables:`, sim.credit_products?.product_variables);
+      
+      // Get variables from simulation_data (JSON field from database)
+      let varData = sim.simulation_data;
+      
+      // Parse if it's a JSON string
+      if (varData && typeof varData === 'string') {
+        try {
+          varData = JSON.parse(varData);
+        } catch (e) {
+          console.error(`Failed to parse simulation_data for simulation ${index + 1}:`, e);
+          varData = null;
+        }
+      }
+      
+      // Create a map of variable IDs to names from both product_variables AND model_variables
+      const variableNameMap = {};
+      
+      // First, try product_variables
+      if (sim.credit_products?.product_variables && Array.isArray(sim.credit_products.product_variables)) {
+        sim.credit_products.product_variables.forEach(pv => {
+          variableNameMap[pv.id] = pv.name || pv.field_key;
+        });
+      }
+      
+      // Then try model_variables (these are more likely to match simulation_data IDs)
+      if (sim.credit_products?.scoring_models?.model_variables && Array.isArray(sim.credit_products.scoring_models.model_variables)) {
+        sim.credit_products.scoring_models.model_variables.forEach(mv => {
+          variableNameMap[mv.id] = mv.name;
+        });
+      }
+      
+      console.log(`Variable name map:`, variableNameMap);
+      
+      // Display the variables if found
+      if (varData && typeof varData === 'object' && Object.keys(varData).length > 0) {
+        variables = Object.entries(varData)
+          .map(([key, value]) => {
+            let displayValue = value;
+            if (typeof value === 'object') {
+              displayValue = JSON.stringify(value);
+            }
+            // Get display name from map, or use the key directly
+            const displayLabel = variableNameMap[key] || key;
+            return `
+              <div class="flex justify-between py-2 px-3 bg-background-light dark:bg-background-dark/50 rounded">
+                <span class="text-sm text-text-secondary font-medium">${displayLabel}</span>
+                <span class="text-sm font-semibold text-text-main dark:text-white break-words">${displayValue}</span>
+              </div>
+            `;
+          })
+          .join('');
+      } else {
+        // If no variables found
+        variables = `
+          <div class="text-xs text-text-secondary p-3 bg-gray-100 dark:bg-gray-800 rounded">
+            <p class="text-center">Aucune variable disponible pour cette simulation</p>
+          </div>
+        `;
+      }
+      
+      // Determine score badge color
+      let scoreBadgeColor = 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
+      const score = sim.calculated_score || 0;
+      if (score < 40) {
+        scoreBadgeColor = 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
+      } else if (score < 60) {
+        scoreBadgeColor = 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
+      } else if (score < 80) {
+        scoreBadgeColor = 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
+      } else {
+        scoreBadgeColor = 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
+      }
+      
+      return `
+        <div class="bg-white dark:bg-surface-dark border border-[#dbe6e2] dark:border-[#2a4038] rounded-lg p-4">
+          <div class="flex justify-between items-center mb-4">
+            <h4 class="font-semibold text-text-main dark:text-white">Simulation ${index + 1}</h4>
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${scoreBadgeColor}">${score.toFixed(2)}/100</span>
+          </div>
+          <div class="space-y-2">
+            ${variables}
+          </div>
+        </div>
+      `;
+    }).join('');
+    
+  } catch (error) {
+    console.error('Error loading simulations:', error);
+    const contentDiv = document.getElementById('simulationsModalContent');
+    contentDiv.innerHTML = '<p class="text-red-600 dark:text-red-400 text-center py-8">Erreur lors du chargement des simulations</p>';
+  }
+});
+
+// ==================== DATE RANGE PICKER ====================
+(function() {
+  let selectedStartDate = null;
+  let selectedEndDate = null;
+  let currentMonth = new Date().getMonth();
+  let currentYear = new Date().getFullYear();
+  
+  // Initialize with default dates (1st of current month to today)
+  const today = new Date();
+  selectedStartDate = new Date(today.getFullYear(), today.getMonth(), 1);
+  selectedEndDate = new Date(today);
+  
+  const dateRangeBtn = document.getElementById('dateRangeBtn');
+  const dateRangeModal = document.getElementById('dateRangeModal');
+  const dateRangeBackdrop = document.getElementById('dateRangeBackdrop');
+  const monthSelect = document.getElementById('monthSelect');
+  const yearInput = document.getElementById('yearInput');
+  const calendarDays = document.getElementById('calendarDays');
+  const dateRangeDisplay = document.getElementById('dateRangeDisplay');
+  const prevMonthBtn = document.getElementById('prevMonthBtn');
+  const nextMonthBtn = document.getElementById('nextMonthBtn');
+  const resetDateRangeBtn = document.getElementById('resetDateRangeBtn');
+  const closeDateRangeBtn = document.getElementById('closeDateRangeBtn');
+  const confirmDateRangeBtn = document.getElementById('confirmDateRangeBtn');
+  
+  function formatDate(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+  
+  function formatDateISO(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${year}-${month}-${day}`;
+  }
+  
+  function getDaysInMonth(month, year) {
+    return new Date(year, month + 1, 0).getDate();
+  }
+  
+  function getFirstDayOfMonth(month, year) {
+    const day = new Date(year, month, 1).getDay();
+    return day === 0 ? 6 : day - 1; // Adjust for Monday start
+  }
+  
+  function renderCalendar() {
+    calendarDays.innerHTML = '';
+    const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+    const firstDay = getFirstDayOfMonth(currentMonth, currentYear);
+    
+    // Add empty cells for days before month starts
+    for (let i = 0; i < firstDay; i++) {
+      const emptyCell = document.createElement('div');
+      calendarDays.appendChild(emptyCell);
+    }
+    
+    // Add day cells
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dayCell = document.createElement('button');
+      dayCell.type = 'button';
+      dayCell.className = 'p-2 rounded text-sm font-medium transition-colors relative';
+      dayCell.textContent = day;
+      
+      const cellDate = new Date(currentYear, currentMonth, day);
+      
+      // Determine styling
+      let isInRange = false;
+      let isStart = false;
+      let isEnd = false;
+      
+      if (selectedStartDate && selectedEndDate) {
+        const start = new Date(selectedStartDate);
+        const end = new Date(selectedEndDate);
+        
+        // Ensure start is before end
+        if (start > end) {
+          [start, end] = [end, start];
+        }
+        
+        isStart = cellDate.toDateString() === start.toDateString();
+        isEnd = cellDate.toDateString() === end.toDateString();
+        isInRange = cellDate >= start && cellDate <= end && !isStart && !isEnd;
+      } else if (selectedStartDate) {
+        isStart = cellDate.toDateString() === selectedStartDate.toDateString();
+      }
+      
+      if (isStart || isEnd) {
+        dayCell.className += ' bg-primary text-text-main font-bold';
+      } else if (isInRange) {
+        dayCell.className += ' bg-primary/20 dark:bg-primary/10 text-text-main';
+      } else {
+        dayCell.className += ' text-text-main dark:text-white hover:bg-background-light dark:hover:bg-gray-700';
+      }
+      
+      dayCell.addEventListener('click', () => {
+        if (!selectedStartDate) {
+          selectedStartDate = cellDate;
+          selectedEndDate = null;
+        } else if (!selectedEndDate) {
+          selectedEndDate = cellDate;
+          // Swap if end is before start
+          if (selectedEndDate < selectedStartDate) {
+            [selectedStartDate, selectedEndDate] = [selectedEndDate, selectedStartDate];
+          }
+        } else {
+          // Reset on third click
+          selectedStartDate = cellDate;
+          selectedEndDate = null;
+        }
+        renderCalendar();
+      });
+      
+      calendarDays.appendChild(dayCell);
+    }
+  }
+  
+  function updateDisplay() {
+    if (selectedStartDate && selectedEndDate) {
+      dateRangeDisplay.textContent = `${formatDate(selectedStartDate)} - ${formatDate(selectedEndDate)}`;
+    }
+  }
+  
+  function openModal() {
+    monthSelect.value = currentMonth;
+    yearInput.value = currentYear;
+    dateRangeModal.classList.remove('hidden');
+    renderCalendar();
+  }
+  
+  function closeModal() {
+    dateRangeModal.classList.add('hidden');
+  }
+  
+  function confirmSelection() {
+    if (selectedStartDate && selectedEndDate) {
+      updateDisplay();
+      const event = new CustomEvent('dateRangeChanged', {
+        detail: {
+          startDate: formatDateISO(selectedStartDate),
+          endDate: formatDateISO(selectedEndDate)
+        }
+      });
+      window.dispatchEvent(event);
+    }
+    closeModal();
+  }
+  
+  function resetDates() {
+    const today = new Date();
+    selectedStartDate = new Date(today.getFullYear(), today.getMonth(), 1);
+    selectedEndDate = new Date(today);
+    currentMonth = today.getMonth();
+    currentYear = today.getFullYear();
+    monthSelect.value = currentMonth;
+    yearInput.value = currentYear;
+    renderCalendar();
+    updateDisplay();
+  }
+  
+  // Event listeners
+  dateRangeBtn.addEventListener('click', openModal);
+  dateRangeBackdrop.addEventListener('click', closeModal);
+  closeDateRangeBtn.addEventListener('click', closeModal);
+  confirmDateRangeBtn.addEventListener('click', confirmSelection);
+  resetDateRangeBtn.addEventListener('click', resetDates);
+  
+  prevMonthBtn.addEventListener('click', () => {
+    currentMonth--;
+    if (currentMonth < 0) {
+      currentMonth = 11;
+      currentYear--;
+    }
+    monthSelect.value = currentMonth;
+    yearInput.value = currentYear;
+    renderCalendar();
+  });
+  
+  nextMonthBtn.addEventListener('click', () => {
+    currentMonth++;
+    if (currentMonth > 11) {
+      currentMonth = 0;
+      currentYear++;
+    }
+    monthSelect.value = currentMonth;
+    yearInput.value = currentYear;
+    renderCalendar();
+  });
+  
+  monthSelect.addEventListener('change', () => {
+    currentMonth = parseInt(monthSelect.value);
+    renderCalendar();
+  });
+  
+  yearInput.addEventListener('change', () => {
+    currentYear = parseInt(yearInput.value);
+    renderCalendar();
+  });
+  
+  // Initialize display
+  updateDisplay();
+})();
+</script>
+</body></html>

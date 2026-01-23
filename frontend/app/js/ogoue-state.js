@@ -71,9 +71,10 @@ const appState = structuredClone(defaultState);
 /**
  * Envoie une nouvelle vente à l'API (authentifiée par JWT)
  * @param {Object} vente - { date, description, moyen_paiement, type_vente, quantite, montant, justificatif, file }
+ * @param {Function} onProgress - Callback optionnel pour le suivi de la progression (percent)
  * @returns {Promise<Object|null>}
  */
-async function addVente(vente) {
+async function addVente(vente, onProgress) {
   const token = getToken();
   if (!token) {
     alert("Vous devez être connecté");
@@ -97,29 +98,81 @@ async function addVente(vente) {
       formData.append("receipt", vente.file);
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/sales`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`
-        // Ne pas définir Content-Type: FormData le définit automatiquement avec la bonne limite de boundary
-      },
-      body: formData
-    });
+    // Créer un XMLHttpRequest pour tracker la progression
+    if (vente.file && onProgress) {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
 
-    if (response.status === 401) {
-      handleUnauthorized();
-      return null;
+        // Suivi de la progression
+        xhr.upload.addEventListener("progress", (e) => {
+          if (e.lengthComputable) {
+            const percentComplete = (e.loaded / e.total) * 100;
+            onProgress(percentComplete);
+          }
+        });
+
+        xhr.addEventListener("load", async () => {
+          if (xhr.status === 401) {
+            handleUnauthorized();
+            resolve(null);
+            return;
+          }
+
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const data = JSON.parse(xhr.responseText);
+              console.log("✅ Vente ajoutée:", data);
+              resolve(data);
+            } catch (e) {
+              reject(new Error("Erreur de parsing réponse"));
+            }
+          } else {
+            try {
+              const errorData = JSON.parse(xhr.responseText);
+              reject(new Error(errorData.error || `HTTP ${xhr.status}`));
+            } catch (e) {
+              reject(new Error(`HTTP ${xhr.status}`));
+            }
+          }
+        });
+
+        xhr.addEventListener("error", () => {
+          reject(new Error("Erreur réseau"));
+        });
+
+        xhr.addEventListener("abort", () => {
+          reject(new Error("Téléchargement annulé"));
+        });
+
+        xhr.open("POST", `${API_BASE_URL}/api/sales`);
+        xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+        xhr.send(formData);
+      });
+    } else {
+      // Utiliser fetch si pas de fichier
+      const response = await fetch(`${API_BASE_URL}/api/sales`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (response.status === 401) {
+        handleUnauthorized();
+        return null;
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Erreur API addVente:", errorData);
+        throw new Error(errorData.error || `HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("✅ Vente ajoutée:", data);
+      return data;
     }
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Erreur API addVente:", errorData);
-      throw new Error(errorData.error || `HTTP ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log("✅ Vente ajoutée:", data);
-    return data;
   } catch (error) {
     console.error("❌ Erreur lors de l'ajout de vente:", error);
     alert(`Erreur lors de l'ajout de vente: ${error.message}`);
@@ -130,9 +183,10 @@ async function addVente(vente) {
 /**
  * Envoie une nouvelle dépense à l'API (authentifiée par JWT)
  * @param {Object} depense - { date, categorie, moyen_paiement, montant, justificatif, file }
+ * @param {Function} onProgress - Callback optionnel pour le suivi de la progression (percent)
  * @returns {Promise<Object|null>}
  */
-async function addDepense(depense) {
+async function addDepense(depense, onProgress) {
   const token = getToken();
   if (!token) {
     alert("Vous devez être connecté");
@@ -154,29 +208,81 @@ async function addDepense(depense) {
       formData.append("receipt", depense.file);
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/expenses`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`
-        // Ne pas définir Content-Type: FormData le définit automatiquement avec la bonne limite de boundary
-      },
-      body: formData
-    });
+    // Créer un XMLHttpRequest pour tracker la progression
+    if (depense.file && onProgress) {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
 
-    if (response.status === 401) {
-      handleUnauthorized();
-      return null;
+        // Suivi de la progression
+        xhr.upload.addEventListener("progress", (e) => {
+          if (e.lengthComputable) {
+            const percentComplete = (e.loaded / e.total) * 100;
+            onProgress(percentComplete);
+          }
+        });
+
+        xhr.addEventListener("load", async () => {
+          if (xhr.status === 401) {
+            handleUnauthorized();
+            resolve(null);
+            return;
+          }
+
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const data = JSON.parse(xhr.responseText);
+              console.log("✅ Dépense ajoutée:", data);
+              resolve(data);
+            } catch (e) {
+              reject(new Error("Erreur de parsing réponse"));
+            }
+          } else {
+            try {
+              const errorData = JSON.parse(xhr.responseText);
+              reject(new Error(errorData.error || `HTTP ${xhr.status}`));
+            } catch (e) {
+              reject(new Error(`HTTP ${xhr.status}`));
+            }
+          }
+        });
+
+        xhr.addEventListener("error", () => {
+          reject(new Error("Erreur réseau"));
+        });
+
+        xhr.addEventListener("abort", () => {
+          reject(new Error("Téléchargement annulé"));
+        });
+
+        xhr.open("POST", `${API_BASE_URL}/api/expenses`);
+        xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+        xhr.send(formData);
+      });
+    } else {
+      // Utiliser fetch si pas de fichier
+      const response = await fetch(`${API_BASE_URL}/api/expenses`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (response.status === 401) {
+        handleUnauthorized();
+        return null;
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Erreur API addDepense:", errorData);
+        throw new Error(errorData.error || `HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("✅ Dépense ajoutée:", data);
+      return data;
     }
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Erreur API addDepense:", errorData);
-      throw new Error(errorData.error || `HTTP ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log("✅ Dépense ajoutée:", data);
-    return data;
   } catch (error) {
     console.error("❌ Erreur lors de l'ajout de dépense:", error);
     alert(`Erreur lors de l'ajout de dépense: ${error.message}`);

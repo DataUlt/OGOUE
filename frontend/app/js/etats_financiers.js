@@ -1393,3 +1393,159 @@ function openJustificatifModal(fileName, fileUrl) {
         }
     });
 }
+
+/**
+ * Ouvre un modal pour afficher le justificatif (PDF ou image)
+ */
+function openJustificatifModal(fileName, fileUrl) {
+    console.log('📁 Ouverture modal : fileName="' + fileName + '", fileUrl="' + fileUrl + '"');
+    
+    // Vérifier si un modal existe déjà et le supprimer
+    const existingModal = document.getElementById('justificatif-modal');
+    if (existingModal) {
+      existingModal.remove();
+    }
+    
+    // Fermer les autres modals (comme le tableau d'export)
+    const otherModals = document.querySelectorAll('[role="dialog"], .modal, [class*="modal"]');
+    otherModals.forEach(m => {
+      if (m && m.id !== 'justificatif-modal') {
+        const closeBtn = m.querySelector('[aria-label="close"], .close, button:first-of-type');
+        if (closeBtn) closeBtn.click();
+      }
+    });
+
+    const modal = document.createElement('div');
+    modal.id = 'justificatif-modal';
+    modal.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[99999] p-1 sm:p-2';
+    modal.style.position = 'fixed';
+    modal.style.width = '100vw';
+    modal.style.height = '100vh';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.zIndex = '99999';
+    
+    const modalContent = document.createElement('div');
+    modalContent.className = 'bg-card-light dark:bg-card-dark rounded-lg sm:rounded-xl w-[99vw] sm:w-[98vw] h-[99vh] sm:h-[98vh] shadow-lg overflow-hidden border border-[#e8ede8] dark:border-[#2a3a32] flex flex-col';
+    modalContent.style.maxWidth = 'calc(100vw - 4px)';
+    modalContent.style.maxHeight = 'calc(100vh - 4px)';
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.id = 'close-justificatif';
+    closeBtn.className = 'absolute top-4 right-4 w-8 h-8 rounded-full bg-[#f0f0f0] dark:bg-[#2a3a32] flex items-center justify-center text-[#666] dark:text-[#999] hover:bg-[#e0e0e0] dark:hover:bg-[#3a4a42] transition-colors z-10';
+    closeBtn.innerHTML = '<span class="material-symbols-outlined">close</span>';
+    closeBtn.type = 'button';
+    
+    const headerDiv = document.createElement('div');
+    headerDiv.className = 'p-2 sm:p-3 border-b border-[#e8ede8] dark:border-[#2a3a32] flex justify-between items-start gap-2 flex-shrink-0';
+    
+    const titleDiv = document.createElement('div');
+    titleDiv.className = 'flex flex-col';
+    titleDiv.innerHTML = '<h2 class="text-lg font-semibold text-text-light-primary dark:text-text-dark-primary">Aperçu du justificatif</h2><p class="text-xs text-text-light-secondary dark:text-text-dark-secondary">'+fileName+'</p>';
+    
+    headerDiv.appendChild(titleDiv);
+    headerDiv.appendChild(closeBtn);
+    
+    const previewDiv = document.createElement('div');
+    previewDiv.className = 'flex-1 overflow-auto flex items-center justify-center bg-white dark:bg-gray-800 relative';
+    previewDiv.style.minHeight = '200px';
+    
+    // Déterminer le type de fichier et créer l'aperçu approprié
+    const fileExtension = fileName.split('.').pop().toLowerCase();
+    const isPDF = fileExtension === 'pdf';
+    const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension);
+    
+    if (fileUrl) {
+      if (isPDF) {
+        // Affichage avec Google Docs Viewer (simple et sans folklore)
+        const googleViewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(fileUrl)}&embedded=true`;
+        const iframe = document.createElement('iframe');
+        iframe.src = googleViewerUrl;
+        iframe.className = 'w-full h-full';
+        iframe.style.minHeight = '600px';
+        iframe.style.border = 'none';
+        previewDiv.appendChild(iframe);
+      } else if (isImage) {
+        // Pour les images, créer un img tag
+        const img = document.createElement('img');
+        img.src = fileUrl;
+        img.alt = fileName;
+        img.className = 'max-w-full max-h-full object-contain rounded-lg';
+        img.style.maxHeight = 'calc(98vh - 80px)';
+        img.onerror = () => {
+          img.style.display = 'none';
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'text-center';
+          errorDiv.innerHTML = `
+            <span class="material-symbols-outlined text-6xl text-red-400 mb-4 block">image_not_supported</span>
+            <p class="text-text-light-secondary dark:text-text-dark-secondary mb-4">Impossible de charger l'image</p>
+            <p class="text-sm text-gray-500 dark:text-gray-500">L'URL du fichier pourrait être invalide ou le fichier supprimé</p>
+          `;
+          previewDiv.appendChild(errorDiv);
+        };
+        previewDiv.appendChild(img);
+      } else {
+        // Fichier non supporté pour l'aperçu
+        const noPreviewDiv = document.createElement('div');
+        noPreviewDiv.className = 'text-center';
+        noPreviewDiv.innerHTML = `
+          <span class="material-symbols-outlined text-6xl text-gray-400 dark:text-gray-600 mb-4 block">description</span>
+          <p class="text-text-light-secondary dark:text-text-dark-secondary mb-4">Aperçu non disponible pour ce type de fichier</p>
+          <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary">Utilisez le bouton télécharger pour ouvrir le fichier</p>
+        `;
+        previewDiv.appendChild(noPreviewDiv);
+      }
+    } else {
+      const noFileDiv = document.createElement('div');
+      noFileDiv.className = 'text-center';
+      noFileDiv.innerHTML = `
+        <span class="material-symbols-outlined text-6xl text-gray-400 dark:text-gray-600 mb-4 block">warning</span>
+        <p class="text-text-light-secondary dark:text-text-dark-secondary mb-4">URL du fichier non disponible</p>
+        <p class="text-sm text-gray-500 dark:text-gray-500">Le fichier n'a pas d'URL de téléchargement associée</p>
+      `;
+      previewDiv.appendChild(noFileDiv);
+    }
+    
+    const footerDiv = document.createElement('div');
+    footerDiv.className = 'p-2 sm:p-3 border-t border-[#e8ede8] dark:border-[#2a3a32] flex gap-2 sm:gap-3 justify-center flex-shrink-0';
+    
+    if (fileUrl) {
+        const downloadBtn = document.createElement('a');
+        downloadBtn.href = fileUrl;
+        downloadBtn.download = fileName;
+        downloadBtn.className = 'inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-primary text-background-light hover:bg-primary/90 transition-colors font-medium text-sm font-display shadow-soft';
+        downloadBtn.innerHTML = '<span class="material-symbols-outlined" style="font-variation-settings: \'FILL\' 1;">download</span> Télécharger';
+        
+        footerDiv.appendChild(downloadBtn);
+    }
+    
+    modalContent.appendChild(headerDiv);
+    modalContent.appendChild(previewDiv);
+    modalContent.appendChild(footerDiv);
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+
+    // Fermer le modal au clic sur le bouton
+    closeBtn.addEventListener('click', () => {
+        modal.remove();
+    });
+    
+    // Fermer le modal au clic en dehors
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+}
+
+// Ajouter les event listeners pour les justificatifs dans les tableaux
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('justificatif-link')) {
+        e.preventDefault();
+        const fileName = e.target.dataset.file;
+        const fileUrl = e.target.dataset.url;
+        if (fileName && fileUrl) {
+            openJustificatifModal(fileName, fileUrl);
+        }
+    }
+});
