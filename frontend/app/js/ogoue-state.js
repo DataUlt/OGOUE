@@ -451,6 +451,100 @@ function setPeriodeCourante(mois, annee) {
   appState.periodeCourante = { mois, annee };
 }
 
+/**
+ * Récupère les ventes pour une plage de dates (authentifiée par JWT)
+ * @param {string} startDate - Format YYYY-MM-DD
+ * @param {string} endDate - Format YYYY-MM-DD
+ * @returns {Promise<Array>}
+ */
+async function getVentesPourPlage(startDate, endDate) {
+  const token = getToken();
+  if (!token) {
+    console.warn("Pas de token, redirection vers login");
+    handleUnauthorized();
+    return [];
+  }
+
+  try {
+    const params = new URLSearchParams({
+      startDate: startDate,
+      endDate: endDate
+    });
+
+    const response = await fetch(`${API_BASE_URL}/api/sales?${params}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    if (response.status === 401) {
+      handleUnauthorized();
+      return [];
+    }
+
+    if (!response.ok) {
+      console.error(`Erreur API getVentesPourPlage: ${response.status}`);
+      return [];
+    }
+
+    const data = await response.json();
+    // L'API retourne { sales: [...] }
+    return Array.isArray(data.sales) ? data.sales : [];
+  } catch (error) {
+    console.error("❌ Erreur lors de la récupération des ventes par plage:", error);
+    return [];
+  }
+}
+
+/**
+ * Récupère les dépenses pour une plage de dates (authentifiée par JWT)
+ * @param {string} startDate - Format YYYY-MM-DD
+ * @param {string} endDate - Format YYYY-MM-DD
+ * @returns {Promise<Array>}
+ */
+async function getDepensesPourPlage(startDate, endDate) {
+  const token = getToken();
+  if (!token) {
+    console.warn("Pas de token, redirection vers login");
+    handleUnauthorized();
+    return [];
+  }
+
+  try {
+    const params = new URLSearchParams({
+      startDate: startDate,
+      endDate: endDate
+    });
+
+    const response = await fetch(`${API_BASE_URL}/api/expenses?${params}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    if (response.status === 401) {
+      handleUnauthorized();
+      return [];
+    }
+
+    if (!response.ok) {
+      console.error(`Erreur API getDepensesPourPlage: ${response.status}`);
+      return [];
+    }
+
+    const data = await response.json();
+    // L'API retourne { expenses: [...] }
+    return Array.isArray(data.expenses) ? data.expenses : [];
+  } catch (error) {
+    console.error("❌ Erreur lors de la récupération des dépenses par plage:", error);
+    return [];
+  }
+}
+
 // ─────────────────────────────────────────────────
 // Exposition sur window
 // ─────────────────────────────────────────────────
@@ -464,5 +558,7 @@ window.OGOUE = {
   addDepense,
   getVentesPourPeriode,
   getDepensesPourPeriode,
+  getVentesPourPlage,
+  getDepensesPourPlage,
   getResumeMensuel
 };

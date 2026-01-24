@@ -4,8 +4,10 @@ import { uploadFileToSupabase, deleteFileFromSupabase } from "../utils/supabase-
 import { logDeletion } from "../utils/deletion-audit.js";
 
 const listSchema = z.object({
-  month: z.coerce.number().int().min(1).max(12),
-  year: z.coerce.number().int().min(2000).max(2100),
+  month: z.coerce.number().int().min(1).max(12).optional(),
+  year: z.coerce.number().int().min(2000).max(2100).optional(),
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
 });
 
 const createSchema = z.object({
@@ -21,7 +23,7 @@ const createSchema = z.object({
 export async function listSales(req, res) {
   try {
     const parsed = listSchema.parse(req.query);
-    const { month, year } = parsed;
+    let { month, year, startDate, endDate } = parsed;
     
     // Récupérer l'organizationId du JWT
     const organizationId = req.user.organizationId;
@@ -81,16 +83,43 @@ export async function listSales(req, res) {
       }
     }
 
-    console.log(`📊 listSales: ${enrichedRows.length} ventes brutes, filtre: mois=${month}, année=${year}`);
+    console.log(`📊 listSales: ${enrichedRows.length} ventes brutes, filtre: ${startDate && endDate ? `du ${startDate} au ${endDate}` : `mois=${month}, année=${year}`}`);
 
-    // Filtrer par mois et année en JavaScript
+    // Déterminer les dates de filtrage
+    let finalStartDate, finalEndDate;
+    if (startDate && endDate) {
+      finalStartDate = startDate;
+      finalEndDate = endDate;
+    } else if (month && year) {
+      // Créer une plage pour le mois/année
+      const firstDay = new Date(year, month - 1, 1);
+      const lastDay = new Date(year, month, 0);
+      finalStartDate = firstDay.toISOString().split('T')[0];
+      finalEndDate = lastDay.toISOString().split('T')[0];
+    } else {
+      // Si rien n'est fourni, retourner toutes les ventes
+      const transformedSales = enrichedRows.map(row => ({
+        id: row.id,
+        date: row.sale_date,
+        description: row.description,
+        type_vente: row.sale_type,
+        moyen_paiement: row.payment_method,
+        quantite: row.quantity,
+        montant: row.amount,
+        justificatif: row.receipt_name,
+        justificatifUrl: row.receipt_url,
+        created_at: row.created_at,
+        created_by_name: row.created_by_name
+      }));
+      return res.json({ sales: transformedSales });
+    }
+
+    // Filtrer par plage de dates
     const transformedSales = enrichedRows
       .filter(row => {
-        // Parser la date au format YYYY-MM-DD directement sans conversion UTC
-        const [year, month, day] = row.sale_date.split('T')[0].split('-').map(Number);
-        const match = month === parsed.month && year === parsed.year;
-        console.log(`  Vente ${row.id}: date=${row.sale_date} -> mois=${month}, année=${year}, match=${match}`);
-        return match;
+        const datePart = row.sale_date.split('T')[0];
+        const isInRange = datePart >= finalStartDate && datePart <= finalEndDate;
+        return isInRange;
       })
       .map(row => ({
         id: row.id,

@@ -4,8 +4,10 @@ import { uploadFileToSupabase, deleteFileFromSupabase } from "../utils/supabase-
 import { logDeletion } from "../utils/deletion-audit.js";
 
 const listSchema = z.object({
-  month: z.coerce.number().int().min(1).max(12),
-  year: z.coerce.number().int().min(2000).max(2100),
+  month: z.coerce.number().int().min(1).max(12).optional(),
+  year: z.coerce.number().int().min(2000).max(2100).optional(),
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
 });
 
 const createSchema = z.object({
@@ -19,7 +21,7 @@ const createSchema = z.object({
 export async function listExpenses(req, res) {
   try {
     const parsed = listSchema.parse(req.query);
-    const { month, year } = parsed;
+    let { month, year, startDate, endDate } = parsed;
     
     // Récupérer l'organizationId du JWT
     const organizationId = req.user.organizationId;
@@ -78,17 +80,41 @@ export async function listExpenses(req, res) {
       }
     }
 
-    console.log(`📊 listExpenses: ${enrichedRows.length} dépenses brutes, filtre: mois=${month}, année=${year}`);
+    console.log(`📊 listExpenses: ${enrichedRows.length} dépenses brutes, filtre: ${startDate && endDate ? `du ${startDate} au ${endDate}` : `mois=${month}, année=${year}`}`);
 
-    // Filtrer par mois et année en JavaScript
+    // Déterminer les dates de filtrage
+    let finalStartDate, finalEndDate;
+    if (startDate && endDate) {
+      finalStartDate = startDate;
+      finalEndDate = endDate;
+    } else if (month && year) {
+      // Créer une plage pour le mois/année
+      const firstDay = new Date(year, month - 1, 1);
+      const lastDay = new Date(year, month, 0);
+      finalStartDate = firstDay.toISOString().split('T')[0];
+      finalEndDate = lastDay.toISOString().split('T')[0];
+    } else {
+      // Si rien n'est fourni, retourner toutes les dépenses
+      const transformedExpenses = enrichedRows.map(row => ({
+        id: row.id,
+        date: row.expense_date,
+        categorie: row.category,
+        moyen_paiement: row.payment_method,
+        montant: row.amount,
+        justificatif: row.receipt_name,
+        justificatifUrl: row.receipt_url,
+        created_at: row.created_at,
+        created_by_name: row.created_by_name
+      }));
+      return res.json({ expenses: transformedExpenses });
+    }
+
+    // Filtrer par plage de dates
     const transformedExpenses = enrichedRows
       .filter(row => {
-        const date = new Date(row.expense_date);
-        const rowMonth = date.getMonth() + 1;
-        const rowYear = date.getFullYear();
-        const match = rowMonth === month && rowYear === year;
-        console.log(`  Dépense ${row.id}: date=${row.expense_date} -> mois=${rowMonth}, année=${rowYear}, match=${match}`);
-        return match;
+        const datePart = row.expense_date.split('T')[0];
+        const isInRange = datePart >= finalStartDate && datePart <= finalEndDate;
+        return isInRange;
       })
       .map(row => {
         return {
