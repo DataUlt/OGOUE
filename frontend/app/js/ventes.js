@@ -161,7 +161,20 @@
   // =========================
   // ✅ LOGIQUE "ARTICLES" (Option B)
   // =========================
-  const STORAGE_KEY_ARTICLES = "ogoue.ventes.articles";
+  
+  function getArticlesStorageKey() {
+    // Récupère l'ID utilisateur actuel pour filtrer les articles par utilisateur
+    try {
+      const userStr = localStorage.getItem("user");
+      if (!userStr) return "ogoue.ventes.articles"; // Fallback si pas d'utilisateur
+      const user = JSON.parse(userStr);
+      const userId = user?.id || user?.user_id;
+      if (!userId) return "ogoue.ventes.articles";
+      return `ogoue.ventes.articles.${userId}`; // Clé unique par utilisateur
+    } catch (e) {
+      return "ogoue.ventes.articles";
+    }
+  }
 
   const firstWrapper = document.getElementById("article-first-input-wrapper");
   const selectWrapper = document.getElementById("article-select-wrapper");
@@ -180,7 +193,8 @@
 
   function loadArticles() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY_ARTICLES);
+      const storageKey = getArticlesStorageKey();
+      const raw = localStorage.getItem(storageKey);
       const arr = raw ? JSON.parse(raw) : [];
       return Array.isArray(arr) ? arr.filter(Boolean) : [];
     } catch (e) {
@@ -189,7 +203,8 @@
   }
 
   function saveArticles(list) {
-    localStorage.setItem(STORAGE_KEY_ARTICLES, JSON.stringify(list));
+    const storageKey = getArticlesStorageKey();
+    localStorage.setItem(storageKey, JSON.stringify(list));
   }
 
   function buildArticleOptions() {

@@ -148,7 +148,20 @@
   // ─────────────────────────────────────────────
   // ✅ Gestion Catégories (déplacée depuis le HTML)
   // ─────────────────────────────────────────────
-  const CATEGORIES_STORAGE_KEY = "ogoue.depenses.categories.custom";
+  
+  function getCategoriesStorageKey() {
+    // Récupère l'ID utilisateur actuel pour filtrer les catégories par utilisateur
+    try {
+      const userStr = localStorage.getItem("user");
+      if (!userStr) return "ogoue.depenses.categories.custom"; // Fallback si pas d'utilisateur
+      const user = JSON.parse(userStr);
+      const userId = user?.id || user?.user_id;
+      if (!userId) return "ogoue.depenses.categories.custom";
+      return `ogoue.depenses.categories.custom.${userId}`; // Clé unique par utilisateur
+    } catch (e) {
+      return "ogoue.depenses.categories.custom";
+    }
+  }
 
   const baseCategories = [
     "Achats / Stocks",
@@ -169,7 +182,8 @@
 
   function loadCustomCategories() {
     try {
-      const raw = localStorage.getItem(CATEGORIES_STORAGE_KEY);
+      const storageKey = getCategoriesStorageKey();
+      const raw = localStorage.getItem(storageKey);
       const arr = raw ? JSON.parse(raw) : [];
       return Array.isArray(arr) ? arr : [];
     } catch (e) {
@@ -178,7 +192,8 @@
   }
 
   function saveCustomCategories(list) {
-    localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(list));
+    const storageKey = getCategoriesStorageKey();
+    localStorage.setItem(storageKey, JSON.stringify(list));
   }
 
   function normalizeLabel(s) {
