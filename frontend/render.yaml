@@ -15,6 +15,66 @@ services:
         name: X-XSS-Protection
         value: "1; mode=block"
     routes:
+      # Pretty URLs - serve .html files without extension
+      - type: rewrite
+        source: /login
+        destination: /login.html
+      - type: rewrite
+        source: /signin
+        destination: /signin.html
+      - type: rewrite
+        source: /apropos
+        destination: /apropos.html
+      - type: rewrite
+        source: /agent-login
+        destination: /agent-login.html
+      - type: rewrite
+        source: /forgot-password
+        destination: /forgot-password.html
+      - type: rewrite
+        source: /reset-password
+        destination: /reset-password.html
+      - type: rewrite
+        source: /conditions-utilisation
+        destination: /conditions-utilisation.html
+      # App module routes
+      - type: rewrite
+        source: /app/module_tableau_bord
+        destination: /app/module_tableau_bord.html
+      - type: rewrite
+        source: /app/module_ventes
+        destination: /app/module_ventes.html
+      - type: rewrite
+        source: /app/module_depenses
+        destination: /app/module_depenses.html
+      - type: rewrite
+        source: /app/module_scoring
+        destination: /app/module_scoring.html
+      - type: rewrite
+        source: /app/module_agents
+        destination: /app/module_agents.html
+      - type: rewrite
+        source: /app/module_etats_financiers
+        destination: /app/module_etats_financiers.html
+      - type: rewrite
+        source: /app/module_resume_ventes_depenses
+        destination: /app/module_resume_ventes_depenses.html
+      - type: rewrite
+        source: /app/module_depot_dossier
+        destination: /app/module_depot_dossier.html
+      - type: rewrite
+        source: /app/module_historique_suppressions
+        destination: /app/module_historique_suppressions.html
+      - type: rewrite
+        source: /app/module_agent_dashboard
+        destination: /app/module_agent_dashboard.html
+      - type: rewrite
+        source: /app/module_agent_depenses
+        destination: /app/module_agent_depenses.html
+      - type: rewrite
+        source: /app/module_agent_resume
+        destination: /app/module_agent_resume.html
+      # SPA fallback routes
       - type: rewrite
         source: /app/*
         destination: /app/index.html

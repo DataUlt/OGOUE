@@ -1,9 +1,9 @@
-ï»¿<!DOCTYPE html>
+<!DOCTYPE html>
 <html class="light" lang="fr">
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>GÃ©nÃ©ration des Ã‰tats Financiers</title>
+    <title>Génération des États Financiers</title>
 
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 
@@ -19,7 +19,7 @@
             theme: {
                 extend: {
                     colors: {
-                        /* Palette OGOUÃ‰ - Redesign */
+                        /* Palette OGOUÉ - Redesign */
                         "primary": "#0088CC",
                         "secondary": "#1E3A5F",
                         "background-light": "#f6f8f6",
@@ -65,20 +65,20 @@
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-between whitespace-nowrap h-20">
                 <div class="flex items-center gap-4">
-                    <a href="module_tableau_bord.html"><img src="/app/Logo-ogoue (2).png" alt="OGOUÃ‰ Logo" class="h-28 w-auto"></a>
+                    <a href="module_tableau_bord"><img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-28 w-auto"></a>
                 </div>
 
                 <div class="hidden md:flex items-center gap-9">
                     <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium"
-                       href="module_tableau_bord.html">
+                       href="module_tableau_bord">
                         Tableau de Bord
                     </a>
                     <a class="text-primary text-sm font-bold"
-                       href="module_ventes.html">
-                        ComptabilitÃ©
+                       href="module_ventes">
+                        Comptabilité
                     </a>
                     <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium"
-                       href="module_scoring.html">
+                       href="module_scoring">
                         Financement
                     </a>
                 </div>
@@ -86,9 +86,9 @@
                 <!-- Menu mobile -->
                 <div id="mobile-menu" class="md:hidden absolute top-full left-0 right-0 bg-background-light dark:bg-background-dark border-b border-[#e8ede8] dark:border-gray-700 hidden">
                     <div class="flex flex-col gap-2 p-4">
-                        <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_tableau_bord.html">Tableau de Bord</a>
-                        <a class="text-primary text-sm font-bold leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_ventes.html">ComptabilitÃ©</a>
-                        <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_scoring.html">Financement</a>
+                        <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_tableau_bord">Tableau de Bord</a>
+                        <a class="text-primary text-sm font-bold leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_ventes">Comptabilité</a>
+                        <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_scoring">Financement</a>
                     </div>
                 </div>
 
@@ -127,34 +127,34 @@
                             Gestion Comptable
                         </h1>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
-                            Enregistrer et suivre vos dÃ©penses quotidiennes.
+                            Enregistrer et suivre vos dépenses quotidiennes.
                         </p>
                     </div>
                 </header>
 
-                <!-- Onglets + Filtre date sur la mÃªme ligne -->
+                <!-- Onglets + Filtre date sur la même ligne -->
                 <div class="border-b border-gray-200 dark:border-gray-700 pb-3">
                     <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
                         <nav class="flex gap-8 -mb-px">
-                            <a href="module_ventes.html"
+                            <a href="module_ventes"
                                class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
                                 <p class="text-sm font-bold leading-normal tracking-[0.015em]">Ventes</p>
                             </a>
-                            <a href="module_depenses.html"
+                            <a href="module_depenses"
                                class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
-                                <p class="text-sm font-bold leading-normal tracking-[0.015em]">DÃ©penses</p>
+                                <p class="text-sm font-bold leading-normal tracking-[0.015em]">Dépenses</p>
                             </a>
-                            <a href="module_resume_ventes_depenses.html"
+                            <a href="module_resume_ventes_depenses"
                                class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
-                                <p class="text-sm font-bold leading-normal tracking-[0.015em]">RÃ©sumÃ©</p>
+                                <p class="text-sm font-bold leading-normal tracking-[0.015em]">Résumé</p>
                             </a>
-                            <a href="module_etats_financiers.html"
+                            <a href="module_etats_financiers"
                                class="flex flex-col items-center justify-center border-b-[3px] border-b-primary text-[#0a0c0a] dark:text-white pb-3 pt-4 px-2">
-                                <p class="text-sm font-bold leading-normal tracking-[0.015em]">Analyse financiÃ¨re</p>
+                                <p class="text-sm font-bold leading-normal tracking-[0.015em]">Analyse financière</p>
                             </a>
                         </nav>
 
-                        <!-- Carte Filtrer par date (alignÃ©e Ã  droite des onglets) -->
+                        <!-- Carte Filtrer par date (alignée à droite des onglets) -->
                         <div class="relative rounded-lg border border-[#e8ede8] dark:border-gray-700 bg-card-light dark:bg-card-dark px-6 py-4 shadow-sm w-[320px]">
                             <p class="text-[10px] font-semibold uppercase tracking-wide text-text-light-secondary dark:text-text-dark-secondary mb-1">
                                 Filtrer par date
@@ -188,7 +188,7 @@
 
                                 <div class="flex justify-between items-center pt-3 mt-3 border-t border-[#e8ede8] dark:border-gray-700">
                                     <button id="resetRange" class="text-xs px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-background-light">
-                                        RÃ©initialiser
+                                        Réinitialiser
                                     </button>
                                     <button id="closeCalendar" class="text-xs px-3 py-1.5 rounded-lg bg-primary text-[#0a0c0a]">
                                         Fermer
@@ -202,7 +202,7 @@
                <!--
 <div class="flex flex-col gap-2 mt-4">
     <p class="text-text-light-secondary dark:text-text-dark-secondary max-w-lg">
-        SÃ©lectionnez un document Ã  prÃ©visualiser ou exportez l'ensemble des Ã©tats financiers pour l'exercice en cours.
+        Sélectionnez un document à prévisualiser ou exportez l'ensemble des états financiers pour l'exercice en cours.
     </p>
 </div>
 -->
@@ -220,21 +220,21 @@
                     </button>
                 </div>
 
-                <!-- Cartes des Ã©tats -->
+                <!-- Cartes des états -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
 
-                    <!-- Compte de RÃ©sultat -->
+                    <!-- Compte de Résultat -->
                     <div class="flex flex-col gap-4 p-5 bg-card-light dark:bg-card-dark rounded-xl shadow-sm">
                         <div class="flex items-center gap-3">
                             <div class="bg-primary/20 p-2 rounded-lg">
                                 <span class="material-symbols-outlined text-primary">assessment</span>
                             </div>
-                            <h2 class="text-lg font-bold">Compte de RÃ©sultat</h2>
+                            <h2 class="text-lg font-bold">Compte de Résultat</h2>
                         </div>
                         <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary flex-grow">
-                            SynthÃ¨se des charges et produits de l'exercice.
+                            Synthèse des charges et produits de l'exercice.
                         </p>
-                        <button id="generateCompteBtn" class="rounded-lg h-9 px-4 bg-primary/20 text-sm font-bold">GÃ©nÃ©rer l'aperÃ§u</button>
+                        <button id="generateCompteBtn" class="rounded-lg h-9 px-4 bg-primary/20 text-sm font-bold">Générer l'aperçu</button>
                     </div>
 
                     <!-- Tableau de Flux -->
@@ -246,9 +246,9 @@
                             <h2 class="text-lg font-bold">Tableau de Flux</h2>
                         </div>
                         <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary flex-grow">
-                            Analyse des flux de liquiditÃ©s entrants et sortants.
+                            Analyse des flux de liquidités entrants et sortants.
                         </p>
-                        <button id="generateFluxBtn" class="rounded-lg h-9 px-4 bg-primary/20 text-sm font-bold">GÃ©nÃ©rer l'aperÃ§u</button>
+                        <button id="generateFluxBtn" class="rounded-lg h-9 px-4 bg-primary/20 text-sm font-bold">Générer l'aperçu</button>
                     </div>
 
                     <!-- Historique des ventes -->
@@ -260,23 +260,23 @@
                             <h2 class="text-lg font-bold">Historique des ventes</h2>
                         </div>
                         <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary flex-grow">
-                            Suivi dÃ©taillÃ© de toutes les ventes rÃ©alisÃ©es.
+                            Suivi détaillé de toutes les ventes réalisées.
                         </p>
-                        <button id="generateVentesBtn" class="rounded-lg h-9 px-4 bg-primary/20 text-sm font-bold">GÃ©nÃ©rer l'aperÃ§u</button>
+                        <button id="generateVentesBtn" class="rounded-lg h-9 px-4 bg-primary/20 text-sm font-bold">Générer l'aperçu</button>
                     </div>
 
-                    <!-- Historiques des dÃ©penses -->
+                    <!-- Historiques des dépenses -->
                     <div class="flex flex-col gap-4 p-5 bg-card-light dark:bg-card-dark rounded-xl shadow-sm">
                         <div class="flex items-center gap-3">
                             <div class="bg-primary/20 p-2 rounded-lg">
                                 <span class="material-symbols-outlined text-primary">receipt_long</span>
                             </div>
-                            <h2 class="text-lg font-bold">Historiques des dÃ©penses</h2>
+                            <h2 class="text-lg font-bold">Historiques des dépenses</h2>
                         </div>
                         <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary flex-grow">
-                            Suivi dÃ©taillÃ© de toutes les dÃ©penses engagÃ©es.
+                            Suivi détaillé de toutes les dépenses engagées.
                         </p>
-                        <button id="generateDepensesBtn" class="rounded-lg h-9 px-4 bg-primary/20 text-sm font-bold">GÃ©nÃ©rer l'aperÃ§u</button>
+                        <button id="generateDepensesBtn" class="rounded-lg h-9 px-4 bg-primary/20 text-sm font-bold">Générer l'aperçu</button>
                     </div>
 
                     <!-- Historique des suppressions -->
@@ -302,12 +302,12 @@
 
 </div>
 
-<!-- Store OGOUÃ‰ -->
+<!-- Store OGOUÉ -->
 <script src="js/ogoue-state.js"></script>
 <script src="js/header-ui.js"></script>
 <script src="js/mobile-menu.js"></script>
 
-<!-- JS dÃ©diÃ© aux Ã©tats financiers -->
+<!-- JS dédié aux états financiers -->
 <script src="js/etats_financiers.js"></script>
 <script src="js/topbar-actions.js"></script>
 <script>
@@ -316,17 +316,17 @@
             window.OGOUE.initTopbarActions();
         }
 
-        // Bouton pour accÃ©der Ã  l'historique des suppressions
+        // Bouton pour accéder à l'historique des suppressions
         const viewSuppressionHistoryBtn = document.getElementById('viewSuppressionHistoryBtn');
         if (viewSuppressionHistoryBtn) {
             viewSuppressionHistoryBtn.addEventListener('click', () => {
-                // VÃ©rifier si l'utilisateur est manager
+                // Vérifier si l'utilisateur est manager
                 const userStr = localStorage.getItem('user');
                 const user = userStr ? JSON.parse(userStr) : null;
                 const userRole = user ? user.role : null;
                 
                 if (userRole !== 'manager') {
-                    alert('Seuls les gÃ©rants peuvent accÃ©der Ã  l\'historique des suppressions.');
+                    alert('Seuls les gérants peuvent accéder à l\'historique des suppressions.');
                     return;
                 }
                 window.location.href = 'module_historique_suppressions.html';

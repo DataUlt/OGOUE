@@ -1,4 +1,4 @@
-ï»¿<!DOCTYPE html>
+<!DOCTYPE html>
 <html class="light" lang="fr">
 <head>
     <meta charset="utf-8"/>
@@ -20,7 +20,7 @@
             theme: {
                 extend: {
                     colors: {
-                        /* Palette OGOUÃ‰ - Redesign */
+                        /* Palette OGOUÉ - Redesign */
                         "primary": "#0088CC",
                         "secondary": "#1E3A5F",
                         "background-light": "#f6f8f6",
@@ -55,17 +55,17 @@
             font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
         }
 
-        /* âœ… FORCER le champ date Ã  la mÃªme taille que les autres et icÃ´ne Ã  droite */
+        /* ? FORCER le champ date à la même taille que les autres et icône à droite */
         .date-input{
             height: 56px !important;                /* = h-14 */
-            padding: 0 48px 0 15px !important;      /* espace rÃ©servÃ© Ã  droite pour l'icÃ´ne */
+            padding: 0 48px 0 15px !important;      /* espace réservé à droite pour l'icône */
             box-sizing: border-box !important;
             line-height: 56px !important;          /* centre le texte */
             position: relative;                     /* pour positionner l'indicateur */
-            color-scheme: light dark;               /* Active le datepicker adaptÃ© au mode sombre */
+            color-scheme: light dark;               /* Active le datepicker adapté au mode sombre */
         }
 
-        /* Chrome / WebKit: positionner l'indicateur Ã  l'extrÃªme droite */
+        /* Chrome / WebKit: positionner l'indicateur à l'extrême droite */
         .date-input::-webkit-calendar-picker-indicator {
             position: absolute;
             right: 10px;
@@ -83,7 +83,7 @@
             padding: 0 !important;
         }
 
-        /* Mode sombre: icÃ´ne du calendrier en clair */
+        /* Mode sombre: icône du calendrier en clair */
         html.dark .date-input::-webkit-calendar-picker-indicator {
             filter: invert(1) brightness(0.9);
         }
@@ -99,7 +99,7 @@
             filter: invert(1) brightness(0.9);
         }
 
-        /* AmÃ©liorations pour le calendrier du navigateur en mode sombre */
+        /* Améliorations pour le calendrier du navigateur en mode sombre */
         @media (prefers-color-scheme: dark) {
             input[type="date"],
             input[type="time"],
@@ -118,13 +118,13 @@
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-between whitespace-nowrap h-20">
                 <div class="flex items-center gap-4">
-                    <a href="module_agent_dashboard.html"><img src="/app/Logo-ogoue (2).png" alt="OGOUÃ‰ Logo" class="h-28 w-auto"></a>
+                    <a href="module_agent_dashboard"><img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-28 w-auto"></a>
                 </div>
                 <div class="hidden md:flex items-center gap-9">
 
                     <a class="text-primary text-sm font-bold leading-normal"
-                       href="module_ventes.html">
-                        ComptabilitÃ©
+                       href="module_ventes">
+                        Comptabilité
                     </a>
                 
                 </div>
@@ -166,17 +166,17 @@
                 <!-- Onglets -->
                 <div class="border-b border-gray-200 dark:border-gray-700">
                     <nav class="flex gap-8 -mb-px">
-                        <a href="module_agent_dashboard.html"
+                        <a href="module_agent_dashboard"
                            class="flex flex-col items-center justify-center border-b-[3px] border-b-primary text-[#0d1b19] dark:text-white pb-3 pt-4 px-2">
                             <p class="text-sm font-bold leading-normal tracking-[0.015em]">Ventes</p>
                         </a>
-                        <a href="module_agent_depenses.html"
+                        <a href="module_agent_depenses"
                            class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
-                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">DÃ©penses</p>
+                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">Dépenses</p>
                         </a>
-                        <a href="module_agent_resume.html"
+                        <a href="module_agent_resume"
                            class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
-                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">RÃ©sumÃ©</p>
+                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">Résumé</p>
                         </a>
                     </nav>
                 </div>
@@ -185,7 +185,7 @@
                 <div class="mt-4 bg-white dark:bg-[#182c29] p-8 rounded-xl shadow-sm border border-[#cfe7e3]/70 dark:border-gray-700/70">
                     <h2 class="text-xl font-bold text-[#0d1b19] dark:text-white mb-6">Enregistrer une nouvelle vente</h2>
 
-                    <!-- âœ… Formulaire Ventes -->
+                    <!-- ? Formulaire Ventes -->
                     <form id="form-ventes" class="space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <label class="flex flex-col">
@@ -201,13 +201,13 @@
                                 />
                             </label>
 
-                            <!-- âœ… Bloc Article / Service (Option B) -->
+                            <!-- ? Bloc Article / Service (Option B) -->
                             <div class="flex flex-col">
                                 <p class="text-base font-medium leading-normal pb-2 text-[#0d1b19] dark:text-gray-200">
                                     Nom de l'article / service <span class="text-red-500">*</span>
                                 </p>
 
-                                <!-- 1) Mode "premiÃ¨re vente" (liste vide) : input -->
+                                <!-- 1) Mode "première vente" (liste vide) : input -->
                                 <div id="article-first-input-wrapper" class="block">
                                     <input
                                         id="vente-description"
@@ -225,7 +225,7 @@
                                         name="article_select"
                                         class="form-select flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0d1b19] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-14 p-[15px] text-base font-normal leading-normal"
                                     >
-                                        <!-- options injectÃ©es en JS -->
+                                        <!-- options injectées en JS -->
                                     </select>
 
                                     <!-- 3) "Autres" : champ texte -->
@@ -252,7 +252,7 @@
                                     class="form-select flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0d1b19] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-14 p-[15px] text-base font-normal leading-normal"
                                     required
                                 >
-                                    <option value="">SÃ©lectionner un moyen de paiement</option>
+                                    <option value="">Sélectionner un moyen de paiement</option>
                                     <option value="cash">Cash</option>
                                     <option value="mobile_money">Mobile Money</option>
                                 </select>
@@ -267,7 +267,7 @@
                                     class="form-select flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0d1b19] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-14 p-[15px] text-base font-normal leading-normal"
                                     required
                                 >
-                                    <option value="">SÃ©lectionner un type de vente</option>
+                                    <option value="">Sélectionner un type de vente</option>
                                     <option value="produits">Vente de produits</option>
                                     <option value="services">Prestation de service</option>
                                 </select>
@@ -277,7 +277,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <label class="flex flex-col">
                                 <p class="text-base font-medium leading-normal pb-2 text-[#0d1b19] dark:text-gray-200">
-                                    QuantitÃ©<span class="text-red-500">*</span>
+                                    Quantité<span class="text-red-500">*</span>
                                 </p>
                                 <input
                                     id="vente-quantite"
@@ -315,13 +315,13 @@
                                     <span class="material-symbols-outlined text-5xl text-gray-400 dark:text-gray-500">cloud_upload</span>
                                     <div class="flex text-sm text-gray-600 dark:text-gray-400 mt-2">
                                         <label class="relative cursor-pointer rounded-md font-medium text-primary hover:text-primary/80 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary/50" for="file-upload">
-                                            <span>TÃ©lÃ©versez un fichier</span>
+                                            <span>Téléversez un fichier</span>
                                             <input class="sr-only" id="file-upload" name="file-upload" type="file"/>
                                         </label>
-                                        <p class="pl-1">ou glissez-dÃ©posez</p>
+                                        <p class="pl-1">ou glissez-déposez</p>
                                     </div>
                                     <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                                        Formats acceptÃ©s : PDF, JPEG, PNG. Taille max : 5Mo
+                                        Formats acceptés : PDF, JPEG, PNG. Taille max : 5Mo
                                     </p>
                                 </div>
                             </div>
@@ -342,11 +342,11 @@
                     </form>
                 </div>
 
-                <!-- Tableau des ventes rÃ©centes (vue compacte) -->
+                <!-- Tableau des ventes récentes (vue compacte) -->
                 <div class="mt-4">
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-xl font-bold text-[#0d1b19] dark:text:white">
-                            Ventes rÃ©centes d'aujourd'hui
+                            Ventes récentes d'aujourd'hui
                         </h2>
                         <button
                             id="btn-ventes-expand"
@@ -365,11 +365,11 @@
                                 <th class="px-6 py-4" scope="col">Date</th>
                                 <th class="px-6 py-4" scope="col">Heure</th>
                                 <th class="px-6 py-4" scope="col">Article</th>
-                                <th class="px-6 py-4" scope="col">QuantitÃ©</th>
+                                <th class="px-6 py-4" scope="col">Quantité</th>
                                 <th class="px-6 py-4" scope="col">Prix Total</th>
                                 <th class="px-6 py-4" scope="col">Paiement</th>
                                 <th class="px-6 py-4" scope="col">Type</th>
-                                <th class="px-6 py-4" scope="col">CrÃ©Ã© par</th>
+                                <th class="px-6 py-4" scope="col">Créé par</th>
                                 <th class="px-6 py-4" scope="col">Justificatif</th>
                                 <th class="px-6 py-4 text-center" scope="col">Action</th>
                             </tr>
@@ -383,7 +383,7 @@
         </div>
     </main>
 
-    <!-- ===== Modale vue Ã©tendue des ventes ===== -->
+    <!-- ===== Modale vue étendue des ventes ===== -->
     <div id="ventes-modal" class="fixed inset-0 z-40 hidden items-center justify-center bg-black/40 px-4">
         <div class="bg-white dark:bg-[#182c29] rounded-2xl shadow-xl max-w-5xl w-full max-h-[85vh] flex flex-col overflow-hidden">
             <div class="flex items-center justify-between px-6 py-4 border-b border-[#cfe7e3]/70 dark:border-gray-700/70">
@@ -401,7 +401,7 @@
 
             <div class="flex items-center justify-between gap-4 px-6 py-3 border-b border-[#cfe7e3]/70 dark:border-gray-700/70">
                 <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">
-                    Liste complÃ¨te des ventes enregistrÃ©es pour la pÃ©riode courante.
+                    Liste complète des ventes enregistrées pour la période courante.
                 </p>
                 <button
                     id="btn-ventes-export"
@@ -420,11 +420,11 @@
                         <th class="px-6 py-4" scope="col">Date</th>
                         <th class="px-6 py-4" scope="col">Heure</th>
                         <th class="px-6 py-4" scope="col">Article</th>
-                        <th class="px-6 py-4" scope="col">QuantitÃ©</th>
+                        <th class="px-6 py-4" scope="col">Quantité</th>
                         <th class="px-6 py-4" scope="col">Prix Total</th>
                         <th class="px-6 py-4" scope="col">Paiement</th>
                         <th class="px-6 py-4" scope="col">Type</th>
-                        <th class="px-6 py-4" scope="col">CrÃ©Ã© par</th>
+                        <th class="px-6 py-4" scope="col">Créé par</th>
                         <th class="px-6 py-4" scope="col">Justificatif</th>
                         <th class="px-6 py-4 text-center" scope="col">Action</th>
                     </tr>

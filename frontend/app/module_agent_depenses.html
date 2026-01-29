@@ -1,9 +1,9 @@
-ï»¿<!DOCTYPE html>
+<!DOCTYPE html>
 <html class="light" lang="fr">
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Gestion Comptable - DÃ©penses</title>
+    <title>Gestion Comptable - Dépenses</title>
 
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -20,7 +20,7 @@
             theme: {
                 extend: {
                     colors: {
-                        /* Palette OGOUÃ‰ - Redesign */
+                        /* Palette OGOUÉ - Redesign */
                         "primary": "#0088CC",
                         "secondary": "#1E3A5F",
                         "background-light": "#f6f8f6",
@@ -56,17 +56,17 @@
             font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
         }
 
-        /* âœ… FORCER le champ date Ã  la mÃªme taille que les autres */
+        /* ? FORCER le champ date à la même taille que les autres */
         .date-input{
             height: 56px !important;                /* = h-14 */
-            padding: 0 48px 0 15px !important;      /* espace rÃ©servÃ© Ã  droite pour l'icÃ´ne */
+            padding: 0 48px 0 15px !important;      /* espace réservé à droite pour l'icône */
             box-sizing: border-box !important;
             line-height: 56px !important;          /* centre le texte */
             position: relative;                     /* pour positionner l'indicateur */
-            color-scheme: light dark;               /* Active le datepicker adaptÃ© au mode sombre */
+            color-scheme: light dark;               /* Active le datepicker adapté au mode sombre */
         }
 
-        /* Chrome/Edge : positionner l'indicateur Ã  droite */
+        /* Chrome/Edge : positionner l'indicateur à droite */
         .date-input::-webkit-calendar-picker-indicator {
             position: absolute;
             right: 10px;
@@ -79,13 +79,13 @@
             filter: invert(0.8);
         }
 
-        /* Chrome/Edge : centre l'Ã©dition interne du date */
+        /* Chrome/Edge : centre l'édition interne du date */
         .date-input::-webkit-datetime-edit{
             line-height: 56px !important;
             padding: 0 !important;
         }
 
-        /* Mode sombre: icÃ´ne du calendrier en clair */
+        /* Mode sombre: icône du calendrier en clair */
         html.dark .date-input::-webkit-calendar-picker-indicator {
             filter: invert(1) brightness(0.9);
         }
@@ -101,7 +101,7 @@
             filter: invert(1) brightness(0.9);
         }
 
-        /* AmÃ©liorations pour le calendrier du navigateur en mode sombre */
+        /* Améliorations pour le calendrier du navigateur en mode sombre */
         @media (prefers-color-scheme: dark) {
             input[type="date"],
             input[type="time"],
@@ -115,17 +115,17 @@
 <body class="font-display bg-background-light dark:bg-background-dark text-[#0a0c0a] dark:text-gray-200">
 <div class="relative flex min-h-screen w-full flex-col group/design-root overflow-x-hidden">
 
-    <!-- ===== HEADER OGOUE (liens corrigÃ©s) ===== -->
+    <!-- ===== HEADER OGOUE (liens corrigés) ===== -->
     <header class="sticky top-0 z-10 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-[#e8ede8] dark:border-gray-700">
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-between whitespace-nowrap h-20">
                 <div class="flex items-center gap-4">
-                    <a href="module_agent_dashboard.html"><img src="/app/Logo-ogoue (2).png" alt="OGOUÃ‰ Logo" class="h-28 w-auto"></a>
+                    <a href="module_agent_dashboard"><img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-28 w-auto"></a>
                 </div>
                 <div class="hidden md:flex items-center gap-9">
                     <a class="text-primary text-sm font-bold leading-normal"
-                       href="module_agent_dashboard.html">
-                        ComptabilitÃ©
+                       href="module_agent_dashboard">
+                        Comptabilité
                     </a>
                 </div>
                 <div class="flex items-center gap-2">
@@ -146,7 +146,7 @@
     </header>
     <!-- ===== FIN HEADER ===== -->
 
-    <!-- ===== CONTENU PAGE DÃ‰PENSES ===== -->
+    <!-- ===== CONTENU PAGE DÉPENSES ===== -->
     <main class="flex-grow">
         <div class="container mx-auto px-4 py-8">
             <div class="flex flex-col gap-8">
@@ -158,36 +158,36 @@
                             Gestion Comptable
                         </h1>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
-                            Enregistrer et suivre vos dÃ©penses quotidiennes.
+                            Enregistrer et suivre vos dépenses quotidiennes.
                         </p>
                     </div>
                 </header>
 
-                <!-- Onglets (liens corrigÃ©s) -->
+                <!-- Onglets (liens corrigés) -->
                 <div class="border-b border-gray-200 dark:border-gray-700">
                     <nav class="flex gap-8 -mb-px">
-                        <a href="module_agent_dashboard.html"
+                        <a href="module_agent_dashboard"
                            class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
                             <p class="text-sm font-bold leading-normal tracking-[0.015em]">Ventes</p>
                         </a>
-                        <a href="module_agent_depenses.html"
+                        <a href="module_agent_depenses"
                            class="flex flex-col items-center justify-center border-b-[3px] border-b-primary text-[#0a0c0a] dark:text-white pb-3 pt-4 px-2">
-                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">DÃ©penses</p>
+                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">Dépenses</p>
                         </a>
-                        <a href="module_agent_resume.html"
+                        <a href="module_agent_resume"
                            class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
-                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">RÃ©sumÃ©</p>
+                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">Résumé</p>
                         </a>
                     </nav>
                 </div>
 
-                <!-- Card DÃ©penses -->
+                <!-- Card Dépenses -->
                 <div class="mt-4 bg-white dark:bg-card-dark p-8 rounded-xl shadow-sm border border-[#e8ede8]/70 dark:border-gray-700/70">
-                    <h2 class="text-xl font-bold text-[#0a0c0a] dark:text-white mb-6">Enregistrer une nouvelle dÃ©pense</h2>
+                    <h2 class="text-xl font-bold text-[#0a0c0a] dark:text-white mb-6">Enregistrer une nouvelle dépense</h2>
 
                     <form id="form-depenses" class="space-y-6">
 
-                        <!-- Date + CatÃ©gorie -->
+                        <!-- Date + Catégorie -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <label class="flex flex-col">
                                 <p class="text-base font-medium leading-normal pb-2 text-[#0a0c0a] dark:text-gray-200">
@@ -203,7 +203,7 @@
 
                             <label class="flex flex-col">
                                 <p class="text-base font-medium leading-normal pb-2 text-[#0a0c0a] dark:text-gray-200">
-                                    CatÃ©gorie <span class="text-red-500">*</span>
+                                    Catégorie <span class="text-red-500">*</span>
                                 </p>
 
                                 <select
@@ -211,24 +211,24 @@
                                     name="categorie"
                                     required
                                     class="form-select flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0a0c0a] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-14 p-[15px] text-base font-normal leading-normal">
-                                    <!-- options injectÃ©es en JS -->
+                                    <!-- options injectées en JS -->
                                 </select>
 
                                 <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                                    Astuce : si vous choisissez <span class="font-semibold">Autres</span>, vous pourrez prÃ©ciser et l'ajouter Ã  vos catÃ©gories.
+                                    Astuce : si vous choisissez <span class="font-semibold">Autres</span>, vous pourrez préciser et l'ajouter à vos catégories.
                                 </p>
                             </label>
 
                             <label id="categorie-autre-wrapper" class="flex flex-col hidden md:col-span-2">
                                 <p class="text-base font-medium leading-normal pb-2 text-[#0a0c0a] dark:text-gray-200">
-                                    PrÃ©ciser la catÃ©gorie <span class="text-red-500">*</span>
+                                    Préciser la catégorie <span class="text-red-500">*</span>
                                 </p>
 
                                 <input
                                     id="depense-categorie-autre"
                                     name="categorie_autre"
                                     type="text"
-                                    placeholder="Ex : SÃ©curitÃ©, Fournitures, Maintenance..."
+                                    placeholder="Ex : Sécurité, Fournitures, Maintenance..."
                                     class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0a0c0a] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-14 placeholder:text-gray-400 dark:placeholder:text-gray-500 p-[15px] text-base font-normal leading-normal">
                             </label>
                         </div>
@@ -244,7 +244,7 @@
                                     name="moyen_paiement"
                                     required
                                     class="form-select flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0a0c0a] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-14 p-[15px] text-base font-normal leading-normal">
-                                    <option value="">SÃ©lectionner un moyen de paiement</option>
+                                    <option value="">Sélectionner un moyen de paiement</option>
                                     <option value="cash">Cash</option>
                                     <option value="mobile_money">Mobile Money</option>
                                 </select>
@@ -276,13 +276,13 @@
                                         <label
                                             for="depense-file-upload"
                                             class="relative cursor-pointer rounded-md font-medium text-primary hover:text-primary/80 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary/50">
-                                            <span>TÃ©lÃ©versez un fichier</span>
+                                            <span>Téléversez un fichier</span>
                                             <input id="depense-file-upload" name="file-upload" type="file" class="sr-only" />
                                         </label>
-                                        <p class="pl-1">ou glissez-dÃ©posez</p>
+                                        <p class="pl-1">ou glissez-déposez</p>
                                     </div>
                                     <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                                        Formats acceptÃ©s : PDF, JPEG, PNG. Taille max : 5Mo
+                                        Formats acceptés : PDF, JPEG, PNG. Taille max : 5Mo
                                     </p>
                                 </div>
                             </div>
@@ -298,17 +298,17 @@
                             <button
                                 type="submit"
                                 class="px-6 py-3 rounded-lg text-sm font-bold bg-primary text-[#0a0c0a] hover:bg-primary/80">
-                                Enregistrer la dÃ©pense
+                                Enregistrer la dépense
                             </button>
                         </div>
                     </form>
                 </div>
 
-                <!-- Tableau des dÃ©penses rÃ©centes (vue compacte) -->
+                <!-- Tableau des dépenses récentes (vue compacte) -->
                 <div class="mt-4">
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-xl font-bold text-[#0a0c0a] dark:text-white">
-                            DÃ©penses rÃ©centes d'aujourd'hui
+                            Dépenses récentes d'aujourd'hui
                         </h2>
                         <button
                             id="btn-depenses-expand"
@@ -326,10 +326,10 @@
                             <tr>
                                 <th scope="col" class="px-6 py-4">Date</th>
                                 <th scope="col" class="px-6 py-4">Heure</th>
-                                <th scope="col" class="px-6 py-4">CatÃ©gorie</th>
+                                <th scope="col" class="px-6 py-4">Catégorie</th>
                                 <th scope="col" class="px-6 py-4">Montant</th>
                                 <th scope="col" class="px-6 py-4">Moyen de paiement</th>
-                                <th scope="col" class="px-6 py-4">CrÃ©Ã© par</th>
+                                <th scope="col" class="px-6 py-4">Créé par</th>
                                 <th scope="col" class="px-6 py-4">Justificatif</th>
                                 <th scope="col" class="px-6 py-4 text-center">Action</th>
                             </tr>
@@ -343,12 +343,12 @@
         </div>
     </main>
 
-    <!-- ===== Modale vue Ã©tendue des dÃ©penses ===== -->
+    <!-- ===== Modale vue étendue des dépenses ===== -->
     <div id="depenses-modal" class="fixed inset-0 z-40 hidden items-center justify-center bg-black/40 px-4">
         <div class="bg-white dark:bg-card-dark rounded-2xl shadow-xl max-w-5xl w-full max-h-[85vh] flex flex-col overflow-hidden">
             <div class="flex items-center justify-between px-6 py-4 border-b border-[#e8ede8]/70 dark:border-gray-700/70">
                 <h3 class="text-lg font-bold text-[#0a0c0a] dark:text-white">
-                    Historique des dÃ©penses d'aujourd'hui
+                    Historique des dépenses d'aujourd'hui
                 </h3>
                 <button id="btn-depenses-close" type="button"
                         class="inline-flex items-center justify-center size-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700">
@@ -358,7 +358,7 @@
 
             <div class="flex items-center justify-between gap-4 px-6 py-3 border-b border-[#e8ede8]/70 dark:border-gray-700/70">
                 <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">
-                    Liste complÃ¨te des dÃ©penses enregistrÃ©es aujourd'hui.
+                    Liste complète des dépenses enregistrées aujourd'hui.
                 </p>
                 <button id="btn-depenses-export" type="button"
                         class="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-[#0a0c0a] hover:bg-primary/80">
@@ -373,10 +373,10 @@
                     <tr>
                         <th scope="col" class="px-6 py-4">Date</th>
                         <th scope="col" class="px-6 py-4">Heure</th>
-                        <th scope="col" class="px-6 py-4">CatÃ©gorie</th>
+                        <th scope="col" class="px-6 py-4">Catégorie</th>
                         <th scope="col" class="px-6 py-4">Montant</th>
                         <th scope="col" class="px-6 py-4">Moyen de paiement</th>
-                        <th scope="col" class="px-6 py-4">CrÃ©Ã© par</th>
+                        <th scope="col" class="px-6 py-4">Créé par</th>
                         <th scope="col" class="px-6 py-4">Justificatif</th>
                         <th scope="col" class="px-6 py-4 text-center">Action</th>
                     </tr>

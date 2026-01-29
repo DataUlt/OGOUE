@@ -5,7 +5,7 @@
 
 // Détermine l'URL de l'API selon l'environnement
 function getAPIBaseURL() {
-    // En production sur Netlify
+    // En production sur Render
     if (window.location.hostname === 'www.ogoue.com' || 
         window.location.hostname === 'ogoue.com') {
         return 'https://api.ogoue.com';
@@ -17,9 +17,8 @@ function getAPIBaseURL() {
         return 'http://localhost:3001'; // ou le port de votre backend local
     }
     
-    // En préproduction sur Render ou Netlify (preview)
-    if (window.location.hostname.includes('onrender.com') || 
-        window.location.hostname.includes('netlify.app')) {
+    // En préproduction sur Render (preview)
+    if (window.location.hostname.includes('onrender.com')) {
         return 'https://api.ogoue.com';
     }
     

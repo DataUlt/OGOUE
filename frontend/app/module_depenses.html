@@ -1,9 +1,9 @@
-ï»¿<!DOCTYPE html>
+<!DOCTYPE html>
 <html class="light" lang="fr">
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Gestion Comptable - DÃ©penses</title>
+    <title>Gestion Comptable - Dépenses</title>
 
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -20,7 +20,7 @@
             theme: {
                 extend: {
                     colors: {
-                        /* Palette OGOUÃ‰ - Redesign */
+                        /* Palette OGOUÉ - Redesign */
                         "primary": "#0088CC",
                         "secondary": "#1E3A5F",
                         "background-light": "#f6f8f6",
@@ -66,17 +66,17 @@
             animation: spin 2s linear infinite;
         }
 
-        /* âœ… FORCER le champ date Ã  la mÃªme taille que les autres et icÃ´ne Ã  droite */
+        /* ? FORCER le champ date à la même taille que les autres et icône à droite */
         .date-input{
             height: 56px !important;                /* = h-14 */
-            padding: 0 48px 0 15px !important;      /* espace rÃ©servÃ© Ã  droite pour l'icÃ´ne */
+            padding: 0 48px 0 15px !important;      /* espace réservé à droite pour l'icône */
             box-sizing: border-box !important;
             line-height: 56px !important;          /* centre le texte */
             position: relative;                     /* pour positionner l'indicateur */
-            color-scheme: light dark;               /* Active le datepicker adaptÃ© au mode sombre */
+            color-scheme: light dark;               /* Active le datepicker adapté au mode sombre */
         }
 
-        /* Chrome / WebKit: positionner l'indicateur Ã  l'extrÃªme droite */
+        /* Chrome / WebKit: positionner l'indicateur à l'extrême droite */
         .date-input::-webkit-calendar-picker-indicator {
             position: absolute;
             right: 10px;
@@ -94,7 +94,7 @@
             padding: 0 !important;
         }
 
-        /* Mode sombre: icÃ´ne du calendrier en clair */
+        /* Mode sombre: icône du calendrier en clair */
         html.dark .date-input::-webkit-calendar-picker-indicator {
             filter: invert(1) brightness(0.9);
         }
@@ -110,7 +110,7 @@
             filter: invert(1) brightness(0.9);
         }
 
-        /* AmÃ©liorations pour le calendrier du navigateur en mode sombre */
+        /* Améliorations pour le calendrier du navigateur en mode sombre */
         @media (prefers-color-scheme: dark) {
             input[type="date"],
             input[type="time"],
@@ -124,33 +124,33 @@
 <body class="font-display bg-background-light dark:bg-background-dark text-[#0a0c0a] dark:text-gray-200">
 <div class="relative flex min-h-screen w-full flex-col group/design-root overflow-x-hidden">
 
-    <!-- ===== HEADER OGOUE (liens corrigÃ©s) ===== -->
+    <!-- ===== HEADER OGOUE (liens corrigés) ===== -->
     <header class="sticky top-0 z-10 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-[#e8ede8] dark:border-gray-700">
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-between whitespace-nowrap h-20">
                 <div class="flex items-center gap-4">
-                    <a href="module_tableau_bord.html"><img src="/app/Logo-ogoue (2).png" alt="OGOUÃ‰ Logo" class="h-28 w-auto"></a>
+                    <a href="module_tableau_bord"><img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-28 w-auto"></a>
                 </div>
                 <div class="hidden md:flex items-center gap-9">
                     <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
-                       href="module_tableau_bord.html">
+                       href="module_tableau_bord">
                         Tableau de Bord
                     </a>
                     <a class="text-primary text-sm font-bold leading-normal"
-                       href="module_ventes.html">
-                        ComptabilitÃ©
+                       href="module_ventes">
+                        Comptabilité
                     </a>
                     <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
-                       href="module_scoring.html">
+                       href="module_scoring">
                         Financement
                     </a>
                 </div>
                 <!-- Menu mobile -->
                 <div id="mobile-menu" class="md:hidden absolute top-full left-0 right-0 bg-background-light dark:bg-background-dark border-b border-[#e8ede8] dark:border-gray-700 hidden">
                     <div class="flex flex-col gap-2 p-4">
-                        <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_tableau_bord.html">Tableau de Bord</a>
-                        <a class="text-primary text-sm font-bold leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_ventes.html">ComptabilitÃ©</a>
-                        <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_scoring.html">Financement</a>
+                        <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_tableau_bord">Tableau de Bord</a>
+                        <a class="text-primary text-sm font-bold leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_ventes">Comptabilité</a>
+                        <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_scoring">Financement</a>
                     </div>
                 </div>
                 <!-- Bouton menu mobile -->
@@ -175,7 +175,7 @@
     </header>
     <!-- ===== FIN HEADER ===== -->
 
-    <!-- ===== CONTENU PAGE DÃ‰PENSES ===== -->
+    <!-- ===== CONTENU PAGE DÉPENSES ===== -->
     <main class="flex-grow">
         <div class="container mx-auto px-4 py-8">
             <div class="flex flex-col gap-8">
@@ -187,40 +187,40 @@
                             Gestion Comptable
                         </h1>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
-                            Enregistrer et suivre vos dÃ©penses quotidiennes.
+                            Enregistrer et suivre vos dépenses quotidiennes.
                         </p>
                     </div>
                 </header>
 
-                <!-- Onglets (liens corrigÃ©s) -->
+                <!-- Onglets (liens corrigés) -->
                 <div class="border-b border-gray-200 dark:border-gray-700">
                     <nav class="flex gap-8 -mb-px">
-                        <a href="module_ventes.html"
+                        <a href="module_ventes"
                            class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
                             <p class="text-sm font-bold leading-normal tracking-[0.015em]">Ventes</p>
                         </a>
-                        <a href="module_depenses.html"
+                        <a href="module_depenses"
                            class="flex flex-col items-center justify-center border-b-[3px] border-b-primary text-[#0a0c0a] dark:text-white pb-3 pt-4 px-2">
-                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">DÃ©penses</p>
+                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">Dépenses</p>
                         </a>
-                        <a href="module_resume_ventes_depenses.html"
+                        <a href="module_resume_ventes_depenses"
                            class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
-                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">RÃ©sumÃ©</p>
+                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">Résumé</p>
                         </a>
-                        <a href="module_etats_financiers.html"
+                        <a href="module_etats_financiers"
                            class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
-                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">Analyse financiÃ¨re</p>
+                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">Analyse financière</p>
                         </a>
                     </nav>
                 </div>
 
-                <!-- Card DÃ©penses -->
+                <!-- Card Dépenses -->
                 <div class="mt-4 bg-white dark:bg-[#182c29] p-8 rounded-xl shadow-sm border border-[#cfe7e3]/70 dark:border-gray-700/70">
-                    <h2 class="text-xl font-bold text-[#0a0c0a] dark:text-white mb-6">Enregistrer une nouvelle dÃ©pense</h2>
+                    <h2 class="text-xl font-bold text-[#0a0c0a] dark:text-white mb-6">Enregistrer une nouvelle dépense</h2>
 
                     <form id="form-depenses" class="space-y-6">
 
-                        <!-- Date + CatÃ©gorie -->
+                        <!-- Date + Catégorie -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <label class="flex flex-col">
                                 <p class="text-base font-medium leading-normal pb-2 text-[#0a0c0a] dark:text-gray-200">
@@ -236,7 +236,7 @@
 
                             <label class="flex flex-col">
                                 <p class="text-base font-medium leading-normal pb-2 text-[#0a0c0a] dark:text-gray-200">
-                                    CatÃ©gorie <span class="text-red-500">*</span>
+                                    Catégorie <span class="text-red-500">*</span>
                                 </p>
 
                                 <select
@@ -244,24 +244,24 @@
                                     name="categorie"
                                     required
                                     class="form-select flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0a0c0a] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-14 p-[15px] text-base font-normal leading-normal">
-                                    <!-- options injectÃ©es en JS -->
+                                    <!-- options injectées en JS -->
                                 </select>
 
                                 <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                                    Astuce : si vous choisissez <span class="font-semibold">Autres</span>, vous pourrez prÃ©ciser et lâ€™ajouter Ã  vos catÃ©gories.
+                                    Astuce : si vous choisissez <span class="font-semibold">Autres</span>, vous pourrez préciser et l’ajouter à vos catégories.
                                 </p>
                             </label>
 
                             <label id="categorie-autre-wrapper" class="flex flex-col hidden md:col-span-2">
                                 <p class="text-base font-medium leading-normal pb-2 text-[#0a0c0a] dark:text-gray-200">
-                                    PrÃ©ciser la catÃ©gorie <span class="text-red-500">*</span>
+                                    Préciser la catégorie <span class="text-red-500">*</span>
                                 </p>
 
                                 <input
                                     id="depense-categorie-autre"
                                     name="categorie_autre"
                                     type="text"
-                                    placeholder="Ex : SÃ©curitÃ©, Fournitures, Maintenance..."
+                                    placeholder="Ex : Sécurité, Fournitures, Maintenance..."
                                     class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0a0c0a] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-14 placeholder:text-gray-400 dark:placeholder:text-gray-500 p-[15px] text-base font-normal leading-normal">
                             </label>
                         </div>
@@ -277,7 +277,7 @@
                                     name="moyen_paiement"
                                     required
                                     class="form-select flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0a0c0a] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-14 p-[15px] text-base font-normal leading-normal">
-                                    <option value="">SÃ©lectionner un moyen de paiement</option>
+                                    <option value="">Sélectionner un moyen de paiement</option>
                                     <option value="cash">Cash</option>
                                     <option value="mobile_money">Mobile Money</option>
                                 </select>
@@ -303,7 +303,7 @@
                                 Joindre le justificatif
                             </p>
                             
-                            <!-- Zone d'upload avec Ã©tat par dÃ©faut -->
+                            <!-- Zone d'upload avec état par défaut -->
                             <div id="upload-zone-default" class="mt-1 flex justify-center px-6 pt-10 pb-12 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg transition-colors duration-200 hover:border-primary dark:hover:border-primary hover:bg-primary/5">
                                 <div class="text-center">
                                     <span class="material-symbols-outlined text-5xl text-gray-400 dark:text-gray-500">cloud_upload</span>
@@ -311,24 +311,24 @@
                                         <label
                                             for="depense-file-upload"
                                             class="relative cursor-pointer rounded-md font-medium text-primary hover:text-primary/80 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary/50">
-                                            <span>TÃ©lÃ©versez un fichier</span>
+                                            <span>Téléversez un fichier</span>
                                             <input id="depense-file-upload" name="file-upload" type="file" class="sr-only" />
                                         </label>
-                                        <p class="pl-1">ou glissez-dÃ©posez</p>
+                                        <p class="pl-1">ou glissez-déposez</p>
                                     </div>
                                     <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                                        Formats acceptÃ©s : PDF, JPEG, PNG. Taille max : 5Mo
+                                        Formats acceptés : PDF, JPEG, PNG. Taille max : 5Mo
                                     </p>
                                 </div>
                             </div>
 
-                            <!-- Zone aprÃ¨s sÃ©lection d'un fichier -->
+                            <!-- Zone après sélection d'un fichier -->
                             <div id="upload-zone-selected" class="hidden mt-1 p-4 border-2 border-primary bg-primary/10 rounded-lg">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <span class="material-symbols-outlined text-2xl text-primary">insert_drive_file</span>
                                         <div class="text-left">
-                                            <p class="text-sm font-medium text-[#0a0c0a] dark:text-gray-100" id="file-name">Fichier sÃ©lectionnÃ©</p>
+                                            <p class="text-sm font-medium text-[#0a0c0a] dark:text-gray-100" id="file-name">Fichier sélectionné</p>
                                             <p class="text-xs text-gray-600 dark:text-gray-400" id="file-size">0 Mo</p>
                                         </div>
                                     </div>
@@ -343,7 +343,7 @@
                                 <div class="flex items-center gap-3 mb-3">
                                     <span class="material-symbols-outlined text-2xl text-primary animate-spin">hourglass_top</span>
                                     <div class="text-left">
-                                        <p class="text-sm font-medium text-[#0a0c0a] dark:text-gray-100">TÃ©lÃ©chargement en cours...</p>
+                                        <p class="text-sm font-medium text-[#0a0c0a] dark:text-gray-100">Téléchargement en cours...</p>
                                         <p class="text-xs text-gray-600 dark:text-gray-400" id="upload-progress-text">0%</p>
                                     </div>
                                 </div>
@@ -352,13 +352,13 @@
                                 </div>
                             </div>
 
-                            <!-- Zone aprÃ¨s upload rÃ©ussi -->
+                            <!-- Zone après upload réussi -->
                             <div id="upload-zone-success" class="hidden mt-1 p-4 border-2 border-cyan-500 bg-cyan-50 dark:bg-cyan-500/10 rounded-lg">
                                 <div class="flex items-center gap-3">
                                     <span class="material-symbols-outlined text-2xl text-cyan-500">check_circle</span>
                                     <div class="text-left">
-                                        <p class="text-sm font-medium text-cyan-700 dark:text-cyan-400">Fichier tÃ©lÃ©chargÃ© avec succÃ¨s</p>
-                                        <p class="text-xs text-cyan-600 dark:text-cyan-300" id="file-success-name">Fichier reÃ§u</p>
+                                        <p class="text-sm font-medium text-cyan-700 dark:text-cyan-400">Fichier téléchargé avec succès</p>
+                                        <p class="text-xs text-cyan-600 dark:text-cyan-300" id="file-success-name">Fichier reçu</p>
                                     </div>
                                 </div>
                             </div>
@@ -368,9 +368,9 @@
                                 <div class="flex items-start gap-3">
                                     <span class="material-symbols-outlined text-2xl text-red-500 flex-shrink-0">error</span>
                                     <div class="text-left">
-                                        <p class="text-sm font-medium text-red-700 dark:text-red-400">Erreur lors du tÃ©lÃ©chargement</p>
+                                        <p class="text-sm font-medium text-red-700 dark:text-red-400">Erreur lors du téléchargement</p>
                                         <p class="text-xs text-red-600 dark:text-red-300 mt-1" id="upload-error-message">Une erreur est survenue</p>
-                                        <button type="button" id="btn-retry-file" class="text-xs text-primary hover:text-primary/80 font-medium mt-2 underline">RÃ©essayer</button>
+                                        <button type="button" id="btn-retry-file" class="text-xs text-primary hover:text-primary/80 font-medium mt-2 underline">Réessayer</button>
                                     </div>
                                 </div>
                             </div>
@@ -386,17 +386,17 @@
                             <button
                                 type="submit"
                                 class="px-6 py-3 rounded-lg text-sm font-bold bg-primary text-[#0a0c0a] hover:bg-primary/80">
-                                Enregistrer la dÃ©pense
+                                Enregistrer la dépense
                             </button>
                         </div>
                     </form>
                 </div>
 
-                <!-- Tableau des dÃ©penses rÃ©centes (vue compacte) -->
+                <!-- Tableau des dépenses récentes (vue compacte) -->
                 <div class="mt-4">
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-xl font-bold text-[#0a0c0a] dark:text-white">
-                            DÃ©penses rÃ©centes d'aujourd'hui
+                            Dépenses récentes d'aujourd'hui
                         </h2>
                         <button
                             id="btn-depenses-expand"
@@ -414,10 +414,10 @@
                             <tr>
                                 <th scope="col" class="px-6 py-4">Date</th>
                                 <th scope="col" class="px-6 py-4">Heure</th>
-                                <th scope="col" class="px-6 py-4">CatÃ©gorie</th>
+                                <th scope="col" class="px-6 py-4">Catégorie</th>
                                 <th scope="col" class="px-6 py-4">Montant</th>
                                 <th scope="col" class="px-6 py-4">Moyen de paiement</th>
-                                <th scope="col" class="px-6 py-4">CrÃ©Ã© par</th>
+                                <th scope="col" class="px-6 py-4">Créé par</th>
                                 <th scope="col" class="px-6 py-4">Justificatif</th>
                                 <th scope="col" class="px-6 py-4 text-center">Action</th>
                             </tr>
@@ -431,12 +431,12 @@
         </div>
     </main>
 
-    <!-- ===== Modale vue Ã©tendue des dÃ©penses ===== -->
+    <!-- ===== Modale vue étendue des dépenses ===== -->
     <div id="depenses-modal" class="fixed inset-0 z-40 hidden items-center justify-center bg-black/40 px-4">
         <div class="bg-white dark:bg-[#182c29] rounded-2xl shadow-xl max-w-5xl w-full max-h-[85vh] flex flex-col overflow-hidden">
             <div class="flex items-center justify-between px-6 py-4 border-b border-[#cfe7e3]/70 dark:border-gray-700/70">
                 <h3 class="text-lg font-bold text-[#0a0c0a] dark:text-white">
-                    Historique des dÃ©penses d'aujourd'hui
+                    Historique des dépenses d'aujourd'hui
                 </h3>
                 <button id="btn-depenses-close" type="button"
                         class="inline-flex items-center justify-center size-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700">
@@ -446,7 +446,7 @@
 
             <div class="flex items-center justify-between gap-4 px-6 py-3 border-b border-[#cfe7e3]/70 dark:border-gray-700/70">
                 <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">
-                    Liste complÃ¨te des dÃ©penses enregistrÃ©es aujourd'hui.
+                    Liste complète des dépenses enregistrées aujourd'hui.
                 </p>
                 <button id="btn-depenses-export" type="button"
                         class="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-[#0a0c0a] hover:bg-primary/80">
@@ -461,10 +461,10 @@
                     <tr>
                         <th scope="col" class="px-6 py-4">Date</th>
                         <th scope="col" class="px-6 py-4">Heure</th>
-                        <th scope="col" class="px-6 py-4">CatÃ©gorie</th>
+                        <th scope="col" class="px-6 py-4">Catégorie</th>
                         <th scope="col" class="px-6 py-4">Montant</th>
                         <th scope="col" class="px-6 py-4">Moyen de paiement</th>
-                        <th scope="col" class="px-6 py-4">CrÃ©Ã© par</th>
+                        <th scope="col" class="px-6 py-4">Créé par</th>
                         <th scope="col" class="px-6 py-4">Justificatif</th>
                         <th scope="col" class="px-6 py-4 text-center">Action</th>
                     </tr>
