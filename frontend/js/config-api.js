@@ -17,8 +17,9 @@ function getAPIBaseURL() {
         return 'http://localhost:3001'; // ou le port de votre backend local
     }
     
-    // En préproduction sur Netlify (preview)
-    if (window.location.hostname.includes('netlify.app')) {
+    // En préproduction sur Render ou Netlify (preview)
+    if (window.location.hostname.includes('onrender.com') || 
+        window.location.hostname.includes('netlify.app')) {
         return 'https://api.ogoue.com';
     }
     

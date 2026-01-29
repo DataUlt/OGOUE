@@ -18,7 +18,7 @@ window.OGOUE.initAuth = function() {
         // Redirect to login with proper URL
         const loginUrl = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
             ? 'http://127.0.0.1:8080/login.html'
-            : 'https://ogoue.com/login.html';
+            : 'https://www.ogoue.com/login.html';
         window.location.href = loginUrl;
     }
 };
@@ -31,7 +31,7 @@ window.OGOUE.handleUnauthorized = function() {
     // Redirect to login with proper URL
     const loginUrl = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
         ? 'http://127.0.0.1:8080/login.html'
-        : 'https://ogoue.com/login.html';
+        : 'https://www.ogoue.com/login.html';
     window.location.href = loginUrl;
 };
 
