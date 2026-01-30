@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Gestion Comptable - Résumé</title>
+    <title>Gestion Comptable - RÃ©sumÃ©</title>
 
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -20,7 +20,7 @@
             theme: {
                 extend: {
                     colors: {
-                        /* Palette OGOUÉ - Redesign */
+                        /* Palette OGOUÃ‰ - Redesign */
                         "primary": "#0088CC",
                         "secondary": "#1E3A5F",
                         "background-light": "#f6f8f6",
@@ -61,12 +61,12 @@
 <body class="font-display bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary">
 <div class="relative flex w-full flex-col group/design-root overflow-x-hidden">
 
-    <!-- ===== HEADER OGOUE (identique à Dépenses) ===== -->
+    <!-- ===== HEADER OGOUE (identique Ã  DÃ©penses) ===== -->
     <header class="sticky top-0 z-10 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-[#e8ede8] dark:border-gray-700">
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-between whitespace-nowrap h-20">
                 <div class="flex items-center gap-4">
-                    <a href="module_tableau_bord"><img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-28 w-auto"></a>
+                    <a href="module_tableau_bord"><img src="/app/Logo-ogoue (2).png" alt="OGOUÃ‰ Logo" class="h-28 w-auto"></a>
                 </div>
                 <div class="hidden md:flex items-center gap-9">
                     <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
@@ -75,7 +75,7 @@
                     </a>
                     <a class="text-primary text-sm font-bold leading-normal"
                        href="module_ventes">
-                        Comptabilité
+                        ComptabilitÃ©
                     </a>
                     <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
                        href="module_scoring">
@@ -86,7 +86,7 @@
                 <div id="mobile-menu" class="md:hidden absolute top-full left-0 right-0 bg-background-light dark:bg-background-dark border-b border-[#e8ede8] dark:border-gray-700 hidden">
                     <div class="flex flex-col gap-2 p-4">
                         <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_tableau_bord">Tableau de Bord</a>
-                        <a class="text-primary text-sm font-bold leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_ventes">Comptabilité</a>
+                        <a class="text-primary text-sm font-bold leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_ventes">ComptabilitÃ©</a>
                         <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_scoring">Financement</a>
                     </div>
                 </div>
@@ -124,12 +124,12 @@
                             Gestion Comptable
                         </h1>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
-                            Enregistrer et suivre vos dépenses quotidiennes.
+                            Enregistrer et suivre vos dÃ©penses quotidiennes.
                         </p>
                     </div>
                 </header>
 
-                <!-- Onglets + Filtre par date sur la même ligne -->
+                <!-- Onglets + Filtre par date sur la mÃªme ligne -->
                 <div class="border-b border-gray-200 dark:border-gray-700">
                     <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
 
@@ -141,19 +141,19 @@
                             </a>
                             <a href="module_depenses"
                                class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
-                                <p class="text-sm font-bold leading-normal tracking-[0.015em]">Dépenses</p>
+                                <p class="text-sm font-bold leading-normal tracking-[0.015em]">DÃ©penses</p>
                             </a>
                             <a href="module_resume_ventes_depenses"
                                class="flex flex-col items-center justify-center border-b-[3px] border-b-primary text-[#0a0c0a] dark:text-white pb-3 pt-4 px-2">
-                                <p class="text-sm font-bold leading-normal tracking-[0.015em]">Résumé</p>
+                                <p class="text-sm font-bold leading-normal tracking-[0.015em]">RÃ©sumÃ©</p>
                             </a>
                             <a href="module_etats_financiers"
                                class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
-                                <p class="text-sm font-bold leading-normal tracking-[0.015em]">Analyse financière</p>
+                                <p class="text-sm font-bold leading-normal tracking-[0.015em]">Analyse financiÃ¨re</p>
                             </a>
                         </nav>
 
-                        <!-- Filtre par date aligné à droite -->
+                        <!-- Filtre par date alignÃ© Ã  droite -->
                         <div class="relative rounded-lg border border-[#e8ede8] dark:border-gray-700 bg-card-light dark:bg-card-dark px-6 py-4 shadow-sm w-[320px]">
                             <p class="text-[10px] font-semibold uppercase tracking-wide text-text-light-secondary dark:text-text-dark-secondary mb-1">
                                 Filtrer par date
@@ -196,7 +196,7 @@
 
                                 <!-- Grille des jours -->
                                 <div id="calendarGrid" class="grid grid-cols-7 gap-1 text-sm">
-                                    <!-- cases générées en JS -->
+                                    <!-- cases gÃ©nÃ©rÃ©es en JS -->
                                 </div>
 
                                 <!-- Actions -->
@@ -206,7 +206,7 @@
                                         type="button"
                                         class="text-xs px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-background-light dark:hover:bg-background-dark"
                                     >
-                                        Réinitialiser
+                                        RÃ©initialiser
                                     </button>
                                     <button
                                         id="closeCalendar"
@@ -230,7 +230,7 @@
                         <p id="stat-trend-ventes" class="text-base font-medium leading-normal text-cyan-600 dark:text-cyan-500">-</p>
                     </div>
                     <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl p-6 border border-gray-200 dark:border-gray-700/50 bg-white dark:bg-background-dark">
-                        <p class="text-base font-medium leading-normal text-gray-600 dark:text-gray-400">Total des dépenses</p>
+                        <p class="text-base font-medium leading-normal text-gray-600 dark:text-gray-400">Total des dÃ©penses</p>
                         <p id="stat-total-depenses" class="tracking-light text-3xl font-bold leading-tight text-gray-900 dark:text-white">-</p>
                         <p id="stat-trend-depenses" class="text-base font-medium leading-normal text-red-600 dark:text-red-500">-</p>
                     </div>
@@ -246,30 +246,30 @@
                     <!-- LEFT COLUMN : 3 CARTES -->
                     <div class="lg:col-span-3 flex flex-col gap-4">
 
-                        <!-- Répartition des ventes -->
+                        <!-- RÃ©partition des ventes -->
                         <div class="flex flex-col rounded-xl border border-gray-200 dark:border-gray-700/50 bg-white dark:bg-background-dark overflow-hidden">
                             <h2 class="text-lg font-bold leading-tight tracking-[-0.015em] px-6 pt-5 pb-3 text-gray-900 dark:text-white">
-                                Répartition des ventes
+                                RÃ©partition des ventes
                             </h2>
                             <div id="repartition-ventes" class="p-2 px-6 grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-8 items-start">
                                 <!-- Rempli en JS -->
                             </div>
                         </div>
 
-                        <!-- Répartition moyens de paiement (ventes) -->
+                        <!-- RÃ©partition moyens de paiement (ventes) -->
                         <div class="flex flex-col rounded-xl border border-gray-200 dark:border-gray-700/50 bg-white dark:bg-background-dark overflow-hidden">
                             <h2 class="text-lg font-bold leading-tight tracking-[-0.015em] px-6 pt-5 pb-3 text-gray-900 dark:text-white">
-                                Répartition des moyens de paiement
+                                RÃ©partition des moyens de paiement
                             </h2>
                             <div id="repartition-paiement-ventes" class="p-2 px-6 grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-8 items-start">
                                 <!-- Rempli en JS -->
                             </div>
                         </div>
 
-                        <!-- Répartition moyens de paiement (dépenses) -->
+                        <!-- RÃ©partition moyens de paiement (dÃ©penses) -->
                         <div class="flex flex-col rounded-xl border border-gray-200 dark:border-gray-700/50 bg-white dark:bg-background-dark overflow-hidden">
                             <h2 class="text-lg font-bold leading-tight tracking-[-0.015em] px-6 pt-5 pb-3 text-gray-900 dark:text-white">
-                                Répartition des moyens de paiement pour les dépenses
+                                RÃ©partition des moyens de paiement pour les dÃ©penses
                             </h2>
                             <div id="repartition-paiement-depenses" class="p-2 px-6 grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-8 items-start">
                                 <!-- Rempli en JS -->
@@ -278,10 +278,10 @@
 
                     </div>
 
-                    <!-- RIGHT COLUMN : Répartition des dépenses -->
+                    <!-- RIGHT COLUMN : RÃ©partition des dÃ©penses -->
                     <div class="lg:col-span-2 flex flex-col rounded-xl border border-gray-200 dark:border-gray-700/50 bg-white dark:bg-background-dark overflow-hidden">
                         <h2 class="text-lg font-bold leading-tight tracking-[-0.015em] px-6 pt-5 pb-3 text-gray-900 dark:text-white">
-                            Répartition des dépenses
+                            RÃ©partition des dÃ©penses
                         </h2>
                         <div id="repartition-depenses" class="flex flex-col px-6 pb-4">
                             <!-- Rempli en JS -->
@@ -296,12 +296,12 @@
 
 </div>
 
-<!-- Store OGOUÉ -->
+<!-- Store OGOUÃ‰ -->
 <script src="js/ogoue-state.js"></script>
 <script src="js/header-ui.js"></script>
 <script src="js/mobile-menu.js"></script>
 
-<!-- JS dédié à la page Résumé -->
+<!-- JS dÃ©diÃ© Ã  la page RÃ©sumÃ© -->
 <script src="js/resume.js"></script>
 <script src="js/topbar-actions.js"></script>
 <script>
