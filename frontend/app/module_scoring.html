@@ -20,7 +20,7 @@
       theme: {
         extend: {
           colors: {
-            /* Palette OGOUÉ - Redesign */
+            /* Palette OGOUÃ‰ - Redesign */
             "primary": "#0088CC",
             "secondary": "#1E3A5F",
             "background-light": "#f6f8f6",
@@ -90,13 +90,13 @@
     <div class="container mx-auto px-4">
       <div class="flex items-center justify-between whitespace-nowrap h-20">
                 <div class="flex items-center gap-4">
-                    <a href="module_tableau_bord"><img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-28 w-auto"></a>
+                    <a href="module_tableau_bord"><img src="/app/Logo-ogoue (2).png" alt="OGOUÃ‰ Logo" class="h-28 w-auto"></a>
                 </div>
                 <div class="hidden md:flex items-center gap-9">
                     <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
                        href="module_tableau_bord">Tableau de Bord</a>
                     <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
-                       href="module_ventes">Comptabilité</a>
+                       href="module_ventes">ComptabilitÃ©</a>
                     <a class="text-primary text-sm font-bold leading-normal"
                        href="module_scoring">Financement</a>
                 </div>
@@ -104,7 +104,7 @@
                 <div id="mobile-menu" class="md:hidden absolute top-full left-0 right-0 bg-background-light dark:bg-background-dark border-b border-[#e8ede8] dark:border-gray-700 hidden">
                     <div class="flex flex-col gap-2 p-4">
                         <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_tableau_bord">Tableau de Bord</a>
-                        <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_ventes">Comptabilité</a>
+                        <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_ventes">ComptabilitÃ©</a>
                         <a class="text-primary text-sm font-bold leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_scoring">Financement</a>
                     </div>
                 </div>
@@ -119,7 +119,7 @@
                     <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white" data-action="settings">
                         <span class="material-symbols-outlined">settings</span>
                     </button>
-                    <!-- ? PROFIL (corrigé + fiable) -->
+                    <!-- ? PROFIL (corrigÃ© + fiable) -->
                     <button
                       id="profileBtn"
             class="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer bg-primary/20 dark:bg-primary/30 text-[#0a0c0a] dark:text-white hover:bg-primary/30 dark:hover:bg-primary/40 transition-colors"
@@ -143,7 +143,7 @@
         Parcours de financement
       </h1>
       <p class="text-gray-500 dark:text-gray-400 text-base sm:text-lg font-normal leading-normal max-w-3xl">
-        Découvrez votre score de traçabilité et préparez votre entreprise au financement.
+        DÃ©couvrez votre score de traÃ§abilitÃ© et prÃ©parez votre entreprise au financement.
       </p>
     </div>
 
@@ -153,7 +153,7 @@
         <div class="relative group">
           <a class="border-b-[3px] border-primary text-primary hover:text-primary dark:text-primary dark:hover:text-primary pb-3 px-1 flex items-center gap-2" href="https://financement.ogoue.com/pme-login" target="_blank">
             <span class="material-symbols-outlined text-xl">folder_open</span>
-            <span class="font-medium text-sm tracking-[0.015em]">Accès Partenaire</span>
+            <span class="font-medium text-sm tracking-[0.015em]">AccÃ¨s Partenaire</span>
           </a>
         </div>
       </nav>
@@ -176,7 +176,7 @@
                                   a 15.9155 15.9155 0 0 1 0 -31.831" stroke-dasharray="0, 100"></path>
             </svg>
             <div class="absolute inset-0 flex flex-col items-center justify-center">
-              <span id="globalScoreValue" class="text-4xl font-black text-[#0a0c0a] dark:text-white tracking-tighter">—</span>
+              <span id="globalScoreValue" class="text-4xl font-black text-[#0a0c0a] dark:text-white tracking-tighter">â€”</span>
               <span class="text-xs font-medium text-gray-400 uppercase tracking-widest mt-1">Global</span>
             </div>
           </div>
@@ -185,11 +185,11 @@
           <div class="flex flex-col gap-3 items-center sm:items-start text-center sm:text-left flex-1">
             <div id="scoreBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
               <span class="material-symbols-outlined text-sm font-bold">verified</span>
-              <span class="text-sm font-bold" id="scoreBadgeText">Excellent niveau de traçabilité</span>
+              <span class="text-sm font-bold" id="scoreBadgeText">Excellent niveau de traÃ§abilitÃ©</span>
             </div>
-            <h3 class="text-xl font-bold text-[#0a0c0a] dark:text-white">Score de traçabilité</h3>
+            <h3 class="text-xl font-bold text-[#0a0c0a] dark:text-white">Score de traÃ§abilitÃ©</h3>
             <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
-              Ce score mesure la part de vos ventes et dépenses associées à un justificatif valide. Un score élevé augmente vos chances d'obtenir un financement.
+              Ce score mesure la part de vos ventes et dÃ©penses associÃ©es Ã  un justificatif valide. Un score Ã©levÃ© augmente vos chances d'obtenir un financement.
             </p>
             <!-- Mini Legend -->
             <div class="mt-2 flex gap-2 text-xs text-gray-400">
@@ -208,13 +208,13 @@
               <div class="bg-cyan-50 dark:bg-cyan-900/20 p-2 rounded-lg text-primary">
                 <span class="material-symbols-outlined">shopping_cart</span>
               </div>
-              <span id="salesBadge" class="text-primary dark:text-cyan-400 font-bold text-sm bg-cyan-100 dark:bg-cyan-900/40 px-2 py-0.5 rounded">—</span>
+              <span id="salesBadge" class="text-primary dark:text-cyan-400 font-bold text-sm bg-cyan-100 dark:bg-cyan-900/40 px-2 py-0.5 rounded">â€”</span>
             </div>
             <div>
-              <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Ventes justifiées</p>
+              <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Ventes justifiÃ©es</p>
               <div class="flex items-baseline gap-2 mt-1">
-                <h4 id="salesScore" class="text-2xl font-bold text-[#0a0c0a] dark:text-white">—</h4>
-                <span class="text-sm text-gray-400 font-medium" id="salesTotalSpan">/ —</span>
+                <h4 id="salesScore" class="text-2xl font-bold text-[#0a0c0a] dark:text-white">â€”</h4>
+                <span class="text-sm text-gray-400 font-medium" id="salesTotalSpan">/ â€”</span>
               </div>
             </div>
             <!-- Progress Bar -->
@@ -222,7 +222,7 @@
               <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5">
                 <div id="salesProgress" class="h-2.5 rounded-full" style="width: 0%; background-color: #0088CC;"></div>
               </div>
-              <p id="salesMessage" class="text-xs text-primary font-medium mt-1">—</p>
+              <p id="salesMessage" class="text-xs text-primary font-medium mt-1">â€”</p>
             </div>
           </div>
 
@@ -232,13 +232,13 @@
               <div class="bg-cyan-50 dark:bg-cyan-900/20 p-2 rounded-lg text-primary">
                 <span class="material-symbols-outlined">receipt_long</span>
               </div>
-              <span id="expensesBadge" class="text-primary dark:text-cyan-400 font-bold text-sm bg-cyan-100 dark:bg-cyan-900/40 px-2 py-0.5 rounded">—</span>
+              <span id="expensesBadge" class="text-primary dark:text-cyan-400 font-bold text-sm bg-cyan-100 dark:bg-cyan-900/40 px-2 py-0.5 rounded">â€”</span>
             </div>
             <div>
-              <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Dépenses justifiées</p>
+              <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">DÃ©penses justifiÃ©es</p>
               <div class="flex items-baseline gap-2 mt-1">
-                <h4 id="expensesScore" class="text-2xl font-bold text-[#0a0c0a] dark:text-white">—</h4>
-                <span class="text-sm text-gray-400 font-medium" id="expensesTotalSpan">/ —</span>
+                <h4 id="expensesScore" class="text-2xl font-bold text-[#0a0c0a] dark:text-white">â€”</h4>
+                <span class="text-sm text-gray-400 font-medium" id="expensesTotalSpan">/ â€”</span>
               </div>
             </div>
             <!-- Progress Bar -->
@@ -246,7 +246,7 @@
               <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5">
                 <div id="expensesProgress" class="h-2.5 rounded-full" style="width: 0%; background-color: #0088CC;"></div>
               </div>
-              <p id="expensesMessage" class="text-xs text-primary font-medium mt-1">—</p>
+              <p id="expensesMessage" class="text-xs text-primary font-medium mt-1">â€”</p>
             </div>
           </div>
         </div>
@@ -265,14 +265,14 @@
             </div>
             <h3 class="text-lg font-bold">Qu'est-ce que le score ?</h3>
             <p class="text-gray-300 text-sm leading-relaxed">
-Un score est un indicateur synthétique qui résume une situation à partir de plusieurs données.
-Il permet d’évaluer rapidement un niveau, de comparer et de suivre une évolution dans le temps.            </p>
+Un score est un indicateur synthÃ©tique qui rÃ©sume une situation Ã  partir de plusieurs donnÃ©es.
+Il permet d'Ã©valuer rapidement un niveau, de comparer et de suivre une Ã©volution dans le temps.            </p>
           </div>
         </div>
 
         <!-- Action Checklist -->
         <div class="bg-white dark:bg-card-dark rounded-xl border border-[#e7f3f1] dark:border-[#1e3b36] shadow-sm p-6 flex-1">
-          <h3 class="text-lg font-bold text-[#0a0c0a] dark:text-white mb-4">Comment améliorer mon score de traçabilité?</h3>
+          <h3 class="text-lg font-bold text-[#0a0c0a] dark:text-white mb-4">Comment amÃ©liorer mon score de traÃ§abilitÃ©?</h3>
           <div class="flex flex-col gap-4">
             <!-- Action Item 1 -->
             <div class="flex gap-3 items-start group">
@@ -281,7 +281,7 @@ Il permet d’évaluer rapidement un niveau, de comparer et de suivre une évolution
               </div>
               <div class="flex flex-col">
                 <p class="text-sm font-semibold text-[#0a0c0a] dark:text-gray-200 group-hover:text-primary transition-colors cursor-pointer">Ajouter les justificatifs manquants</p>
-                <p class="text-xs text-gray-500">Prenez en photo vos factures et reçus récents.</p>
+                <p class="text-xs text-gray-500">Prenez en photo vos factures et reÃ§us rÃ©cents.</p>
               </div>
             </div>
             <div class="h-px bg-gray-100 dark:bg-gray-800 w-full"></div>
@@ -292,7 +292,7 @@ Il permet d’évaluer rapidement un niveau, de comparer et de suivre une évolution
                 <span class="material-symbols-outlined text-primary text-xl">update</span>
               </div>
               <div class="flex flex-col">
-                <p class="text-sm font-semibold text-[#0a0c0a] dark:text-gray-200 group-hover:text-primary transition-colors cursor-pointer">Mise à jour régulière</p>
+                <p class="text-sm font-semibold text-[#0a0c0a] dark:text-gray-200 group-hover:text-primary transition-colors cursor-pointer">Mise Ã  jour rÃ©guliÃ¨re</p>
                 <p class="text-xs text-gray-500">Connectez-vous chaque semaine pour valider vos comptes.</p>
               </div>
             </div>
@@ -326,9 +326,9 @@ Il permet d’évaluer rapidement un niveau, de comparer et de suivre une évolution
           </div>
         </div>
 
-        <!-- Dépenses sans justificatif -->
+        <!-- DÃ©penses sans justificatif -->
         <div>
-          <h3 class="text-lg font-bold text-[#0a0c0a] dark:text-white mb-4">Dépenses sans justificatif</h3>
+          <h3 class="text-lg font-bold text-[#0a0c0a] dark:text-white mb-4">DÃ©penses sans justificatif</h3>
           <div id="expensesListContainer" class="space-y-3">
             <p class="text-gray-500 dark:text-gray-400 text-sm">Chargement...</p>
           </div>
@@ -348,12 +348,12 @@ Il permet d’évaluer rapidement un niveau, de comparer et de suivre une évolution
 <script src="js/mobile-menu.js"></script>
 <script>
 // ============================================================
-// CALCUL DYNAMIQUE DU SCORE DE TRAÇABILITÉ
+// CALCUL DYNAMIQUE DU SCORE DE TRAÃ‡ABILITÃ‰
 // ============================================================
-// API_BASE_URL, getToken() et handleUnauthorized() sont définis dans ogoue-state.js
+// API_BASE_URL, getToken() et handleUnauthorized() sont dÃ©finis dans ogoue-state.js
 
 /**
- * Récupère les ventes et dépenses du mois courant
+ * RÃ©cupÃ¨re les ventes et dÃ©penses du mois courant
  */
 async function fetchOperations() {
   const token = getToken();
@@ -382,7 +382,7 @@ async function fetchOperations() {
     }
 
     if (!salesRes.ok || !expensesRes.ok) {
-      throw new Error("Erreur lors de la récupération des données");
+      throw new Error("Erreur lors de la rÃ©cupÃ©ration des donnÃ©es");
     }
 
     const salesData = await salesRes.json();
@@ -399,7 +399,7 @@ async function fetchOperations() {
 }
 
 /**
- * Calcule les pourcentages de traçabilité
+ * Calcule les pourcentages de traÃ§abilitÃ©
  */
 function calculateScores(operations) {
   if (!operations) return null;
@@ -411,14 +411,14 @@ function calculateScores(operations) {
   const salesWithReceipt = sales.filter(s => s.justificatif && s.justificatif.trim()).length;
   const salesPercentage = totalSales > 0 ? Math.round((salesWithReceipt / totalSales) * 100) : 0;
 
-  // Calcul pour les dépenses
+  // Calcul pour les dÃ©penses
   const totalExpenses = expenses.length;
   const expensesWithReceipt = expenses.filter(e => e.justificatif && e.justificatif.trim()).length;
   const expensesPercentage = totalExpenses > 0 ? Math.round((expensesWithReceipt / totalExpenses) * 100) : 0;
 
-  // Score global = basé sur TOUTES les opérations
-  // Si pas de dépenses, score = score des ventes
-  // Si pas de ventes, score = score des dépenses
+  // Score global = basÃ© sur TOUTES les opÃ©rations
+  // Si pas de dÃ©penses, score = score des ventes
+  // Si pas de ventes, score = score des dÃ©penses
   // Si les deux existent, score = moyenne
   let globalScore = 0;
   if (totalSales > 0 && totalExpenses > 0) {
@@ -428,10 +428,10 @@ function calculateScores(operations) {
     // Seulement des ventes
     globalScore = salesPercentage;
   } else if (totalExpenses > 0) {
-    // Seulement des dépenses
+    // Seulement des dÃ©penses
     globalScore = expensesPercentage;
   } else {
-    // Aucune opération
+    // Aucune opÃ©ration
     globalScore = 0;
   }
 
@@ -447,7 +447,7 @@ function calculateScores(operations) {
 }
 
 /**
- * Retourne le label et couleur basé sur le score
+ * Retourne le label et couleur basÃ© sur le score
  */
 function getScoreLabel(score) {
   if (score >= 70) return { label: "Excellent", color: "#27AE60" }; // >70% = vert (success)
@@ -456,7 +456,7 @@ function getScoreLabel(score) {
 }
 
 /**
- * Met à jour l'UI avec les scores calculés
+ * Met Ã  jour l'UI avec les scores calculÃ©s
  */
 function updateUI(scores) {
   if (!scores) return;
@@ -466,9 +466,9 @@ function updateUI(scores) {
   // === SCORE GLOBAL ===
   const globalLabel = getScoreLabel(globalScore);
   document.getElementById("globalScoreValue").textContent = `${globalScore}%`;
-  document.getElementById("scoreBadgeText").textContent = `${globalLabel.label} niveau de traçabilité`;
+  document.getElementById("scoreBadgeText").textContent = `${globalLabel.label} niveau de traÃ§abilitÃ©`;
   
-  // Mettre à jour le cercle de progression avec la couleur appropriée
+  // Mettre Ã  jour le cercle de progression avec la couleur appropriÃ©e
   const circle = document.getElementById("globalScoreCircle");
   const dasharray = (globalScore / 100) * 100 + ", 100";
   circle.setAttribute("stroke-dasharray", dasharray);
@@ -487,10 +487,10 @@ function updateUI(scores) {
   const salesNoReceipt = salesCount - salesWithReceipt;
   const salesMsg = salesCount > 0 
     ? `${salesNoReceipt} vente${salesNoReceipt !== 1 ? 's' : ''} sans justificatif`
-    : "Aucune vente enregistrée";
+    : "Aucune vente enregistrÃ©e";
   document.getElementById("salesMessage").textContent = salesMsg;
 
-  // === DÉPENSES ===
+  // === DÃ‰PENSES ===
   const expensesLabel = getScoreLabel(expensesPercentage);
   document.getElementById("expensesScore").textContent = expensesWithReceipt;
   document.getElementById("expensesTotalSpan").textContent = `/ ${expensesCount}`;
@@ -503,8 +503,8 @@ function updateUI(scores) {
   const expensesMsg = expensesCount > 0
     ? expensesPercentage >= 80 
       ? "Bravo ! Continuez ainsi."
-      : `${expensesNoReceipt} dépense${expensesNoReceipt !== 1 ? 's' : ''} sans justificatif`
-    : "Aucune dépense enregistrée";
+      : `${expensesNoReceipt} dÃ©pense${expensesNoReceipt !== 1 ? 's' : ''} sans justificatif`
+    : "Aucune dÃ©pense enregistrÃ©e";
   document.getElementById("expensesMessage").textContent = expensesMsg;
 }
 
@@ -513,10 +513,10 @@ function updateUI(scores) {
  */
 async function init() {
   const ops = await fetchOperations();
-  console.log("?? Opérations récupérées:", ops);
+  console.log("?? OpÃ©rations rÃ©cupÃ©rÃ©es:", ops);
   
   const scores = calculateScores(ops);
-  console.log("?? Scores calculés:", scores);
+  console.log("?? Scores calculÃ©s:", scores);
   
   updateUI(scores);
 
@@ -536,7 +536,7 @@ function openUploadModal() {
   const ops = window.currentOperations;
 
   if (!ops) {
-    alert("Aucune donnée disponible");
+    alert("Aucune donnÃ©e disponible");
     return;
   }
 
@@ -552,30 +552,30 @@ function openUploadModal() {
         <input type="checkbox" class="sale-checkbox" data-id="${sale.id}" data-type="sales">
         <div class="flex-1">
           <p class="text-sm font-medium text-[#0a0c0a] dark:text-white">${sale.description || 'Sans description'}</p>
-          <p class="text-xs text-gray-500 dark:text-gray-400">${sale.date} • ${sale.montant} FCFA</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">${sale.date} â€¢ ${sale.montant} FCFA</p>
         </div>
         <input type="file" class="file-input" data-id="${sale.id}" data-type="sales" style="width: 150px;">
       </div>
     `).join('');
   }
 
-  // Dépenses sans justificatif
+  // DÃ©penses sans justificatif
   const expensesWithoutReceipt = ops.expenses.filter(e => !e.justificatif || !e.justificatif.trim());
   const expensesContainer = document.getElementById("expensesListContainer");
   
   if (ops.expenses.length === 0) {
-    // Aucune dépense du tout
-    expensesContainer.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-sm">Aucune dépense enregistrée</p>';
+    // Aucune dÃ©pense du tout
+    expensesContainer.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-sm">Aucune dÃ©pense enregistrÃ©e</p>';
   } else if (expensesWithoutReceipt.length === 0) {
-    // Des dépenses existent et toutes ont un justificatif
-    expensesContainer.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-sm">? Toutes les dépenses ont un justificatif</p>';
+    // Des dÃ©penses existent et toutes ont un justificatif
+    expensesContainer.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-sm">? Toutes les dÃ©penses ont un justificatif</p>';
   } else {
     expensesContainer.innerHTML = expensesWithoutReceipt.map(expense => `
       <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
         <input type="checkbox" class="expense-checkbox" data-id="${expense.id}" data-type="expenses">
         <div class="flex-1">
-          <p class="text-sm font-medium text-[#0a0c0a] dark:text-white">${expense.categorie || 'Sans catégorie'}</p>
-          <p class="text-xs text-gray-500 dark:text-gray-400">${expense.date} • ${expense.montant} FCFA</p>
+          <p class="text-sm font-medium text-[#0a0c0a] dark:text-white">${expense.categorie || 'Sans catÃ©gorie'}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">${expense.date} â€¢ ${expense.montant} FCFA</p>
         </div>
         <input type="file" class="file-input" data-id="${expense.id}" data-type="expenses" style="width: 150px;">
       </div>
@@ -593,7 +593,7 @@ function closeUploadModal() {
 }
 
 /**
- * Met à jour le justificatif d'une opération
+ * Met Ã  jour le justificatif d'une opÃ©ration
  */
 async function updateOperationJustificatif(type, operationId, file, inputElement) {
   const token = getToken();
@@ -603,7 +603,7 @@ async function updateOperationJustificatif(type, operationId, file, inputElement
   }
 
   try {
-    // Désactiver le bouton close et show loading state
+    // DÃ©sactiver le bouton close et show loading state
     const closeBtn = document.getElementById("closeModalBtn");
     closeBtn.disabled = true;
     inputElement.disabled = true;
@@ -639,7 +639,7 @@ async function updateOperationJustificatif(type, operationId, file, inputElement
         const error = JSON.parse(text);
         console.error("? Erreur API (json):", error);
       } catch (e) {
-        // La réponse n'est pas du JSON
+        // La rÃ©ponse n'est pas du JSON
       }
       
       closeBtn.disabled = false;
@@ -647,31 +647,31 @@ async function updateOperationJustificatif(type, operationId, file, inputElement
       return false;
     }
 
-    console.log("? Justificatif téléchargé avec succès");
+    console.log("? Justificatif tÃ©lÃ©chargÃ© avec succÃ¨s");
     
-    // Afficher notification de succès
+    // Afficher notification de succÃ¨s
     console.log("?? Affichage du toast...");
-    showToast(`? ${file.name} téléchargé avec succès!`, 2000);
+    showToast(`? ${file.name} tÃ©lÃ©chargÃ© avec succÃ¨s!`, 2000);
     
-    // Attendre un peu puis rafraîchir et fermer
+    // Attendre un peu puis rafraÃ®chir et fermer
     console.log("? Attente de 1500ms...");
     await new Promise(r => setTimeout(r, 1500));
     
-    console.log("?? Rafraîchissement des données...");
+    console.log("?? RafraÃ®chissement des donnÃ©es...");
     // Refresh the data
     window.currentOperations = await fetchOperations();
-    console.log("?? Nouvelles opérations:", window.currentOperations);
+    console.log("?? Nouvelles opÃ©rations:", window.currentOperations);
     
     const scores = calculateScores(window.currentOperations);
     console.log("?? Nouveaux scores:", scores);
     
     updateUI(scores);
-    console.log("?? UI mise à jour");
+    console.log("?? UI mise Ã  jour");
     
     // Fermer le modal
     console.log("? Fermeture du modal...");
     closeUploadModal();
-    console.log("? Modal fermé");
+    console.log("? Modal fermÃ©");
     
     return true;
   } catch (error) {
@@ -745,7 +745,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       if (!success) {
         e.target.value = ""; // Reset input
-        showToast("? Erreur lors du téléchargement du justificatif", 3000);
+        showToast("? Erreur lors du tÃ©lÃ©chargement du justificatif", 3000);
       }
     }
   });
