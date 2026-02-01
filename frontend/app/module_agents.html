@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion des Agents - OGOUE</title>
+    <link rel="icon" type="image/png" href="O-removebg-preview.png">
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
@@ -47,12 +48,12 @@
             <div class="max-w-7xl mx-auto px-6 lg:px-8">
                 <div class="flex items-center justify-between h-20">
                     <div class="flex items-center gap-4">
-                        <a href="module_tableau_bord"><img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-28 w-auto"></a>
+                        <a href="module_tableau_bord"><img src="/app/Logo-ogoue (2).png" alt="OGOUï¿½ Logo" class="h-28 w-auto"></a>
                     </div>
 
                     <div class="hidden md:flex items-center gap-8">
                         <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="module_tableau_bord">Tableau de Bord</a>
-                        <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="module_ventes">Comptabilité</a>
+                        <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="module_ventes">Comptabilitï¿½</a>
                         <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="module_scoring">Financement</a>
                     </div>
 
@@ -60,7 +61,7 @@
                     <div id="mobile-menu" class="md:hidden absolute top-full left-0 right-0 bg-background-light border-b border-black/10 hidden">
                         <div class="flex flex-col gap-2 p-4">
                             <a class="text-text-light text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100" href="module_tableau_bord">Tableau de Bord</a>
-                            <a class="text-text-light text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100" href="module_ventes">Comptabilité</a>
+                            <a class="text-text-light text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100" href="module_ventes">Comptabilitï¿½</a>
                             <a class="text-text-light text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100" href="module_scoring">Financement</a>
                         </div>
                     </div>
@@ -100,18 +101,18 @@
                 </button>
                 <div>
                     <h1 class="text-3xl md:text-4xl font-black tracking-tight text-text-light mb-2">Gestion des Agents</h1>
-                    <p class="text-text-light-muted">Créez et gérez les accès des agents à votre organisation</p>
+                    <p class="text-text-light-muted">Crï¿½ez et gï¿½rez les accï¿½s des agents ï¿½ votre organisation</p>
                 </div>
             </div>
 
-            <!-- Section de création -->
+            <!-- Section de crï¿½ation -->
             <div class="bg-white rounded-xl shadow-sm p-8 mb-8">
-                <h2 class="text-xl font-bold text-text-light mb-6">Créer un nouvel agent</h2>
+                <h2 class="text-xl font-bold text-text-light mb-6">Crï¿½er un nouvel agent</h2>
                 
                 <form id="agentForm" class="space-y-4">
                     <div>
                         <label for="firstName" class="block text-sm font-semibold text-text-light mb-2">
-                            Prénom de l'agent
+                            Prï¿½nom de l'agent
                         </label>
                         <input 
                             type="text" 
@@ -128,7 +129,7 @@
                         class="w-full py-3 px-4 rounded-lg bg-primary text-background-light font-bold text-sm hover:bg-text-light transition-colors"
                     >
                         <span class="material-symbols-outlined inline mr-2" style="font-size: 18px; vertical-align: middle;">add</span>
-                        Créer l'agent
+                        Crï¿½er l'agent
                     </button>
                 </form>
             </div>
@@ -140,7 +141,7 @@
                 </div>
 
                 <div id="agentsList" class="divide-y divide-black/10">
-                    <!-- Les agents seront affichés ici -->
+                    <!-- Les agents seront affichï¿½s ici -->
                     <div class="p-8 text-center text-text-light-muted">
                         Chargement des agents...
                     </div>
@@ -192,13 +193,13 @@
                             <h3 class="text-lg font-semibold text-text-light">${agent.firstName}</h3>
                             <div class="mt-3 space-y-2">
                                 <div class="flex items-center gap-3">
-                                    <span class="text-sm text-text-light-muted">Code d'accès :</span>
+                                    <span class="text-sm text-text-light-muted">Code d'accï¿½s :</span>
                                     <code class="bg-gray-100 px-3 py-1 rounded font-mono text-sm text-text-light">
                                         ${agent.accessCode}
                                     </code>
                                     <button 
                                         type="button"
-                                        onclick="navigator.clipboard.writeText('${agent.accessCode}').then(() => alert('Code copié !'))"
+                                        onclick="navigator.clipboard.writeText('${agent.accessCode}').then(() => alert('Code copiï¿½ !'))"
                                         class="text-primary hover:text-text-light text-sm font-medium transition-colors"
                                     >
                                         <span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle;">content_copy</span>
@@ -206,13 +207,13 @@
                                     </button>
                                 </div>
                                 <div class="text-xs text-text-light-muted">
-                                    Créé le : ${new Date(agent.createdAt).toLocaleDateString('fr-FR')}
+                                    Crï¿½ï¿½ le : ${new Date(agent.createdAt).toLocaleDateString('fr-FR')}
                                 </div>
                             </div>
                         </div>
                         <button 
                             type="button"
-                            onclick="if (confirm('Êtes-vous sûr de vouloir supprimer cet agent ?')) { deleteAgentHandler('${agent.id}'); }"
+                            onclick="if (confirm('ï¿½tes-vous sï¿½r de vouloir supprimer cet agent ?')) { deleteAgentHandler('${agent.id}'); }"
                             class="text-red-600 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition-colors"
                             title="Supprimer l'agent"
                         >
@@ -227,34 +228,34 @@
         window.deleteAgentHandler = async (agentId) => {
             try {
                 await deleteAgent(agentId);
-                alert('Agent supprimé avec succès');
+                alert('Agent supprimï¿½ avec succï¿½s');
                 loadAgents();
             } catch (error) {
                 alert('Erreur lors de la suppression');
             }
         };
 
-        // Formulaire de création
+        // Formulaire de crï¿½ation
         document.getElementById('agentForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const firstName = document.getElementById('firstName').value.trim();
             
             if (!firstName) {
-                alert('Veuillez entrer le prénom de l\'agent');
+                alert('Veuillez entrer le prï¿½nom de l\'agent');
                 return;
             }
 
             try {
                 const newAgent = await createAgent(firstName);
-                alert(`Agent créé ! Code d'accès: ${newAgent.accessCode}`);
+                alert(`Agent crï¿½ï¿½ ! Code d'accï¿½s: ${newAgent.accessCode}`);
                 document.getElementById('agentForm').reset();
                 loadAgents();
             } catch (error) {
-                alert('Erreur lors de la création de l\'agent');
+                alert('Erreur lors de la crï¿½ation de l\'agent');
             }
         });
 
-        // Charger au démarrage
+        // Charger au dï¿½marrage
         loadAgents();
     </script>
 </body>

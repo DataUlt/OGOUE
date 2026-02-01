@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <title>Dépôt de dossier - OGOUE</title>
+  <title>Dï¿½pï¿½t de dossier - OGOUE</title>
+  <link rel="icon" type="image/png" href="O-removebg-preview.png">
 
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -55,14 +56,14 @@
     <div class="container mx-auto px-4">
       <div class="flex items-center justify-between whitespace-nowrap h-20">
         <div class="flex items-center gap-3">
-          <a href="/"><img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-28 w-auto"></a>
+          <a href="/"><img src="/app/Logo-ogoue (2).png" alt="OGOUï¿½ Logo" class="h-28 w-auto"></a>
         </div>
 
         <div class="hidden md:flex items-center gap-9">
           <a class="text-text-light-primary dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
              href="module_tableau_bord">Tableau de Bord</a>
           <a class="text-text-light-primary dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
-             href="module_ventes">Comptabilité</a>
+             href="module_ventes">Comptabilitï¿½</a>
           <a class="text-primary text-sm font-bold leading-normal"
              href="module_scoring">Financement</a>
         </div>
@@ -99,7 +100,7 @@
 
           <a href="module_depot_dossier"
              class="flex items-center gap-2 border-b-[3px] border-b-primary text-[#0a0c0a] dark:text-white pb-3 pt-4 px-2">
-            <span class="text-sm font-bold tracking-[0.015em]">Dépôt de dossier</span>
+            <span class="text-sm font-bold tracking-[0.015em]">Dï¿½pï¿½t de dossier</span>
           </a>
         </nav>
       </div>
@@ -109,16 +110,16 @@
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 class="mt-2 text-2xl md:text-3xl font-black tracking-[-0.02em] text-text-light-primary dark:text-white">
-              Déposez votre dossier en 3 étapes
+              Dï¿½posez votre dossier en 3 ï¿½tapes
             </h1>
             <p class="mt-2 text-sm md:text-base text-text-light-secondary max-w-2xl">
-              Choisissez l’institution financière, sélectionnez le produit, puis téléversez les documents requis.
+              Choisissez lï¿½institution financiï¿½re, sï¿½lectionnez le produit, puis tï¿½lï¿½versez les documents requis.
             </p>
           </div>
 
           <div class="flex items-center gap-2 px-3 py-2 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/40">
             <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-[18px]">lock</span>
-            <span class="text-xs font-semibold text-blue-600 dark:text-blue-400">Dossier sécurisé & chiffré</span>
+            <span class="text-xs font-semibold text-blue-600 dark:text-blue-400">Dossier sï¿½curisï¿½ & chiffrï¿½</span>
           </div>
         </div>
 
@@ -128,14 +129,14 @@
             <div class="size-9 rounded-xl bg-primary/20 flex items-center justify-center text-text-light-primary font-black">0</div>
             <div>
               <p class="text-sm font-black text-text-light-primary dark:text-white">Partenaire</p>
-              <p class="text-xs text-text-light-secondary mt-0.5">Choisir l’institution</p>
+              <p class="text-xs text-text-light-secondary mt-0.5">Choisir lï¿½institution</p>
             </div>
           </div>
 
           <div id="step1" class="rounded-xl border border-[#e7f3f1] dark:border-[#1f3a35] bg-white dark:bg-[#152a26]/30 p-4 flex items-start gap-3">
             <div class="size-9 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-300 font-black">1</div>
             <div>
-              <p class="text-sm font-black text-text-light-primary dark:text-white">Crédit</p>
+              <p class="text-sm font-black text-text-light-primary dark:text-white">Crï¿½dit</p>
               <p class="text-xs text-text-light-secondary mt-0.5">Choisir le produit</p>
             </div>
           </div>
@@ -144,7 +145,7 @@
             <div class="size-9 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-300 font-black">2</div>
             <div>
               <p class="text-sm font-black text-text-light-primary dark:text-white">Documents</p>
-              <p class="text-xs text-text-light-secondary mt-0.5">Téléversement</p>
+              <p class="text-xs text-text-light-secondary mt-0.5">Tï¿½lï¿½versement</p>
             </div>
           </div>
         </div>
@@ -159,13 +160,13 @@
               0. Choisissez votre partenaire financier
             </h2>
             <p class="mt-1 text-sm text-text-light-secondary">
-              Les produits et documents requis dépendent de l’institution sélectionnée.
+              Les produits et documents requis dï¿½pendent de lï¿½institution sï¿½lectionnï¿½e.
             </p>
           </div>
 
           <div id="partnerSelectedPill" class="hidden md:flex items-center gap-2 px-3 py-2 rounded-full bg-primary/10 border border-primary/20">
             <span class="material-symbols-outlined text-primary text-[18px]">verified</span>
-            <span id="partnerPillText" class="text-xs font-bold text-text-light-primary">—</span>
+            <span id="partnerPillText" class="text-xs font-bold text-text-light-primary">ï¿½</span>
           </div>
         </div>
 
@@ -192,7 +193,7 @@
                     </div>
                     <div>
                       <p class="text-base font-black text-text-light-primary dark:text-white">Microfinance A</p>
-                      <p class="text-sm text-text-light-secondary">Décision rapide • BFR / Trésorerie</p>
+                      <p class="text-sm text-text-light-secondary">Dï¿½cision rapide ï¿½ BFR / Trï¿½sorerie</p>
                       <div class="mt-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/40">
                         <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-[16px]">bolt</span>
                         <span class="text-xs font-bold text-blue-600 dark:text-blue-400">72h</span>
@@ -219,10 +220,10 @@
                     </div>
                     <div>
                       <p class="text-base font-black text-text-light-primary dark:text-white">Banque Populaire B</p>
-                      <p class="text-sm text-text-light-secondary">Investissement • Équipement • Stock</p>
+                      <p class="text-sm text-text-light-secondary">Investissement ï¿½ ï¿½quipement ï¿½ Stock</p>
                       <div class="mt-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 dark:bg-white/5 border border-[#e7f3f1] dark:border-[#1f3a35]">
                         <span class="material-symbols-outlined text-[16px] text-text-light-secondary">gavel</span>
-                        <span class="text-xs font-bold text-text-light-secondary">Exigences élevées</span>
+                        <span class="text-xs font-bold text-text-light-secondary">Exigences ï¿½levï¿½es</span>
                       </div>
                     </div>
                   </div>
@@ -245,8 +246,8 @@
                       <span class="material-symbols-outlined text-purple-600 dark:text-purple-400">rocket_launch</span>
                     </div>
                     <div>
-                      <p class="text-base font-black text-text-light-primary dark:text-white">Fonds d’Investissement C</p>
-                      <p class="text-sm text-text-light-secondary">Expansion • Matériel • Croissance</p>
+                      <p class="text-base font-black text-text-light-primary dark:text-white">Fonds dï¿½Investissement C</p>
+                      <p class="text-sm text-text-light-secondary">Expansion ï¿½ Matï¿½riel ï¿½ Croissance</p>
                       <div class="mt-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-900/40">
                         <span class="material-symbols-outlined text-[16px] text-purple-600 dark:text-purple-400">workspace_premium</span>
                         <span class="text-xs font-bold text-purple-600 dark:text-purple-400">Pitch requis</span>
@@ -271,10 +272,10 @@
           <label class="text-xs font-bold text-text-light-secondary">Partenaire (liste)</label>
           <select id="partnerSelectMobile"
                   class="mt-2 w-full h-12 rounded-xl border border-[#e8ede8] dark:border-gray-700 bg-white dark:bg-background-dark p-3 text-sm font-semibold">
-            <option value="" selected>— Choisir un partenaire —</option>
+            <option value="" selected>ï¿½ Choisir un partenaire ï¿½</option>
             <option value="mf_a">Microfinance A (Gabon)</option>
             <option value="bank_b">Banque Populaire B</option>
-            <option value="fund_c">Fonds d’Investissement C</option>
+            <option value="fund_c">Fonds dï¿½Investissement C</option>
           </select>
         </div>
       </section>
@@ -285,10 +286,10 @@
           <div>
             <h2 class="text-lg font-black text-text-light-primary dark:text-white flex items-center gap-2">
               <span class="material-symbols-outlined text-primary">inventory_2</span>
-              1. Sélectionnez votre crédit
+              1. Sï¿½lectionnez votre crï¿½dit
             </h2>
             <p class="mt-1 text-sm text-text-light-secondary">
-              Cette liste est filtrée selon votre partenaire.
+              Cette liste est filtrï¿½e selon votre partenaire.
             </p>
           </div>
           <a class="text-xs md:text-sm text-primary font-bold hover:underline flex items-center gap-1" href="#">
@@ -312,10 +313,10 @@
                 <div class="max-w-md bg-white dark:bg-[#152a26] border border-[#e7f3f1] dark:border-[#1f3a35] rounded-2xl p-4 shadow-soft">
                   <div class="flex items-center justify-center gap-2 text-primary font-black">
                     <span class="material-symbols-outlined">lock</span>
-                    Sélectionnez d’abord un partenaire
+                    Sï¿½lectionnez dï¿½abord un partenaire
                   </div>
                   <p class="mt-2 text-sm text-text-light-secondary">
-                    Les crédits varient selon l’institution.
+                    Les crï¿½dits varient selon lï¿½institution.
                   </p>
                 </div>
               </div>
@@ -336,7 +337,7 @@
                   <span class="material-symbols-outlined text-primary hidden peer-checked:block text-[24px]">check_circle</span>
                 </div>
                 <div class="mt-3">
-                  <h3 class="font-black text-text-light-primary dark:text-white text-lg">Prêt de Stock</h3>
+                  <h3 class="font-black text-text-light-primary dark:text-white text-lg">Prï¿½t de Stock</h3>
                   <p class="text-sm text-text-light-secondary mt-1">Financement d'inventaire</p>
                   <div class="mt-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20">
                     <span class="material-symbols-outlined text-[16px] text-primary">bolt</span>
@@ -382,7 +383,7 @@
                   <span class="material-symbols-outlined text-primary hidden peer-checked:block text-[24px]">check_circle</span>
                 </div>
                 <div class="mt-3">
-                  <h3 class="font-black text-text-light-primary dark:text-white text-lg">Avance Trésorerie</h3>
+                  <h3 class="font-black text-text-light-primary dark:text-white text-lg">Avance Trï¿½sorerie</h3>
                   <p class="text-sm text-text-light-secondary mt-1">Court terme (30j)</p>
                 </div>
               </label>
@@ -403,8 +404,8 @@
                   <span class="material-symbols-outlined text-primary hidden peer-checked:block text-[24px]">check_circle</span>
                 </div>
                 <div class="mt-3">
-                  <h3 class="font-black text-text-light-primary dark:text-white text-lg">Équipement Pro</h3>
-                  <p class="text-sm text-text-light-secondary mt-1">Matériel & outillage</p>
+                  <h3 class="font-black text-text-light-primary dark:text-white text-lg">ï¿½quipement Pro</h3>
+                  <p class="text-sm text-text-light-secondary mt-1">Matï¿½riel & outillage</p>
                 </div>
               </label>
             </div>
@@ -429,15 +430,15 @@
             </div>
 
             <h2 id="dossierTitle" class="mt-2 text-2xl md:text-3xl font-black tracking-[-0.02em] text-text-light-primary dark:text-white">
-              Dossier : —
+              Dossier : ï¿½
             </h2>
             <p id="dossierSubtitle" class="mt-2 text-sm md:text-base text-text-light-secondary">
-              Sélectionnez un partenaire puis un crédit pour voir les documents requis.
+              Sï¿½lectionnez un partenaire puis un crï¿½dit pour voir les documents requis.
             </p>
 
             <div class="mt-3 inline-flex items-center gap-2 px-3 py-2 rounded-full bg-primary/10 border border-primary/20">
               <span class="material-symbols-outlined text-primary text-[18px]">verified_user</span>
-              <span id="docsBadge" class="text-xs font-black text-text-light-primary">(—)</span>
+              <span id="docsBadge" class="text-xs font-black text-text-light-primary">(ï¿½)</span>
             </div>
           </div>
         </div>
@@ -458,8 +459,8 @@
             </div>
 
             <div class="flex flex-col">
-              <span id="footerTitle" class="font-black text-lg">Sélectionnez un partenaire</span>
-              <span id="footerSubtitle" class="text-sm text-white/70">Le dépôt est lié à une institution financière.</span>
+              <span id="footerTitle" class="font-black text-lg">Sï¿½lectionnez un partenaire</span>
+              <span id="footerSubtitle" class="text-sm text-white/70">Le dï¿½pï¿½t est liï¿½ ï¿½ une institution financiï¿½re.</span>
             </div>
           </div>
 
@@ -484,7 +485,7 @@
 
   <footer class="mt-auto py-8 border-t border-[#e7f3f1] dark:border-[#1f3a35] bg-white dark:bg-[#152a26]">
     <div class="flex justify-center text-center px-4">
-      <p class="text-sm text-text-light-secondary">© 2024 OGOUE. Plateforme sécurisée de gestion financière.</p>
+      <p class="text-sm text-text-light-secondary">ï¿½ 2024 OGOUE. Plateforme sï¿½curisï¿½e de gestion financiï¿½re.</p>
     </div>
   </footer>
 
@@ -496,28 +497,28 @@
   // =============================
   const DATA = {
     partners: {
-      mf_a: { name: "Microfinance A", type: "Microfinance Catégorie 2", loans: ["stock", "cash"] },
+      mf_a: { name: "Microfinance A", type: "Microfinance Catï¿½gorie 2", loans: ["stock", "cash"] },
       bank_b: { name: "Banque Populaire B", type: "Banque commerciale", loans: ["stock", "invest", "equipment"] },
-      fund_c: { name: "Fonds d’Investissement C", type: "Fonds / Investisseur", loans: ["invest", "equipment"] },
+      fund_c: { name: "Fonds dï¿½Investissement C", type: "Fonds / Investisseur", loans: ["invest", "equipment"] },
     },
     loans: {
       stock: {
-        label: "Prêt de Stock",
+        label: "Prï¿½t de Stock",
         amountText: "Demande indicative : 5M FCFA",
         docsByPartner: {
           mf_a: [
-            { title:"Pièce d'identité du gérant", subtitle:"CNI ou Passeport en cours de validité", status:"uploaded", file:{type:"PDF", name:"CNI_Gerant_2023.pdf", size:"1.2 MB"} },
+            { title:"Piï¿½ce d'identitï¿½ du gï¿½rant", subtitle:"CNI ou Passeport en cours de validitï¿½", status:"uploaded", file:{type:"PDF", name:"CNI_Gerant_2023.pdf", size:"1.2 MB"} },
             { title:"Registre de Commerce", subtitle:"Fiche circuit RCCM", status:"uploaded", file:{type:"IMG", name:"RCCM_Scan_01.jpg", size:"2.4 MB"} },
-            { title:"Relevés Bancaires", subtitle:"Les 3 derniers mois (PDF)", status:"to_upload" },
-            { title:"Photos de la boutique", subtitle:"Devanture et intérieur", status:"to_upload" },
-            { title:"Quittance fiscale", subtitle:"Année en cours (obligatoire)", status:"missing" },
+            { title:"Relevï¿½s Bancaires", subtitle:"Les 3 derniers mois (PDF)", status:"to_upload" },
+            { title:"Photos de la boutique", subtitle:"Devanture et intï¿½rieur", status:"to_upload" },
+            { title:"Quittance fiscale", subtitle:"Annï¿½e en cours (obligatoire)", status:"missing" },
           ],
           bank_b: [
-            { title:"Pièce d'identité du gérant", subtitle:"CNI ou Passeport", status:"to_upload" },
-            { title:"RCCM / Statuts", subtitle:"RCCM + statuts signés (PDF)", status:"to_upload" },
-            { title:"Relevés Bancaires", subtitle:"Les 6 derniers mois (PDF)", status:"to_upload" },
-            { title:"Bilan & Compte de résultat", subtitle:"Dernier exercice (obligatoire)", status:"missing" },
-            { title:"État de stock", subtitle:"Inventaire détaillé + valorisation", status:"to_upload" },
+            { title:"Piï¿½ce d'identitï¿½ du gï¿½rant", subtitle:"CNI ou Passeport", status:"to_upload" },
+            { title:"RCCM / Statuts", subtitle:"RCCM + statuts signï¿½s (PDF)", status:"to_upload" },
+            { title:"Relevï¿½s Bancaires", subtitle:"Les 6 derniers mois (PDF)", status:"to_upload" },
+            { title:"Bilan & Compte de rï¿½sultat", subtitle:"Dernier exercice (obligatoire)", status:"missing" },
+            { title:"ï¿½tat de stock", subtitle:"Inventaire dï¿½taillï¿½ + valorisation", status:"to_upload" },
           ]
         }
       },
@@ -526,41 +527,41 @@
         amountText: "Demande indicative : 15M FCFA",
         docsByPartner: {
           bank_b: [
-            { title:"Business plan", subtitle:"Projet + prévisions (PDF)", status:"to_upload" },
+            { title:"Business plan", subtitle:"Projet + prï¿½visions (PDF)", status:"to_upload" },
             { title:"Devis / Proforma", subtitle:"Fournisseurs / travaux (PDF)", status:"to_upload" },
-            { title:"Relevés Bancaires", subtitle:"Les 6 derniers mois (PDF)", status:"to_upload" },
-            { title:"Bilan & Compte de résultat", subtitle:"Dernier exercice (obligatoire)", status:"missing" },
+            { title:"Relevï¿½s Bancaires", subtitle:"Les 6 derniers mois (PDF)", status:"to_upload" },
+            { title:"Bilan & Compte de rï¿½sultat", subtitle:"Dernier exercice (obligatoire)", status:"missing" },
           ],
           fund_c: [
-            { title:"Pitch deck", subtitle:"Présentation projet (PDF)", status:"to_upload" },
-            { title:"Prévisionnel", subtitle:"CA, charges, trésorerie (Excel/PDF)", status:"to_upload" },
-            { title:"Justificatifs légaux", subtitle:"RCCM + identité dirigeant", status:"to_upload" },
+            { title:"Pitch deck", subtitle:"Prï¿½sentation projet (PDF)", status:"to_upload" },
+            { title:"Prï¿½visionnel", subtitle:"CA, charges, trï¿½sorerie (Excel/PDF)", status:"to_upload" },
+            { title:"Justificatifs lï¿½gaux", subtitle:"RCCM + identitï¿½ dirigeant", status:"to_upload" },
           ]
         }
       },
       cash: {
-        label: "Avance Trésorerie",
+        label: "Avance Trï¿½sorerie",
         amountText: "Demande indicative : 2M FCFA",
         docsByPartner: {
           mf_a: [
-            { title:"Pièce d'identité du gérant", subtitle:"CNI ou Passeport", status:"to_upload" },
-            { title:"Relevés Bancaires", subtitle:"Les 3 derniers mois (PDF)", status:"to_upload" },
-            { title:"Journal des ventes", subtitle:"Dernières 4 semaines", status:"to_upload" },
+            { title:"Piï¿½ce d'identitï¿½ du gï¿½rant", subtitle:"CNI ou Passeport", status:"to_upload" },
+            { title:"Relevï¿½s Bancaires", subtitle:"Les 3 derniers mois (PDF)", status:"to_upload" },
+            { title:"Journal des ventes", subtitle:"Derniï¿½res 4 semaines", status:"to_upload" },
           ]
         }
       },
       equipment: {
-        label: "Équipement Pro",
+        label: "ï¿½quipement Pro",
         amountText: "Demande indicative : 8M FCFA",
         docsByPartner: {
           bank_b: [
-            { title:"Devis / Proforma", subtitle:"Matériel & fournisseur (PDF)", status:"to_upload" },
-            { title:"Relevés Bancaires", subtitle:"Les 6 derniers mois (PDF)", status:"to_upload" },
-            { title:"Bilan & Compte de résultat", subtitle:"Dernier exercice (si disponible)", status:"to_upload" },
+            { title:"Devis / Proforma", subtitle:"Matï¿½riel & fournisseur (PDF)", status:"to_upload" },
+            { title:"Relevï¿½s Bancaires", subtitle:"Les 6 derniers mois (PDF)", status:"to_upload" },
+            { title:"Bilan & Compte de rï¿½sultat", subtitle:"Dernier exercice (si disponible)", status:"to_upload" },
           ],
           fund_c: [
-            { title:"Justificatif d'activité", subtitle:"RCCM / statuts", status:"to_upload" },
-            { title:"Proforma équipement", subtitle:"Fournisseur (PDF)", status:"to_upload" },
+            { title:"Justificatif d'activitï¿½", subtitle:"RCCM / statuts", status:"to_upload" },
+            { title:"Proforma ï¿½quipement", subtitle:"Fournisseur (PDF)", status:"to_upload" },
           ]
         }
       }
@@ -653,9 +654,9 @@
   }
 
   function badgeForStatus(status) {
-    if (status === "uploaded") return {wrap:"bg-primary/10 text-text-light-primary border-primary/20", icon:"check_circle", text:"Téléversé"};
+    if (status === "uploaded") return {wrap:"bg-primary/10 text-text-light-primary border-primary/20", icon:"check_circle", text:"Tï¿½lï¿½versï¿½"};
     if (status === "missing") return {wrap:"bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-100 dark:border-red-800", icon:"error", text:"Manquant"};
-    return {wrap:"bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-200 border-gray-200 dark:border-gray-600", icon:"hourglass_empty", text:"À téléverser"};
+    return {wrap:"bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-200 border-gray-200 dark:border-gray-600", icon:"hourglass_empty", text:"ï¿½ tï¿½lï¿½verser"};
   }
 
   function renderDocCard(doc) {
@@ -692,7 +693,7 @@
           ${doc.status === "missing" ? "upload_file" : "cloud_upload"}
         </span>
         <div class="text-sm font-bold ${doc.status === "missing" ? "text-red-600 dark:text-red-400" : "text-text-light-primary dark:text-white"}">
-          ${doc.status === "missing" ? "Veuillez téléverser ce document" : "Glisser-déposer ou <span class='text-primary underline'>parcourir</span>"}
+          ${doc.status === "missing" ? "Veuillez tï¿½lï¿½verser ce document" : "Glisser-dï¿½poser ou <span class='text-primary underline'>parcourir</span>"}
         </div>
         <p class="text-xs ${doc.status === "missing" ? "text-red-400/80" : "text-gray-400"}">
           ${doc.status === "missing" ? "Obligatoire pour continuer" : "PDF, JPG, PNG max 5Mo"}
@@ -758,11 +759,11 @@
       setOverlayLocked(true);
       showLoans([]); // hide all
       docsGrid.innerHTML = "";
-      dossierTitle.textContent = "Dossier : —";
-      dossierSubtitle.textContent = "Sélectionnez un partenaire puis un crédit pour voir les documents requis.";
-      docsBadge.textContent = "(—)";
-      footerTitle.textContent = "Sélectionnez un partenaire";
-      footerSubtitle.textContent = "Le dépôt est lié à une institution financière.";
+      dossierTitle.textContent = "Dossier : ï¿½";
+      dossierSubtitle.textContent = "Sï¿½lectionnez un partenaire puis un crï¿½dit pour voir les documents requis.";
+      docsBadge.textContent = "(ï¿½)";
+      footerTitle.textContent = "Sï¿½lectionnez un partenaire";
+      footerSubtitle.textContent = "Le dï¿½pï¿½t est liï¿½ ï¿½ une institution financiï¿½re.";
       btnSubmit.disabled = true;
       btnSubmit.className = "flex-1 md:flex-none px-8 py-3 rounded-xl bg-white/15 text-white/60 font-black text-sm cursor-not-allowed flex items-center justify-center gap-2 opacity-80";
       setProgress(0);
@@ -774,7 +775,7 @@
 
     const partner = DATA.partners[partnerId];
     partnerSelectedPill.classList.remove("hidden");
-    partnerPillText.textContent = `${partner.name} • ${partner.type}`;
+    partnerPillText.textContent = `${partner.name} ï¿½ ${partner.type}`;
 
     // show loans allowed
     showLoans(partner.loans);
@@ -792,14 +793,14 @@
     const loan = DATA.loans[state.loanId];
     const docs = getDocs(partnerId, state.loanId);
 
-    dossierTitle.textContent = `Dossier : ${loan ? loan.label : "—"}`;
+    dossierTitle.textContent = `Dossier : ${loan ? loan.label : "ï¿½"}`;
     dossierSubtitle.textContent = `${loan ? loan.amountText : ""}. Documents requis selon ${partner.name}.`;
-    docsBadge.textContent = `(${loan ? loan.label : "—"} • ${partner.name})`;
+    docsBadge.textContent = `(${loan ? loan.label : "ï¿½"} ï¿½ ${partner.name})`;
 
     docsGrid.innerHTML = docs.length
       ? docs.map(renderDocCard).join("")
       : `<div class="col-span-1 md:col-span-2 p-5 rounded-2xl border border-[#e7f3f1] dark:border-[#1f3a35] bg-white dark:bg-[#152a26]">
-          <p class="text-sm text-text-light-secondary">Aucun document configuré pour ce produit chez ce partenaire (V2 statique).</p>
+          <p class="text-sm text-text-light-secondary">Aucun document configurï¿½ pour ce produit chez ce partenaire (V2 statique).</p>
         </div>`;
 
     const hasMissing = docs.some(d => d.status === "missing");
@@ -814,13 +815,13 @@
       footerSubtitle.textContent = "Ajoutez tous les documents obligatoires pour pouvoir soumettre.";
       btnSubmit.disabled = true;
       btnSubmit.className = "flex-1 md:flex-none px-8 py-3 rounded-xl bg-white/15 text-white/60 font-black text-sm cursor-not-allowed flex items-center justify-center gap-2 opacity-80";
-      btnSubmit.innerHTML = `Soumettre à ${partner.name}<span class="material-symbols-outlined text-[18px]">send</span>`;
+      btnSubmit.innerHTML = `Soumettre ï¿½ ${partner.name}<span class="material-symbols-outlined text-[18px]">send</span>`;
     } else {
-      footerTitle.textContent = "Dossier prêt à être soumis";
-      footerSubtitle.textContent = "Tous les documents obligatoires sont présents.";
+      footerTitle.textContent = "Dossier prï¿½t ï¿½ ï¿½tre soumis";
+      footerSubtitle.textContent = "Tous les documents obligatoires sont prï¿½sents.";
       btnSubmit.disabled = false;
       btnSubmit.className = "flex-1 md:flex-none px-8 py-3 rounded-xl bg-primary text-[#0a0c0a] font-black text-sm flex items-center justify-center gap-2 hover:bg-primary/90 transition";
-      btnSubmit.innerHTML = `Soumettre à ${partner.name}<span class="material-symbols-outlined text-[18px]">send</span>`;
+      btnSubmit.innerHTML = `Soumettre ï¿½ ${partner.name}<span class="material-symbols-outlined text-[18px]">send</span>`;
     }
 
     saveState();
@@ -870,7 +871,7 @@
   // save
   btnSave.addEventListener("click", () => {
     saveState();
-    footerSubtitle.textContent = "Sauvegarde locale effectuée (V2 statique).";
+    footerSubtitle.textContent = "Sauvegarde locale effectuï¿½e (V2 statique).";
     setTimeout(() => updateUI(), 900);
   });
 
