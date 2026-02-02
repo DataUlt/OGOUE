@@ -5,6 +5,9 @@ services:
     buildCommand: echo "Deploying static frontend"
     staticPublishPath: .
     headers:
+      - path: /*.html
+        name: Content-Type
+        value: "text/html; charset=utf-8"
       - path: /*
         name: X-Frame-Options
         value: SAMEORIGIN
