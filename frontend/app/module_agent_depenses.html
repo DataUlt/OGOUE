@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Gestion Comptable - D�penses</title>
+    <title>Gestion Comptable - D&eacute;penses</title>
     <link rel="icon" type="image/png" href="O-removebg-preview.png">
 
     <!-- Tailwind -->
@@ -21,7 +21,7 @@
             theme: {
                 extend: {
                     colors: {
-                        /* Palette OGOU� - Redesign */
+                        /* Palette OGOUé - Redesign */
                         "primary": "#0088CC",
                         "secondary": "#1E3A5F",
                         "background-light": "#f6f8f6",
@@ -57,17 +57,17 @@
             font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
         }
 
-        /* ? FORCER le champ date � la m�me taille que les autres */
+        /* ? FORCER le champ date &agrave; la m&ecirc;me taille que les autres */
         .date-input{
             height: 56px !important;                /* = h-14 */
-            padding: 0 48px 0 15px !important;      /* espace r�serv� � droite pour l'ic�ne */
+            padding: 0 48px 0 15px !important;      /* espace r&eacute;serv&eacute; &agrave; droite pour l'ic&ocirc;ne */
             box-sizing: border-box !important;
             line-height: 56px !important;          /* centre le texte */
             position: relative;                     /* pour positionner l'indicateur */
-            color-scheme: light dark;               /* Active le datepicker adapt� au mode sombre */
+            color-scheme: light dark;               /* Active le datepicker adapt&eacute; au mode sombre */
         }
 
-        /* Chrome/Edge : positionner l'indicateur � droite */
+        /* Chrome/Edge : positionner l'indicateur &agrave; droite */
         .date-input::-webkit-calendar-picker-indicator {
             position: absolute;
             right: 10px;
@@ -80,13 +80,13 @@
             filter: invert(0.8);
         }
 
-        /* Chrome/Edge : centre l'�dition interne du date */
+        /* Chrome/Edge : centre l'&eacute;dition interne du date */
         .date-input::-webkit-datetime-edit{
             line-height: 56px !important;
             padding: 0 !important;
         }
 
-        /* Mode sombre: ic�ne du calendrier en clair */
+        /* Mode sombre: ic&ocirc;ne du calendrier en clair */
         html.dark .date-input::-webkit-calendar-picker-indicator {
             filter: invert(1) brightness(0.9);
         }
@@ -102,7 +102,7 @@
             filter: invert(1) brightness(0.9);
         }
 
-        /* Am�liorations pour le calendrier du navigateur en mode sombre */
+        /* Am&eacute;liorations pour le calendrier du navigateur en mode sombre */
         @media (prefers-color-scheme: dark) {
             input[type="date"],
             input[type="time"],
@@ -116,17 +116,17 @@
 <body class="font-display bg-background-light dark:bg-background-dark text-[#0a0c0a] dark:text-gray-200">
 <div class="relative flex min-h-screen w-full flex-col group/design-root overflow-x-hidden">
 
-    <!-- ===== HEADER OGOUE (liens corrig�s) ===== -->
+    <!-- ===== HEADER OGOUE (liens corrig&eacute;s) ===== -->
     <header class="sticky top-0 z-10 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-[#e8ede8] dark:border-gray-700">
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-between whitespace-nowrap h-20">
                 <div class="flex items-center gap-4">
-                    <a href="module_agent_dashboard"><img src="/app/Logo-ogoue (2).png" alt="OGOU� Logo" class="h-28 w-auto"></a>
+                    <a href="module_agent_dashboard"><img src="/app/Logo-ogoue (2).png" alt="OGOUé Logo" class="h-28 w-auto"></a>
                 </div>
                 <div class="hidden md:flex items-center gap-9">
                     <a class="text-primary text-sm font-bold leading-normal"
                        href="module_agent_dashboard">
-                        Comptabilit�
+                        Comptabilit&eacute;
                     </a>
                 </div>
                 <div class="flex items-center gap-2">
@@ -147,7 +147,7 @@
     </header>
     <!-- ===== FIN HEADER ===== -->
 
-    <!-- ===== CONTENU PAGE D�PENSES ===== -->
+    <!-- ===== CONTENU PAGE D&Eacute;PENSES ===== -->
     <main class="flex-grow">
         <div class="container mx-auto px-4 py-8">
             <div class="flex flex-col gap-8">
@@ -159,12 +159,12 @@
                             Gestion Comptable
                         </h1>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
-                            Enregistrer et suivre vos d�penses quotidiennes.
+                            Enregistrer et suivre vos d&eacute;penses quotidiennes.
                         </p>
                     </div>
                 </header>
 
-                <!-- Onglets (liens corrig�s) -->
+                <!-- Onglets (liens corrig&eacute;s) -->
                 <div class="border-b border-gray-200 dark:border-gray-700">
                     <nav class="flex gap-8 -mb-px">
                         <a href="module_agent_dashboard"
@@ -173,22 +173,22 @@
                         </a>
                         <a href="module_agent_depenses"
                            class="flex flex-col items-center justify-center border-b-[3px] border-b-primary text-[#0a0c0a] dark:text-white pb-3 pt-4 px-2">
-                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">D�penses</p>
+                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">D&eacute;penses</p>
                         </a>
                         <a href="module_agent_resume"
                            class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
-                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">R�sum�</p>
+                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">R&eacute;sum&eacute;</p>
                         </a>
                     </nav>
                 </div>
 
-                <!-- Card D�penses -->
+                <!-- Card D&eacute;penses -->
                 <div class="mt-4 bg-white dark:bg-card-dark p-8 rounded-xl shadow-sm border border-[#e8ede8]/70 dark:border-gray-700/70">
-                    <h2 class="text-xl font-bold text-[#0a0c0a] dark:text-white mb-6">Enregistrer une nouvelle d�pense</h2>
+                    <h2 class="text-xl font-bold text-[#0a0c0a] dark:text-white mb-6">Enregistrer une nouvelle d&eacute;pense</h2>
 
                     <form id="form-depenses" class="space-y-6">
 
-                        <!-- Date + Cat�gorie -->
+                        <!-- Date + Cat&eacute;gorie -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <label class="flex flex-col">
                                 <p class="text-base font-medium leading-normal pb-2 text-[#0a0c0a] dark:text-gray-200">
@@ -204,7 +204,7 @@
 
                             <label class="flex flex-col">
                                 <p class="text-base font-medium leading-normal pb-2 text-[#0a0c0a] dark:text-gray-200">
-                                    Cat�gorie <span class="text-red-500">*</span>
+                                    Cat&eacute;gorie <span class="text-red-500">*</span>
                                 </p>
 
                                 <select
@@ -212,24 +212,24 @@
                                     name="categorie"
                                     required
                                     class="form-select flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0a0c0a] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-14 p-[15px] text-base font-normal leading-normal">
-                                    <!-- options inject�es en JS -->
+                                    <!-- options inject&eacute;es en JS -->
                                 </select>
 
                                 <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                                    Astuce : si vous choisissez <span class="font-semibold">Autres</span>, vous pourrez pr�ciser et l'ajouter � vos cat�gories.
+                                    Astuce : si vous choisissez <span class="font-semibold">Autres</span>, vous pourrez pr&eacute;ciser et l'ajouter &agrave; vos cat&eacute;gories.
                                 </p>
                             </label>
 
                             <label id="categorie-autre-wrapper" class="flex flex-col hidden md:col-span-2">
                                 <p class="text-base font-medium leading-normal pb-2 text-[#0a0c0a] dark:text-gray-200">
-                                    Pr�ciser la cat�gorie <span class="text-red-500">*</span>
+                                    Pr&eacute;ciser la cat&eacute;gorie <span class="text-red-500">*</span>
                                 </p>
 
                                 <input
                                     id="depense-categorie-autre"
                                     name="categorie_autre"
                                     type="text"
-                                    placeholder="Ex : S�curit�, Fournitures, Maintenance..."
+                                    placeholder="Ex : S&eacute;curit&eacute;, Fournitures, Maintenance..."
                                     class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0a0c0a] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-14 placeholder:text-gray-400 dark:placeholder:text-gray-500 p-[15px] text-base font-normal leading-normal">
                             </label>
                         </div>
@@ -245,7 +245,7 @@
                                     name="moyen_paiement"
                                     required
                                     class="form-select flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0a0c0a] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-14 p-[15px] text-base font-normal leading-normal">
-                                    <option value="">S�lectionner un moyen de paiement</option>
+                                    <option value="">S&eacute;lectionner un moyen de paiement</option>
                                     <option value="cash">Cash</option>
                                     <option value="mobile_money">Mobile Money</option>
                                 </select>
@@ -277,13 +277,13 @@
                                         <label
                                             for="depense-file-upload"
                                             class="relative cursor-pointer rounded-md font-medium text-primary hover:text-primary/80 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary/50">
-                                            <span>T�l�versez un fichier</span>
+                                            <span>T&eacute;l&eacute;versez un fichier</span>
                                             <input id="depense-file-upload" name="file-upload" type="file" class="sr-only" />
                                         </label>
-                                        <p class="pl-1">ou glissez-d�posez</p>
+                                        <p class="pl-1">ou glissez-d&eacute;posez</p>
                                     </div>
                                     <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                                        Formats accept�s : PDF, JPEG, PNG. Taille max : 5Mo
+                                        Formats accept&eacute;s : PDF, JPEG, PNG. Taille max : 5Mo
                                     </p>
                                 </div>
                             </div>
@@ -299,17 +299,17 @@
                             <button
                                 type="submit"
                                 class="px-6 py-3 rounded-lg text-sm font-bold bg-primary text-[#0a0c0a] hover:bg-primary/80">
-                                Enregistrer la d�pense
+                                Enregistrer la d&eacute;pense
                             </button>
                         </div>
                     </form>
                 </div>
 
-                <!-- Tableau des d�penses r�centes (vue compacte) -->
+                <!-- Tableau des d&eacute;penses r&eacute;centes (vue compacte) -->
                 <div class="mt-4">
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-xl font-bold text-[#0a0c0a] dark:text-white">
-                            D�penses r�centes d'aujourd'hui
+                            D&eacute;penses r&eacute;centes d'aujourd'hui
                         </h2>
                         <button
                             id="btn-depenses-expand"
@@ -327,10 +327,10 @@
                             <tr>
                                 <th scope="col" class="px-6 py-4">Date</th>
                                 <th scope="col" class="px-6 py-4">Heure</th>
-                                <th scope="col" class="px-6 py-4">Cat�gorie</th>
+                                <th scope="col" class="px-6 py-4">Cat&eacute;gorie</th>
                                 <th scope="col" class="px-6 py-4">Montant</th>
                                 <th scope="col" class="px-6 py-4">Moyen de paiement</th>
-                                <th scope="col" class="px-6 py-4">Cr�� par</th>
+                                <th scope="col" class="px-6 py-4">Cr&eacute;&eacute; par</th>
                                 <th scope="col" class="px-6 py-4">Justificatif</th>
                                 <th scope="col" class="px-6 py-4 text-center">Action</th>
                             </tr>
@@ -344,12 +344,12 @@
         </div>
     </main>
 
-    <!-- ===== Modale vue �tendue des d�penses ===== -->
+    <!-- ===== Modale vue &eacute;tendue des d&eacute;penses ===== -->
     <div id="depenses-modal" class="fixed inset-0 z-40 hidden items-center justify-center bg-black/40 px-4">
         <div class="bg-white dark:bg-card-dark rounded-2xl shadow-xl max-w-5xl w-full max-h-[85vh] flex flex-col overflow-hidden">
             <div class="flex items-center justify-between px-6 py-4 border-b border-[#e8ede8]/70 dark:border-gray-700/70">
                 <h3 class="text-lg font-bold text-[#0a0c0a] dark:text-white">
-                    Historique des d�penses d'aujourd'hui
+                    Historique des d&eacute;penses d'aujourd'hui
                 </h3>
                 <button id="btn-depenses-close" type="button"
                         class="inline-flex items-center justify-center size-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700">
@@ -359,7 +359,7 @@
 
             <div class="flex items-center justify-between gap-4 px-6 py-3 border-b border-[#e8ede8]/70 dark:border-gray-700/70">
                 <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">
-                    Liste compl�te des d�penses enregistr�es aujourd'hui.
+                    Liste compl&egrave;te des d&eacute;penses enregistr&eacute;es aujourd'hui.
                 </p>
                 <button id="btn-depenses-export" type="button"
                         class="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-[#0a0c0a] hover:bg-primary/80">
@@ -374,10 +374,10 @@
                     <tr>
                         <th scope="col" class="px-6 py-4">Date</th>
                         <th scope="col" class="px-6 py-4">Heure</th>
-                        <th scope="col" class="px-6 py-4">Cat�gorie</th>
+                        <th scope="col" class="px-6 py-4">Cat&eacute;gorie</th>
                         <th scope="col" class="px-6 py-4">Montant</th>
                         <th scope="col" class="px-6 py-4">Moyen de paiement</th>
-                        <th scope="col" class="px-6 py-4">Cr�� par</th>
+                        <th scope="col" class="px-6 py-4">Cr&eacute;&eacute; par</th>
                         <th scope="col" class="px-6 py-4">Justificatif</th>
                         <th scope="col" class="px-6 py-4 text-center">Action</th>
                     </tr>

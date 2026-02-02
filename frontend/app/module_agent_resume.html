@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Gestion Comptable - R�sum�</title>
+    <title>Gestion Comptable - R&eacute;sum&eacute;</title>
     <link rel="icon" type="image/png" href="O-removebg-preview.png">
 
     <!-- Tailwind -->
@@ -21,7 +21,7 @@
             theme: {
                 extend: {
                     colors: {
-                        /* Palette OGOU� - Redesign */
+                        /* Palette OGOUé - Redesign */
                         "primary": "#0088CC",
                         "secondary": "#1E3A5F",
                         "background-light": "#f6f8f6",
@@ -51,40 +51,28 @@
             },
         }
     </script>
-
     <style>
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
-        }
-
-        /* Masquer toutes les scrollbars */
-        ::-webkit-scrollbar {
-            display: none;
-        }
-
-        html, body {
-            scrollbar-width: none;
-            -ms-overflow-style: none;
         }
     </style>
 </head>
 
 <body class="font-display bg-background-light dark:bg-background-dark text-[#0a0c0a] dark:text-gray-200">
-<div class="relative flex w-full flex-col group/design-root overflow-x-hidden">
+<div class="relative flex min-h-screen w-full flex-col group/design-root overflow-x-hidden">
 
-    <!-- ===== HEADER OGOUE (identique � D�penses) ===== -->
+    <!-- ===== HEADER OGOUE ===== -->
     <header class="sticky top-0 z-10 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-[#e8ede8] dark:border-gray-700">
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-between whitespace-nowrap h-20">
                 <div class="flex items-center gap-4">
-                    <a href="module_agent_dashboard"><img src="/app/Logo-ogoue (2).png" alt="OGOU� Logo" class="h-28 w-auto"></a>
+                    <a href="module_agent_dashboard"><img src="/app/Logo-ogoue (2).png" alt="OGOUé Logo" class="h-28 w-auto"></a>
                 </div>
                 <div class="hidden md:flex items-center gap-9">
                     <a class="text-primary text-sm font-bold leading-normal"
                        href="module_agent_dashboard">
-                        Comptabilit�
+                        Comptabilit&eacute;
                     </a>
-
                 </div>
                 <div class="flex items-center gap-2">
                     <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white" data-action="notifications">
@@ -98,17 +86,16 @@
                          title="Profil utilisateur">
                         <span class="material-symbols-outlined text-2xl">account_circle</span>
                     </button>
-                    </div>
                 </div>
             </div>
         </div>
     </header>
     <!-- ===== FIN HEADER ===== -->
 
-    <!-- ===== CONTENU PAGE RESUME ===== -->
+    <!-- ===== CONTENU PAGE R&Eacute;SUM&Eacute; ===== -->
     <main class="flex-grow">
-        <div class="container mx-auto px-4 py-2">
-            <div class="flex flex-col gap-6">
+        <div class="container mx-auto px-4 py-8">
+            <div class="flex flex-col gap-8">
 
                 <!-- Titre page -->
                 <header class="flex flex-wrap justify-between items-center gap-3 mb-2">
@@ -117,179 +104,111 @@
                             Gestion Comptable
                         </h1>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
-                            Enregistrer et suivre vos d�penses quotidiennes.
+                            Vue d'ensemble de votre activit&eacute; comptable.
                         </p>
                     </div>
                 </header>
 
-                <!-- Onglets + Filtre par date sur la m�me ligne -->
+                <!-- Onglets -->
                 <div class="border-b border-gray-200 dark:border-gray-700">
-                    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+                    <nav class="flex gap-8 -mb-px">
+                        <a href="module_agent_dashboard"
+                           class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
+                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">Ventes</p>
+                        </a>
+                        <a href="module_agent_depenses"
+                           class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
+                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">D&eacute;penses</p>
+                        </a>
+                        <a href="module_agent_resume"
+                           class="flex flex-col items-center justify-center border-b-[3px] border-b-primary text-[#0a0c0a] dark:text-white pb-3 pt-4 px-2">
+                            <p class="text-sm font-bold leading-normal tracking-[0.015em]">R&eacute;sum&eacute;</p>
+                        </a>
+                    </nav>
+                </div>
 
-                        <!-- Onglets -->
-                        <nav class="flex gap-8 -mb-px">
-                            <a href="module_agent_dashboard"
-                               class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
-                                <p class="text-sm font-bold leading-normal tracking-[0.015em]">Ventes</p>
-                            </a>
-                            <a href="module_agent_depenses"
-                               class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
-                                <p class="text-sm font-bold leading-normal tracking-[0.015em]">D�penses</p>
-                            </a>
-                            <a href="module_agent_resume"
-                               class="flex flex-col items-center justify-center border-b-[3px] border-b-primary text-[#0a0c0a] dark:text-white pb-3 pt-4 px-2">
-                                <p class="text-sm font-bold leading-normal tracking-[0.015em]">R�sum�</p>
-                            </a>
-                        </nav>
-
-                        <!-- Filtre par date align� � droite -->
-                        <div class="relative rounded-lg border border-[#e8ede8] dark:border-gray-700 bg-card-light dark:bg-card-dark px-6 py-4 shadow-sm w-[320px]">
-                            <p class="text-[10px] font-semibold uppercase tracking-wide text-text-light-secondary dark:text-text-dark-secondary mb-1">
-                                Filtrer par date
-                            </p>
-
-                            <!-- Champ cliquable -->
-                            <button
-                                id="dateFilterButton"
-                                type="button"
-                                class="flex items-center justify-between gap-2 w-full h-10 rounded-md border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark px-3 text-sm font-normal text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/40"
-                            >
-                                <span id="dateFilterLabel" class="truncate text-[13px]">
-                                    <!-- rempli en JS -->
-                                </span>
-                                <span class="material-symbols-outlined text-lg text-gray-500 dark:text-gray-400">
-                                    calendar_month
-                                </span>
-                            </button>
-
-                            <!-- Panel calendrier -->
-                            <div
-                                id="dateFilterPanel"
-                                class="absolute right-0 mt-2 w-[300px] rounded-xl border border-[#e8ede8] dark:border-gray-700 bg-white dark:bg-card-dark shadow-xl p-4 hidden z-20"
-                            >
-                                <!-- Header mois + navigation -->
-                                <div class="flex items-center justify-between mb-3">
-                                    <button id="prevMonth" type="button" class="p-1.5 rounded-full hover:bg-background-light dark:hover:bg-background-dark">
-                                        <span class="material-symbols-outlined text-base text-gray-600 dark:text-gray-300">chevron_left</span>
-                                    </button>
-                                    <p id="monthLabel" class="text-sm font-semibold text-[#0a0c0a] dark:text-gray-100"></p>
-                                    <button id="nextMonth" type="button" class="p-1.5 rounded-full hover:bg-background-light dark:hover:bg-background-dark">
-                                        <span class="material-symbols-outlined text-base text-gray-600 dark:text-gray-300">chevron_right</span>
-                                    </button>
-                                </div>
-
-                                <!-- Jours de la semaine -->
-                                <div class="grid grid-cols-7 text-center text-[11px] uppercase tracking-wide text-gray-400 dark:text-gray-500 mb-1">
-                                    <span>l</span><span>m</span><span>m</span><span>j</span><span>v</span><span>s</span><span>d</span>
-                                </div>
-
-                                <!-- Grille des jours -->
-                                <div id="calendarGrid" class="grid grid-cols-7 gap-1 text-sm">
-                                    <!-- cases g�n�r�es en JS -->
-                                </div>
-
-                                <!-- Actions -->
-                                <div class="flex justify-between items-center pt-3 mt-3 border-t border-[#e8ede8] dark:border-gray-700">
-                                    <button
-                                        id="resetRange"
-                                        type="button"
-                                        class="text-xs px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-background-light dark:hover:bg-background-dark"
-                                    >
-                                        R�initialiser
-                                    </button>
-                                    <button
-                                        id="closeCalendar"
-                                        type="button"
-                                        class="text-xs px-3 py-1.5 rounded-lg bg-primary text-[#0a0c0a] hover:bg-primary/90"
-                                    >
-                                        Fermer
-                                    </button>
-                                </div>
-                            </div>
+                <!-- Section Statistiques -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Ventes d'aujourd'hui -->
+                    <div class="bg-white dark:bg-card-dark rounded-xl p-6 shadow-sm border border-[#e8ede8]/70 dark:border-gray-700/70">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-300">Ventes d'aujourd'hui</h3>
+                            <span class="material-symbols-outlined text-primary">trending_up</span>
                         </div>
+                        <p class="text-2xl font-bold text-[#0a0c0a] dark:text-white" id="ventes-total">0 FCFA</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                            <span id="ventes-count">0</span> transaction(s)
+                        </p>
+                    </div>
 
+                    <!-- D&eacute;penses d'aujourd'hui -->
+                    <div class="bg-white dark:bg-card-dark rounded-xl p-6 shadow-sm border border-[#e8ede8]/70 dark:border-gray-700/70">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-300">D&eacute;penses d'aujourd'hui</h3>
+                            <span class="material-symbols-outlined text-danger">trending_down</span>
+                        </div>
+                        <p class="text-2xl font-bold text-[#0a0c0a] dark:text-white" id="depenses-total">0 FCFA</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                            <span id="depenses-count">0</span> transaction(s)
+                        </p>
+                    </div>
+
+                    <!-- B&eacute;n&eacute;fice d'aujourd'hui -->
+                    <div class="bg-white dark:bg-card-dark rounded-xl p-6 shadow-sm border border-[#e8ede8]/70 dark:border-gray-700/70">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-300">B&eacute;n&eacute;fice d'aujourd'hui</h3>
+                            <span class="material-symbols-outlined text-success">paid</span>
+                        </div>
+                        <p class="text-2xl font-bold text-[#0a0c0a] dark:text-white" id="benefice-total">0 FCFA</p>
+                        <p class="text-xs text-success mt-2" id="benefice-percent">+0%</p>
                     </div>
                 </div>
 
-                <!-- Bloc stats -->
-                <section class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
-                    <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl p-6 border border-gray-200 dark:border-gray-700/50 bg-white dark:bg-background-dark">
-                        <p class="text-base font-medium leading-normal text-gray-600 dark:text-gray-400">Total des ventes</p>
-                        <p id="stat-total-ventes" class="tracking-light text-3xl font-bold leading-tight text-gray-900 dark:text-white">-</p>
-                        <p id="stat-trend-ventes" class="text-base font-medium leading-normal text-cyan-600 dark:text-cyan-500">-</p>
+                <!-- Comparaison par moyen de paiement -->
+                <div class="bg-white dark:bg-card-dark rounded-xl p-8 shadow-sm border border-[#e8ede8]/70 dark:border-gray-700/70">
+                    <h2 class="text-xl font-bold text-[#0a0c0a] dark:text-white mb-6">R&eacute;partition par moyen de paiement</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-4">Ventes</h3>
+                            <div class="space-y-3" id="ventes-moyens-paiement"></div>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-4">D&eacute;penses</h3>
+                            <div class="space-y-3" id="depenses-moyens-paiement"></div>
+                        </div>
                     </div>
-                    <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl p-6 border border-gray-200 dark:border-gray-700/50 bg-white dark:bg-background-dark">
-                        <p class="text-base font-medium leading-normal text-gray-600 dark:text-gray-400">Total des d�penses</p>
-                        <p id="stat-total-depenses" class="tracking-light text-3xl font-bold leading-tight text-gray-900 dark:text-white">-</p>
-                        <p id="stat-trend-depenses" class="text-base font-medium leading-normal text-red-600 dark:text-red-500">-</p>
-                    </div>
-                    <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl p-6 border border-gray-200 dark:border-gray-700/50 bg-white dark:bg-background-dark">
-                        <p class="text-base font-medium leading-normal text-gray-600 dark:text-gray-400">Solde</p>
-                        <p id="stat-solde" class="tracking-light text-3xl font-bold leading-tight text-gray-900 dark:text-white">-</p>
-                        <p id="stat-trend-solde" class="text-base font-medium leading-normal text-cyan-600 dark:text-cyan-500">-</p>
-                    </div>
-                </section>
+                </div>
 
-                <!-- Middle blocks -->
-                <section class="grid grid-cols-1 lg:grid-cols-5 gap-4 p-4">
-                    <!-- LEFT COLUMN : 3 CARTES -->
-                    <div class="lg:col-span-3 flex flex-col gap-4">
-
-                        <!-- R�partition des ventes -->
-                        <div class="flex flex-col rounded-xl border border-gray-200 dark:border-gray-700/50 bg-white dark:bg-background-dark overflow-hidden">
-                            <h2 class="text-lg font-bold leading-tight tracking-[-0.015em] px-6 pt-5 pb-3 text-gray-900 dark:text-white">
-                                R�partition des ventes
-                            </h2>
-                            <div id="repartition-ventes" class="p-2 px-6 grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-8 items-start">
-                                <!-- Rempli en JS -->
+                <!-- Actions rapides -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <a href="module_agent_dashboard" class="bg-white dark:bg-card-dark rounded-xl p-6 shadow-sm border border-[#e8ede8]/70 dark:border-gray-700/70 hover:shadow-md transition-shadow cursor-pointer">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-bold text-[#0a0c0a] dark:text-white mb-1">Ajouter une vente</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Enregistrez rapidement une nouvelle vente</p>
                             </div>
+                            <span class="material-symbols-outlined text-primary text-3xl">add_circle</span>
                         </div>
-
-                        <!-- R�partition moyens de paiement (ventes) -->
-                        <div class="flex flex-col rounded-xl border border-gray-200 dark:border-gray-700/50 bg-white dark:bg-background-dark overflow-hidden">
-                            <h2 class="text-lg font-bold leading-tight tracking-[-0.015em] px-6 pt-5 pb-3 text-gray-900 dark:text-white">
-                                R�partition des moyens de paiement
-                            </h2>
-                            <div id="repartition-paiement-ventes" class="p-2 px-6 grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-8 items-start">
-                                <!-- Rempli en JS -->
+                    </a>
+                    <a href="module_agent_depenses" class="bg-white dark:bg-card-dark rounded-xl p-6 shadow-sm border border-[#e8ede8]/70 dark:border-gray-700/70 hover:shadow-md transition-shadow cursor-pointer">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-bold text-[#0a0c0a] dark:text-white mb-1">Ajouter une d&eacute;pense</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Enregistrez rapidement une nouvelle d&eacute;pense</p>
                             </div>
+                            <span class="material-symbols-outlined text-primary text-3xl">add_circle</span>
                         </div>
-
-                        <!-- R�partition moyens de paiement (d�penses) -->
-                        <div class="flex flex-col rounded-xl border border-gray-200 dark:border-gray-700/50 bg-white dark:bg-background-dark overflow-hidden">
-                            <h2 class="text-lg font-bold leading-tight tracking-[-0.015em] px-6 pt-5 pb-3 text-gray-900 dark:text-white">
-                                R�partition des moyens de paiement pour les d�penses
-                            </h2>
-                            <div id="repartition-paiement-depenses" class="p-2 px-6 grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-8 items-start">
-                                <!-- Rempli en JS -->
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <!-- RIGHT COLUMN : R�partition des d�penses -->
-                    <div class="lg:col-span-2 flex flex-col rounded-xl border border-gray-200 dark:border-gray-700/50 bg-white dark:bg-background-dark overflow-hidden">
-                        <h2 class="text-lg font-bold leading-tight tracking-[-0.015em] px-6 pt-5 pb-3 text-gray-900 dark:text-white">
-                            R�partition des d�penses
-                        </h2>
-                        <div id="repartition-depenses" class="flex flex-col px-6 pb-4">
-                            <!-- Rempli en JS -->
-                        </div>
-                    </div>
-                </section>
+                    </a>
+                </div>
 
             </div>
         </div>
     </main>
-    <!-- ===== FIN CONTENU ===== -->
 
 </div>
 
-<!-- Store OGOU� -->
 <script src="js/ogoue-state.js"></script>
 <script src="js/header-ui.js"></script>
-
-<!-- JS d�di� � la page R�sum� -->
 <script src="js/resume.js"></script>
 <script src="js/topbar-actions.js"></script>
 <script>
