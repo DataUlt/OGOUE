@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <title>Se Connecter - OGOUÉ</title>
+  <link rel="icon" type="image/png" href="app/O-removebg-preview.png">
 
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -55,16 +56,16 @@
       <div class="max-w-7xl mx-auto px-6 lg:px-8">
         <div class="flex items-center justify-between h-20 border-b border-black/10">
           <div class="flex items-center gap-4">
-            <a href="/index.html" class="flex items-center gap-2">
+            <a href="/" class="flex items-center gap-2">
               <img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-28 w-auto">
             </a>
           </div>
 
           <nav class="hidden md:flex items-center gap-8">
-            <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/index.html">Accueil</a>
+            <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/">Accueil</a>
             <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/index.html#features">Fonctionnalités</a>
             <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/index.html#benefits">Avantages</a>
-            <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/apropos.html">À propos</a>
+            <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/apropos">À propos</a>
           </nav>
 
           <!-- Mobile menu button -->
@@ -73,7 +74,7 @@
           </button>
 
           <div class="hidden md:flex items-center gap-3">
-            <a href="/signin.html"
+            <a href="/signin"
                class="flex min-w-[84px] items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-primary text-background-dark text-sm font-bold tracking-wide hover:bg-primary/90 transition-colors">
               <span class="truncate">Créer compte</span>
             </a>
@@ -85,12 +86,12 @@
     <!-- Mobile menu -->
     <div id="mobile-menu" class="hidden fixed inset-0 top-20 z-40 md:hidden bg-background-light border-t border-black/10">
       <nav class="flex flex-col p-6 space-y-4">
-        <a href="/index.html" class="text-text-light font-medium hover:text-primary transition-colors">Accueil</a>
+        <a href="/" class="text-text-light font-medium hover:text-primary transition-colors">Accueil</a>
         <a href="/index.html#features" class="text-text-light font-medium hover:text-primary transition-colors">Fonctionnalités</a>
         <a href="/index.html#benefits" class="text-text-light font-medium hover:text-primary transition-colors">Avantages</a>
-        <a href="/apropos.html" class="text-text-light font-medium hover:text-primary transition-colors">À propos</a>
+        <a href="/apropos" class="text-text-light font-medium hover:text-primary transition-colors">À propos</a>
         <hr class="border-black/10" />
-        <a href="/signin.html" class="text-primary font-bold hover:text-text-light transition-colors">Créer compte</a>
+        <a href="/signin" class="text-primary font-bold hover:text-text-light transition-colors">Créer compte</a>
       </nav>
     </div>
 
@@ -194,7 +195,7 @@
               </button>
             </div>
             <div id="agentButton" class="hidden">
-              <a href="/agent-login.html"
+              <a href="/agent-login"
                 class="block w-full py-3 px-4 rounded-lg bg-primary text-background-dark font-bold text-sm hover:bg-primary/90 transition-colors text-center">
                 Accéder à mon espace
               </a>
@@ -202,7 +203,7 @@
 
             <!-- Links -->
             <div class="text-center">
-              <a class="text-sm text-text-light-muted hover:text-text-light transition-colors" href="forgot-password.html">
+              <a class="text-sm text-text-light-muted hover:text-text-light transition-colors" href="forgot-password">
                 Mot de passe oublié ?
               </a>
             </div>
@@ -210,7 +211,7 @@
             <div class="pt-4 border-t border-black/10 text-center">
               <p class="text-sm text-text-light-muted">
                 Vous n'avez pas de compte ?
-                <a class="font-semibold text-primary hover:text-text-light transition-colors" href="/signin.html">
+                <a class="font-semibold text-primary hover:text-text-light transition-colors" href="/signin">
                   Créez un compte
                 </a>
               </p>
@@ -226,7 +227,7 @@
       <div class="max-w-7xl mx-auto px-6 lg:px-8">
         <div class="flex items-center justify-between h-20">
           <div class="flex items-center gap-4">
-            <a href="/index.html" class="flex items-center gap-2">
+            <a href="/" class="flex items-center gap-2">
               <img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-28 w-auto">
             </a>
           </div>
@@ -309,7 +310,7 @@
         
         const APP_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
           ? 'http://127.0.0.1:8080/app'
-          : 'https://ogoue.com/app';
+          : 'https://www.ogoue.com/app';
         setTimeout(() => {
           window.location.href = `${APP_BASE}/module_tableau_bord.html`;
         }, 1500);

@@ -1,9 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html class="light" lang="fr">
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Gestion Comptable - Dépenses</title>
+    <link rel="icon" type="image/png" href="O-removebg-preview.png">
 
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -66,14 +67,14 @@
             animation: spin 2s linear infinite;
         }
 
-        /* ✅ FORCER le champ date à la même taille que les autres et icône à droite */
+        /* ? FORCER le champ date à la même taille que les autres et icône à droite */
         .date-input{
             height: 56px !important;                /* = h-14 */
             padding: 0 48px 0 15px !important;      /* espace réservé à droite pour l'icône */
             box-sizing: border-box !important;
             line-height: 56px !important;          /* centre le texte */
             position: relative;                     /* pour positionner l'indicateur */
-            color-scheme: light dark;               /* Active le datepicker adapté au mode sombre */
+            color-scheme: light dark;               /* Active le datepicker adapt� au mode sombre */
         }
 
         /* Chrome / WebKit: positionner l'indicateur à l'extrême droite */
@@ -94,7 +95,7 @@
             padding: 0 !important;
         }
 
-        /* Mode sombre: icône du calendrier en clair */
+        /* Mode sombre: ic�ne du calendrier en clair */
         html.dark .date-input::-webkit-calendar-picker-indicator {
             filter: invert(1) brightness(0.9);
         }
@@ -129,28 +130,28 @@
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-between whitespace-nowrap h-20">
                 <div class="flex items-center gap-4">
-                    <a href="module_tableau_bord.html"><img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-28 w-auto"></a>
+                    <a href="module_tableau_bord"><img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-28 w-auto"></a>
                 </div>
                 <div class="hidden md:flex items-center gap-9">
                     <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
-                       href="module_tableau_bord.html">
+                       href="module_tableau_bord">
                         Tableau de Bord
                     </a>
                     <a class="text-primary text-sm font-bold leading-normal"
-                       href="module_ventes.html">
+                       href="module_ventes">
                         Comptabilité
                     </a>
                     <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
-                       href="module_scoring.html">
+                       href="module_scoring">
                         Financement
                     </a>
                 </div>
                 <!-- Menu mobile -->
                 <div id="mobile-menu" class="md:hidden absolute top-full left-0 right-0 bg-background-light dark:bg-background-dark border-b border-[#e8ede8] dark:border-gray-700 hidden">
                     <div class="flex flex-col gap-2 p-4">
-                        <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_tableau_bord.html">Tableau de Bord</a>
-                        <a class="text-primary text-sm font-bold leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_ventes.html">Comptabilité</a>
-                        <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_scoring.html">Financement</a>
+                        <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_tableau_bord">Tableau de Bord</a>
+                        <a class="text-primary text-sm font-bold leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_ventes">Comptabilité</a>
+                        <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_scoring">Financement</a>
                     </div>
                 </div>
                 <!-- Bouton menu mobile -->
@@ -195,19 +196,19 @@
                 <!-- Onglets (liens corrigés) -->
                 <div class="border-b border-gray-200 dark:border-gray-700">
                     <nav class="flex gap-8 -mb-px">
-                        <a href="module_ventes.html"
+                        <a href="module_ventes"
                            class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
                             <p class="text-sm font-bold leading-normal tracking-[0.015em]">Ventes</p>
                         </a>
-                        <a href="module_depenses.html"
+                        <a href="module_depenses"
                            class="flex flex-col items-center justify-center border-b-[3px] border-b-primary text-[#0a0c0a] dark:text-white pb-3 pt-4 px-2">
                             <p class="text-sm font-bold leading-normal tracking-[0.015em]">Dépenses</p>
                         </a>
-                        <a href="module_resume_ventes_depenses.html"
+                        <a href="module_resume_ventes_depenses"
                            class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
                             <p class="text-sm font-bold leading-normal tracking-[0.015em]">Résumé</p>
                         </a>
-                        <a href="module_etats_financiers.html"
+                        <a href="module_etats_financiers"
                            class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
                             <p class="text-sm font-bold leading-normal tracking-[0.015em]">Analyse financière</p>
                         </a>
@@ -303,7 +304,7 @@
                                 Joindre le justificatif
                             </p>
                             
-                            <!-- Zone d'upload avec état par défaut -->
+                            <!-- Zone d'upload avec �tat par d�faut -->
                             <div id="upload-zone-default" class="mt-1 flex justify-center px-6 pt-10 pb-12 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg transition-colors duration-200 hover:border-primary dark:hover:border-primary hover:bg-primary/5">
                                 <div class="text-center">
                                     <span class="material-symbols-outlined text-5xl text-gray-400 dark:text-gray-500">cloud_upload</span>

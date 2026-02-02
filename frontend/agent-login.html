@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <title>Connexion Agent - OGOUE</title>
+  <link rel="icon" type="image/png" href="app/O-removebg-preview.png">
 
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -55,16 +56,16 @@
       <div class="max-w-7xl mx-auto px-6 lg:px-8">
         <div class="flex items-center justify-between h-20 border-b border-black/10">
           <div class="flex items-center gap-4">
-            <a href="/index.html" class="flex items-center gap-2">
+            <a href="/" class="flex items-center gap-2">
               <img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-28 w-auto">
             </a>
           </div>
 
           <nav class="hidden md:flex items-center gap-8">
-            <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/index.html">Accueil</a>
+            <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/">Accueil</a>
             <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/index.html#features">Fonctionnalités</a>
             <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/index.html#benefits">Avantages</a>
-            <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/apropos.html">À propos</a>
+            <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/apropos">À propos</a>
           </nav>
 
           <!-- Mobile menu button -->
@@ -73,7 +74,7 @@
           </button>
 
           <div class="hidden md:flex items-center gap-3">
-            <a href="/login.html" class="text-text-light-muted hover:text-text-light text-sm font-semibold transition-colors">Se connecter</a>
+            <a href="/login" class="text-text-light-muted hover:text-text-light text-sm font-semibold transition-colors">Se connecter</a>
           </div>
         </div>
       </div>
@@ -82,12 +83,12 @@
     <!-- Mobile menu -->
     <div id="mobile-menu" class="hidden fixed inset-0 top-20 z-40 md:hidden bg-background-light border-t border-black/10">
       <nav class="flex flex-col p-6 space-y-4">
-        <a href="/index.html" class="text-text-light font-medium hover:text-primary transition-colors">Accueil</a>
+        <a href="/" class="text-text-light font-medium hover:text-primary transition-colors">Accueil</a>
         <a href="/index.html#features" class="text-text-light font-medium hover:text-primary transition-colors">Fonctionnalités</a>
         <a href="/index.html#benefits" class="text-text-light font-medium hover:text-primary transition-colors">Avantages</a>
-        <a href="/apropos.html" class="text-text-light font-medium hover:text-primary transition-colors">À propos</a>
+        <a href="/apropos" class="text-text-light font-medium hover:text-primary transition-colors">À propos</a>
         <hr class="border-black/10" />
-        <a href="/login.html" class="text-primary font-bold hover:text-text-light transition-colors">Se connecter</a>
+        <a href="/login" class="text-primary font-bold hover:text-text-light transition-colors">Se connecter</a>
       </nav>
     </div>
 
@@ -150,7 +151,7 @@
             </button>
 
             <div class="text-center text-sm text-text-light-muted">
-              <a class="font-semibold text-primary hover:text-text-light transition-colors" href="/login.html">
+              <a class="font-semibold text-primary hover:text-text-light transition-colors" href="/login">
                 Retour à la connexion
               </a>
             </div>
@@ -165,7 +166,7 @@
       <div class="max-w-7xl mx-auto px-6 lg:px-8">
         <div class="flex items-center justify-between h-20">
           <div class="flex items-center gap-4">
-            <a href="/index.html" class="flex items-center gap-2">
+            <a href="/" class="flex items-center gap-2">
               <img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-28 w-auto">
             </a>
           </div>
@@ -230,7 +231,7 @@
 
         const APP_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
           ? 'http://127.0.0.1:8080/app'
-          : 'https://ogoue.com/app';
+          : 'https://www.ogoue.com/app';
         setTimeout(() => {
           window.location.href = `${APP_BASE}/module_agent_dashboard.html`;
         }, 1500);

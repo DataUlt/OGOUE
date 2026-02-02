@@ -1,9 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html class="light" lang="fr">
 <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>Parcours de Financement - Scoring</title>
+  <link rel="icon" type="image/png" href="O-removebg-preview.png">
 
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -90,22 +91,22 @@
     <div class="container mx-auto px-4">
       <div class="flex items-center justify-between whitespace-nowrap h-20">
                 <div class="flex items-center gap-4">
-                    <a href="module_tableau_bord.html"><img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-28 w-auto"></a>
+                    <a href="module_tableau_bord"><img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-28 w-auto"></a>
                 </div>
                 <div class="hidden md:flex items-center gap-9">
                     <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
-                       href="module_tableau_bord.html">Tableau de Bord</a>
+                       href="module_tableau_bord">Tableau de Bord</a>
                     <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
-                       href="module_ventes.html">Comptabilité</a>
+                       href="module_ventes">Comptabilité</a>
                     <a class="text-primary text-sm font-bold leading-normal"
-                       href="module_scoring.html">Financement</a>
+                       href="module_scoring">Financement</a>
                 </div>
                 <!-- Menu mobile -->
                 <div id="mobile-menu" class="md:hidden absolute top-full left-0 right-0 bg-background-light dark:bg-background-dark border-b border-[#e8ede8] dark:border-gray-700 hidden">
                     <div class="flex flex-col gap-2 p-4">
-                        <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_tableau_bord.html">Tableau de Bord</a>
-                        <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_ventes.html">Comptabilité</a>
-                        <a class="text-primary text-sm font-bold leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_scoring.html">Financement</a>
+                        <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_tableau_bord">Tableau de Bord</a>
+                        <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_ventes">Comptabilité</a>
+                        <a class="text-primary text-sm font-bold leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_scoring">Financement</a>
                     </div>
                 </div>
                 <!-- Bouton menu mobile -->
@@ -119,7 +120,7 @@
                     <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white" data-action="settings">
                         <span class="material-symbols-outlined">settings</span>
                     </button>
-                    <!-- ✅ PROFIL (corrigé + fiable) -->
+                    <!-- ? PROFIL (corrigé + fiable) -->
                     <button
                       id="profileBtn"
             class="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer bg-primary/20 dark:bg-primary/30 text-[#0a0c0a] dark:text-white hover:bg-primary/30 dark:hover:bg-primary/40 transition-colors"
@@ -266,7 +267,7 @@
             <h3 class="text-lg font-bold">Qu'est-ce que le score ?</h3>
             <p class="text-gray-300 text-sm leading-relaxed">
 Un score est un indicateur synthétique qui résume une situation à partir de plusieurs données.
-Il permet d’évaluer rapidement un niveau, de comparer et de suivre une évolution dans le temps.            </p>
+Il permet d'évaluer rapidement un niveau, de comparer et de suivre une évolution dans le temps.            </p>
           </div>
         </div>
 
@@ -393,7 +394,7 @@ async function fetchOperations() {
       expenses: expensesData.expenses || []
     };
   } catch (error) {
-    console.error("❌ Erreur fetch:", error);
+    console.error("? Erreur fetch:", error);
     return null;
   }
 }
@@ -513,10 +514,10 @@ function updateUI(scores) {
  */
 async function init() {
   const ops = await fetchOperations();
-  console.log("📊 Opérations récupérées:", ops);
+  console.log("?? Opérations récupérées:", ops);
   
   const scores = calculateScores(ops);
-  console.log("📈 Scores calculés:", scores);
+  console.log("?? Scores calculés:", scores);
   
   updateUI(scores);
 
@@ -545,7 +546,7 @@ function openUploadModal() {
   const salesContainer = document.getElementById("salesListContainer");
   
   if (salesWithoutReceipt.length === 0) {
-    salesContainer.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-sm">✅ Toutes les ventes ont un justificatif</p>';
+    salesContainer.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-sm">? Toutes les ventes ont un justificatif</p>';
   } else {
     salesContainer.innerHTML = salesWithoutReceipt.map(sale => `
       <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -568,7 +569,7 @@ function openUploadModal() {
     expensesContainer.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-sm">Aucune dépense enregistrée</p>';
   } else if (expensesWithoutReceipt.length === 0) {
     // Des dépenses existent et toutes ont un justificatif
-    expensesContainer.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-sm">✅ Toutes les dépenses ont un justificatif</p>';
+    expensesContainer.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-sm">? Toutes les dépenses ont un justificatif</p>';
   } else {
     expensesContainer.innerHTML = expensesWithoutReceipt.map(expense => `
       <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -611,8 +612,8 @@ async function updateOperationJustificatif(type, operationId, file, inputElement
     const endpoint = type === "sales" ? "/api/sales" : "/api/expenses";
     const url = `${API_BASE_URL}${endpoint}/${operationId}`;
     
-    console.log("📤 Upload vers:", url);
-    console.log("📦 Fichier:", file.name);
+    console.log("?? Upload vers:", url);
+    console.log("?? Fichier:", file.name);
 
     const response = await fetch(url, {
       method: "PUT",
@@ -623,8 +624,8 @@ async function updateOperationJustificatif(type, operationId, file, inputElement
       body: JSON.stringify({ receiptName: file.name })
     });
 
-    console.log("📥 Status:", response.status);
-    console.log("📥 Headers:", response.headers);
+    console.log("?? Status:", response.status);
+    console.log("?? Headers:", response.headers);
 
     if (response.status === 401) {
       handleUnauthorized();
@@ -633,11 +634,11 @@ async function updateOperationJustificatif(type, operationId, file, inputElement
 
     if (!response.ok) {
       const text = await response.text();
-      console.error("❌ Erreur API (text):", text);
+      console.error("? Erreur API (text):", text);
       
       try {
         const error = JSON.parse(text);
-        console.error("❌ Erreur API (json):", error);
+        console.error("? Erreur API (json):", error);
       } catch (e) {
         // La réponse n'est pas du JSON
       }
@@ -647,35 +648,35 @@ async function updateOperationJustificatif(type, operationId, file, inputElement
       return false;
     }
 
-    console.log("✅ Justificatif téléchargé avec succès");
+    console.log("? Justificatif téléchargé avec succès");
     
     // Afficher notification de succès
-    console.log("📢 Affichage du toast...");
-    showToast(`✅ ${file.name} téléchargé avec succès!`, 2000);
+    console.log("?? Affichage du toast...");
+    showToast(`? ${file.name} téléchargé avec succès!`, 2000);
     
     // Attendre un peu puis rafraîchir et fermer
-    console.log("⏳ Attente de 1500ms...");
+    console.log("? Attente de 1500ms...");
     await new Promise(r => setTimeout(r, 1500));
     
-    console.log("🔄 Rafraîchissement des données...");
+    console.log("?? Rafraîchissement des données...");
     // Refresh the data
     window.currentOperations = await fetchOperations();
-    console.log("📊 Nouvelles opérations:", window.currentOperations);
+    console.log("?? Nouvelles opérations:", window.currentOperations);
     
     const scores = calculateScores(window.currentOperations);
-    console.log("📈 Nouveaux scores:", scores);
+    console.log("?? Nouveaux scores:", scores);
     
     updateUI(scores);
-    console.log("🎨 UI mise à jour");
+    console.log("?? UI mise à jour");
     
     // Fermer le modal
-    console.log("❌ Fermeture du modal...");
+    console.log("? Fermeture du modal...");
     closeUploadModal();
-    console.log("✅ Modal fermé");
+    console.log("? Modal fermé");
     
     return true;
   } catch (error) {
-    console.error("❌ Erreur:", error);
+    console.error("? Erreur:", error);
     const closeBtn = document.getElementById("closeModalBtn");
     closeBtn.disabled = false;
     inputElement.disabled = false;
@@ -745,7 +746,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       if (!success) {
         e.target.value = ""; // Reset input
-        showToast("❌ Erreur lors du téléchargement du justificatif", 3000);
+        showToast("? Erreur lors du téléchargement du justificatif", 3000);
       }
     }
   });

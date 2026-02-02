@@ -1,5 +1,0 @@
-/* Netlify _redirects file - Alternative à netlify.toml */
-/* Redirection pour l'application web (SPA routing) */
-/app/*  /app/index.html  200
-/* Fallback pour les pages non trouvées */
-/*      /index.html     200
