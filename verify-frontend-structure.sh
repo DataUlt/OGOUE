@@ -1,9 +1,9 @@
-#!/bin/bash
+﻿#!/bin/bash
 
 # Script de vérification de la structure frontend pour Netlify
 # Exécuter depuis la racine du projet
 
-echo "🔍 Vérification de la structure du frontend OGOUÉ pour Netlify..."
+echo "🔍 Vérification de la structure du frontend OGOUE pour Netlify..."
 echo ""
 
 # Couleurs

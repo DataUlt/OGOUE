@@ -1,4 +1,4 @@
-// js/resume.js
+﻿// js/resume.js
 
 // Helpers pour normaliser les dates
 function normalizeDate(iso) {

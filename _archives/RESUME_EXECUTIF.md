@@ -1,4 +1,4 @@
-# 🎯 RÉSUMÉ EXÉCUTIF - Corrections d'authentification en production
+﻿# 🎯 RÉSUMÉ EXÉCUTIF - Corrections d'authentification en production
 
 ## 📊 Situation initiale
 

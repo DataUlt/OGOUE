@@ -1,4 +1,4 @@
-# 📦 Dossier Archive (_archives)
+﻿# 📦 Dossier Archive (_archives)
 
 Ce dossier contient les fichiers et documentation obsolètes qui ont été archivés lors du passage à la nouvelle architecture Netlify.
 

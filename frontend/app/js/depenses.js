@@ -1,4 +1,4 @@
-// js/depenses.js
+﻿// js/depenses.js
 
 (function () {
   if (!window.OGOUE) {

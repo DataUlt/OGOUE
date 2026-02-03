@@ -1,7 +1,7 @@
-{
+﻿{
   "name": "ogoue-frontend",
   "version": "1.0.0",
-  "description": "Frontend OGOUÉ - Plateforme de gestion financière pour PME",
+  "description": "Frontend OGOUE - Plateforme de gestion financière pour PME",
   "private": true,
   "scripts": {
     "serve": "npx http-server . -p 8080 -c-1",
@@ -21,6 +21,6 @@
     "pme",
     "gestion"
   ],
-  "author": "OGOUÉ Team",
+  "author": "OGOUE Team",
   "license": "MIT"
 }

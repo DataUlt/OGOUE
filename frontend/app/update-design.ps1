@@ -1,4 +1,4 @@
-# Script PowerShell pour mettre à jour le design des modules
+﻿# Script PowerShell pour mettre à jour le design des modules
 
 $appDir = "c:\Users\Benoit NZIENGUI\Desktop\PFE-Version-Netflify\OGOUE\frontend\app"
 $files = Get-ChildItem "$appDir\module_*.html" -Exclude "module_tableau_bord.html"

@@ -1,4 +1,4 @@
-// Frontend API pour la gestion des agents
+﻿// Frontend API pour la gestion des agents
 const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
   ? 'http://localhost:3001/api'
   : 'https://api.ogoue.com/api';

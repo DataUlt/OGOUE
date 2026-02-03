@@ -1,4 +1,4 @@
-# 📖 INDEX - Système d'Audit des Suppressions
+﻿# 📖 INDEX - Système d'Audit des Suppressions
 
 ## 🎯 Où commencer?
 

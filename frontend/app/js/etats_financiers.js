@@ -1,4 +1,4 @@
-// js/etats_financiers.js
+﻿// js/etats_financiers.js
 
 document.addEventListener("DOMContentLoaded", function () {
     const btn = document.getElementById("dateFilterButton");

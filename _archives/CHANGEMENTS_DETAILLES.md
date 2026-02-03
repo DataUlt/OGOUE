@@ -1,4 +1,4 @@
-# 🔧 CHANGEMENTS EXACTS APPLIQUÉS
+﻿# 🔧 CHANGEMENTS EXACTS APPLIQUÉS
 
 ## Vue d'ensemble
 

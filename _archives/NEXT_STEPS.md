@@ -1,4 +1,4 @@
-# 🚀 PROCHAINES ÉTAPES - OGOUE Backend
+﻿# 🚀 PROCHAINES ÉTAPES - OGOUE Backend
 
 ## Status Actuel: ✅ PRÊT (Attente de Réseau)
 

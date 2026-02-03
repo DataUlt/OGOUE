@@ -1,4 +1,4 @@
-# 📱 Guide de déploiement des corrections en production
+﻿# 📱 Guide de déploiement des corrections en production
 
 ## 🎯 Objectif
 Déployer les 5 corrections critiques sans interrompre le service en production.

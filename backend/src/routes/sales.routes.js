@@ -1,4 +1,4 @@
-import { Router } from "express";
+﻿import { Router } from "express";
 import { listSales, createSale, updateSaleReceipt, deleteSale } from "../controllers/sales.controller.js";
 import upload from "../middleware/upload.middleware.js";
 

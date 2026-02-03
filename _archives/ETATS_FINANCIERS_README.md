@@ -1,4 +1,4 @@
-# 📊 Page États Financiers - Implémentation Complète
+﻿# 📊 Page États Financiers - Implémentation Complète
 
 ## ✅ Travail Réalisé
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+﻿#!/usr/bin/env node
 /**
  * Test local des endpoints - Valide la structure sans Supabase
  * Run: node test_endpoints_local.mjs

@@ -1,4 +1,4 @@
-# ⚡ Migration Supabase Storage - Instructions
+﻿# ⚡ Migration Supabase Storage - Instructions
 
 ## 🎯 Objectif
 Ajouter les colonnes `receipt_url` et `receipt_storage_path` aux tables `expenses` et `sales` pour supporter le vrai upload de fichiers vers Supabase Storage.

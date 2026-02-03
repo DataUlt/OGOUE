@@ -1,4 +1,4 @@
-#!/usr/bin/env pwsh
+﻿#!/usr/bin/env pwsh
 # Test Auth Backend - Version Debug
 
 $baseUrl = "http://127.0.0.1:3001"

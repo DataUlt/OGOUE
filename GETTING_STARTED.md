@@ -1,8 +1,8 @@
-# 🎉 OGOUÉ App - Guide Complet End-to-End
+﻿# 🎉 OGOUE App - Guide Complet End-to-End
 
 ## 📋 État du Projet
 
-L'application OGOUÉ est **maintenant fonctionnelle end-to-end** avec authentification JWT, interface marketing intégrée, et dashboard avec gestion des ventes/dépenses.
+L'application OGOUE est **maintenant fonctionnelle end-to-end** avec authentification JWT, interface marketing intégrée, et dashboard avec gestion des ventes/dépenses.
 
 ---
 

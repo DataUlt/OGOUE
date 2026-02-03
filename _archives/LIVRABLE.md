@@ -1,4 +1,4 @@
-# 📦 LIVRABLE COMPLET - Tous les fichiers et ressources
+﻿# 📦 LIVRABLE COMPLET - Tous les fichiers et ressources
 
 ## 📋 Fichiers créés pour vous
 

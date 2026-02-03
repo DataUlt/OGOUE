@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+﻿#!/usr/bin/env node
 
 const testRegister = async () => {
   const email = `test_${Math.random().toString(36).substring(7)}@ogoue.cm`;

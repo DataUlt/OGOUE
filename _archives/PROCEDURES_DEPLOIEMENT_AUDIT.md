@@ -1,4 +1,4 @@
-# 🚀 Procédure de Déploiement - Système d'Audit des Suppressions
+﻿# 🚀 Procédure de Déploiement - Système d'Audit des Suppressions
 
 ## ⏱️ Durée estimée: 15 minutes
 

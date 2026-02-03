@@ -1,4 +1,4 @@
-# 🔧 DIAGNOSTIC BACKEND - OGOUE API
+﻿# 🔧 DIAGNOSTIC BACKEND - OGOUE API
 
 ## État Actuel du Serveur
 

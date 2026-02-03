@@ -1,4 +1,4 @@
-#!/usr/bin/env pwsh
+﻿#!/usr/bin/env pwsh
 # Comprehensive Auth Backend Tests
 # Starts server, waits, then runs all tests
 

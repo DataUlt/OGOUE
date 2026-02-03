@@ -1,4 +1,4 @@
-@echo off
+﻿@echo off
 REM Test Register
 echo === TEST 1A: REGISTER ===
 curl -X POST http://127.0.0.1:3001/api/auth/register ^

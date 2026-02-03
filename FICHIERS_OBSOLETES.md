@@ -1,4 +1,4 @@
-# 🗑️ Analyse des Fichiers Obsolètes - Frontend OGOUÉ
+﻿# 🗑️ Analyse des Fichiers Obsolètes - Frontend OGOUE
 
 ## 📋 Fichiers et Dossiers à Supprimer
 

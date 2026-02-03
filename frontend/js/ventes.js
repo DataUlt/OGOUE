@@ -1,4 +1,4 @@
-console.log('ventes.js loaded');
+﻿console.log('ventes.js loaded');
 
 // Ventes module initialization
 (function() {

@@ -1,4 +1,4 @@
-// js/ventes.js
+﻿// js/ventes.js
 (function () {
   if (!window.OGOUE) {
     console.error("OGOUE store non chargé");

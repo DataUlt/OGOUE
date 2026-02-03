@@ -1,4 +1,4 @@
-# ⚡ Quick Start - Système d'Audit (2 minutes)
+﻿# ⚡ Quick Start - Système d'Audit (2 minutes)
 
 ## 🎯 TL;DR
 

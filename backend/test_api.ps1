@@ -1,4 +1,4 @@
-# Test Script for OGOUE API
+﻿# Test Script for OGOUE API
 # Usage: .\test_api.ps1
 
 $BASE_URL = "http://127.0.0.1:3001"

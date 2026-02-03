@@ -1,4 +1,4 @@
-console.log('depenses.js loaded');
+﻿console.log('depenses.js loaded');
 
 // Depenses module initialization
 (function() {

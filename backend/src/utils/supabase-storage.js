@@ -1,4 +1,4 @@
-import { supabase } from "../db/supabase.js";
+﻿import { supabase } from "../db/supabase.js";
 
 const BUCKET_NAME = "justificatifs";
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB

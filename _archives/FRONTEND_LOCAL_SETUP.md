@@ -1,4 +1,4 @@
-# 🚀 Frontend Local Development Setup
+﻿# 🚀 Frontend Local Development Setup
 
 ## Architecture Actuelle
 

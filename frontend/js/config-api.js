@@ -1,5 +1,5 @@
-/**
- * Configuration globale de l'API OGOUÉ
+﻿/**
+ * Configuration globale de l'API OGOUE
  * À utiliser dans tous les appels API du frontend
  */
 
@@ -29,7 +29,7 @@ function getAPIBaseURL() {
 // Objet de configuration global
 const CONFIG = {
     API_BASE_URL: getAPIBaseURL(),
-    APP_NAME: 'OGOUÉ',
+    APP_NAME: 'OGOUE',
     APP_VERSION: '1.0.0',
     TIMEOUT: 30000, // 30 secondes
     

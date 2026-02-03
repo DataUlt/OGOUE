@@ -1,4 +1,4 @@
-# 📋 Système d'Audit des Suppressions - Documentation
+﻿# 📋 Système d'Audit des Suppressions - Documentation
 
 ## 🎯 Vue d'ensemble
 

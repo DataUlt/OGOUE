@@ -1,4 +1,4 @@
-# 📦 FICHIERS LIVRÉS - Résumé complet
+﻿# 📦 FICHIERS LIVRÉS - Résumé complet
 
 ## 🎯 Ce qui a été fait
 

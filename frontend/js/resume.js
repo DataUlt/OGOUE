@@ -1,4 +1,4 @@
-console.log('resume.js loaded!');
+﻿console.log('resume.js loaded!');
 
 // Resume Page Functionality
 window.OGOUE = window.OGOUE || {};

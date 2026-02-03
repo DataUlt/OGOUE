@@ -1,4 +1,4 @@
-# ✅ Système d'Audit des Suppressions - Résumé des changements
+﻿# ✅ Système d'Audit des Suppressions - Résumé des changements
 
 **Date:** 30 Décembre 2025  
 **Objectif:** Implémenter un système complet de traçabilité pour les suppressions avec justification obligatoire

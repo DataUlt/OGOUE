@@ -1,4 +1,4 @@
--- Migration: Add file storage columns to sales and expenses tables
+﻿-- Migration: Add file storage columns to sales and expenses tables
 -- This allows storing Supabase Storage URLs and paths for uploaded justificatifs
 
 -- Add columns to expenses table

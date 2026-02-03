@@ -1,4 +1,4 @@
-# ⚡ QUICK START - Guide rapide des corrections
+﻿# ⚡ QUICK START - Guide rapide des corrections
 
 ## 🎯 La situation en 3 mots
 ❌ Inscription bloquée → ✅ Corrélée → 🚀 À déployer

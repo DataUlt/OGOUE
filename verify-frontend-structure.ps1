@@ -1,9 +1,9 @@
-#!/usr/bin/env pwsh
+﻿#!/usr/bin/env pwsh
 
 # Script de vérification de la structure frontend pour Netlify (Windows)
 # Exécuter depuis VS Code Terminal
 
-Write-Host "🔍 Vérification de la structure du frontend OGOUÉ pour Netlify..." -ForegroundColor Cyan
+Write-Host "🔍 Vérification de la structure du frontend OGOUE pour Netlify..." -ForegroundColor Cyan
 Write-Host ""
 
 # Compteurs

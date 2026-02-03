@@ -1,4 +1,4 @@
-import { supabase } from "../db/supabase.js";
+﻿import { supabase } from "../db/supabase.js";
 
 /**
  * Enregistre une suppression dans la table d'audit

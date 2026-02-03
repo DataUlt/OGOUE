@@ -1,4 +1,4 @@
--- PFE-OGOUE-FINANCEMENT Database Schema
+﻿-- PFE-OGOUE-FINANCEMENT Database Schema
 -- This script sets up the users and pmes tables in the secondary Supabase instance
 
 -- ============================================

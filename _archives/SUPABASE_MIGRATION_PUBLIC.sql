@@ -1,4 +1,4 @@
--- ============================================================
+﻿-- ============================================================
 -- OGOUE Supabase Migration - PUBLIC SCHEMA VERSION
 -- Exécutez ce script dans l'SQL Editor de votre dashboard Supabase
 -- ============================================================

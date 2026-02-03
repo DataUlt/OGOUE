@@ -1,4 +1,4 @@
-console.log('dashboard.js loaded');
+﻿console.log('dashboard.js loaded');
 
 // Format currency in French format
 function formatCurrency(amount) {

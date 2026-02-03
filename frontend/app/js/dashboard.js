@@ -1,4 +1,4 @@
-// js/dashboard.js
+﻿// js/dashboard.js
 
 // Variables globales pour les KPI
 let globalKPIData = {

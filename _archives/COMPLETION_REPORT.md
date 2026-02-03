@@ -1,4 +1,4 @@
-# ✅ OGOUE Backend - Migration Supabase COMPLÈTE
+﻿# ✅ OGOUE Backend - Migration Supabase COMPLÈTE
 
 ## 🎉 STATUS: PRODUCTION READY
 

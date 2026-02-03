@@ -1,4 +1,4 @@
-#!/usr/bin/env pwsh
+﻿#!/usr/bin/env pwsh
 # Test Auth Backend
 # Usage: pwsh test_auth.ps1
 

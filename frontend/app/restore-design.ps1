@@ -1,4 +1,4 @@
-# Script pour régénérer les fichiers avec les bonnes polices depuis les fichiers source d'origine
+﻿# Script pour régénérer les fichiers avec les bonnes polices depuis les fichiers source d'origine
 
 $appDir = "c:\Users\Benoit NZIENGUI\Desktop\PFE-Version-Netflify\OGOUE\frontend\app"
 

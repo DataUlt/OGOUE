@@ -1,4 +1,4 @@
-const body = JSON.stringify({
+﻿const body = JSON.stringify({
   email: "test@example.com",
   password: "Test123456",
   firstName: "John",

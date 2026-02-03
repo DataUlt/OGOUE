@@ -1,8 +1,8 @@
-# TEST_AUTH.md - Auth Backend Testing Guide
+﻿# TEST_AUTH.md - Auth Backend Testing Guide
 
 ## Overview
 
-This document contains all cURL commands to test the OGOUÉ Auth Backend (JWT).
+This document contains all cURL commands to test the OGOUE Auth Backend (JWT).
 
 **Backend URL:** `http://127.0.0.1:3001`
 

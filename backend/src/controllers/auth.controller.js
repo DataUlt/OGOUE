@@ -1,4 +1,4 @@
-import { supabase, supabaseSecondary } from "../db/supabase.js";
+﻿import { supabase, supabaseSecondary } from "../db/supabase.js";
 import { z } from "zod";
 import jwt from "jsonwebtoken";
 

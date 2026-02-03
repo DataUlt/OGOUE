@@ -1,4 +1,4 @@
-// INTÉGRATION DU SYSTÈME D'AUDIT DANS AUTRES MODULES
+﻿// INTÉGRATION DU SYSTÈME D'AUDIT DANS AUTRES MODULES
 // Copier-coller ce code dans d'autres modules (ventes, etc.)
 
 // ============================================================

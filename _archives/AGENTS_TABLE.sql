@@ -1,4 +1,4 @@
--- Créer la table agents
+﻿-- Créer la table agents
 CREATE TABLE IF NOT EXISTS agents (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     organization_id UUID NOT NULL,

@@ -1,4 +1,4 @@
-// Global OGOUE State Management
+﻿// Global OGOUE State Management
 window.OGOUE = window.OGOUE || {};
 
 // Auth state

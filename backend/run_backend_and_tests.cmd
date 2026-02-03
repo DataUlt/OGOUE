@@ -1,4 +1,4 @@
-@echo off
+﻿@echo off
 REM Kill any existing node processes
 taskkill /F /IM node.exe >nul 2>&1
 

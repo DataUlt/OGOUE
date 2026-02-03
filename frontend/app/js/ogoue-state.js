@@ -1,4 +1,4 @@
-// js/ogoue-state.js
+﻿// js/ogoue-state.js
 // ============================================================
 // CONNEXION À L'API BACKEND AVEC JWT AUTHENTICATION
 // ============================================================

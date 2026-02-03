@@ -1,4 +1,4 @@
--- Ajouter la colonne created_by à la table sales
+﻿-- Ajouter la colonne created_by à la table sales
 ALTER TABLE public.sales
 ADD COLUMN IF NOT EXISTS created_by UUID;
 

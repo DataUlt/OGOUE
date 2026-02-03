@@ -1,4 +1,4 @@
-import express from "express";
+﻿import express from "express";
 import { register, login, getMe, registerAgent, loginAgent, forgotPassword, resetPassword, loginSecondary, registerSecondary } from "../controllers/auth.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 

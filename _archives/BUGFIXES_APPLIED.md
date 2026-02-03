@@ -1,4 +1,4 @@
-# 🔧 Corrections appliquées - Problèmes d'authentification en production
+﻿# 🔧 Corrections appliquées - Problèmes d'authentification en production
 
 ## Résumé des problèmes identifiés et corrigés
 

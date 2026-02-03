@@ -1,4 +1,4 @@
-// Header UI Actions
+﻿// Header UI Actions
 window.OGOUE = window.OGOUE || {};
 window.OGOUE.headerUI = {};
 

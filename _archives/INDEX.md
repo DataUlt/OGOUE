@@ -1,4 +1,4 @@
-# 📚 INDEX - Tous les fichiers de documentation
+﻿# 📚 INDEX - Tous les fichiers de documentation
 
 ## 🎯 Par où commencer ?
 

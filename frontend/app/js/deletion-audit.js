@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Module de gestion des suppressions avec audit
  * Affiche une modal demandant la justification avant suppression
  */

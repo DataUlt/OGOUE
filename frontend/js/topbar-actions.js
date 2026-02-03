@@ -1,4 +1,4 @@
-// Topbar Actions
+﻿// Topbar Actions
 window.OGOUE = window.OGOUE || {};
 
 window.OGOUE.topbarActions = {

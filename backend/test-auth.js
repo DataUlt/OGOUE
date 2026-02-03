@@ -1,4 +1,4 @@
-// Test script pour l'authentification
+﻿// Test script pour l'authentification
 import axios from "axios";
 
 const BASE_URL = "http://localhost:3001/api";

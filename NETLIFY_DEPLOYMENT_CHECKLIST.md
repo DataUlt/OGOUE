@@ -1,4 +1,4 @@
-# ✅ Checklist de Déploiement OGOUÉ sur Netlify
+﻿# ✅ Checklist de Déploiement OGOUE sur Netlify
 
 ## 🎯 Avant le Déploiement
 
@@ -179,7 +179,7 @@ Pour vérifier l'état du déploiement :
 
 ## 🎉 Félicitations !
 
-Votre application OGOUÉ est maintenant :
+Votre application OGOUE est maintenant :
 - ✅ **Déployée sur Netlify**
 - ✅ **Accessible via www.ogoue.com**
 - ✅ **Avec SSL/HTTPS automatique**

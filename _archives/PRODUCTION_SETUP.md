@@ -1,4 +1,4 @@
-# Configuration Dev → Prod pour Render
+﻿# Configuration Dev → Prod pour Render
 
 ## ✅ Modifications appliquées
 

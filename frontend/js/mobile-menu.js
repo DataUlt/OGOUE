@@ -1,4 +1,4 @@
-console.log('mobile-menu.js loaded!');
+﻿console.log('mobile-menu.js loaded!');
 
 document.addEventListener('DOMContentLoaded', function() {
     const menuToggle = document.getElementById('menu-toggle');

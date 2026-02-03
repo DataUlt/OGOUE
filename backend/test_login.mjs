@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+﻿#!/usr/bin/env node
 
 const testLogin = async () => {
   const email = "test_kn6yuwj@ogoue.cm";

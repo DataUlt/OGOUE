@@ -1,4 +1,4 @@
-@echo off
+﻿@echo off
 REM Quick Start Script for OGOUE Backend
 REM Usage: Run this .cmd file to start everything
 

@@ -1,4 +1,4 @@
-# ✅ CHECKLIST FINALE - Corrections appliquées
+﻿# ✅ CHECKLIST FINALE - Corrections appliquées
 
 ## 📝 Vérifications locales (À faire)
 

@@ -1,4 +1,4 @@
-// header-ui.js
+﻿// header-ui.js
 (function () {
   const NOTIF_KEY = 'ogo_notifications';
   const PREFS_KEY = 'ogo_preferences';
