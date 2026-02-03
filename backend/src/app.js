@@ -1,5 +1,7 @@
 ﻿import express from "express";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 
 import authRoutes from "./routes/auth.routes.js";
 import salesRoutes from "./routes/sales.routes.js";
@@ -9,6 +11,9 @@ import organizationRoutes from "./routes/organization.routes.js";
 import agentsRoutes from "./routes/agents.routes.js";
 import auditRoutes from "./routes/audit.routes.js";
 import { authMiddleware } from "./middleware/auth.middleware.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const app = express();
 
@@ -62,6 +67,10 @@ app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
 
 app.use(express.json({ limit: "200kb" }));
+
+// Serve static files from the frontend directory
+const frontendPath = path.join(__dirname, "../../frontend");
+app.use(express.static(frontendPath));
 
 app.get("/health", (req, res) => res.json({ ok: true }));
 
