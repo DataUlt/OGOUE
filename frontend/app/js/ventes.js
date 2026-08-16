@@ -162,19 +162,11 @@
   // ✅ LOGIQUE "ARTICLES" (Option B)
   // =========================
   
-  function getArticlesStorageKey() {
-    // Récupère l'ID utilisateur actuel pour filtrer les articles par utilisateur
-    try {
-      const userStr = localStorage.getItem("user");
-      if (!userStr) return "ogoue.ventes.articles"; // Fallback si pas d'utilisateur
-      const user = JSON.parse(userStr);
-      const userId = user?.id || user?.user_id;
-      if (!userId) return "ogoue.ventes.articles";
-      return `ogoue.ventes.articles.${userId}`; // Clé unique par utilisateur
-    } catch (e) {
-      return "ogoue.ventes.articles";
-    }
-  }
+  // Le catalogue vient désormais du serveur et non plus du localStorage :
+  // il est partagé par toute l'organisation (gérant + agents), il survit
+  // au changement d'appareil, et il porte un prix unitaire.
+  // `articlesCache` conserve les objets {id, name, type, unitPrice}.
+  let articlesCache = [];
 
   const firstWrapper = document.getElementById("article-first-input-wrapper");
   const selectWrapper = document.getElementById("article-select-wrapper");
@@ -191,26 +183,24 @@
     return String(s || "").trim().replace(/\s+/g, " ");
   }
 
-  function loadArticles() {
-    try {
-      const storageKey = getArticlesStorageKey();
-      const raw = localStorage.getItem(storageKey);
-      const arr = raw ? JSON.parse(raw) : [];
-      return Array.isArray(arr) ? arr.filter(Boolean) : [];
-    } catch (e) {
-      return [];
+  /** Recharge le catalogue depuis l'API et met à jour le cache local. */
+  async function loadArticles() {
+    if (!window.OGOUE || typeof window.OGOUE.getArticles !== "function") {
+      console.warn("Catalogue indisponible : OGOUE.getArticles manquant");
+      articlesCache = [];
+      return articlesCache;
     }
+    articlesCache = await window.OGOUE.getArticles();
+    return articlesCache;
   }
 
-  function saveArticles(list) {
-    const storageKey = getArticlesStorageKey();
-    localStorage.setItem(storageKey, JSON.stringify(list));
+  function findArticleByName(name) {
+    const key = normalizeLabel(name).toLowerCase();
+    return articlesCache.find((a) => String(a.name).toLowerCase() === key) || null;
   }
 
   function buildArticleOptions() {
     if (!articleSelect) return;
-
-    const list = loadArticles();
 
     articleSelect.innerHTML = "";
 
@@ -219,18 +209,27 @@
     opt0.textContent = "Sélectionner un article / service";
     articleSelect.appendChild(opt0);
 
-    list.forEach((label) => {
+    articlesCache.forEach((article) => {
       const opt = document.createElement("option");
-      opt.value = label;
-      opt.textContent = label;
+      opt.value = article.name;
+      // Seul le nom est affiché ; le prix reste porté par l'option et
+      // sert à remplir automatiquement le champ Prix Total.
+      opt.textContent = article.name;
+      opt.dataset.unitPrice = String(article.unitPrice || 0);
+      opt.dataset.type = article.type || "";
       articleSelect.appendChild(opt);
     });
 
-    // ✅ “Autres” apparaît UNIQUEMENT si liste non vide (donc à partir de la 2e vente)
+    // "Autres" permet une vente ponctuelle hors catalogue
     const optOther = document.createElement("option");
     optOther.value = "__OTHER__";
-    optOther.textContent = "Autres (ajouter un nouvel article)";
+    optOther.textContent = "Autres (article hors catalogue)";
     articleSelect.appendChild(optOther);
+  }
+
+  function formatPrice(value) {
+    const n = Number(value) || 0;
+    return n.toLocaleString("fr-FR", { maximumFractionDigits: 0 }) + " FCFA";
   }
 
   function setModeListEmpty() {
@@ -288,14 +287,73 @@
     }
   }
 
-  function initArticlesUI() {
-    const list = loadArticles();
-    if (list.length === 0) setModeListEmpty();
+  // ── Remplissage automatique du prix ─────────────────────────
+  // Le prix unitaire du catalogue sert de base : total = prix x quantité.
+  // Il reste modifiable à la main (remise, prix négocié) ; dès que
+  // l'utilisateur touche au montant, on cesse de le recalculer.
+  let montantModifieManuellement = false;
+  let prixUnitaireCourant = null;
+
+  function recalculerMontant() {
+    const qteInput = document.getElementById("vente-quantite");
+    const montantInput = document.getElementById("vente-montant");
+    if (!montantInput || prixUnitaireCourant === null) return;
+    if (montantModifieManuellement) return;
+
+    const qte = parseFloat(qteInput?.value || "0") || 0;
+    // Sans quantité saisie, on affiche le prix d'une unité
+    const total = prixUnitaireCourant * (qte > 0 ? qte : 1);
+    montantInput.value = String(total);
+  }
+
+  function appliquerArticleSelectionne() {
+    if (!articleSelect) return;
+    const opt = articleSelect.selectedOptions && articleSelect.selectedOptions[0];
+    const typeInput = document.getElementById("vente-type");
+
+    if (!opt || !opt.dataset || opt.dataset.unitPrice === undefined) {
+      prixUnitaireCourant = null;
+      return;
+    }
+
+    prixUnitaireCourant = Number(opt.dataset.unitPrice) || 0;
+    // Nouvelle sélection : on repart d'un montant calculé
+    montantModifieManuellement = false;
+    recalculerMontant();
+
+    // Le type de vente du catalogue pré-remplit le champ correspondant
+    if (typeInput && opt.dataset.type) {
+      typeInput.value = opt.dataset.type;
+    }
+  }
+
+  async function initArticlesUI() {
+    await loadArticles();
+
+    if (articlesCache.length === 0) setModeListEmpty();
     else setModeListNotEmpty();
 
     if (articleSelect) {
       articleSelect.addEventListener("change", () => {
-        toggleOther(articleSelect.value === "__OTHER__");
+        const isOther = articleSelect.value === "__OTHER__";
+        toggleOther(isOther);
+        if (isOther) {
+          // Hors catalogue : aucun prix connu, saisie libre
+          prixUnitaireCourant = null;
+          montantModifieManuellement = false;
+        } else {
+          appliquerArticleSelectionne();
+        }
+      });
+    }
+
+    const qteInput = document.getElementById("vente-quantite");
+    if (qteInput) qteInput.addEventListener("input", recalculerMontant);
+
+    const montantInput = document.getElementById("vente-montant");
+    if (montantInput) {
+      montantInput.addEventListener("input", () => {
+        montantModifieManuellement = true;
       });
     }
   }
@@ -337,36 +395,58 @@
 
   // ✅ Récupère l'article/service selon le mode
   function getArticleValue() {
-    const list = loadArticles();
-
-    // Mode 1ère vente (liste vide)
-    if (list.length === 0) {
-      const v = normalizeLabel(firstInput ? firstInput.value : "");
-      return v;
+    // Catalogue vide : saisie libre
+    if (articlesCache.length === 0) {
+      return normalizeLabel(firstInput ? firstInput.value : "");
     }
 
-    // Mode liste non vide : select
     const selected = articleSelect ? articleSelect.value : "";
     if (selected === "__OTHER__") {
-      const other = normalizeLabel(autreInput ? autreInput.value : "");
-      return other;
+      return normalizeLabel(autreInput ? autreInput.value : "");
     }
 
     return normalizeLabel(selected);
   }
 
-  // ✅ Ajoute l'article en storage si nécessaire
-  function persistArticleIfNeeded(articleLabel) {
+  /**
+   * Propose d'ajouter au catalogue un article saisi hors liste.
+   * Le prix unitaire enregistré est déduit du montant et de la quantité,
+   * pour que la prochaine vente soit pré-remplie.
+   */
+  async function persistArticleIfNeeded(articleLabel) {
     const label = normalizeLabel(articleLabel);
     if (!label) return;
+    if (findArticleByName(label)) return;
 
-    const list = loadArticles();
-    const exists = list.some((x) => String(x).toLowerCase() === label.toLowerCase());
+    if (!window.OGOUE || typeof window.OGOUE.addArticle !== "function") return;
 
-    if (!exists) {
-      list.push(label);
-      saveArticles(list);
+    const typeInput = document.getElementById("vente-type");
+    const qteInput = document.getElementById("vente-quantite");
+    const montantInput = document.getElementById("vente-montant");
+
+    const qte = parseFloat(qteInput?.value || "0") || 0;
+    const montant = parseFloat(montantInput?.value || "0") || 0;
+    const prixUnitaire = qte > 0 ? Math.round((montant / qte) * 100) / 100 : montant;
+
+    const message =
+      `Ajouter "${label}" à votre catalogue ?\n\n` +
+      `Prix unitaire enregistré : ${formatPrice(prixUnitaire)}\n\n` +
+      `Il sera proposé automatiquement lors des prochaines ventes, ` +
+      `pour vous et vos agents.`;
+
+    if (!window.confirm(message)) return;
+
+    const type = typeInput?.value === "services" ? "services" : "produits";
+    const result = await window.OGOUE.addArticle({ name: label, type, unitPrice: prixUnitaire });
+
+    if (!result.ok && result.status !== 409) {
+      console.error("Ajout au catalogue impossible:", result.error);
+      return;
     }
+
+    // Le catalogue a changé : on rafraîchit la liste déroulante
+    await loadArticles();
+    if (articlesCache.length > 0) setModeListNotEmpty();
   }
 
   function getFormData() {
@@ -909,8 +989,8 @@
       return;
     }
 
-    // ✅ Persist article avant reset, et bascule UI si besoin
-    persistArticleIfNeeded(data.description);
+    // ✅ Propose d'ajouter l'article au catalogue s'il n'y est pas encore
+    await persistArticleIfNeeded(data.description);
 
     // ✅ Afficher la zone d'upload appropriée si fichier présent
     if (data.file) {
@@ -945,8 +1025,8 @@
     await renderCompactTable();
 
     // ✅ Refresh UI articles après ajout
-    const list = loadArticles();
-    if (list.length === 0) {
+    await loadArticles();
+    if (articlesCache.length === 0) {
       setModeListEmpty();
     } else {
       setModeListNotEmpty();

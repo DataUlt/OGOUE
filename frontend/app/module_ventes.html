@@ -120,6 +120,8 @@
             }
         }
     </style>
+    <!-- Restriction d'acces : un agent est redirige vers ses propres pages -->
+    <script src="js/role-guard.js"></script>
 </head>
 
 <body class="font-display bg-background-light dark:bg-background-dark text-[#0d1b19] dark:text-gray-200">
@@ -272,6 +274,13 @@
                                         />
                                     </div>
                                 </div>
+
+                                <!-- Acces au catalogue partage de l'organisation -->
+                                <a href="module_articles.html"
+                                   class="mt-2 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+                                    <span class="material-symbols-outlined text-base">tune</span>
+                                    <span>Gérer mon catalogue d'articles et de prix</span>
+                                </a>
                             </div>
                         </div>
 

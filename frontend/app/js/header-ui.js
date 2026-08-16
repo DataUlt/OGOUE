@@ -453,44 +453,6 @@
     `;
     content.appendChild(appearanceDiv);
     
-    // AFFICHAGE - DATE FORMAT
-    const affichageDiv = document.createElement('div');
-    affichageDiv.innerHTML = `
-      <div class="text-xs font-bold uppercase text-gray-500 dark:text-gray-400 mb-3">Affichage</div>
-      <div class="space-y-3">
-        <div>
-          <label class="text-xs font-medium text-gray-700 dark:text-gray-300 block mb-2">Format de date</label>
-          <select id="ogo-date-format" class="w-full px-3 py-2 text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-            <option value="DD/MM/YYYY" ${prefs.dateFormat === 'DD/MM/YYYY' ? 'selected' : ''}>JJ / MM / AAAA</option>
-            <option value="MM/DD/YYYY" ${prefs.dateFormat === 'MM/DD/YYYY' ? 'selected' : ''}>MM/DD/YYYY</option>
-            <option value="YYYY-MM-DD" ${prefs.dateFormat === 'YYYY-MM-DD' ? 'selected' : ''}>YYYY-MM-DD</option>
-          </select>
-        </div>
-        <div>
-          <label class="text-xs font-medium text-gray-700 dark:text-gray-300 block mb-2">Devise</label>
-          <select id="ogo-currency" class="w-full px-3 py-2 text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-            <option value="FCFA" ${prefs.currency === 'FCFA' ? 'selected' : ''}>FCFA (Franc CFA)</option>
-            <option value="EUR" ${prefs.currency === 'EUR' ? 'selected' : ''}>EUR (Euro)</option>
-            <option value="USD" ${prefs.currency === 'USD' ? 'selected' : ''}>USD (Dollar)</option>
-          </select>
-        </div>
-      </div>
-    `;
-    content.appendChild(affichageDiv);
-    
-    // NOTIFICATIONS
-    const notifDiv = document.createElement('div');
-    notifDiv.innerHTML = `
-      <div class="text-xs font-bold uppercase text-gray-500 dark:text-gray-400 mb-3">Notifications</div>
-      <label class="flex items-center justify-between cursor-pointer">
-        <span class="text-sm text-gray-700 dark:text-gray-300">Activer les notifications</span>
-        <div class="w-12 h-6 bg-teal-500 rounded-full relative transition" id="notif-toggle">
-          <div class="w-5 h-5 bg-white rounded-full absolute top-0.5 transition ${prefs.notificationsEnabled ? 'right-0.5' : 'left-0.5'}"></div>
-        </div>
-      </label>
-    `;
-    content.appendChild(notifDiv);
-    
     // AGENTS (seulement pour les Managers)
     const user = getUser() || { role: '' };
     const isAgent = user.role === 'agent';
@@ -499,10 +461,16 @@
       const agentsDiv = document.createElement('div');
       agentsDiv.innerHTML = `
         <div class="text-xs font-bold uppercase text-gray-500 dark:text-gray-400 mb-3">Gestion</div>
-        <a href="module_agents.html" class="block w-full px-4 py-2 rounded-lg text-background-light bg-primary hover:bg-text-light font-medium text-sm text-center transition-colors inline-flex items-center justify-center gap-2">
-          <span class="material-symbols-outlined" style="font-size: 18px;">group</span>
-          Gérer les Agents
-        </a>
+        <div class="space-y-2">
+          <a href="module_agents.html" class="block w-full px-4 py-2 rounded-lg text-background-light bg-primary hover:bg-text-light font-medium text-sm text-center transition-colors inline-flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined" style="font-size: 18px;">group</span>
+            Gérer les Agents
+          </a>
+          <a href="module_articles.html" class="block w-full px-4 py-2 rounded-lg text-background-light bg-primary hover:bg-text-light font-medium text-sm text-center transition-colors inline-flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined" style="font-size: 18px;">storefront</span>
+            Ma boutique
+          </a>
+        </div>
       `;
       content.appendChild(agentsDiv);
     }
@@ -525,57 +493,6 @@
         if (t === 'dark') document.documentElement.classList.add('dark');
         else document.documentElement.classList.remove('dark');
       });
-    });
-    
-    // Event listeners - DATE FORMAT
-    popover.querySelector('#ogo-date-format')?.addEventListener('change', function(){
-      const newPrefs = getPrefs();
-      newPrefs.dateFormat = this.value;
-      savePrefs(newPrefs);
-      console.log('✅ Format de date changé en:', this.value);
-    });
-    
-    // Event listeners - DEVISE
-    const currencySelect = popover.querySelector('#ogo-currency');
-    console.log("🔍 Looking for #ogo-currency:", currencySelect);
-    if (currencySelect) {
-      currencySelect.addEventListener('change', function(){
-        const newPrefs = getPrefs();
-        newPrefs.currency = this.value;
-        savePrefs(newPrefs);
-        console.log('✅ Devise changée en:', this.value);
-        // Mettre à jour les KPI et les graphiques en temps réel
-        if (typeof updateKPIDisplay === 'function') {
-          console.log("📈 Calling updateKPIDisplay()");
-          updateKPIDisplay();
-        }
-        // Recharger les graphiques avec la nouvelle devise
-        console.log("🚀 Dispatching currency:changed event");
-        const event = new CustomEvent('currency:changed', { detail: { currency: this.value } });
-        document.dispatchEvent(event);
-        console.log("✅ Event dispatched!");
-      });
-    } else {
-      console.error("❌ #ogo-currency element not found!");
-    }
-    
-    // Event listeners - NOTIFICATIONS
-    popover.querySelector('#notif-toggle')?.addEventListener('click', function(){
-      const newPrefs = getPrefs();
-      newPrefs.notificationsEnabled = !newPrefs.notificationsEnabled;
-      savePrefs(newPrefs);
-      const thumb = this.querySelector('div');
-      if (newPrefs.notificationsEnabled) {
-        this.classList.add('bg-teal-500');
-        this.classList.remove('bg-gray-300');
-        thumb.style.right = '2px';
-        thumb.style.left = 'auto';
-      } else {
-        this.classList.remove('bg-teal-500');
-        this.classList.add('bg-gray-300');
-        thumb.style.left = '2px';
-        thumb.style.right = 'auto';
-      }
     });
     
     // Close button

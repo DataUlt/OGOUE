@@ -462,12 +462,15 @@
         }
         
         showSuccess("Compte créé avec succès ! Redirection...");
-        
+
         const APP_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
           ? 'http://127.0.0.1:8080/app'
           : 'https://www.ogoue.com/app';
         setTimeout(() => {
-          window.location.href = APP_BASE + '/module_tableau_bord.html';
+          // Etape de configuration du catalogue juste apres la creation du
+          // compte. Elle est passable : le bouton "Plus tard" mene au tableau
+          // de bord, et le catalogue reste modifiable ensuite.
+          window.location.href = APP_BASE + '/module_articles.html?onboarding=1';
         }, 1500);
         
       } catch (error) {

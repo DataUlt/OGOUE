@@ -81,6 +81,8 @@
       pointer-events: none;
     }
   </style>
+    <!-- Restriction d'acces : un agent est redirige vers ses propres pages -->
+    <script src="js/role-guard.js"></script>
 </head>
 
 <body class="font-display bg-background-light dark:bg-background-dark text-[#0a0c0a] dark:text-gray-100">
@@ -148,16 +150,13 @@
       </p>
     </div>
 
-    <!-- Tabs -->
-    <div class="mb-8 border-b border-[#e8ede8] dark:border-[#2d4a46]">
-      <nav aria-label="Tabs" class="flex gap-8">
-        <div class="relative group">
-          <a class="border-b-[3px] border-primary text-primary hover:text-primary dark:text-primary dark:hover:text-primary pb-3 px-1 flex items-center gap-2" href="https://financement.ogoue.com/pme-login" target="_blank">
-            <span class="material-symbols-outlined text-xl">folder_open</span>
-            <span class="font-medium text-sm tracking-[0.015em]">Accès Partenaire</span>
-          </a>
-        </div>
-      </nav>
+    <!-- Acces a l'espace partenaire -->
+    <div class="mb-8">
+      <a class="inline-flex min-w-[220px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-full h-12 px-8 bg-primary text-background-dark text-base font-bold tracking-wide hover:bg-primary/90 dark:hover:text-white transition-colors"
+         href="https://financement.ogoue.com/pme-login" target="_blank" rel="noopener noreferrer">
+        <span class="material-symbols-outlined text-xl">open_in_new</span>
+        <span class="truncate">Accès Partenaire</span>
+      </a>
     </div>
 
     <!-- Content Grid -->

@@ -10,6 +10,7 @@ import summaryRoutes from "./routes/summary.routes.js";
 import organizationRoutes from "./routes/organization.routes.js";
 import agentsRoutes from "./routes/agents.routes.js";
 import auditRoutes from "./routes/audit.routes.js";
+import articlesRoutes from "./routes/articles.routes.js";
 import { authMiddleware } from "./middleware/auth.middleware.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -84,6 +85,7 @@ app.use("/api/summary", authMiddleware, summaryRoutes);
 app.use("/api/organization", authMiddleware, organizationRoutes);
 app.use("/api/agents", authMiddleware, agentsRoutes);
 app.use("/api/audit", authMiddleware, auditRoutes);
+app.use("/api/articles", authMiddleware, articlesRoutes);
 
 // 404
 app.use((req, res) => res.status(404).json({ error: "Not found" }));
