@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html class="light" lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Mes dossiers - OGOUE</title>
+  <link rel="icon" type="image/png" href="O-removebg-preview.png">
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <!-- Fonts & icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#0088CC",
+            "background-light": "#f6f8f6",
+            "background-dark": "#111712",
+            "text-light-primary": "#0a0c0a",
+            "text-light-secondary": "#4c9a8d",
+          },
+          fontFamily: { "display": ["Manrope", "sans-serif"] },
+          borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+          boxShadow: {
+            "soft": "0 10px 30px rgba(13,27,25,.08)",
+            "lift": "0 14px 40px rgba(13,27,25,.12)"
+          }
+        },
+      },
+    }
+  </script>
+
+  <style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 500,'GRAD' 0,'opsz' 24; }
+  </style>
+
+  <!-- Restriction d'acces : un agent est redirige vers ses propres pages -->
+  <script src="js/role-guard.js"></script>
+</head>
+
+<body class="font-display bg-background-light dark:bg-background-dark text-[#0a0c0a] dark:text-gray-100">
+<div class="relative flex min-h-screen w-full flex-col">
+
+  <!-- ===== HEADER OGOUE ===== -->
+  <header class="z-10 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-[#e8ede8] dark:border-gray-700">
+    <div class="container mx-auto px-4">
+      <div class="flex items-center justify-between whitespace-nowrap h-20">
+        <div class="flex items-center gap-4">
+          <a href="module_tableau_bord"><img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-28 w-auto"></a>
+        </div>
+        <div class="hidden md:flex items-center gap-9">
+          <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
+             href="module_tableau_bord">Tableau de Bord</a>
+          <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
+             href="module_ventes">Comptabilité</a>
+          <a class="text-primary text-sm font-bold leading-normal"
+             href="module_scoring">Financement</a>
+        </div>
+        <!-- Menu mobile -->
+        <div id="mobile-menu" class="md:hidden absolute top-full left-0 right-0 bg-background-light dark:bg-background-dark border-b border-[#e8ede8] dark:border-gray-700 hidden">
+          <div class="flex flex-col gap-2 p-4">
+            <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_tableau_bord">Tableau de Bord</a>
+            <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_ventes">Comptabilité</a>
+            <a class="text-primary text-sm font-bold leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_scoring">Financement</a>
+          </div>
+        </div>
+        <button id="menu-toggle" type="button" class="md:hidden flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+        <div class="flex items-center gap-2">
+          <button type="button" class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white" data-action="notifications">
+            <span class="material-symbols-outlined">search_insights</span>
+          </button>
+          <button type="button" class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white" data-action="settings">
+            <span class="material-symbols-outlined">settings</span>
+          </button>
+          <button id="profileBtn" type="button"
+                  class="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer bg-primary/20 dark:bg-primary/30 text-[#0a0c0a] dark:text-white hover:bg-primary/30 dark:hover:bg-primary/40 transition-colors"
+                  data-action="profile" title="Profil">
+            <span class="material-symbols-outlined text-2xl">account_circle</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <!-- ===== FIN HEADER ===== -->
+
+  <main class="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <div class="flex flex-col gap-2 mb-6">
+      <h1 class="text-3xl sm:text-4xl font-black leading-tight tracking-[-0.033em] dark:text-white">
+        Financement
+      </h1>
+      <p class="text-gray-600 dark:text-gray-400">
+        Suivez l'avancement des dossiers que vous avez déposés.
+      </p>
+    </div>
+
+    <!-- ONGLETS -->
+    <div class="border-b border-gray-200 dark:border-gray-700 mb-8">
+      <nav class="flex gap-8 -mb-px overflow-x-auto">
+        <a href="module_scoring"
+           class="flex items-center gap-2 border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 pb-3 pt-4 px-2 whitespace-nowrap">
+          <span class="text-sm font-bold tracking-[0.015em]">Score de traçabilité</span>
+        </a>
+        <a href="module_depot_dossier"
+           class="flex items-center gap-2 border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 pb-3 pt-4 px-2 whitespace-nowrap">
+          <span class="text-sm font-bold tracking-[0.015em]">Déposer un dossier</span>
+        </a>
+        <a href="module_mes_dossiers"
+           class="flex items-center gap-2 border-b-[3px] border-b-primary text-[#0a0c0a] dark:text-white pb-3 pt-4 px-2 whitespace-nowrap">
+          <span class="text-sm font-bold tracking-[0.015em]">Mes dossiers</span>
+        </a>
+      </nav>
+    </div>
+
+    <div id="alerte" class="hidden mb-6 rounded-xl px-4 py-3 text-sm"></div>
+
+    <div id="chargement" class="text-gray-500 dark:text-gray-400 py-8 text-center">
+      Chargement de vos dossiers…
+    </div>
+
+    <div id="vide" class="hidden rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 p-10 text-center">
+      <span class="material-symbols-outlined text-4xl text-gray-400">folder_open</span>
+      <p class="mt-3 font-semibold dark:text-white">Vous n'avez encore aucun dossier</p>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        Consultez les crédits disponibles pour constituer votre premier dossier.
+      </p>
+      <a href="module_depot_dossier"
+         class="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-white hover:bg-primary/90 transition">
+        <span class="material-symbols-outlined text-base">upload_file</span>
+        Déposer un dossier
+      </a>
+    </div>
+
+    <div id="listeDossiers" class="flex flex-col gap-4"></div>
+
+  </main>
+</div>
+
+<script src="js/ogoue-state.js"></script>
+<script src="js/header-ui.js"></script>
+<script src="js/mobile-menu.js"></script>
+<script>
+// ============================================================
+// Suivi des dossiers de financement
+// ------------------------------------------------------------
+// C'est l'institution qui fait avancer le statut depuis son espace.
+// Cette page en restitue l'état courant et l'historique complet.
+// ============================================================
+
+const FCFA = new Intl.NumberFormat("fr-FR");
+
+// Libelle et couleur de chaque statut, du point de vue de la PME
+const STATUTS = {
+  brouillon:         { libelle: "Brouillon",            classe: "bg-gray-100 text-gray-700",       aide: "Ce dossier n'est pas encore déposé." },
+  depose:            { libelle: "Déposé",               classe: "bg-blue-100 text-blue-800",       aide: "L'institution a bien reçu votre dossier." },
+  en_examen:         { libelle: "En cours d'examen",    classe: "bg-indigo-100 text-indigo-800",   aide: "L'institution étudie votre demande." },
+  complement_requis: { libelle: "Complément demandé",   classe: "bg-amber-100 text-amber-800",     aide: "L'institution attend une pièce ou une précision de votre part." },
+  accepte:           { libelle: "Accepté",              classe: "bg-emerald-100 text-emerald-800", aide: "Votre demande a été acceptée." },
+  refuse:            { libelle: "Refusé",               classe: "bg-red-100 text-red-800",         aide: "Votre demande n'a pas été retenue." },
+};
+
+const AUTEURS = { pme: "Vous", institution: "L'institution" };
+
+function echapper(valeur) {
+  return String(valeur ?? "").replace(/[&<>"']/g, (c) => (
+    { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
+  ));
+}
+
+function formatDate(valeur) {
+  if (!valeur) return "—";
+  const d = new Date(valeur);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
+}
+
+function formatDateHeure(valeur) {
+  if (!valeur) return "—";
+  const d = new Date(valeur);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+
+function afficherAlerte(message, type = "succes") {
+  const boite = document.getElementById("alerte");
+  const styles = {
+    erreur: "bg-red-50 text-red-700 border border-red-200",
+    succes: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+    info: "bg-blue-50 text-blue-700 border border-blue-200",
+  };
+  boite.className = `mb-6 rounded-xl px-4 py-3 text-sm ${styles[type] || styles.succes}`;
+  boite.textContent = message;
+  boite.classList.remove("hidden");
+}
+
+function carteDossier(dossier) {
+  const statut = STATUTS[dossier.status] || { libelle: dossier.status, classe: "bg-gray-100 text-gray-700", aide: "" };
+  const institution = dossier.institution ? dossier.institution.name : "Institution partenaire";
+  const produit = dossier.product ? dossier.product.name : "Crédit";
+  const modifiable = ["brouillon", "complement_requis"].includes(dossier.status);
+
+  return `
+    <article class="rounded-2xl bg-white dark:bg-gray-800/40 border border-[#e8ede8] dark:border-gray-700 shadow-soft overflow-hidden">
+      <div class="p-5 flex flex-wrap items-start justify-between gap-4">
+        <div class="min-w-0">
+          <p class="text-sm text-text-light-secondary font-semibold">${echapper(institution)}</p>
+          <h2 class="text-lg font-bold dark:text-white">${echapper(produit)}</h2>
+          <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            ${dossier.amountRequested !== null ? `<strong>${FCFA.format(dossier.amountRequested)} FCFA</strong>` : "Montant non précisé"}
+            ${dossier.durationMonths ? ` sur ${dossier.durationMonths} mois` : ""}
+          </p>
+        </div>
+        <div class="text-right">
+          <span class="inline-flex rounded-full px-3 py-1 text-xs font-bold ${statut.classe}">${statut.libelle}</span>
+          <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            ${dossier.submittedAt ? `Déposé le ${formatDate(dossier.submittedAt)}` : `Créé le ${formatDate(dossier.createdAt)}`}
+          </p>
+        </div>
+      </div>
+
+      <div class="px-5 pb-5 flex flex-col gap-4">
+        <p class="text-sm text-gray-600 dark:text-gray-400">${statut.aide}</p>
+
+        ${dossier.decisionNote ? `
+          <div class="rounded-xl bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 px-4 py-3">
+            <p class="text-xs font-bold uppercase tracking-wide text-amber-800">Message de l'institution</p>
+            <p class="mt-1 text-sm text-amber-900 dark:text-amber-200">${echapper(dossier.decisionNote)}</p>
+          </div>
+        ` : ""}
+
+        ${dossier.purpose ? `
+          <div>
+            <p class="text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">Objet</p>
+            <p class="mt-1 text-sm dark:text-gray-300">${echapper(dossier.purpose)}</p>
+          </div>
+        ` : ""}
+
+        <div>
+          <p class="text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+            Pièces fournies (${dossier.documents.length})
+          </p>
+          ${dossier.documents.length > 0 ? `
+            <ul class="mt-2 flex flex-col gap-1">
+              ${dossier.documents.map((d) => `
+                <li class="flex items-center gap-2 text-sm">
+                  <span class="material-symbols-outlined text-base text-gray-400">description</span>
+                  <a href="${echapper(d.fileUrl)}" target="_blank" rel="noopener"
+                     class="text-primary hover:underline break-all">${echapper(d.name)}</a>
+                </li>
+              `).join("")}
+            </ul>
+          ` : `<p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Aucune pièce jointe.</p>`}
+        </div>
+
+        <div>
+          <p class="text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">Historique</p>
+          <ol class="relative border-l border-gray-200 dark:border-gray-700 ml-2">
+            ${dossier.history.map((h) => {
+              const s = STATUTS[h.status] || { libelle: h.status };
+              return `
+                <li class="ml-4 pb-3 last:pb-0">
+                  <span class="absolute -left-1.5 w-3 h-3 rounded-full bg-primary/60"></span>
+                  <p class="text-sm font-semibold dark:text-gray-200">${s.libelle}</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">
+                    ${AUTEURS[h.changedBy] || "Système"} — ${formatDateHeure(h.at)}
+                  </p>
+                  ${h.note ? `<p class="mt-1 text-sm text-gray-600 dark:text-gray-400">${echapper(h.note)}</p>` : ""}
+                </li>
+              `;
+            }).join("")}
+          </ol>
+        </div>
+
+        ${modifiable ? `
+          <div>
+            <a href="module_depot_dossier?productId=${encodeURIComponent(dossier.product ? dossier.product.id : "")}"
+               class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-white hover:bg-primary/90 transition">
+              <span class="material-symbols-outlined text-base">edit</span>
+              ${dossier.status === "complement_requis" ? "Compléter et redéposer" : "Reprendre ce dossier"}
+            </a>
+          </div>
+        ` : ""}
+      </div>
+    </article>
+  `;
+}
+
+(async function demarrer() {
+  const chargement = document.getElementById("chargement");
+  const vide = document.getElementById("vide");
+  const liste = document.getElementById("listeDossiers");
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("depose")) {
+    afficherAlerte("Votre dossier a été déposé. L'institution va l'examiner.", "succes");
+  }
+
+  const resumes = await OGOUE.getApplications();
+  chargement.classList.add("hidden");
+
+  if (resumes.length === 0) {
+    vide.classList.remove("hidden");
+    return;
+  }
+
+  // Le détail porte les pièces et l'historique, que la liste ne renvoie pas.
+  const details = await Promise.all(resumes.map((d) => OGOUE.getApplication(d.id)));
+  const dossiers = details.filter(Boolean);
+
+  liste.innerHTML = dossiers.map(carteDossier).join("");
+})();
+</script>
+</body>
+</html>

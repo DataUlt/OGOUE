@@ -7,7 +7,10 @@ import {
   createApplication,
   updateApplication,
   submitApplication,
+  uploadApplicationDocument,
+  deleteApplicationDocument,
 } from "../controllers/financing.controller.js";
+import upload from "../middleware/upload.middleware.js";
 
 const r = Router();
 
@@ -21,5 +24,9 @@ r.post("/applications", createApplication);
 r.get("/applications/:id", getApplication);
 r.put("/applications/:id", updateApplication);
 r.post("/applications/:id/submit", submitApplication);
+
+// Pieces justificatives du dossier
+r.post("/applications/:id/documents", upload.single("file"), uploadApplicationDocument);
+r.delete("/applications/:id/documents/:docId", deleteApplicationDocument);
 
 export default r;

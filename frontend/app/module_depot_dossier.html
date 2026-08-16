@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html class="light" lang="fr">
 <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <title>D�p�t de dossier - OGOUE</title>
+  <title>Déposer un dossier - OGOUE</title>
   <link rel="icon" type="image/png" href="O-removebg-preview.png">
 
   <!-- Tailwind -->
@@ -39,861 +39,821 @@
   </script>
 
   <style>
-    body { font-family: 'Inter', sans-serif; }
-    .scrollbar-hide::-webkit-scrollbar { display: none; }
-    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 500,'GRAD' 0,'opsz' 24; }
     .fade-in { animation: fade .18s ease-out both; }
-    @keyframes fade { from{opacity:.0; transform: translateY(6px);} to{opacity:1; transform: translateY(0);} }
+    @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
   </style>
+
   <!-- Restriction d'acces : un agent est redirige vers ses propres pages -->
   <script src="js/role-guard.js"></script>
 </head>
 
-<body class="font-display bg-background-light dark:bg-background-dark text-text-light-primary dark:text-gray-200">
-<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+<body class="font-display bg-background-light dark:bg-background-dark text-[#0a0c0a] dark:text-gray-100">
+<div class="relative flex min-h-screen w-full flex-col">
 
-  <!-- HEADER -->
-  <header class="sticky top-0 z-20 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-[#e8ede8] dark:border-gray-700">
+  <!-- ===== HEADER OGOUE ===== -->
+  <header class="z-10 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-[#e8ede8] dark:border-gray-700">
     <div class="container mx-auto px-4">
       <div class="flex items-center justify-between whitespace-nowrap h-20">
-        <div class="flex items-center gap-3">
-          <a href="/"><img src="/app/Logo-ogoue (2).png" alt="OGOU� Logo" class="h-28 w-auto"></a>
+        <div class="flex items-center gap-4">
+          <a href="module_tableau_bord"><img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-28 w-auto"></a>
         </div>
-
         <div class="hidden md:flex items-center gap-9">
-          <a class="text-text-light-primary dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
+          <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
              href="module_tableau_bord">Tableau de Bord</a>
-          <a class="text-text-light-primary dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
-             href="module_ventes">Comptabilit�</a>
+          <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
+             href="module_ventes">Comptabilité</a>
           <a class="text-primary text-sm font-bold leading-normal"
              href="module_scoring">Financement</a>
         </div>
-
+        <!-- Menu mobile -->
+        <div id="mobile-menu" class="md:hidden absolute top-full left-0 right-0 bg-background-light dark:bg-background-dark border-b border-[#e8ede8] dark:border-gray-700 hidden">
+          <div class="flex flex-col gap-2 p-4">
+            <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_tableau_bord">Tableau de Bord</a>
+            <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_ventes">Comptabilité</a>
+            <a class="text-primary text-sm font-bold leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_scoring">Financement</a>
+          </div>
+        </div>
+        <!-- Bouton menu mobile -->
+        <button id="menu-toggle" class="md:hidden flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
         <div class="flex items-center gap-2">
-          <button class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 text-text-light-primary dark:bg-primary/25 dark:text-white hover:bg-primary/25 transition cursor-pointer" data-action="notifications">
+          <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white" data-action="notifications">
             <span class="material-symbols-outlined">search_insights</span>
           </button>
-          <button class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 text-text-light-primary dark:bg-primary/25 dark:text-white hover:bg-primary/25 transition cursor-pointer" data-action="settings">
+          <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white" data-action="settings">
             <span class="material-symbols-outlined">settings</span>
           </button>
-          <button class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-primary/20 dark:bg-primary/30 text-[#0a0c0a] dark:text-white hover:bg-primary/30 dark:hover:bg-primary/40 transition-colors ring-2 ring-primary/25"
-               data-action="profile"
-               title="Profil utilisateur">
+          <button id="profileBtn"
+                  class="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer bg-primary/20 dark:bg-primary/30 text-[#0a0c0a] dark:text-white hover:bg-primary/30 dark:hover:bg-primary/40 transition-colors"
+                  data-action="profile" title="Profil" type="button">
             <span class="material-symbols-outlined text-2xl">account_circle</span>
           </button>
         </div>
       </div>
     </div>
   </header>
+  <!-- ===== FIN HEADER ===== -->
 
-  <!-- MAIN -->
-  <main class="flex-grow flex flex-col items-center py-6 px-4 md:px-10 lg:px-40">
-    <div class="w-full max-w-[980px] flex flex-col gap-6">
+  <main class="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-      <!-- TABS -->
-      <div class="border-b border-gray-200 dark:border-gray-700">
-        <nav class="flex gap-8 -mb-px">
-          <a href="module_scoring"
-             class="flex items-center gap-2 border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400
-                    hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
-            <span class="text-sm font-bold tracking-[0.015em]">Scoring</span>
-          </a>
-
-          <a href="module_depot_dossier"
-             class="flex items-center gap-2 border-b-[3px] border-b-primary text-[#0a0c0a] dark:text-white pb-3 pt-4 px-2">
-            <span class="text-sm font-bold tracking-[0.015em]">D�p�t de dossier</span>
-          </a>
-        </nav>
-      </div>
-
-      <!-- HERO -->
-      <section class="bg-white dark:bg-white/5 border border-[#e8ede8] dark:border-gray-700 rounded-2xl p-5 md:p-6 shadow-soft">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 class="mt-2 text-2xl md:text-3xl font-black tracking-[-0.02em] text-text-light-primary dark:text-white">
-              D�posez votre dossier en 3 �tapes
-            </h1>
-            <p class="mt-2 text-sm md:text-base text-text-light-secondary max-w-2xl">
-              Choisissez l�institution financi�re, s�lectionnez le produit, puis t�l�versez les documents requis.
-            </p>
-          </div>
-
-          <div class="flex items-center gap-2 px-3 py-2 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/40">
-            <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-[18px]">lock</span>
-            <span class="text-xs font-semibold text-blue-600 dark:text-blue-400">Dossier s�curis� & chiffr�</span>
-          </div>
-        </div>
-
-        <!-- STEPPER -->
-        <div class="mt-5 grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div id="step0" class="rounded-xl border border-primary/30 bg-primary/5 p-4 flex items-start gap-3">
-            <div class="size-9 rounded-xl bg-primary/20 flex items-center justify-center text-text-light-primary font-black">0</div>
-            <div>
-              <p class="text-sm font-black text-text-light-primary dark:text-white">Partenaire</p>
-              <p class="text-xs text-text-light-secondary mt-0.5">Choisir l�institution</p>
-            </div>
-          </div>
-
-          <div id="step1" class="rounded-xl border border-[#e7f3f1] dark:border-[#1f3a35] bg-white dark:bg-[#152a26]/30 p-4 flex items-start gap-3">
-            <div class="size-9 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-300 font-black">1</div>
-            <div>
-              <p class="text-sm font-black text-text-light-primary dark:text-white">Cr�dit</p>
-              <p class="text-xs text-text-light-secondary mt-0.5">Choisir le produit</p>
-            </div>
-          </div>
-
-          <div id="step2" class="rounded-xl border border-[#e7f3f1] dark:border-[#1f3a35] bg-white dark:bg-[#152a26]/30 p-4 flex items-start gap-3">
-            <div class="size-9 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-300 font-black">2</div>
-            <div>
-              <p class="text-sm font-black text-text-light-primary dark:text-white">Documents</p>
-              <p class="text-xs text-text-light-secondary mt-0.5">T�l�versement</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 0. PARTENAIRE (cards) -->
-      <section class="bg-white dark:bg-white/5 border border-[#e8ede8] dark:border-gray-700 rounded-2xl p-5 md:p-6 shadow-soft">
-        <div class="flex items-center justify-between gap-4">
-          <div>
-            <h2 class="text-lg font-black text-text-light-primary dark:text-white flex items-center gap-2">
-              <span class="material-symbols-outlined text-primary">account_balance</span>
-              0. Choisissez votre partenaire financier
-            </h2>
-            <p class="mt-1 text-sm text-text-light-secondary">
-              Les produits et documents requis d�pendent de l�institution s�lectionn�e.
-            </p>
-          </div>
-
-          <div id="partnerSelectedPill" class="hidden md:flex items-center gap-2 px-3 py-2 rounded-full bg-primary/10 border border-primary/20">
-            <span class="material-symbols-outlined text-primary text-[18px]">verified</span>
-            <span id="partnerPillText" class="text-xs font-bold text-text-light-primary">�</span>
-          </div>
-        </div>
-
-        <div class="mt-4 relative">
-          <button id="pScrollLeft"
-            class="hidden md:flex absolute -left-5 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-[#152a26]
-                   border border-[#e7f3f1] dark:border-[#1f3a35] shadow-soft rounded-full w-10 h-10 items-center justify-center hover:bg-primary/10 transition">
-            <span class="material-symbols-outlined text-primary">chevron_left</span>
-          </button>
-
-          <div id="partnerScroller" class="flex gap-4 overflow-x-auto scroll-smooth pb-2 scrollbar-hide">
-            <!-- Microfinance A -->
-            <div class="min-w-[320px] max-w-[320px]">
-              <input class="peer sr-only" id="p-mf_a" name="partner" type="radio" />
-              <label for="p-mf_a"
-                     class="block h-full p-4 rounded-2xl bg-white dark:bg-[#152a26]
-                            border border-[#e7f3f1] dark:border-[#1f3a35]
-                            hover:border-primary/50 hover:shadow-soft transition
-                            peer-checked:border-2 peer-checked:border-primary peer-checked:ring-1 peer-checked:ring-primary/20 peer-checked:shadow-lift">
-                <div class="flex items-start justify-between gap-3">
-                  <div class="flex items-start gap-3">
-                    <div class="size-12 rounded-2xl bg-primary/15 flex items-center justify-center">
-                      <span class="material-symbols-outlined text-primary">savings</span>
-                    </div>
-                    <div>
-                      <p class="text-base font-black text-text-light-primary dark:text-white">Microfinance A</p>
-                      <p class="text-sm text-text-light-secondary">D�cision rapide � BFR / Tr�sorerie</p>
-                      <div class="mt-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/40">
-                        <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-[16px]">bolt</span>
-                        <span class="text-xs font-bold text-blue-600 dark:text-blue-400">72h</span>
-                      </div>
-                    </div>
-                  </div>
-                  <span class="material-symbols-outlined text-primary hidden peer-checked:block">check_circle</span>
-                </div>
-              </label>
-            </div>
-
-            <!-- Banque B -->
-            <div class="min-w-[320px] max-w-[320px]">
-              <input class="peer sr-only" id="p-bank_b" name="partner" type="radio" />
-              <label for="p-bank_b"
-                     class="block h-full p-4 rounded-2xl bg-white dark:bg-[#152a26]
-                            border border-[#e7f3f1] dark:border-[#1f3a35]
-                            hover:border-primary/50 hover:shadow-soft transition
-                            peer-checked:border-2 peer-checked:border-primary peer-checked:ring-1 peer-checked:ring-primary/20 peer-checked:shadow-lift">
-                <div class="flex items-start justify-between gap-3">
-                  <div class="flex items-start gap-3">
-                    <div class="size-12 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                      <span class="material-symbols-outlined text-gray-600 dark:text-gray-300">account_balance</span>
-                    </div>
-                    <div>
-                      <p class="text-base font-black text-text-light-primary dark:text-white">Banque Populaire B</p>
-                      <p class="text-sm text-text-light-secondary">Investissement � �quipement � Stock</p>
-                      <div class="mt-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 dark:bg-white/5 border border-[#e7f3f1] dark:border-[#1f3a35]">
-                        <span class="material-symbols-outlined text-[16px] text-text-light-secondary">gavel</span>
-                        <span class="text-xs font-bold text-text-light-secondary">Exigences �lev�es</span>
-                      </div>
-                    </div>
-                  </div>
-                  <span class="material-symbols-outlined text-primary hidden peer-checked:block">check_circle</span>
-                </div>
-              </label>
-            </div>
-
-            <!-- Fonds C -->
-            <div class="min-w-[320px] max-w-[320px]">
-              <input class="peer sr-only" id="p-fund_c" name="partner" type="radio" />
-              <label for="p-fund_c"
-                     class="block h-full p-4 rounded-2xl bg-white dark:bg-[#152a26]
-                            border border-[#e7f3f1] dark:border-[#1f3a35]
-                            hover:border-primary/50 hover:shadow-soft transition
-                            peer-checked:border-2 peer-checked:border-primary peer-checked:ring-1 peer-checked:ring-primary/20 peer-checked:shadow-lift">
-                <div class="flex items-start justify-between gap-3">
-                  <div class="flex items-start gap-3">
-                    <div class="size-12 rounded-2xl bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center">
-                      <span class="material-symbols-outlined text-purple-600 dark:text-purple-400">rocket_launch</span>
-                    </div>
-                    <div>
-                      <p class="text-base font-black text-text-light-primary dark:text-white">Fonds d�Investissement C</p>
-                      <p class="text-sm text-text-light-secondary">Expansion � Mat�riel � Croissance</p>
-                      <div class="mt-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-900/40">
-                        <span class="material-symbols-outlined text-[16px] text-purple-600 dark:text-purple-400">workspace_premium</span>
-                        <span class="text-xs font-bold text-purple-600 dark:text-purple-400">Pitch requis</span>
-                      </div>
-                    </div>
-                  </div>
-                  <span class="material-symbols-outlined text-primary hidden peer-checked:block">check_circle</span>
-                </div>
-              </label>
-            </div>
-          </div>
-
-          <button id="pScrollRight"
-            class="hidden md:flex absolute -right-5 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-[#152a26]
-                   border border-[#e7f3f1] dark:border-[#1f3a35] shadow-soft rounded-full w-10 h-10 items-center justify-center hover:bg-primary/10 transition">
-            <span class="material-symbols-outlined text-primary">chevron_right</span>
-          </button>
-        </div>
-
-        <!-- fallback mobile dropdown (optional mais utile) -->
-        <div class="mt-4 md:hidden">
-          <label class="text-xs font-bold text-text-light-secondary">Partenaire (liste)</label>
-          <select id="partnerSelectMobile"
-                  class="mt-2 w-full h-12 rounded-xl border border-[#e8ede8] dark:border-gray-700 bg-white dark:bg-background-dark p-3 text-sm font-semibold">
-            <option value="" selected>� Choisir un partenaire �</option>
-            <option value="mf_a">Microfinance A (Gabon)</option>
-            <option value="bank_b">Banque Populaire B</option>
-            <option value="fund_c">Fonds d�Investissement C</option>
-          </select>
-        </div>
-      </section>
-
-      <!-- 1. CREDIT -->
-      <section class="bg-white dark:bg-white/5 border border-[#e8ede8] dark:border-gray-700 rounded-2xl p-5 md:p-6 shadow-soft">
-        <div class="flex items-center justify-between gap-4">
-          <div>
-            <h2 class="text-lg font-black text-text-light-primary dark:text-white flex items-center gap-2">
-              <span class="material-symbols-outlined text-primary">inventory_2</span>
-              1. S�lectionnez votre cr�dit
-            </h2>
-            <p class="mt-1 text-sm text-text-light-secondary">
-              Cette liste est filtr�e selon votre partenaire.
-            </p>
-          </div>
-          <a class="text-xs md:text-sm text-primary font-bold hover:underline flex items-center gap-1" href="#">
-            <span class="material-symbols-outlined text-[16px]">compare_arrows</span>
-            Comparer
-          </a>
-        </div>
-
-        <div class="mt-4 relative">
-          <button id="scrollLeft"
-            class="hidden md:flex absolute -left-5 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-[#152a26]
-                   border border-[#e7f3f1] dark:border-[#1f3a35] shadow-soft rounded-full w-10 h-10 items-center justify-center hover:bg-primary/10 transition">
-            <span class="material-symbols-outlined text-primary">chevron_left</span>
-          </button>
-
-          <div id="creditScroller" class="relative flex gap-4 overflow-x-auto scroll-smooth pb-2 scrollbar-hide">
-
-            <!-- overlay lock -->
-            <div id="loanOverlay" class="absolute inset-0 z-10 rounded-2xl bg-white/60 dark:bg-black/30 backdrop-blur-[1px] hidden">
-              <div class="h-full w-full flex items-center justify-center p-6 text-center">
-                <div class="max-w-md bg-white dark:bg-[#152a26] border border-[#e7f3f1] dark:border-[#1f3a35] rounded-2xl p-4 shadow-soft">
-                  <div class="flex items-center justify-center gap-2 text-primary font-black">
-                    <span class="material-symbols-outlined">lock</span>
-                    S�lectionnez d�abord un partenaire
-                  </div>
-                  <p class="mt-2 text-sm text-text-light-secondary">
-                    Les cr�dits varient selon l�institution.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- STOCK -->
-            <div class="relative cursor-pointer group min-w-[320px] max-w-[320px]" data-loan-card="stock">
-              <input class="peer sr-only" id="loan-stock" name="loan-type" type="radio"/>
-              <label class="block h-full p-4 rounded-2xl bg-white dark:bg-[#152a26]
-                            border border-[#e7f3f1] dark:border-[#1f3a35]
-                            hover:border-primary/50 hover:shadow-soft transition
-                            peer-checked:border-2 peer-checked:border-primary peer-checked:ring-1 peer-checked:ring-primary/20 peer-checked:shadow-lift"
-                     for="loan-stock">
-                <div class="flex justify-between items-start">
-                  <div class="bg-primary/15 p-2.5 rounded-xl text-primary">
-                    <span class="material-symbols-outlined text-[24px]">inventory_2</span>
-                  </div>
-                  <span class="material-symbols-outlined text-primary hidden peer-checked:block text-[24px]">check_circle</span>
-                </div>
-                <div class="mt-3">
-                  <h3 class="font-black text-text-light-primary dark:text-white text-lg">Pr�t de Stock</h3>
-                  <p class="text-sm text-text-light-secondary mt-1">Financement d'inventaire</p>
-                  <div class="mt-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20">
-                    <span class="material-symbols-outlined text-[16px] text-primary">bolt</span>
-                    <span class="text-xs font-bold text-text-light-primary">Rapide</span>
-                  </div>
-                </div>
-              </label>
-            </div>
-
-            <!-- INVEST -->
-            <div class="relative cursor-pointer group min-w-[320px] max-w-[320px]" data-loan-card="invest">
-              <input class="peer sr-only" id="loan-invest" name="loan-type" type="radio"/>
-              <label class="block h-full p-4 rounded-2xl bg-white dark:bg-[#152a26]
-                            border border-[#e7f3f1] dark:border-[#1f3a35]
-                            hover:border-primary/50 hover:shadow-soft transition
-                            peer-checked:border-2 peer-checked:border-primary peer-checked:ring-1 peer-checked:ring-primary/20 peer-checked:shadow-lift"
-                     for="loan-invest">
-                <div class="flex justify-between items-start">
-                  <div class="bg-gray-100 dark:bg-gray-800 p-2.5 rounded-xl text-gray-600 dark:text-gray-300">
-                    <span class="material-symbols-outlined text-[24px]">storefront</span>
-                  </div>
-                  <span class="material-symbols-outlined text-primary hidden peer-checked:block text-[24px]">check_circle</span>
-                </div>
-                <div class="mt-3">
-                  <h3 class="font-black text-text-light-primary dark:text-white text-lg">Investissement</h3>
-                  <p class="text-sm text-text-light-secondary mt-1">Travaux & Extension</p>
-                </div>
-              </label>
-            </div>
-
-            <!-- CASH -->
-            <div class="relative cursor-pointer group min-w-[320px] max-w-[320px]" data-loan-card="cash">
-              <input class="peer sr-only" id="loan-cash" name="loan-type" type="radio"/>
-              <label class="block h-full p-4 rounded-2xl bg-white dark:bg-[#152a26]
-                            border border-[#e7f3f1] dark:border-[#1f3a35]
-                            hover:border-primary/50 hover:shadow-soft transition
-                            peer-checked:border-2 peer-checked:border-primary peer-checked:ring-1 peer-checked:ring-primary/20 peer-checked:shadow-lift"
-                     for="loan-cash">
-                <div class="flex justify-between items-start">
-                  <div class="bg-gray-100 dark:bg-gray-800 p-2.5 rounded-xl text-gray-600 dark:text-gray-300">
-                    <span class="material-symbols-outlined text-[24px]">payments</span>
-                  </div>
-                  <span class="material-symbols-outlined text-primary hidden peer-checked:block text-[24px]">check_circle</span>
-                </div>
-                <div class="mt-3">
-                  <h3 class="font-black text-text-light-primary dark:text-white text-lg">Avance Tr�sorerie</h3>
-                  <p class="text-sm text-text-light-secondary mt-1">Court terme (30j)</p>
-                </div>
-              </label>
-            </div>
-
-            <!-- EQUIPMENT -->
-            <div class="relative cursor-pointer group min-w-[320px] max-w-[320px]" data-loan-card="equipment">
-              <input class="peer sr-only" id="loan-equipment" name="loan-type" type="radio"/>
-              <label class="block h-full p-4 rounded-2xl bg-white dark:bg-[#152a26]
-                            border border-[#e7f3f1] dark:border-[#1f3a35]
-                            hover:border-primary/50 hover:shadow-soft transition
-                            peer-checked:border-2 peer-checked:border-primary peer-checked:ring-1 peer-checked:ring-primary/20 peer-checked:shadow-lift"
-                     for="loan-equipment">
-                <div class="flex justify-between items-start">
-                  <div class="bg-gray-100 dark:bg-gray-800 p-2.5 rounded-xl text-gray-600 dark:text-gray-300">
-                    <span class="material-symbols-outlined text-[24px]">precision_manufacturing</span>
-                  </div>
-                  <span class="material-symbols-outlined text-primary hidden peer-checked:block text-[24px]">check_circle</span>
-                </div>
-                <div class="mt-3">
-                  <h3 class="font-black text-text-light-primary dark:text-white text-lg">�quipement Pro</h3>
-                  <p class="text-sm text-text-light-secondary mt-1">Mat�riel & outillage</p>
-                </div>
-              </label>
-            </div>
-
-          </div>
-
-          <button id="scrollRight"
-            class="hidden md:flex absolute -right-5 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-[#152a26]
-                   border border-[#e7f3f1] dark:border-[#1f3a35] shadow-soft rounded-full w-10 h-10 items-center justify-center hover:bg-primary/10 transition">
-            <span class="material-symbols-outlined text-primary">chevron_right</span>
-          </button>
-        </div>
-      </section>
-
-      <!-- 2. DOCS -->
-      <section class="bg-white dark:bg-white/5 border border-[#e8ede8] dark:border-gray-700 rounded-2xl p-5 md:p-6 shadow-soft">
-        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-          <div>
-            <div class="flex items-center gap-2 text-primary font-black text-sm uppercase tracking-wider">
-              <span class="material-symbols-outlined text-[18px]">folder_open</span>
-              2. Constitution du dossier
-            </div>
-
-            <h2 id="dossierTitle" class="mt-2 text-2xl md:text-3xl font-black tracking-[-0.02em] text-text-light-primary dark:text-white">
-              Dossier : �
-            </h2>
-            <p id="dossierSubtitle" class="mt-2 text-sm md:text-base text-text-light-secondary">
-              S�lectionnez un partenaire puis un cr�dit pour voir les documents requis.
-            </p>
-
-            <div class="mt-3 inline-flex items-center gap-2 px-3 py-2 rounded-full bg-primary/10 border border-primary/20">
-              <span class="material-symbols-outlined text-primary text-[18px]">verified_user</span>
-              <span id="docsBadge" class="text-xs font-black text-text-light-primary">(�)</span>
-            </div>
-          </div>
-        </div>
-
-        <div id="docsGrid" class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-      </section>
-
-      <!-- Sticky bottom summary -->
-      <div class="sticky bottom-5 z-20">
-        <div class="bg-[#0a0c0a] dark:bg-black text-white p-4 md:p-5 rounded-2xl shadow-lift flex flex-col md:flex-row items-center justify-between gap-4 border border-white/10">
-          <div class="flex items-center gap-4 w-full md:w-auto">
-            <div class="relative size-12 hidden md:block">
-              <svg class="size-full -rotate-90" viewBox="0 0 36 36">
-                <path class="text-white/20" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="4"></path>
-                <path class="text-primary" id="progressArc" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="0, 100" stroke-width="4"></path>
-              </svg>
-              <span id="progressText" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] font-black">0%</span>
-            </div>
-
-            <div class="flex flex-col">
-              <span id="footerTitle" class="font-black text-lg">S�lectionnez un partenaire</span>
-              <span id="footerSubtitle" class="text-sm text-white/70">Le d�p�t est li� � une institution financi�re.</span>
-            </div>
-          </div>
-
-          <div class="flex gap-3 w-full md:w-auto">
-            <button id="btnSave"
-              class="flex-1 md:flex-none px-6 py-3 rounded-xl border border-white/20 text-white font-black text-sm hover:bg-white/10 transition">
-              Sauvegarder
-            </button>
-
-            <button id="btnSubmit"
-              class="flex-1 md:flex-none px-8 py-3 rounded-xl bg-white/15 text-white/60 font-black text-sm cursor-not-allowed flex items-center justify-center gap-2 opacity-80"
-              disabled>
-              Soumettre
-              <span class="material-symbols-outlined text-[18px]">send</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
+    <div class="flex flex-col gap-2 mb-6">
+      <h1 class="text-3xl sm:text-4xl font-black leading-tight tracking-[-0.033em] dark:text-white">
+        Financement
+      </h1>
+      <p class="text-gray-600 dark:text-gray-400">
+        Consultez les crédits proposés par nos partenaires et constituez votre dossier en ligne.
+      </p>
     </div>
-  </main>
 
-  <footer class="mt-auto py-8 border-t border-[#e7f3f1] dark:border-[#1f3a35] bg-white dark:bg-[#152a26]">
-    <div class="flex justify-center text-center px-4">
-      <p class="text-sm text-text-light-secondary">� 2024 OGOUE. Plateforme s�curis�e de gestion financi�re.</p>
+    <!-- ONGLETS -->
+    <div class="border-b border-gray-200 dark:border-gray-700 mb-8">
+      <nav class="flex gap-8 -mb-px overflow-x-auto">
+        <a href="module_scoring"
+           class="flex items-center gap-2 border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 pb-3 pt-4 px-2 whitespace-nowrap">
+          <span class="text-sm font-bold tracking-[0.015em]">Score de traçabilité</span>
+        </a>
+        <a href="module_depot_dossier"
+           class="flex items-center gap-2 border-b-[3px] border-b-primary text-[#0a0c0a] dark:text-white pb-3 pt-4 px-2 whitespace-nowrap">
+          <span class="text-sm font-bold tracking-[0.015em]">Déposer un dossier</span>
+        </a>
+        <a href="module_mes_dossiers"
+           class="flex items-center gap-2 border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 pb-3 pt-4 px-2 whitespace-nowrap">
+          <span class="text-sm font-bold tracking-[0.015em]">Mes dossiers</span>
+        </a>
+      </nav>
     </div>
-  </footer>
 
-</div>
+    <!-- Bandeau d'alerte global -->
+    <div id="alerte" class="hidden mb-6 rounded-xl px-4 py-3 text-sm"></div>
 
-<script>
-  // =============================
-  // DATA (V2 statique)
-  // =============================
-  const DATA = {
-    partners: {
-      mf_a: { name: "Microfinance A", type: "Microfinance Cat�gorie 2", loans: ["stock", "cash"] },
-      bank_b: { name: "Banque Populaire B", type: "Banque commerciale", loans: ["stock", "invest", "equipment"] },
-      fund_c: { name: "Fonds d�Investissement C", type: "Fonds / Investisseur", loans: ["invest", "equipment"] },
-    },
-    loans: {
-      stock: {
-        label: "Pr�t de Stock",
-        amountText: "Demande indicative : 5M FCFA",
-        docsByPartner: {
-          mf_a: [
-            { title:"Pi�ce d'identit� du g�rant", subtitle:"CNI ou Passeport en cours de validit�", status:"uploaded", file:{type:"PDF", name:"CNI_Gerant_2023.pdf", size:"1.2 MB"} },
-            { title:"Registre de Commerce", subtitle:"Fiche circuit RCCM", status:"uploaded", file:{type:"IMG", name:"RCCM_Scan_01.jpg", size:"2.4 MB"} },
-            { title:"Relev�s Bancaires", subtitle:"Les 3 derniers mois (PDF)", status:"to_upload" },
-            { title:"Photos de la boutique", subtitle:"Devanture et int�rieur", status:"to_upload" },
-            { title:"Quittance fiscale", subtitle:"Ann�e en cours (obligatoire)", status:"missing" },
-          ],
-          bank_b: [
-            { title:"Pi�ce d'identit� du g�rant", subtitle:"CNI ou Passeport", status:"to_upload" },
-            { title:"RCCM / Statuts", subtitle:"RCCM + statuts sign�s (PDF)", status:"to_upload" },
-            { title:"Relev�s Bancaires", subtitle:"Les 6 derniers mois (PDF)", status:"to_upload" },
-            { title:"Bilan & Compte de r�sultat", subtitle:"Dernier exercice (obligatoire)", status:"missing" },
-            { title:"�tat de stock", subtitle:"Inventaire d�taill� + valorisation", status:"to_upload" },
-          ]
-        }
-      },
-      invest: {
-        label: "Investissement",
-        amountText: "Demande indicative : 15M FCFA",
-        docsByPartner: {
-          bank_b: [
-            { title:"Business plan", subtitle:"Projet + pr�visions (PDF)", status:"to_upload" },
-            { title:"Devis / Proforma", subtitle:"Fournisseurs / travaux (PDF)", status:"to_upload" },
-            { title:"Relev�s Bancaires", subtitle:"Les 6 derniers mois (PDF)", status:"to_upload" },
-            { title:"Bilan & Compte de r�sultat", subtitle:"Dernier exercice (obligatoire)", status:"missing" },
-          ],
-          fund_c: [
-            { title:"Pitch deck", subtitle:"Pr�sentation projet (PDF)", status:"to_upload" },
-            { title:"Pr�visionnel", subtitle:"CA, charges, tr�sorerie (Excel/PDF)", status:"to_upload" },
-            { title:"Justificatifs l�gaux", subtitle:"RCCM + identit� dirigeant", status:"to_upload" },
-          ]
-        }
-      },
-      cash: {
-        label: "Avance Tr�sorerie",
-        amountText: "Demande indicative : 2M FCFA",
-        docsByPartner: {
-          mf_a: [
-            { title:"Pi�ce d'identit� du g�rant", subtitle:"CNI ou Passeport", status:"to_upload" },
-            { title:"Relev�s Bancaires", subtitle:"Les 3 derniers mois (PDF)", status:"to_upload" },
-            { title:"Journal des ventes", subtitle:"Derni�res 4 semaines", status:"to_upload" },
-          ]
-        }
-      },
-      equipment: {
-        label: "�quipement Pro",
-        amountText: "Demande indicative : 8M FCFA",
-        docsByPartner: {
-          bank_b: [
-            { title:"Devis / Proforma", subtitle:"Mat�riel & fournisseur (PDF)", status:"to_upload" },
-            { title:"Relev�s Bancaires", subtitle:"Les 6 derniers mois (PDF)", status:"to_upload" },
-            { title:"Bilan & Compte de r�sultat", subtitle:"Dernier exercice (si disponible)", status:"to_upload" },
-          ],
-          fund_c: [
-            { title:"Justificatif d'activit�", subtitle:"RCCM / statuts", status:"to_upload" },
-            { title:"Proforma �quipement", subtitle:"Fournisseur (PDF)", status:"to_upload" },
-          ]
-        }
-      }
-    }
-  };
-
-  // =============================
-  // DOM
-  // =============================
-  const loanOverlay = document.getElementById("loanOverlay");
-  const docsGrid = document.getElementById("docsGrid");
-  const dossierTitle = document.getElementById("dossierTitle");
-  const dossierSubtitle = document.getElementById("dossierSubtitle");
-  const docsBadge = document.getElementById("docsBadge");
-
-  const footerTitle = document.getElementById("footerTitle");
-  const footerSubtitle = document.getElementById("footerSubtitle");
-  const btnSubmit = document.getElementById("btnSubmit");
-  const btnSave = document.getElementById("btnSave");
-
-  const progressArc = document.getElementById("progressArc");
-  const progressText = document.getElementById("progressText");
-
-  const step0 = document.getElementById("step0");
-  const step1 = document.getElementById("step1");
-  const step2 = document.getElementById("step2");
-
-  const partnerSelectedPill = document.getElementById("partnerSelectedPill");
-  const partnerPillText = document.getElementById("partnerPillText");
-
-  const partnerRadios = {
-    mf_a: document.getElementById("p-mf_a"),
-    bank_b: document.getElementById("p-bank_b"),
-    fund_c: document.getElementById("p-fund_c")
-  };
-  const partnerSelectMobile = document.getElementById("partnerSelectMobile");
-
-  const loanInputs = {
-    stock: document.getElementById("loan-stock"),
-    invest: document.getElementById("loan-invest"),
-    cash: document.getElementById("loan-cash"),
-    equipment: document.getElementById("loan-equipment"),
-  };
-  const loanCards = Array.from(document.querySelectorAll("[data-loan-card]"));
-
-  // scrollers
-  const pScroller = document.getElementById("partnerScroller");
-  const pLeft = document.getElementById("pScrollLeft");
-  const pRight = document.getElementById("pScrollRight");
-
-  const scroller = document.getElementById("creditScroller");
-  const btnLeft = document.getElementById("scrollLeft");
-  const btnRight = document.getElementById("scrollRight");
-
-  // =============================
-  // Helpers
-  // =============================
-  function setOverlayLocked(locked) {
-    loanOverlay.classList.toggle("hidden", !locked);
-    Object.values(loanInputs).forEach(inp => inp.disabled = locked);
-  }
-
-  function showLoans(loanIds) {
-    loanCards.forEach(card => {
-      const id = card.getAttribute("data-loan-card");
-      card.classList.toggle("hidden", !loanIds.includes(id));
-    });
-  }
-
-  function computeProgress(docs) {
-    if (!docs || docs.length === 0) return 0;
-    const uploaded = docs.filter(d => d.status === "uploaded").length;
-    return Math.round((uploaded / docs.length) * 100);
-  }
-
-  function setProgress(pct) {
-    const p = Math.max(0, Math.min(100, pct));
-    progressArc.setAttribute("stroke-dasharray", `${p}, 100`);
-    progressText.textContent = `${p}%`;
-  }
-
-  function setStepState({partnerOk, loanOk, docsOk}) {
-    const base = "rounded-xl p-4 flex items-start gap-3";
-    const done = "border border-primary/30 bg-primary/5";
-    const idle = "border border-[#e7f3f1] dark:border-[#1f3a35] bg-white dark:bg-[#152a26]/30";
-
-    step0.className = `${base} ${partnerOk ? done : done}`; // step0 always highlighted (current)
-    step1.className = `${base} ${partnerOk ? done : idle}`;
-    step2.className = `${base} ${loanOk ? done : idle}`;
-  }
-
-  function badgeForStatus(status) {
-    if (status === "uploaded") return {wrap:"bg-primary/10 text-text-light-primary border-primary/20", icon:"check_circle", text:"T�l�vers�"};
-    if (status === "missing") return {wrap:"bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-100 dark:border-red-800", icon:"error", text:"Manquant"};
-    return {wrap:"bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-200 border-gray-200 dark:border-gray-600", icon:"hourglass_empty", text:"� t�l�verser"};
-  }
-
-  function renderDocCard(doc) {
-    const b = badgeForStatus(doc.status);
-    const border =
-      doc.status === "missing" ? "border-red-200 dark:border-red-900/50" :
-      (doc.status === "uploaded" ? "border-primary/30" : "border-[#e7f3f1] dark:border-[#1f3a35]");
-
-    const fileBloc = doc.status === "uploaded" && doc.file ? `
-      <div class="mt-2 bg-[#f8fcfb] dark:bg-[#10221f] rounded-xl p-3 border border-dashed border-[#e7f3f1] dark:border-[#1f3a35] flex justify-between items-center">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-lg ${doc.file.type === "PDF" ? "bg-red-100 text-red-500" : "bg-blue-100 text-blue-500"} flex items-center justify-center font-black text-xs">${doc.file.type}</div>
-          <div class="flex flex-col">
-            <span class="text-sm font-bold text-text-light-primary dark:text-white truncate max-w-[190px]">${doc.file.name}</span>
-            <span class="text-xs text-gray-500">${doc.file.size}</span>
-          </div>
-        </div>
-        <div class="flex gap-1">
-          <button class="text-gray-400 hover:text-primary transition-colors p-1" title="Voir">
-            <span class="material-symbols-outlined text-[20px]">visibility</span>
-          </button>
-          <button class="text-gray-400 hover:text-red-500 transition-colors p-1" title="Supprimer">
-            <span class="material-symbols-outlined text-[20px]">delete</span>
-          </button>
-        </div>
-      </div>
-    ` : "";
-
-    const uploadBloc = (doc.status === "to_upload" || doc.status === "missing") ? `
-      <div class="mt-2 border-2 border-dashed ${doc.status === "missing" ? "border-red-200 dark:border-red-800/50 bg-red-50/30 dark:bg-red-900/10" : "border-[#e7f3f1] dark:border-[#1f3a35]"}
-                  rounded-xl p-6 flex flex-col items-center justify-center gap-2 text-center
-                  hover:bg-[#f8fcfb] dark:hover:bg-[#10221f] hover:border-primary/40 transition-all cursor-pointer">
-        <span class="material-symbols-outlined text-3xl ${doc.status === "missing" ? "text-red-300 dark:text-red-700" : "text-gray-300 dark:text-gray-600"}">
-          ${doc.status === "missing" ? "upload_file" : "cloud_upload"}
-        </span>
-        <div class="text-sm font-bold ${doc.status === "missing" ? "text-red-600 dark:text-red-400" : "text-text-light-primary dark:text-white"}">
-          ${doc.status === "missing" ? "Veuillez t�l�verser ce document" : "Glisser-d�poser ou <span class='text-primary underline'>parcourir</span>"}
-        </div>
-        <p class="text-xs ${doc.status === "missing" ? "text-red-400/80" : "text-gray-400"}">
-          ${doc.status === "missing" ? "Obligatoire pour continuer" : "PDF, JPG, PNG max 5Mo"}
+    <!-- ══════════ ÉTAPE 1 : CHOISIR L'INSTITUTION ══════════ -->
+    <section id="sectionInstitutions">
+      <div class="mb-6">
+        <h2 class="text-2xl font-bold dark:text-white">Sélectionnez votre institution financière</h2>
+        <p class="text-gray-600 dark:text-gray-400 mt-1">
+          Choisissez l'institution avec laquelle vous souhaitez monter votre dossier de financement.
         </p>
       </div>
-    ` : "";
 
-    return `
-      <div class="fade-in bg-white dark:bg-[#152a26] rounded-2xl border ${border} shadow-soft p-5 flex flex-col gap-4 relative overflow-hidden">
-        <div class="absolute top-0 right-0 p-3">
-          <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-xs font-black ${b.wrap}">
-            <span class="material-symbols-outlined text-[16px]">${b.icon}</span>
-            ${b.text}
-          </span>
+      <div class="mb-6">
+        <div class="flex items-center gap-3 bg-white dark:bg-gray-800/40 rounded-full border border-[#e8ede8] dark:border-gray-700 px-5 py-3 shadow-soft">
+          <span class="material-symbols-outlined text-gray-400">search</span>
+          <input id="rechercheInstitution" type="text" placeholder="Rechercher une institution"
+                 aria-label="Rechercher une institution"
+                 class="flex-1 bg-transparent border-0 p-0 outline-0 focus:ring-0 text-[#0a0c0a] dark:text-gray-200 placeholder:text-gray-400"/>
         </div>
-
-        <div class="flex items-start gap-3">
-          <div class="bg-primary/10 p-2.5 rounded-xl text-primary">
-            <span class="material-symbols-outlined">description</span>
-          </div>
-          <div>
-            <h3 class="font-black text-text-light-primary dark:text-white">${doc.title}</h3>
-            <p class="text-xs text-text-light-secondary mt-1">${doc.subtitle}</p>
-          </div>
-        </div>
-
-        ${fileBloc}
-        ${uploadBloc}
       </div>
-    `;
-  }
 
-  // =============================
-  // State
-  // =============================
-  let state = { partnerId: "", loanId: "" };
+      <div id="institutionsChargement" class="text-gray-500 dark:text-gray-400 py-8 text-center">
+        Chargement des institutions…
+      </div>
 
-  function loadState() {
-    try {
-      const saved = JSON.parse(localStorage.getItem("ogoUE_depot_state_v3") || "{}");
-      state.partnerId = saved.partnerId || "";
-      state.loanId = saved.loanId || "";
-    } catch (_) {}
-  }
-  function saveState() {
-    localStorage.setItem("ogoUE_depot_state_v3", JSON.stringify(state));
-  }
+      <div id="institutionsVide" class="hidden rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 p-10 text-center">
+        <span class="material-symbols-outlined text-4xl text-gray-400">account_balance</span>
+        <p class="mt-3 font-semibold dark:text-white">Aucune institution ne propose de crédit pour le moment</p>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+          Les institutions partenaires publient elles-mêmes leurs offres. Dès qu'un crédit
+          sera disponible, l'institution apparaîtra ici.
+        </p>
+      </div>
 
-  function getDocs(partnerId, loanId) {
-    const loan = DATA.loans[loanId];
-    if (!loan) return [];
-    return (loan.docsByPartner && loan.docsByPartner[partnerId]) ? loan.docsByPartner[partnerId] : [];
-  }
+      <div id="institutionsGrille" class="flex flex-wrap gap-6 justify-center"></div>
+    </section>
 
-  function updateUI() {
-    const partnerId = state.partnerId;
-    const loanId = state.loanId;
+    <!-- ══════════ ÉTAPE 2 : CHOISIR LE PRODUIT ══════════ -->
+    <section id="sectionProduits" class="hidden fade-in">
+      <button id="btnRetourInstitutions" type="button"
+              class="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline">
+        <span class="material-symbols-outlined text-base">arrow_back</span>
+        Changer d'institution
+      </button>
 
-    // stepper
-    const partnerOk = !!partnerId;
+      <div id="enteteInstitution" class="mb-6"></div>
 
-    if (!partnerId) {
-      setOverlayLocked(true);
-      showLoans([]); // hide all
-      docsGrid.innerHTML = "";
-      dossierTitle.textContent = "Dossier : �";
-      dossierSubtitle.textContent = "S�lectionnez un partenaire puis un cr�dit pour voir les documents requis.";
-      docsBadge.textContent = "(�)";
-      footerTitle.textContent = "S�lectionnez un partenaire";
-      footerSubtitle.textContent = "Le d�p�t est li� � une institution financi�re.";
-      btnSubmit.disabled = true;
-      btnSubmit.className = "flex-1 md:flex-none px-8 py-3 rounded-xl bg-white/15 text-white/60 font-black text-sm cursor-not-allowed flex items-center justify-center gap-2 opacity-80";
-      setProgress(0);
-      setStepState({partnerOk:false, loanOk:false, docsOk:false});
-      partnerSelectedPill.classList.add("hidden");
-      saveState();
-      return;
-    }
+      <div class="mb-6">
+        <div class="flex items-center gap-3 bg-white dark:bg-gray-800/40 rounded-full border border-[#e8ede8] dark:border-gray-700 px-5 py-3 shadow-soft">
+          <input id="rechercheProduit" type="text" placeholder="Rechercher un produit…"
+                 aria-label="Rechercher un produit"
+                 class="flex-1 bg-transparent border-0 p-0 outline-0 focus:ring-0 text-[#0a0c0a] dark:text-gray-200 placeholder:text-gray-400"/>
+          <span class="material-symbols-outlined text-gray-400">search</span>
+        </div>
+      </div>
 
-    const partner = DATA.partners[partnerId];
-    partnerSelectedPill.classList.remove("hidden");
-    partnerPillText.textContent = `${partner.name} � ${partner.type}`;
+      <div class="rounded-2xl bg-white dark:bg-gray-800/40 border border-[#e8ede8] dark:border-gray-700 shadow-soft overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-background-light dark:bg-gray-900/40">
+              <tr>
+                <th class="px-4 py-3 text-xs font-semibold dark:text-gray-200">Nom du Produit</th>
+                <th class="px-4 py-3 text-xs font-semibold dark:text-gray-200">Cible</th>
+                <th class="px-4 py-3 text-xs font-semibold dark:text-gray-200">Objectif</th>
+                <th class="px-4 py-3 text-xs font-semibold dark:text-gray-200">Montants</th>
+                <th class="px-4 py-3 text-xs font-semibold dark:text-gray-200">Durée</th>
+                <th class="px-4 py-3 text-xs font-semibold dark:text-gray-200">Taux d'Intérêt</th>
+                <th class="px-4 py-3 text-xs font-semibold dark:text-gray-200">Typologie</th>
+                <th class="px-4 py-3 text-xs font-semibold dark:text-gray-200">Documents Requis</th>
+                <th class="px-4 py-3 text-xs font-semibold text-center dark:text-gray-200">Action</th>
+              </tr>
+            </thead>
+            <tbody id="corpsTableProduits" class="divide-y divide-[#e8ede8] dark:divide-gray-700"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
 
-    // show loans allowed
-    showLoans(partner.loans);
-    setOverlayLocked(false);
+    <!-- ══════════ ÉTAPE 3 : CONSTITUER LE DOSSIER ══════════ -->
+    <section id="sectionDossier" class="hidden fade-in">
+      <button id="btnRetourCredits" type="button"
+              class="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline">
+        <span class="material-symbols-outlined text-base">arrow_back</span>
+        Choisir un autre crédit
+      </button>
 
-    // ensure loan valid
-    if (!loanId || !partner.loans.includes(loanId)) {
-      state.loanId = partner.loans[0] || "";
-    }
+      <!-- Rappel du crédit choisi -->
+      <div id="recapCredit" class="rounded-2xl bg-white dark:bg-gray-800/40 border border-[#e8ede8] dark:border-gray-700 p-5 mb-6 shadow-soft"></div>
 
-    // check correct radio
-    Object.keys(loanInputs).forEach(k => loanInputs[k].checked = (k === state.loanId));
+      <!-- Demande -->
+      <div class="rounded-2xl bg-white dark:bg-gray-800/40 border border-[#e8ede8] dark:border-gray-700 p-5 mb-6 shadow-soft">
+        <h3 class="font-bold mb-4 dark:text-white">Votre demande</h3>
+        <form id="formDemande" class="grid gap-4 sm:grid-cols-2">
+          <label class="flex flex-col gap-1">
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Montant demandé (FCFA) *</span>
+            <input id="champMontant" type="number" min="0" step="1000" required
+                   class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-900 focus:border-primary focus:ring-primary"/>
+            <span id="aideMontant" class="text-xs text-gray-500 dark:text-gray-400"></span>
+          </label>
+          <label class="flex flex-col gap-1">
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Durée (mois)</span>
+            <input id="champDuree" type="number" min="1" step="1"
+                   class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-900 focus:border-primary focus:ring-primary"/>
+            <span id="aideDuree" class="text-xs text-gray-500 dark:text-gray-400"></span>
+          </label>
+          <label class="flex flex-col gap-1 sm:col-span-2">
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Objet du financement</span>
+            <textarea id="champObjet" rows="3" maxlength="2000"
+                      placeholder="À quoi servira ce crédit ?"
+                      class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-900 focus:border-primary focus:ring-primary"></textarea>
+          </label>
+          <div class="sm:col-span-2 flex items-center gap-3">
+            <button type="submit" id="btnEnregistrer"
+                    class="inline-flex items-center gap-2 rounded-lg bg-primary/10 text-primary px-4 py-2 text-sm font-bold hover:bg-primary/20 transition">
+              <span class="material-symbols-outlined text-base">save</span>
+              Enregistrer
+            </button>
+            <span id="etatEnregistrement" class="text-sm text-gray-500 dark:text-gray-400"></span>
+          </div>
+        </form>
+      </div>
 
-    // docs
-    const loan = DATA.loans[state.loanId];
-    const docs = getDocs(partnerId, state.loanId);
+      <!-- Pièces justificatives -->
+      <div class="rounded-2xl bg-white dark:bg-gray-800/40 border border-[#e8ede8] dark:border-gray-700 p-5 mb-6 shadow-soft">
+        <div class="flex items-center justify-between mb-1">
+          <h3 class="font-bold dark:text-white">Pièces justificatives</h3>
+          <span id="compteurPieces" class="text-sm text-gray-500 dark:text-gray-400"></span>
+        </div>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+          PDF, image ou document Office, 10 Mo maximum par pièce.
+        </p>
 
-    dossierTitle.textContent = `Dossier : ${loan ? loan.label : "�"}`;
-    dossierSubtitle.textContent = `${loan ? loan.amountText : ""}. Documents requis selon ${partner.name}.`;
-    docsBadge.textContent = `(${loan ? loan.label : "�"} � ${partner.name})`;
+        <div id="listePieces" class="flex flex-col gap-3"></div>
 
-    docsGrid.innerHTML = docs.length
-      ? docs.map(renderDocCard).join("")
-      : `<div class="col-span-1 md:col-span-2 p-5 rounded-2xl border border-[#e7f3f1] dark:border-[#1f3a35] bg-white dark:bg-[#152a26]">
-          <p class="text-sm text-text-light-secondary">Aucun document configur� pour ce produit chez ce partenaire (V2 statique).</p>
-        </div>`;
+        <div class="mt-5 pt-5 border-t border-[#e8ede8] dark:border-gray-700">
+          <h4 class="text-sm font-semibold mb-2 dark:text-gray-200">Ajouter une pièce complémentaire</h4>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">
+            Utile si l'institution vous demande un document qui n'est pas dans la liste.
+          </p>
+          <input id="champPieceLibre" type="file" aria-label="Ajouter une pièce complémentaire"
+                 class="block w-full text-sm text-gray-600 dark:text-gray-300 file:mr-4 file:rounded-lg file:border-0 file:bg-primary/10 file:px-4 file:py-2 file:text-sm file:font-bold file:text-primary hover:file:bg-primary/20"/>
+        </div>
+      </div>
 
-    const hasMissing = docs.some(d => d.status === "missing");
-    const pct = computeProgress(docs);
-    setProgress(pct);
+      <!-- Dépôt -->
+      <div class="rounded-2xl bg-white dark:bg-gray-800/40 border border-[#e8ede8] dark:border-gray-700 p-5 shadow-soft">
+        <div id="messageDepot" class="hidden mb-4 rounded-xl px-4 py-3 text-sm"></div>
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h3 class="font-bold dark:text-white">Déposer le dossier</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              Une fois déposé, votre dossier n'est plus modifiable tant que l'institution
+              ne vous redonne pas la main.
+            </p>
+          </div>
+          <button id="btnDeposer" type="button"
+                  class="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-bold text-white hover:bg-primary/90 transition disabled:opacity-50 disabled:cursor-not-allowed">
+            <span class="material-symbols-outlined text-base">send</span>
+            Déposer mon dossier
+          </button>
+        </div>
+      </div>
+    </section>
 
-    const loanOk = !!state.loanId;
-    setStepState({partnerOk:true, loanOk, docsOk: !hasMissing});
-
-    if (hasMissing || docs.length === 0) {
-      footerTitle.textContent = "Votre dossier est incomplet";
-      footerSubtitle.textContent = "Ajoutez tous les documents obligatoires pour pouvoir soumettre.";
-      btnSubmit.disabled = true;
-      btnSubmit.className = "flex-1 md:flex-none px-8 py-3 rounded-xl bg-white/15 text-white/60 font-black text-sm cursor-not-allowed flex items-center justify-center gap-2 opacity-80";
-      btnSubmit.innerHTML = `Soumettre � ${partner.name}<span class="material-symbols-outlined text-[18px]">send</span>`;
-    } else {
-      footerTitle.textContent = "Dossier pr�t � �tre soumis";
-      footerSubtitle.textContent = "Tous les documents obligatoires sont pr�sents.";
-      btnSubmit.disabled = false;
-      btnSubmit.className = "flex-1 md:flex-none px-8 py-3 rounded-xl bg-primary text-[#0a0c0a] font-black text-sm flex items-center justify-center gap-2 hover:bg-primary/90 transition";
-      btnSubmit.innerHTML = `Soumettre � ${partner.name}<span class="material-symbols-outlined text-[18px]">send</span>`;
-    }
-
-    saveState();
-  }
-
-  // =============================
-  // Events
-  // =============================
-  Object.entries(partnerRadios).forEach(([id, el]) => {
-    el.addEventListener("change", () => {
-      state.partnerId = id;
-      state.loanId = "";
-      if (partnerSelectMobile) partnerSelectMobile.value = id;
-      updateUI();
-    });
-  });
-
-  if (partnerSelectMobile) {
-    partnerSelectMobile.addEventListener("change", () => {
-      state.partnerId = partnerSelectMobile.value;
-      state.loanId = "";
-      // sync radios
-      if (partnerRadios[state.partnerId]) partnerRadios[state.partnerId].checked = true;
-      updateUI();
-    });
-  }
-
-  Object.keys(loanInputs).forEach(loanId => {
-    loanInputs[loanId].addEventListener("change", () => {
-      state.loanId = loanId;
-      updateUI();
-    });
-  });
-
-  // scrollers
-  if (pScroller && pLeft && pRight) {
-    const amt = 340;
-    pLeft.addEventListener("click", () => pScroller.scrollBy({ left: -amt, behavior: "smooth" }));
-    pRight.addEventListener("click", () => pScroller.scrollBy({ left: amt, behavior: "smooth" }));
-  }
-  if (scroller && btnLeft && btnRight) {
-    const amt = 340;
-    btnLeft.addEventListener("click", () => scroller.scrollBy({ left: -amt, behavior: "smooth" }));
-    btnRight.addEventListener("click", () => scroller.scrollBy({ left: amt, behavior: "smooth" }));
-  }
-
-  // save
-  btnSave.addEventListener("click", () => {
-    saveState();
-    footerSubtitle.textContent = "Sauvegarde locale effectu�e (V2 statique).";
-    setTimeout(() => updateUI(), 900);
-  });
-
-  // init
-  loadState();
-  if (state.partnerId && partnerRadios[state.partnerId]) partnerRadios[state.partnerId].checked = true;
-  if (partnerSelectMobile && state.partnerId) partnerSelectMobile.value = state.partnerId;
-  updateUI();
-</script>
+  </main>
+</div>
 
 <script src="js/ogoue-state.js"></script>
 <script src="js/header-ui.js"></script>
-<script src="js/topbar-actions.js"></script>
+<script src="js/mobile-menu.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        if (window.OGOUE?.initTopbarActions) {
-            window.OGOUE.initTopbarActions();
-        }
-    });
-</script>
+// ============================================================
+// Dépôt de dossier de financement
+// ------------------------------------------------------------
+// API_BASE_URL, getToken() et les fonctions de financement sont
+// définis dans ogoue-state.js.
+// ============================================================
 
+const FCFA = new Intl.NumberFormat("fr-FR");
+
+// Catalogue
+let tousLesProduits = [];       // produits actifs, toutes institutions
+let institutions = [];          // institutions qui proposent au moins un credit
+let institutionChoisie = null;
+
+// Dossier en cours de constitution
+let creditChoisi = null;      // detail du produit (avec requiredDocuments)
+let dossierCourant = null;    // dossier brouillon / complement_requis
+let piecesFournies = [];      // pieces deja televersees
+let dossiersOuverts = [];     // dossiers modifiables, par produit
+
+// ─────────── Utilitaires ───────────
+
+function echapper(valeur) {
+  return String(valeur ?? "").replace(/[&<>"']/g, (c) => (
+    { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
+  ));
+}
+
+function formatMontant(min, max) {
+  const bas = Number(min) || 0;
+  const haut = Number(max) || 0;
+  if (!bas && !haut) return "Montant non précisé";
+  return `${FCFA.format(bas)} – ${FCFA.format(haut)} FCFA`;
+}
+
+function formatDuree(min, max) {
+  if (!min && !max) return "Durée libre";
+  if (min && max) return min === max ? `${min} mois` : `de ${min} à ${max} mois`;
+  return `${min || max} mois`;
+}
+
+function afficherAlerte(message, type = "erreur") {
+  const boite = document.getElementById("alerte");
+  const styles = {
+    erreur: "bg-red-50 text-red-700 border border-red-200",
+    succes: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+    info: "bg-blue-50 text-blue-700 border border-blue-200",
+  };
+  boite.className = `mb-6 rounded-xl px-4 py-3 text-sm ${styles[type] || styles.erreur}`;
+  boite.textContent = message;
+  boite.classList.remove("hidden");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function masquerAlerte() {
+  document.getElementById("alerte").classList.add("hidden");
+}
+
+// ─────────── Étape 1 : l'institution ───────────
+
+async function chargerCatalogue() {
+  const [produits, dossiers] = await Promise.all([
+    OGOUE.getCreditProducts(),
+    OGOUE.getApplications(),
+  ]);
+
+  tousLesProduits = produits;
+
+  // Un dossier encore modifiable se reprend au lieu d'en ouvrir un second :
+  // l'API refuse de toute façon deux dossiers en cours sur le même produit.
+  dossiersOuverts = dossiers.filter((d) => ["brouillon", "complement_requis"].includes(d.status));
+
+  // Les institutions sont déduites des crédits publiés : on n'en affiche
+  // aucune qui n'aurait rien à proposer, ce qui mènerait à une impasse.
+  const parId = new Map();
+  produits.forEach((produit) => {
+    if (!produit.institution) return;
+    const existante = parId.get(produit.institution.id);
+    if (existante) existante.nbProduits += 1;
+    else parId.set(produit.institution.id, { ...produit.institution, nbProduits: 1 });
+  });
+  institutions = [...parId.values()].sort((a, b) => a.name.localeCompare(b.name, "fr"));
+
+  document.getElementById("institutionsChargement").classList.add("hidden");
+  afficherInstitutions();
+}
+
+function afficherInstitutions() {
+  const grille = document.getElementById("institutionsGrille");
+  const vide = document.getElementById("institutionsVide");
+  const recherche = document.getElementById("rechercheInstitution").value.trim().toLowerCase();
+
+  const filtrees = recherche
+    ? institutions.filter((i) => (i.name || "").toLowerCase().includes(recherche))
+    : institutions;
+
+  if (institutions.length === 0) {
+    vide.classList.remove("hidden");
+    grille.innerHTML = "";
+    return;
+  }
+  vide.classList.add("hidden");
+
+  if (filtrees.length === 0) {
+    grille.innerHTML = `<p class="w-full text-center py-8 text-gray-500 dark:text-gray-400">Aucune institution trouvée</p>`;
+    return;
+  }
+
+  grille.innerHTML = filtrees.map((institution) => {
+    const type = (institution.type || "").toLowerCase() === "banque" ? "Banque" : "Microfinance";
+    const dossierIci = dossiersOuverts.some((d) => d.institution && d.institution.id === institution.id);
+
+    return `
+      <div class="w-72 rounded-lg border border-black/10 dark:border-gray-700 bg-white dark:bg-gray-800/40 shadow-sm overflow-hidden hover:shadow-lg transition-shadow">
+        <div class="h-32 flex items-center justify-center bg-slate-50 dark:bg-gray-900/40">
+          ${institution.logoUrl
+            ? `<img src="${echapper(institution.logoUrl)}" alt="${echapper(institution.name)}" class="max-h-24 max-w-[75%] object-contain" onerror="this.style.display='none'"/>`
+            : '<div class="text-slate-400 text-sm">Logo non disponible</div>'}
+        </div>
+        <div class="p-4 space-y-2">
+          <div class="flex items-start justify-between gap-2">
+            <h3 class="text-base font-bold text-slate-900 dark:text-white">${echapper(institution.name)}</h3>
+            ${dossierIci ? '<span class="shrink-0 rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-[10px] font-bold">Dossier en cours</span>' : ""}
+          </div>
+          <p class="text-xs font-semibold text-[#006699]">${type}</p>
+          ${institution.mission ? `<p class="text-xs text-slate-600 dark:text-gray-400 line-clamp-2">${echapper(institution.mission)}</p>` : ""}
+          <p class="text-xs text-slate-500 dark:text-gray-400">
+            ${institution.nbProduits} crédit${institution.nbProduits > 1 ? "s" : ""} proposé${institution.nbProduits > 1 ? "s" : ""}
+          </p>
+          ${institution.website
+            ? `<a href="${echapper(institution.website)}" target="_blank" rel="noopener" class="inline-block text-xs font-medium text-[#006699] hover:underline">Visiter le site</a>`
+            : ""}
+          <button type="button" data-institution="${institution.id}"
+                  class="block w-full mt-4 rounded-lg bg-[#0088CC] py-2 text-xs font-bold text-white hover:bg-[#006699] transition text-center">
+            Sélectionner
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  grille.querySelectorAll("[data-institution]").forEach((bouton) => {
+    bouton.addEventListener("click", () => ouvrirInstitution(bouton.dataset.institution));
+  });
+}
+
+document.getElementById("rechercheInstitution").addEventListener("input", afficherInstitutions);
+
+// ─────────── Étape 2 : les produits de l'institution ───────────
+
+function ouvrirInstitution(institutionId) {
+  institutionChoisie = institutions.find((i) => i.id === institutionId);
+  if (!institutionChoisie) return;
+
+  masquerAlerte();
+  document.getElementById("sectionInstitutions").classList.add("hidden");
+  document.getElementById("sectionDossier").classList.add("hidden");
+  document.getElementById("sectionProduits").classList.remove("hidden");
+
+  const type = (institutionChoisie.type || "").toLowerCase() === "banque" ? "Banque" : "Microfinance";
+  document.getElementById("enteteInstitution").innerHTML = `
+    <h2 class="text-2xl font-bold dark:text-white">${echapper(institutionChoisie.name)}</h2>
+    <p class="text-sm font-semibold text-[#006699]">${type}</p>
+    ${institutionChoisie.mission ? `<p class="text-sm text-gray-600 dark:text-gray-400 mt-1">${echapper(institutionChoisie.mission)}</p>` : ""}
+  `;
+
+  document.getElementById("rechercheProduit").value = "";
+  afficherProduits();
+}
+
+function afficherProduits() {
+  const corps = document.getElementById("corpsTableProduits");
+  const recherche = document.getElementById("rechercheProduit").value.trim().toLowerCase();
+
+  let produits = tousLesProduits.filter(
+    (p) => p.institution && p.institution.id === institutionChoisie.id
+  );
+  if (recherche) {
+    produits = produits.filter((p) => (p.name || "").toLowerCase().includes(recherche));
+  }
+
+  if (produits.length === 0) {
+    corps.innerHTML = `
+      <tr><td colspan="9" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+        ${recherche ? "Aucun produit ne correspond à cette recherche." : "Cette institution ne propose aucun crédit pour le moment."}
+      </td></tr>`;
+    return;
+  }
+
+  corps.innerHTML = produits.map((produit) => {
+    const enCours = dossiersOuverts.find((d) => d.product && d.product.id === produit.id);
+    const montants = `${FCFA.format(produit.amountMin)} - ${FCFA.format(produit.amountMax)}`;
+    const duree = produit.durationMinMonths && produit.durationMaxMonths
+      ? `${produit.durationMinMonths} - ${produit.durationMaxMonths} mois`
+      : "À définir";
+    const pieces = produit.requiredDocuments || [];
+
+    return `
+      <tr class="hover:bg-background-light dark:hover:bg-gray-900/30 transition-colors">
+        <td class="px-4 py-3"><p class="font-semibold text-sm dark:text-gray-100">${echapper(produit.name)}</p></td>
+        <td class="px-4 py-3"><p class="text-sm text-gray-500 dark:text-gray-400">${echapper(produit.target || "N/A")}</p></td>
+        <td class="px-4 py-3"><p class="text-sm text-gray-500 dark:text-gray-400">${echapper(produit.objective || "N/A")}</p></td>
+        <td class="px-4 py-3"><p class="text-sm font-medium whitespace-nowrap dark:text-gray-200">${montants}</p></td>
+        <td class="px-4 py-3"><p class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">${duree}</p></td>
+        <td class="px-4 py-3"><p class="text-sm text-gray-500 dark:text-gray-400">${echapper(produit.interestType || "N/A")}</p></td>
+        <td class="px-4 py-3"><p class="text-sm text-gray-500 dark:text-gray-400">${echapper(produit.typology || "N/A")}</p></td>
+        <td class="px-4 py-3">
+          <div class="flex flex-col gap-1.5">
+            ${pieces.length > 0
+              ? pieces.map((doc) => `
+                  <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm text-primary">check_circle</span>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">${echapper(doc.name)}</span>
+                  </div>`).join("")
+              : '<span class="text-sm text-gray-400 italic">Aucun document</span>'}
+          </div>
+        </td>
+        <td class="px-4 py-3 text-center">
+          <button type="button" data-produit="${produit.id}"
+                  class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-semibold whitespace-nowrap">
+            <span class="material-symbols-outlined text-sm">${enCours ? "resume" : "upload_file"}</span>
+            <span>${enCours ? "Reprendre mon dossier" : "Déposer un dossier"}</span>
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  corps.querySelectorAll("[data-produit]").forEach((bouton) => {
+    bouton.addEventListener("click", () => ouvrirDossier(bouton.dataset.produit));
+  });
+}
+
+document.getElementById("rechercheProduit").addEventListener("input", afficherProduits);
+
+document.getElementById("btnRetourInstitutions").addEventListener("click", () => {
+  masquerAlerte();
+  institutionChoisie = null;
+  document.getElementById("sectionProduits").classList.add("hidden");
+  document.getElementById("sectionInstitutions").classList.remove("hidden");
+});
+
+// ─────────── Étape 2 : le dossier ───────────
+
+async function ouvrirDossier(produitId) {
+  masquerAlerte();
+
+  creditChoisi = await OGOUE.getCreditProduct(produitId);
+  if (!creditChoisi) {
+    afficherAlerte("Ce crédit n'est plus disponible.");
+    return;
+  }
+
+  const existant = dossiersOuverts.find((d) => d.product && d.product.id === produitId);
+
+  if (existant) {
+    dossierCourant = await OGOUE.getApplication(existant.id);
+  } else {
+    const resultat = await OGOUE.createApplication({ creditProductId: produitId });
+
+    if (!resultat.ok) {
+      // 409 : un dossier existe déjà, on le rouvre plutôt que d'échouer
+      if (resultat.status === 409) {
+        const dossiers = await OGOUE.getApplications();
+        const trouve = dossiers.find(
+          (d) => d.product && d.product.id === produitId && ["brouillon", "complement_requis"].includes(d.status)
+        );
+        if (trouve) {
+          dossierCourant = await OGOUE.getApplication(trouve.id);
+        } else {
+          afficherAlerte(resultat.error);
+          return;
+        }
+      } else {
+        afficherAlerte(resultat.error);
+        return;
+      }
+    } else {
+      dossierCourant = await OGOUE.getApplication(resultat.application.id);
+    }
+  }
+
+  if (!dossierCourant) {
+    afficherAlerte("Impossible d'ouvrir ce dossier.");
+    return;
+  }
+
+  piecesFournies = dossierCourant.documents || [];
+  afficherDossier();
+}
+
+function afficherDossier() {
+  document.getElementById("sectionInstitutions").classList.add("hidden");
+  document.getElementById("sectionProduits").classList.add("hidden");
+  document.getElementById("sectionDossier").classList.remove("hidden");
+
+  const institution = creditChoisi.institution ? creditChoisi.institution.name : "Institution partenaire";
+
+  document.getElementById("recapCredit").innerHTML = `
+    <p class="text-sm text-text-light-secondary font-semibold">${echapper(institution)}</p>
+    <h2 class="text-xl font-bold dark:text-white">${echapper(creditChoisi.name)}</h2>
+    ${creditChoisi.objective ? `<p class="mt-1 text-sm text-gray-600 dark:text-gray-400">${echapper(creditChoisi.objective)}</p>` : ""}
+    <div class="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm">
+      <span><span class="text-gray-500 dark:text-gray-400">Montant :</span>
+        <strong class="dark:text-gray-200">${formatMontant(creditChoisi.amountMin, creditChoisi.amountMax)}</strong></span>
+      <span><span class="text-gray-500 dark:text-gray-400">Durée :</span>
+        <strong class="dark:text-gray-200">${formatDuree(creditChoisi.durationMinMonths, creditChoisi.durationMaxMonths)}</strong></span>
+    </div>
+  `;
+
+  // Le dossier peut revenir de l'institution avec une demande de complément
+  if (dossierCourant.status === "complement_requis" && dossierCourant.decisionNote) {
+    afficherAlerte(`L'institution demande un complément : ${dossierCourant.decisionNote}`, "info");
+  }
+
+  document.getElementById("champMontant").value = dossierCourant.amountRequested ?? "";
+  document.getElementById("champDuree").value = dossierCourant.durationMonths ?? "";
+  document.getElementById("champObjet").value = dossierCourant.purpose ?? "";
+
+  document.getElementById("aideMontant").textContent =
+    `Ce crédit va de ${FCFA.format(creditChoisi.amountMin)} à ${FCFA.format(creditChoisi.amountMax)} FCFA.`;
+  document.getElementById("aideDuree").textContent =
+    creditChoisi.durationMinMonths || creditChoisi.durationMaxMonths
+      ? `Durée acceptée : ${formatDuree(creditChoisi.durationMinMonths, creditChoisi.durationMaxMonths)}.`
+      : "";
+
+  afficherPieces();
+}
+
+function afficherPieces() {
+  const liste = document.getElementById("listePieces");
+  const exigees = creditChoisi.requiredDocuments || [];
+
+  const fourniesParExigence = new Map();
+  const libres = [];
+  piecesFournies.forEach((piece) => {
+    if (piece.requiredDocumentId) fourniesParExigence.set(piece.requiredDocumentId, piece);
+    else libres.push(piece);
+  });
+
+  const nbFournies = exigees.filter((e) => fourniesParExigence.has(e.id)).length;
+  document.getElementById("compteurPieces").textContent =
+    exigees.length > 0 ? `${nbFournies} / ${exigees.length} pièce(s) exigée(s)` : "";
+
+  const ligneExigee = (exigence) => {
+    const piece = fourniesParExigence.get(exigence.id);
+    if (piece) {
+      return `
+        <div class="flex flex-wrap items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 dark:bg-emerald-900/10 dark:border-emerald-800 px-4 py-3">
+          <span class="material-symbols-outlined text-emerald-600">check_circle</span>
+          <div class="flex-1 min-w-0">
+            <p class="font-semibold text-sm dark:text-gray-200">${echapper(exigence.name)}</p>
+            <a href="${echapper(piece.fileUrl)}" target="_blank" rel="noopener"
+               class="text-xs text-primary hover:underline break-all">${echapper(piece.name)}</a>
+          </div>
+          <button type="button" data-supprimer="${piece.id}"
+                  class="text-sm font-semibold text-red-600 hover:underline">Remplacer</button>
+        </div>
+      `;
+    }
+    return `
+      <div class="flex flex-wrap items-center gap-3 rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-3">
+        <span class="material-symbols-outlined text-gray-400">radio_button_unchecked</span>
+        <div class="flex-1 min-w-0">
+          <p class="font-semibold text-sm dark:text-gray-200">${echapper(exigence.name)}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Pièce non fournie</p>
+        </div>
+        <input type="file" data-exigence="${exigence.id}"
+               aria-label="Téléverser : ${echapper(exigence.name)}"
+               class="block text-sm text-gray-600 dark:text-gray-300 file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-primary hover:file:bg-primary/20"/>
+      </div>
+    `;
+  };
+
+  const ligneLibre = (piece) => `
+    <div class="flex flex-wrap items-center gap-3 rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-3">
+      <span class="material-symbols-outlined text-gray-400">attach_file</span>
+      <div class="flex-1 min-w-0">
+        <a href="${echapper(piece.fileUrl)}" target="_blank" rel="noopener"
+           class="font-semibold text-sm text-primary hover:underline break-all">${echapper(piece.name)}</a>
+        <p class="text-xs text-gray-500 dark:text-gray-400">Pièce complémentaire</p>
+      </div>
+      <button type="button" data-supprimer="${piece.id}"
+              class="text-sm font-semibold text-red-600 hover:underline">Retirer</button>
+    </div>
+  `;
+
+  const contenu = [
+    ...exigees.map(ligneExigee),
+    ...libres.map(ligneLibre),
+  ];
+
+  liste.innerHTML = contenu.length > 0
+    ? contenu.join("")
+    : `<p class="text-sm text-gray-500 dark:text-gray-400">Ce crédit n'exige aucune pièce justificative.</p>`;
+
+  liste.querySelectorAll("[data-exigence]").forEach((champ) => {
+    champ.addEventListener("change", () => {
+      if (champ.files[0]) televerser(champ.files[0], champ.dataset.exigence);
+    });
+  });
+
+  liste.querySelectorAll("[data-supprimer]").forEach((bouton) => {
+    bouton.addEventListener("click", () => retirerPiece(bouton.dataset.supprimer));
+  });
+}
+
+async function televerser(fichier, exigenceId) {
+  masquerAlerte();
+  afficherAlerte("Téléversement en cours…", "info");
+
+  const resultat = await OGOUE.uploadApplicationDocument(dossierCourant.id, fichier, {
+    requiredDocumentId: exigenceId || undefined,
+  });
+
+  if (!resultat.ok) {
+    afficherAlerte(resultat.error);
+    return;
+  }
+
+  await rafraichirDossier();
+  afficherAlerte("Pièce ajoutée.", "succes");
+}
+
+async function retirerPiece(docId) {
+  const resultat = await OGOUE.deleteApplicationDocument(dossierCourant.id, docId);
+  if (!resultat.ok) {
+    afficherAlerte(resultat.error);
+    return;
+  }
+  await rafraichirDossier();
+}
+
+async function rafraichirDossier() {
+  const frais = await OGOUE.getApplication(dossierCourant.id);
+  if (frais) {
+    dossierCourant = frais;
+    piecesFournies = frais.documents || [];
+  }
+  afficherPieces();
+}
+
+// ─────────── Enregistrement et dépôt ───────────
+
+document.getElementById("formDemande").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  await enregistrerDemande(true);
+});
+
+async function enregistrerDemande(avecRetour) {
+  const etat = document.getElementById("etatEnregistrement");
+  const montant = document.getElementById("champMontant").value;
+  const duree = document.getElementById("champDuree").value;
+  const objet = document.getElementById("champObjet").value.trim();
+
+  const changements = {
+    amountRequested: montant === "" ? undefined : Number(montant),
+    durationMonths: duree === "" ? undefined : Number(duree),
+    purpose: objet,
+  };
+
+  etat.textContent = "Enregistrement…";
+  const resultat = await OGOUE.updateApplication(dossierCourant.id, changements);
+
+  if (!resultat.ok) {
+    etat.textContent = "";
+    afficherAlerte(resultat.error);
+    return false;
+  }
+
+  dossierCourant = { ...dossierCourant, ...resultat.application };
+  etat.textContent = "Enregistré.";
+  if (avecRetour) setTimeout(() => { etat.textContent = ""; }, 2500);
+  return true;
+}
+
+document.getElementById("champPieceLibre").addEventListener("change", (e) => {
+  if (e.target.files[0]) {
+    televerser(e.target.files[0], null);
+    e.target.value = "";
+  }
+});
+
+document.getElementById("btnRetourCredits").addEventListener("click", async () => {
+  masquerAlerte();
+  document.getElementById("sectionDossier").classList.add("hidden");
+
+  // Recharger : le dossier qu'on vient de quitter change l'état des boutons
+  await chargerCatalogue();
+
+  if (institutionChoisie) {
+    // L'objet a été reconstruit par le rechargement, on le retrouve par son id
+    ouvrirInstitution(institutionChoisie.id);
+  } else {
+    document.getElementById("sectionInstitutions").classList.remove("hidden");
+  }
+});
+
+document.getElementById("btnDeposer").addEventListener("click", async () => {
+  const bouton = document.getElementById("btnDeposer");
+  const message = document.getElementById("messageDepot");
+  masquerAlerte();
+  message.classList.add("hidden");
+
+  const montant = document.getElementById("champMontant").value;
+  if (montant === "") {
+    afficherAlerte("Le montant demandé est obligatoire pour déposer le dossier.");
+    return;
+  }
+
+  bouton.disabled = true;
+
+  // Le montant saisi doit être enregistré avant le dépôt, sinon l'API
+  // refusera un dossier dont le montant est encore vide.
+  const enregistre = await enregistrerDemande(false);
+  if (!enregistre) {
+    bouton.disabled = false;
+    return;
+  }
+
+  const resultat = await OGOUE.submitApplication(dossierCourant.id);
+
+  if (!resultat.ok) {
+    if (resultat.missing.length > 0) {
+      message.className = "mb-4 rounded-xl px-4 py-3 text-sm bg-red-50 text-red-700 border border-red-200";
+      message.innerHTML = `
+        <p class="font-bold">Il manque ${resultat.missing.length} pièce(s) :</p>
+        <ul class="mt-1 list-disc list-inside">
+          ${resultat.missing.map((m) => `<li>${echapper(m.name)}</li>`).join("")}
+        </ul>
+      `;
+      message.classList.remove("hidden");
+    } else {
+      afficherAlerte(resultat.error);
+    }
+    bouton.disabled = false;
+    return;
+  }
+
+  window.location.href = `module_mes_dossiers?depose=${dossierCourant.id}`;
+});
+
+// ─────────── Démarrage ───────────
+
+(async function demarrer() {
+  await chargerCatalogue();
+
+  // Le catalogue de financement.ogoue.com et « Mes dossiers » renvoient ici
+  // avec le crédit choisi : on saute directement à la constitution du dossier.
+  const produitId = new URLSearchParams(window.location.search).get("productId");
+  if (produitId) {
+    const produit = tousLesProduits.find((p) => p.id === produitId);
+    if (produit && produit.institution) {
+      institutionChoisie = institutions.find((i) => i.id === produit.institution.id) || null;
+    }
+    await ouvrirDossier(produitId);
+  }
+})();
+</script>
 </body>
 </html>

@@ -1,5 +1,6 @@
 import { supabaseSecondary } from "../db/supabase.js";
 import { z } from "zod";
+import { uploadFileToSupabase, deleteFileFromSupabase } from "../utils/supabase-storage.js";
 
 // ============================================================
 // Financement : offre de credit et dossiers des PME
@@ -63,7 +64,8 @@ export async function listProducts(req, res) {
         id, name, objective, amount_min, amount_max,
         duration_min_months, duration_max_months,
         interest_type, typology, target, institution_id,
-        institutions ( id, name, institution_type, logo_url, website )
+        institutions ( id, name, institution_type, mission, logo_url, website ),
+        product_required_documents ( id, name )
       `)
       .eq("is_active", true)
       .order("name", { ascending: true });
@@ -84,11 +86,18 @@ export async function listProducts(req, res) {
       interestType: p.interest_type,
       typology: p.typology,
       target: p.target,
+      // Les pieces exigees sont affichees des le catalogue : la PME sait
+      // ainsi ce qu'elle devra fournir avant meme d'ouvrir un dossier.
+      requiredDocuments: (p.product_required_documents || []).map((d) => ({
+        id: d.id,
+        name: d.name,
+      })),
       institution: p.institutions
         ? {
             id: p.institutions.id,
             name: p.institutions.name,
             type: p.institutions.institution_type,
+            mission: p.institutions.mission,
             logoUrl: p.institutions.logo_url,
             website: p.institutions.website,
           }
@@ -419,6 +428,182 @@ export async function updateApplication(req, res) {
       return res.status(400).json({ error: "Validation error", details: error.issues });
     }
     console.error("Erreur updateApplication:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+// ────────────────────────────────────────────────────────────
+// Pieces justificatives
+// ------------------------------------------------------------
+// Le fichier est stocke cote base PRINCIPALE (bucket "justificatifs",
+// comme les justificatifs de ventes et depenses). Seule son URL est
+// enregistree dans la base secondaire, ce qui evite a l'institution
+// d'avoir le moindre acces a la base d'OGOUE.
+// ────────────────────────────────────────────────────────────
+
+/**
+ * Charge le dossier de la PME connectee et verifie qu'il accepte
+ * encore des modifications. Renvoie une reponse d'erreur le cas
+ * echeant, ou le dossier.
+ */
+async function getDossierModifiable(req, res, id) {
+  const { pme, error: pmeError } = await getPmeForUser(req);
+  if (!pme) {
+    res.status(404).json({ error: pmeError });
+    return null;
+  }
+
+  const { data: application } = await supabaseSecondary
+    .from("loan_applications")
+    .select("id, status, credit_product_id")
+    .eq("id", id)
+    .eq("pme_id", pme.id)
+    .maybeSingle();
+
+  if (!application) {
+    res.status(404).json({ error: "Dossier introuvable" });
+    return null;
+  }
+  if (!STATUTS_MODIFIABLES.includes(application.status)) {
+    res.status(409).json({
+      error: "Ce dossier a été déposé et ses pièces ne sont plus modifiables",
+    });
+    return null;
+  }
+
+  return { pme, application };
+}
+
+/**
+ * POST /api/financing/applications/:id/documents
+ * Ajoute une piece au dossier. `requiredDocumentId` la rattache a une
+ * exigence du produit ; sans lui, c'est une piece libre.
+ */
+export async function uploadApplicationDocument(req, res) {
+  try {
+    if (!supabaseSecondary) return secondaryIndisponible(res);
+    const { id } = req.params;
+
+    if (!req.file) return res.status(400).json({ error: "Aucun fichier fourni" });
+
+    const contexte = await getDossierModifiable(req, res, id);
+    if (!contexte) return;
+    const { pme, application } = contexte;
+
+    // Une piece rattachee a une exigence doit appartenir au produit du dossier,
+    // sinon on pourrait satisfaire l'exigence d'un autre produit.
+    const requiredDocumentId = req.body.requiredDocumentId || null;
+    if (requiredDocumentId) {
+      const { data: exigence } = await supabaseSecondary
+        .from("product_required_documents")
+        .select("id")
+        .eq("id", requiredDocumentId)
+        .eq("credit_product_id", application.credit_product_id)
+        .maybeSingle();
+
+      if (!exigence) {
+        return res.status(400).json({ error: "Cette pièce n'est pas demandée pour ce produit" });
+      }
+    }
+
+    let fichier;
+    try {
+      fichier = await uploadFileToSupabase(req.file.buffer, req.file.originalname, pme.id);
+    } catch (uploadError) {
+      console.error("Erreur uploadApplicationDocument (storage):", uploadError);
+      return res.status(500).json({ error: "Le téléversement du fichier a échoué" });
+    }
+
+    // Une exigence n'est satisfaite que par une piece : la nouvelle remplace
+    // l'ancienne, dont on nettoie aussi le fichier stocke.
+    if (requiredDocumentId) {
+      const { data: anciennes } = await supabaseSecondary
+        .from("application_documents")
+        .select("id, storage_path")
+        .eq("application_id", id)
+        .eq("required_document_id", requiredDocumentId);
+
+      if (anciennes?.length) {
+        await supabaseSecondary
+          .from("application_documents")
+          .delete()
+          .in("id", anciennes.map((d) => d.id));
+
+        for (const ancienne of anciennes) {
+          await deleteFileFromSupabase(ancienne.storage_path);
+        }
+      }
+    }
+
+    const { data: row, error } = await supabaseSecondary
+      .from("application_documents")
+      .insert({
+        application_id: id,
+        required_document_id: requiredDocumentId,
+        name: req.body.name?.trim() || req.file.originalname,
+        file_url: fichier.fileUrl,
+        storage_path: fichier.storagePath,
+      })
+      .select("id, name, file_url, required_document_id, uploaded_at")
+      .single();
+
+    if (error) {
+      console.error("Erreur uploadApplicationDocument:", error);
+      // Ne pas laisser derriere nous un fichier qu'aucune ligne ne reference
+      await deleteFileFromSupabase(fichier.storagePath);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+
+    return res.status(201).json({
+      id: row.id,
+      name: row.name,
+      fileUrl: row.file_url,
+      requiredDocumentId: row.required_document_id,
+      uploadedAt: row.uploaded_at,
+    });
+  } catch (error) {
+    console.error("Erreur uploadApplicationDocument:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+/**
+ * DELETE /api/financing/applications/:id/documents/:docId
+ * Retire une piece d'un dossier encore modifiable.
+ */
+export async function deleteApplicationDocument(req, res) {
+  try {
+    if (!supabaseSecondary) return secondaryIndisponible(res);
+    const { id, docId } = req.params;
+
+    const contexte = await getDossierModifiable(req, res, id);
+    if (!contexte) return;
+
+    const { data: document } = await supabaseSecondary
+      .from("application_documents")
+      .select("id, storage_path")
+      .eq("id", docId)
+      .eq("application_id", id)
+      .maybeSingle();
+
+    if (!document) return res.status(404).json({ error: "Pièce introuvable" });
+
+    const { error } = await supabaseSecondary
+      .from("application_documents")
+      .delete()
+      .eq("id", docId)
+      .eq("application_id", id);
+
+    if (error) {
+      console.error("Erreur deleteApplicationDocument:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+
+    await deleteFileFromSupabase(document.storage_path);
+
+    return res.json({ ok: true });
+  } catch (error) {
+    console.error("Erreur deleteApplicationDocument:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 }

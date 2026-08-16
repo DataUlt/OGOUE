@@ -678,6 +678,159 @@ async function deleteArticle(id) {
 }
 
 // ─────────────────────────────────────────────────
+// 🏦 FINANCEMENT : offre de crédit et dossiers
+// ─────────────────────────────────────────────────
+// Les produits et les dossiers vivent dans la base des institutions.
+// Le backend d'OGOUE sert d'intermédiaire : il retrouve la PME à partir
+// du token, la cliente n'a jamais à connaître son identifiant.
+
+/**
+ * Appel authentifié générique vers /api/financing
+ * @returns {Promise<{ok: boolean, status: number, data: any}>}
+ */
+async function financingRequest(path, options = {}) {
+  const token = getToken();
+  if (!token) {
+    handleUnauthorized();
+    return { ok: false, status: 401, data: null };
+  }
+
+  // Sur un envoi de fichier, laisser le navigateur poser lui-même le
+  // Content-Type avec sa frontière multipart.
+  const estFormData = options.body instanceof FormData;
+
+  const response = await fetch(`${API_BASE_URL}/api/financing${path}`, {
+    ...options,
+    headers: {
+      ...(estFormData ? {} : { "Content-Type": "application/json" }),
+      "Authorization": `Bearer ${token}`,
+      ...(options.headers || {})
+    }
+  });
+
+  if (response.status === 401) {
+    handleUnauthorized();
+    return { ok: false, status: 401, data: null };
+  }
+
+  let data = null;
+  try {
+    data = await response.json();
+  } catch (e) {
+    data = null;
+  }
+
+  return { ok: response.ok, status: response.status, data };
+}
+
+/** Crédits proposés par les institutions partenaires */
+async function getCreditProducts() {
+  const { ok, data } = await financingRequest("/products");
+  return ok && Array.isArray(data?.products) ? data.products : [];
+}
+
+/** Détail d'un crédit, avec la liste des pièces exigées */
+async function getCreditProduct(id) {
+  const { ok, data } = await financingRequest(`/products/${id}`);
+  return ok ? data : null;
+}
+
+/** Dossiers de la PME connectée */
+async function getApplications() {
+  const { ok, data } = await financingRequest("/applications");
+  return ok && Array.isArray(data?.applications) ? data.applications : [];
+}
+
+/** Détail d'un dossier : pièces fournies et historique d'avancement */
+async function getApplication(id) {
+  const { ok, data } = await financingRequest(`/applications/${id}`);
+  return ok ? data : null;
+}
+
+/**
+ * Ouvre un dossier en brouillon sur un crédit.
+ * Un 409 signifie qu'un dossier est déjà en cours sur ce produit : on le
+ * remonte tel quel pour que l'appelant puisse rediriger au lieu d'échouer.
+ */
+async function createApplication(payload) {
+  const { ok, status, data } = await financingRequest("/applications", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+  return {
+    ok,
+    status,
+    application: ok ? data : null,
+    error: ok ? null : (data?.error || "Erreur lors de la création du dossier")
+  };
+}
+
+/** Modifie un dossier encore ouvert (montant, durée, objet) */
+async function updateApplication(id, changes) {
+  const { ok, status, data } = await financingRequest(`/applications/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(changes)
+  });
+  return {
+    ok,
+    status,
+    application: ok ? data : null,
+    error: ok ? null : (data?.error || "Erreur lors de l'enregistrement")
+  };
+}
+
+/**
+ * Dépose le dossier auprès de l'institution.
+ * En cas de pièces manquantes, l'API renvoie un 400 avec `missing` :
+ * on le transmet pour pouvoir les signaler une par une.
+ */
+async function submitApplication(id) {
+  const { ok, status, data } = await financingRequest(`/applications/${id}/submit`, {
+    method: "POST"
+  });
+  return {
+    ok,
+    status,
+    application: ok ? data : null,
+    missing: data?.missing || [],
+    error: ok ? null : (data?.error || "Erreur lors du dépôt du dossier")
+  };
+}
+
+/**
+ * Téléverse une pièce justificative.
+ * @param {string} applicationId
+ * @param {File} file
+ * @param {{requiredDocumentId?: string, name?: string}} options
+ */
+async function uploadApplicationDocument(applicationId, file, options = {}) {
+  const formData = new FormData();
+  formData.append("file", file);
+  if (options.requiredDocumentId) formData.append("requiredDocumentId", options.requiredDocumentId);
+  if (options.name) formData.append("name", options.name);
+
+  const { ok, status, data } = await financingRequest(`/applications/${applicationId}/documents`, {
+    method: "POST",
+    body: formData
+  });
+  return {
+    ok,
+    status,
+    document: ok ? data : null,
+    error: ok ? null : (data?.error || "Erreur lors du téléversement")
+  };
+}
+
+/** Retire une pièce d'un dossier encore ouvert */
+async function deleteApplicationDocument(applicationId, docId) {
+  const { ok, status, data } = await financingRequest(
+    `/applications/${applicationId}/documents/${docId}`,
+    { method: "DELETE" }
+  );
+  return { ok, status, error: ok ? null : (data?.error || "Erreur lors de la suppression") };
+}
+
+// ─────────────────────────────────────────────────
 // Exposition sur window
 // ─────────────────────────────────────────────────
 window.OGOUE = {
@@ -697,5 +850,14 @@ window.OGOUE = {
   addArticle,
   addArticlesBulk,
   updateArticle,
-  deleteArticle
+  deleteArticle,
+  getCreditProducts,
+  getCreditProduct,
+  getApplications,
+  getApplication,
+  createApplication,
+  updateApplication,
+  submitApplication,
+  uploadApplicationDocument,
+  deleteApplicationDocument
 };
