@@ -16,7 +16,10 @@
   var AGENT_PAGES = [
     "module_agent_dashboard",
     "module_agent_depenses",
-    "module_agent_resume"
+    "module_agent_resume",
+    // Le catalogue est celui de l'organisation : l'agent travaille dans
+    // la boutique du gerant et doit donc y acceder comme lui.
+    "module_articles"
   ];
 
   var user = null;

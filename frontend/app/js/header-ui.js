@@ -273,6 +273,36 @@
   function savePrefs(p){ localStorage.setItem(PREFS_KEY, JSON.stringify(p||{})); }
 
   function getUser(){ try { return JSON.parse(localStorage.getItem('user')||'null'); } catch(e){return null} }
+
+  // ── Theme memorise par role ─────────────────────────────────
+  // Gerant et agent partagent souvent le meme navigateur. Le choix
+  // clair/sombre de l'un ne doit pas s'appliquer a l'autre : la
+  // preference est donc rangee sous une cle propre a chaque role.
+  const LEGACY_THEME_KEY = 'ogo_theme';
+
+  function getThemeKey(){
+    const user = getUser();
+    return (user && user.role === 'agent') ? 'ogo_theme_agent' : 'ogo_theme_manager';
+  }
+
+  function getTheme(){
+    const key = getThemeKey();
+    const stored = localStorage.getItem(key);
+    if (stored) return stored;
+
+    // Reprise unique de l'ancienne cle globale, pour ne pas perdre la
+    // preference deja exprimee. On la supprime aussitot, sinon l'autre
+    // role la reprendrait a son tour et la separation serait inutile.
+    const legacy = localStorage.getItem(LEGACY_THEME_KEY);
+    if (legacy) {
+      localStorage.setItem(key, legacy);
+      localStorage.removeItem(LEGACY_THEME_KEY);
+      return legacy;
+    }
+    return 'light';
+  }
+
+  function setTheme(t){ localStorage.setItem(getThemeKey(), t); }
   function getOrg(){ try { return JSON.parse(localStorage.getItem(ORG_KEY)||'null'); } catch(e){return null} }
   function saveOrg(o){ localStorage.setItem(ORG_KEY, JSON.stringify(o||{})); }
 
@@ -442,11 +472,11 @@
       <div class="text-xs font-bold uppercase text-gray-500 dark:text-gray-400 mb-3">Apparence</div>
       <div class="flex gap-3">
         <label class="flex items-center gap-2 cursor-pointer">
-          <input type="radio" name="theme" value="light" ${localStorage.getItem('ogo_theme') !== 'dark' ? 'checked' : ''} class="w-4 h-4 border-gray-300 dark:border-gray-600" />
+          <input type="radio" name="theme" value="light" ${getTheme() !== 'dark' ? 'checked' : ''} class="w-4 h-4 border-gray-300 dark:border-gray-600" />
           <span class="text-sm text-gray-700 dark:text-gray-300">Clair</span>
         </label>
         <label class="flex items-center gap-2 cursor-pointer">
-          <input type="radio" name="theme" value="dark" ${localStorage.getItem('ogo_theme') === 'dark' ? 'checked' : ''} class="w-4 h-4 border-gray-300 dark:border-gray-600" />
+          <input type="radio" name="theme" value="dark" ${getTheme() === 'dark' ? 'checked' : ''} class="w-4 h-4 border-gray-300 dark:border-gray-600" />
           <span class="text-sm text-gray-700 dark:text-gray-300">Sombre</span>
         </label>
       </div>
@@ -457,23 +487,24 @@
     const user = getUser() || { role: '' };
     const isAgent = user.role === 'agent';
     
-    if (!isAgent) {
-      const agentsDiv = document.createElement('div');
-      agentsDiv.innerHTML = `
-        <div class="text-xs font-bold uppercase text-gray-500 dark:text-gray-400 mb-3">Gestion</div>
-        <div class="space-y-2">
+    // La boutique est celle de l'organisation : agent et gérant partagent
+    // le même catalogue. La gestion des agents reste réservée au gérant.
+    const gestionDiv = document.createElement('div');
+    const lienAgents = isAgent ? '' : `
           <a href="module_agents.html" class="block w-full px-4 py-2 rounded-lg text-background-light bg-primary hover:bg-text-light font-medium text-sm text-center transition-colors inline-flex items-center justify-center gap-2">
             <span class="material-symbols-outlined" style="font-size: 18px;">group</span>
             Gérer les Agents
-          </a>
-          <a href="module_articles.html" class="block w-full px-4 py-2 rounded-lg text-background-light bg-primary hover:bg-text-light font-medium text-sm text-center transition-colors inline-flex items-center justify-center gap-2">
-            <span class="material-symbols-outlined" style="font-size: 18px;">storefront</span>
-            Ma boutique
-          </a>
-        </div>
-      `;
-      content.appendChild(agentsDiv);
-    }
+          </a>`;
+    gestionDiv.innerHTML = `
+      <div class="text-xs font-bold uppercase text-gray-500 dark:text-gray-400 mb-3">Gestion</div>
+      <div class="space-y-2">${lienAgents}
+        <a href="module_articles.html" class="block w-full px-4 py-2 rounded-lg text-background-light bg-primary hover:bg-text-light font-medium text-sm text-center transition-colors inline-flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined" style="font-size: 18px;">storefront</span>
+          ${isAgent ? 'La boutique' : 'Ma boutique'}
+        </a>
+      </div>
+    `;
+    content.appendChild(gestionDiv);
     
     container.appendChild(content);
     
@@ -489,7 +520,7 @@
     popover.querySelectorAll('input[name="theme"]').forEach(radio => {
       radio.addEventListener('change', (e) => {
         const t = e.target.value === 'dark' ? 'dark' : 'light';
-        localStorage.setItem('ogo_theme', t);
+        setTheme(t);
         if (t === 'dark') document.documentElement.classList.add('dark');
         else document.documentElement.classList.remove('dark');
       });
@@ -704,7 +735,7 @@
 
   // ============ INITIALIZATION ============
   function initHeaderUI(){
-    const theme = localStorage.getItem('ogo_theme') || 'light';
+    const theme = getTheme();
     if (theme === 'dark') document.documentElement.classList.add('dark');
     else document.documentElement.classList.remove('dark');
 

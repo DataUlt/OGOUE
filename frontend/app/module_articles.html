@@ -53,13 +53,18 @@
             <div class="max-w-7xl mx-auto px-6 lg:px-8">
                 <div class="flex items-center justify-between h-20">
                     <div class="flex items-center gap-4">
-                        <a href="module_tableau_bord.html"><img src="/app/Logo-ogoue (2).png" alt="OGOUE Logo" class="h-28 w-auto"></a>
+                        <a id="nav-logo" href="module_tableau_bord.html"><img src="/app/Logo-ogoue (2).png" alt="OGOUE Logo" class="h-28 w-auto"></a>
                     </div>
 
-                    <div class="hidden md:flex items-center gap-8">
+                    <!-- Navigation gerant : masquee pour les agents, qui n'ont acces qu'a la comptabilite -->
+                    <div id="nav-manager" class="hidden md:flex items-center gap-8">
                         <a class="text-text-light-muted dark:text-gray-400 hover:text-text-light dark:hover:text-white text-sm font-medium transition-colors" href="module_tableau_bord.html">Tableau de Bord</a>
                         <a class="text-text-light-muted dark:text-gray-400 hover:text-text-light dark:hover:text-white text-sm font-medium transition-colors" href="module_ventes.html">Comptabilit&eacute;</a>
                         <a class="text-text-light-muted dark:text-gray-400 hover:text-text-light dark:hover:text-white text-sm font-medium transition-colors" href="module_scoring.html">Financement</a>
+                    </div>
+
+                    <div id="nav-agent" class="hidden items-center gap-8">
+                        <a class="text-primary text-sm font-bold transition-colors" href="module_agent_dashboard.html">Comptabilit&eacute;</a>
                     </div>
 
                     <div class="flex items-center gap-2">
@@ -90,14 +95,25 @@
                 </p>
             </div>
 
-            <div class="mb-10">
-                <h1 class="text-3xl sm:text-4xl font-black leading-tight tracking-[-0.033em] mb-2">
-                    Catalogue articles &amp; services
-                </h1>
-                <p class="text-text-light-muted dark:text-gray-400 text-base">
-                    Ces articles alimentent la liste déroulante du formulaire de vente et harmonisent
-                    les libellés dans toute votre entreprise.
-                </p>
+            <div class="mb-10 flex items-start gap-4">
+                <!-- Retour a la page precedente (masque pendant la configuration,
+                     ou l'on reviendrait sur la creation de compte) -->
+                <button type="button"
+                        id="btn-retour"
+                        onclick="history.back()"
+                        title="Retour"
+                        class="flex-shrink-0 mt-1 flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 dark:bg-primary/30 text-primary hover:bg-primary/30 dark:hover:bg-primary/40 transition-colors">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </button>
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-black leading-tight tracking-[-0.033em] mb-2">
+                        Catalogue articles &amp; services
+                    </h1>
+                    <p class="text-text-light-muted dark:text-gray-400 text-base">
+                        Ces articles alimentent la liste déroulante du formulaire de vente et harmonisent
+                        les libellés dans toute votre entreprise.
+                    </p>
+                </div>
             </div>
 
             <!-- Formulaire d'ajout -->
@@ -203,9 +219,37 @@
             const tbody = document.getElementById("articles-tbody");
             const countEl = document.getElementById("article-count");
 
+            // L'agent partage le catalogue de l'organisation, mais pas la
+            // navigation du gerant : on adapte l'en-tete a son role.
+            let currentUser = null;
+            try {
+                currentUser = JSON.parse(localStorage.getItem("user") || "null");
+            } catch (e) {
+                currentUser = null;
+            }
+            const isAgent = !!currentUser && currentUser.role === "agent";
+
+            if (isAgent) {
+                const navManager = document.getElementById("nav-manager");
+                const navAgent = document.getElementById("nav-agent");
+                // `hidden md:flex` : ajouter `hidden` ne suffit pas, `md:flex`
+                // l'emporte sur grand ecran. Il faut retirer `md:flex`.
+                navManager.classList.remove("md:flex");
+                navManager.classList.add("hidden");
+
+                // Un seul lien : on l'affiche a toutes les tailles d'ecran,
+                // cette page n'ayant pas de menu mobile.
+                navAgent.classList.remove("hidden");
+                navAgent.classList.add("flex");
+
+                document.getElementById("nav-logo").setAttribute("href", "module_agent_dashboard.html");
+            }
+
             // Mode configuration : arrive depuis la creation du compte
             const isOnboarding = new URLSearchParams(window.location.search).get("onboarding") === "1";
             if (isOnboarding) {
+                // Revenir en arriere ramenerait a l'inscription : bouton inutile ici
+                document.getElementById("btn-retour").classList.add("hidden");
                 document.getElementById("onboarding-banner").classList.remove("hidden");
                 document.getElementById("onboarding-actions").classList.remove("hidden");
                 document.getElementById("app-header").classList.add("hidden");
