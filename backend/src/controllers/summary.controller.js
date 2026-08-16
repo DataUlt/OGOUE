@@ -14,38 +14,39 @@ export async function monthSummary(req, res) {
     // Récupérer l'organizationId du JWT
     const organizationId = req.user.organizationId;
 
-    // Récupérer les ventes
-    const { data: salesData, error: salesError } = await supabase
-      .from("sales")
-      .select("amount, sale_date")
-      .eq("organization_id", organizationId);
+    // Plage de dates du mois demandé (filtrage fait par la DB, pas en JS)
+    const firstDay = new Date(year, month - 1, 1).toISOString().split("T")[0];
+    const lastDay = new Date(year, month, 0).toISOString().split("T")[0];
+
+    // Récupérer ventes et dépenses en parallèle, déjà filtrées par période
+    const [{ data: salesData, error: salesError }, { data: expensesData, error: expensesError }] =
+      await Promise.all([
+        supabase
+          .from("sales")
+          .select("amount")
+          .eq("organization_id", organizationId)
+          .gte("sale_date", firstDay)
+          .lte("sale_date", lastDay),
+        supabase
+          .from("expenses")
+          .select("amount")
+          .eq("organization_id", organizationId)
+          .gte("expense_date", firstDay)
+          .lte("expense_date", lastDay),
+      ]);
 
     if (salesError) {
       console.error("Erreur monthSummary (sales):", salesError);
       return res.status(500).json({ error: "Internal server error" });
     }
 
-    // Récupérer les dépenses
-    const { data: expensesData, error: expensesError } = await supabase
-      .from("expenses")
-      .select("amount, expense_date")
-      .eq("organization_id", organizationId);
-
     if (expensesError) {
       console.error("Erreur monthSummary (expenses):", expensesError);
       return res.status(500).json({ error: "Internal server error" });
     }
 
-    // Filtrer par mois et année en JavaScript
-    const filteredSales = (salesData || []).filter(item => {
-      const date = new Date(item.sale_date);
-      return date.getMonth() + 1 === month && date.getFullYear() === year;
-    });
-
-    const filteredExpenses = (expensesData || []).filter(item => {
-      const date = new Date(item.expense_date);
-      return date.getMonth() + 1 === month && date.getFullYear() === year;
-    });
+    const filteredSales = salesData || [];
+    const filteredExpenses = expensesData || [];
 
     const totalSales = filteredSales.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
     const totalExpenses = filteredExpenses.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);

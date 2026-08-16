@@ -563,21 +563,37 @@ export async function forgotPassword(req, res) {
 
     const parsed = forgotPasswordSchema.parse(req.body);
 
+    const frontendUrl = process.env.FRONTEND_URL;
+    if (!frontendUrl) {
+      console.error("❌ FRONTEND_URL non configurée : impossible de générer un lien de réinitialisation valide");
+      return res.status(500).json({ error: "Erreur lors de la réinitialisation du mot de passe" });
+    }
+
     // Supabase gère automatiquement l'envoi d'email de réinitialisation
     const { error } = await supabase.auth.resetPasswordForEmail(parsed.email, {
-      redirectTo: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password.html`,
+      redirectTo: `${frontendUrl}/reset-password.html`,
     });
 
     if (error) {
       console.error("Password reset error:", error);
-      // Ne pas révéler si l'email existe ou non (sécurité)
-      return res.status(200).json({ 
-        message: "Si un compte existe avec cet email, vous recevrez un lien de réinitialisation" 
+
+      // Quota d'envoi d'emails atteint : ce n'est pas un risque d'énumération,
+      // il faut le dire à l'utilisateur au lieu de prétendre que l'email est parti.
+      if (error.status === 429 || error.code === "over_email_send_rate_limit") {
+        return res.status(429).json({
+          error: "Trop de demandes de réinitialisation ont été envoyées. Veuillez réessayer dans quelques minutes.",
+        });
+      }
+
+      // Toute autre erreur (email inexistant, etc.) : réponse générique pour
+      // ne pas révéler si un compte existe avec cette adresse.
+      return res.status(200).json({
+        message: "Si un compte existe avec cet email, vous recevrez un lien de réinitialisation",
       });
     }
 
-    return res.status(200).json({ 
-      message: "Un email de réinitialisation a été envoyé" 
+    return res.status(200).json({
+      message: "Un email de réinitialisation a été envoyé"
     });
   } catch (err) {
     console.error("Forgot password error:", err);
@@ -605,14 +621,18 @@ export async function resetPassword(req, res) {
       return res.status(400).json({ error: "Token manquant" });
     }
 
-    // Utiliser le token pour mettre à jour le mot de passe
-    const { error } = await supabase.auth.updateUser({ 
-      password: parsed.password 
-    }, {
-      // Set the user session with the token
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+    // Le client `supabase` utilise la clé service_role (pas de session active),
+    // donc on résout d'abord l'utilisateur à partir du token de réinitialisation...
+    const { data: userData, error: getUserError } = await supabase.auth.getUser(token);
+
+    if (getUserError || !userData?.user) {
+      console.error("Reset password - token invalide:", getUserError);
+      return res.status(400).json({ error: "Lien de réinitialisation invalide ou expiré" });
+    }
+
+    // ...puis on met à jour son mot de passe via l'API Admin (droits service_role)
+    const { error } = await supabase.auth.admin.updateUserById(userData.user.id, {
+      password: parsed.password,
     });
 
     if (error) {
