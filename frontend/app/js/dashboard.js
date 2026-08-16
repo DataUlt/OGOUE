@@ -152,36 +152,41 @@ function getMonthsInRange(startISO, endISO) {
   return months;
 }
 
+// ========== CHARGEMENT DES DONNÉES DE LA PÉRIODE (une seule fois, réutilisé par KPI + graphiques) ==========
+async function fetchPeriodData(startDateISO, endDateISO) {
+  if (
+    !window.OGOUE ||
+    typeof window.OGOUE.getVentesPourPeriode !== "function" ||
+    typeof window.OGOUE.getDepensesPourPeriode !== "function"
+  ) {
+    console.error("OGOUE store non disponible");
+    return { ventes: [], depenses: [] };
+  }
+
+  // Charger TOUS les mois couverts par la plage, en parallèle (ventes + dépenses)
+  const monthsToLoad = getMonthsInRange(startDateISO, endDateISO);
+  console.log("📅 Mois à charger:", monthsToLoad);
+
+  const requests = monthsToLoad.flatMap(({ month, year }) => [
+    window.OGOUE.getVentesPourPeriode(month, year),
+    window.OGOUE.getDepensesPourPeriode(month, year)
+  ]);
+  const results = await Promise.all(requests);
+
+  let ventes = [];
+  let depenses = [];
+  for (let i = 0; i < results.length; i += 2) {
+    ventes = ventes.concat(results[i] || []);
+    depenses = depenses.concat(results[i + 1] || []);
+  }
+
+  console.log("📊 Total chargé - Ventes:", ventes.length, "Dépenses:", depenses.length);
+  return { ventes, depenses };
+}
+
 // ========== KPI LOADER ==========
-async function loadAndDisplayKPI(startDateISO, endDateISO) {
+function loadAndDisplayKPI(startDateISO, endDateISO, ventes, depenses) {
   try {
-    if (
-      !window.OGOUE ||
-      typeof window.OGOUE.getVentesPourPeriode !== "function" ||
-      typeof window.OGOUE.getDepensesPourPeriode !== "function"
-    ) {
-      console.error("OGOUE store non disponible");
-      return;
-    }
-
-    // Charger TOUS les mois couverts par la plage
-    const monthsToLoad = getMonthsInRange(startDateISO, endDateISO);
-    console.log("📅 Mois à charger:", monthsToLoad);
-    let allVentes = [];
-    let allDepenses = [];
-    
-    for (const { month, year } of monthsToLoad) {
-      const ventes = await window.OGOUE.getVentesPourPeriode(month, year);
-      const depenses = await window.OGOUE.getDepensesPourPeriode(month, year);
-      console.log(`  ${month}/${year} - Ventes: ${ventes?.length || 0}, Dépenses: ${depenses?.length || 0}`);
-      allVentes = allVentes.concat(ventes || []);
-      allDepenses = allDepenses.concat(depenses || []);
-    }
-
-    const ventes = allVentes;
-    const depenses = allDepenses;
-    
-    console.log("📊 Total avant filtre - Ventes:", ventes.length, "Dépenses:", depenses.length);
 
     const inRange = buildRangeChecker(startDateISO, endDateISO);
 
@@ -257,24 +262,10 @@ async function loadAndDisplayKPI(startDateISO, endDateISO) {
 }
 
 // ========== GRAPHIQUES DYNAMIQUES ==========
-async function loadAndDisplayChartEvolution(startDateISO, endDateISO) {
+function loadAndDisplayChartEvolution(startDateISO, endDateISO, ventes) {
   try {
-    if (!window.OGOUE || typeof window.OGOUE.getVentesPourPeriode !== "function") {
-      console.error("OGOUE store non disponible pour graphique");
-      return;
-    }
-
-    // Charger TOUS les mois couverts par la plage
-    const monthsToLoad = getMonthsInRange(startDateISO, endDateISO);
-    let allVentes = [];
-    
-    for (const { month, year } of monthsToLoad) {
-      const v = await window.OGOUE.getVentesPourPeriode(month, year);
-      allVentes = allVentes.concat(v || []);
-    }
-
     const inRange = buildRangeChecker(startDateISO, endDateISO);
-    const ventesFiltrees = allVentes.filter((v) => inRange(v.date || v.saleDate || v.sale_date));
+    const ventesFiltrees = (ventes || []).filter((v) => inRange(v.date || v.saleDate || v.sale_date));
 
     // Grouper par jour dans la période (tous les jours avec des ventes)
     const ventesParJour = {};
@@ -542,23 +533,10 @@ function addChartInteractions(svgContainer, points, chartData) {
 }
 
 // Répartition par catégorie
-async function loadAndDisplayChartRepartition(startDateISO, endDateISO) {
+function loadAndDisplayChartRepartition(startDateISO, endDateISO, ventes) {
   try {
-    if (!window.OGOUE || typeof window.OGOUE.getVentesPourPeriode !== "function") {
-      console.error("OGOUE store non disponible pour répartition");
-      return;
-    }
-
-    // Charger TOUS les mois couverts par la plage
-    const monthsToLoad = getMonthsInRange(startDateISO, endDateISO);
-    let allVentes = [];
-    
-    for (const { month, year } of monthsToLoad) {
-      const ventes = await window.OGOUE.getVentesPourPeriode(month, year);
-      allVentes = allVentes.concat(ventes || []);
-    }
     const inRange = buildRangeChecker(startDateISO, endDateISO);
-    const ventesFiltrees = allVentes.filter((v) => inRange(v.date || v.saleDate || v.sale_date));
+    const ventesFiltrees = (ventes || []).filter((v) => inRange(v.date || v.saleDate || v.sale_date));
 
     const categories = {};
     let totalCA = 0;
@@ -663,11 +641,18 @@ document.addEventListener("DOMContentLoaded", async function () {
   console.log("✅ window.OGOUE est disponible");
 
   const filterState = getDefaultDateRange();
+  // Cache de la dernière période chargée, réutilisé par le changement de devise
+  // (évite de re-télécharger les ventes/dépenses juste pour changer l'affichage)
+  let cachedVentes = [];
+  let cachedDepenses = [];
 
   async function refreshDashboard() {
-    await loadAndDisplayKPI(filterState.startDate, filterState.endDate);
-    await loadAndDisplayChartEvolution(filterState.startDate, filterState.endDate);
-    await loadAndDisplayChartRepartition(filterState.startDate, filterState.endDate);
+    const { ventes, depenses } = await fetchPeriodData(filterState.startDate, filterState.endDate);
+    cachedVentes = ventes;
+    cachedDepenses = depenses;
+    loadAndDisplayKPI(filterState.startDate, filterState.endDate, ventes, depenses);
+    loadAndDisplayChartEvolution(filterState.startDate, filterState.endDate, ventes);
+    loadAndDisplayChartRepartition(filterState.startDate, filterState.endDate, ventes);
   }
 
   // Écoute le filtre de date (événement dispatché par le datepicker du HTML)
@@ -679,14 +664,14 @@ document.addEventListener("DOMContentLoaded", async function () {
   });
 
   // Écoute le changement de devise depuis les préférences
-  document.addEventListener("currency:changed", async (e) => {
+  document.addEventListener("currency:changed", (e) => {
     console.log("🎯 EVENT currency:changed reçu!");
     const { currency } = e.detail || {};
     console.log("💱 Devise changée vers:", currency);
     console.log("📊 Recharging charts with filterState:", filterState);
-    // Recharger uniquement les graphiques avec la nouvelle devise
-    await loadAndDisplayChartEvolution(filterState.startDate, filterState.endDate);
-    await loadAndDisplayChartRepartition(filterState.startDate, filterState.endDate);
+    // Recharger uniquement l'affichage avec la nouvelle devise (données déjà en cache)
+    loadAndDisplayChartEvolution(filterState.startDate, filterState.endDate, cachedVentes);
+    loadAndDisplayChartRepartition(filterState.startDate, filterState.endDate, cachedVentes);
   });
 
   // Premier affichage (plage par défaut: mois en cours jusqu'à aujourd'hui)

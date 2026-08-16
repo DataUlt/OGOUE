@@ -22,14 +22,32 @@ export async function listExpenses(req, res) {
   try {
     const parsed = listSchema.parse(req.query);
     let { month, year, startDate, endDate } = parsed;
-    
+
     // Récupérer l'organizationId du JWT
     const organizationId = req.user.organizationId;
 
-    const { data: rows, error } = await supabase
+    // Déterminer la plage de dates à filtrer (avant la requête, pour filtrer côté DB)
+    let finalStartDate, finalEndDate;
+    if (startDate && endDate) {
+      finalStartDate = startDate;
+      finalEndDate = endDate;
+    } else if (month && year) {
+      const firstDay = new Date(year, month - 1, 1);
+      const lastDay = new Date(year, month, 0);
+      finalStartDate = firstDay.toISOString().split('T')[0];
+      finalEndDate = lastDay.toISOString().split('T')[0];
+    }
+
+    let query = supabase
       .from("expenses")
       .select("id, expense_date, category, payment_method, amount, receipt_name, receipt_url, created_at, created_by")
-      .eq("organization_id", organizationId)
+      .eq("organization_id", organizationId);
+
+    if (finalStartDate && finalEndDate) {
+      query = query.gte("expense_date", finalStartDate).lte("expense_date", finalEndDate);
+    }
+
+    const { data: rows, error } = await query
       .order("expense_date", { ascending: false })
       .order("created_at", { ascending: false });
 
@@ -80,56 +98,21 @@ export async function listExpenses(req, res) {
       }
     }
 
-    console.log(`📊 listExpenses: ${enrichedRows.length} dépenses brutes, filtre: ${startDate && endDate ? `du ${startDate} au ${endDate}` : `mois=${month}, année=${year}`}`);
+    console.log(`📊 listExpenses: ${enrichedRows.length} dépenses retournées, filtre: ${finalStartDate && finalEndDate ? `du ${finalStartDate} au ${finalEndDate}` : "aucun (toutes)"}`);
 
-    // Déterminer les dates de filtrage
-    let finalStartDate, finalEndDate;
-    if (startDate && endDate) {
-      finalStartDate = startDate;
-      finalEndDate = endDate;
-    } else if (month && year) {
-      // Créer une plage pour le mois/année
-      const firstDay = new Date(year, month - 1, 1);
-      const lastDay = new Date(year, month, 0);
-      finalStartDate = firstDay.toISOString().split('T')[0];
-      finalEndDate = lastDay.toISOString().split('T')[0];
-    } else {
-      // Si rien n'est fourni, retourner toutes les dépenses
-      const transformedExpenses = enrichedRows.map(row => ({
-        id: row.id,
-        date: row.expense_date,
-        categorie: row.category,
-        moyen_paiement: row.payment_method,
-        montant: row.amount,
-        justificatif: row.receipt_name,
-        justificatifUrl: row.receipt_url,
-        created_at: row.created_at,
-        created_by_name: row.created_by_name
-      }));
-      return res.json({ expenses: transformedExpenses });
-    }
+    // Le filtrage par période a déjà été appliqué au niveau de la requête DB
+    const transformedExpenses = enrichedRows.map(row => ({
+      id: row.id,
+      date: row.expense_date,
+      categorie: row.category,
+      moyen_paiement: row.payment_method,
+      montant: row.amount,
+      justificatif: row.receipt_name,
+      justificatifUrl: row.receipt_url,
+      created_at: row.created_at,
+      created_by_name: row.created_by_name
+    }));
 
-    // Filtrer par plage de dates
-    const transformedExpenses = enrichedRows
-      .filter(row => {
-        const datePart = row.expense_date.split('T')[0];
-        const isInRange = datePart >= finalStartDate && datePart <= finalEndDate;
-        return isInRange;
-      })
-      .map(row => {
-        return {
-          id: row.id,
-          date: row.expense_date,
-          categorie: row.category,
-          moyen_paiement: row.payment_method,
-          montant: row.amount,
-          justificatif: row.receipt_name,
-          justificatifUrl: row.receipt_url,
-          created_at: row.created_at,
-          created_by_name: row.created_by_name
-        };
-      });
-    
     return res.json({ expenses: transformedExpenses });
   } catch (error) {
     console.error("Erreur listExpenses:", error);

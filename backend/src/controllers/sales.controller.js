@@ -24,15 +24,33 @@ export async function listSales(req, res) {
   try {
     const parsed = listSchema.parse(req.query);
     let { month, year, startDate, endDate } = parsed;
-    
+
     // Récupérer l'organizationId du JWT
     const organizationId = req.user.organizationId;
 
-    // Récupérer les ventes avec Supabase
-    const { data: rows, error } = await supabase
+    // Déterminer la plage de dates à filtrer (avant la requête, pour filtrer côté DB)
+    let finalStartDate, finalEndDate;
+    if (startDate && endDate) {
+      finalStartDate = startDate;
+      finalEndDate = endDate;
+    } else if (month && year) {
+      const firstDay = new Date(year, month - 1, 1);
+      const lastDay = new Date(year, month, 0);
+      finalStartDate = firstDay.toISOString().split('T')[0];
+      finalEndDate = lastDay.toISOString().split('T')[0];
+    }
+
+    // Récupérer les ventes avec Supabase (filtrées par période côté DB si fournie)
+    let query = supabase
       .from("sales")
       .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, receipt_url, created_at, created_by")
-      .eq("organization_id", organizationId)
+      .eq("organization_id", organizationId);
+
+    if (finalStartDate && finalEndDate) {
+      query = query.gte("sale_date", finalStartDate).lte("sale_date", finalEndDate);
+    }
+
+    const { data: rows, error } = await query
       .order("sale_date", { ascending: false })
       .order("created_at", { ascending: false });
 
@@ -83,58 +101,23 @@ export async function listSales(req, res) {
       }
     }
 
-    console.log(`📊 listSales: ${enrichedRows.length} ventes brutes, filtre: ${startDate && endDate ? `du ${startDate} au ${endDate}` : `mois=${month}, année=${year}`}`);
+    console.log(`📊 listSales: ${enrichedRows.length} ventes retournées, filtre: ${finalStartDate && finalEndDate ? `du ${finalStartDate} au ${finalEndDate}` : "aucun (toutes)"}`);
 
-    // Déterminer les dates de filtrage
-    let finalStartDate, finalEndDate;
-    if (startDate && endDate) {
-      finalStartDate = startDate;
-      finalEndDate = endDate;
-    } else if (month && year) {
-      // Créer une plage pour le mois/année
-      const firstDay = new Date(year, month - 1, 1);
-      const lastDay = new Date(year, month, 0);
-      finalStartDate = firstDay.toISOString().split('T')[0];
-      finalEndDate = lastDay.toISOString().split('T')[0];
-    } else {
-      // Si rien n'est fourni, retourner toutes les ventes
-      const transformedSales = enrichedRows.map(row => ({
-        id: row.id,
-        date: row.sale_date,
-        description: row.description,
-        type_vente: row.sale_type,
-        moyen_paiement: row.payment_method,
-        quantite: row.quantity,
-        montant: row.amount,
-        justificatif: row.receipt_name,
-        justificatifUrl: row.receipt_url,
-        created_at: row.created_at,
-        created_by_name: row.created_by_name
-      }));
-      return res.json({ sales: transformedSales });
-    }
+    // Le filtrage par période a déjà été appliqué au niveau de la requête DB
+    const transformedSales = enrichedRows.map(row => ({
+      id: row.id,
+      date: row.sale_date,
+      description: row.description,
+      type_vente: row.sale_type,
+      moyen_paiement: row.payment_method,
+      quantite: row.quantity,
+      montant: row.amount,
+      justificatif: row.receipt_name,
+      justificatifUrl: row.receipt_url,
+      created_at: row.created_at,
+      created_by_name: row.created_by_name
+    }));
 
-    // Filtrer par plage de dates
-    const transformedSales = enrichedRows
-      .filter(row => {
-        const datePart = row.sale_date.split('T')[0];
-        const isInRange = datePart >= finalStartDate && datePart <= finalEndDate;
-        return isInRange;
-      })
-      .map(row => ({
-        id: row.id,
-        date: row.sale_date,
-        description: row.description,
-        type_vente: row.sale_type,
-        moyen_paiement: row.payment_method,
-        quantite: row.quantity,
-        montant: row.amount,
-        justificatif: row.receipt_name,
-        justificatifUrl: row.receipt_url,
-        created_at: row.created_at,
-        created_by_name: row.created_by_name
-      }));
-    
     return res.json({ sales: transformedSales });
   } catch (error) {
     console.error("Erreur listSales:", error);
