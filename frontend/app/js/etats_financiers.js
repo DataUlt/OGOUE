@@ -332,6 +332,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 <style>
                     /* Forcer une hauteur minimale uniforme par ligne (Charge ↔ Produit) */
                     #compte-resultat .grid.grid-cols-2 > div { min-height: 48px; display: flex; align-items: center; }
+                    /* Les fonds pastel restent clairs en mode sombre alors que le texte
+                       passe en clair par héritage : on force un texte foncé lisible.
+                       Les montants colorés (text-green-600 / text-red-600) gardent leur
+                       couleur, une classe posée sur l'élément l'emportant sur l'héritage. */
+                    #compte-resultat .bg-orange-100,
+                    #compte-resultat .bg-orange-200,
+                    #compte-resultat .bg-teal-100,
+                    #compte-resultat .bg-teal-200 { color: #1f2937; }
                     /* Styles pour impression */
                     @media print {
                         #compte-resultat { page-break-inside: avoid; }

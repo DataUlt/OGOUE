@@ -1,4 +1,4 @@
-﻿import { supabase, supabaseSecondary } from "../db/supabase.js";
+﻿import { supabase, supabaseSecondary, supabaseAuth, supabaseAuthSecondary } from "../db/supabase.js";
 import { z } from "zod";
 import jwt from "jsonwebtoken";
 
@@ -230,7 +230,8 @@ export async function register(req, res) {
     }
 
     // 4️⃣ Créer une session en loggant avec l'email et password
-    const { data: sessionData, error: sessionError } = await supabase.auth.signInWithPassword({
+    // (client dédié : ne pas attacher de session au client admin)
+    const { data: sessionData, error: sessionError } = await supabaseAuth.auth.signInWithPassword({
       email: parsed.email,
       password: parsed.password
     });
@@ -282,7 +283,8 @@ export async function login(req, res) {
     const parsed = loginSchema.parse(req.body);
 
     // Authentifier avec Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+    // (client dédié : ne pas attacher de session au client admin)
+    const { data: authData, error: authError } = await supabaseAuth.auth.signInWithPassword({
       email: parsed.email,
       password: parsed.password,
     });
@@ -665,7 +667,8 @@ export async function loginSecondary(req, res) {
     }
 
     // Authentifier avec Supabase Auth SECONDARY
-    const { data: authData, error: authError } = await supabaseSecondary.auth.signInWithPassword({
+    // (client dédié : ne pas attacher de session au client admin)
+    const { data: authData, error: authError } = await supabaseAuthSecondary.auth.signInWithPassword({
       email: parsed.email,
       password: parsed.password,
     });
@@ -805,7 +808,8 @@ export async function registerSecondary(req, res) {
     }
 
     // 4️⃣ Create session by logging in
-    const { data: sessionData, error: sessionError } = await supabaseSecondary.auth.signInWithPassword({
+    // (client dédié : ne pas attacher de session au client admin)
+    const { data: sessionData, error: sessionError } = await supabaseAuthSecondary.auth.signInWithPassword({
       email: parsed.email,
       password: parsed.password
     });

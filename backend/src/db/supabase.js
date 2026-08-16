@@ -57,6 +57,41 @@ export const supabaseSecondary = SUPABASE_SERVICE_ROLE_KEY_SECONDARY
     })
   : null;
 
+// ============================================================
+// Clients dédiés aux opérations de CONNEXION
+// ------------------------------------------------------------
+// signInWithPassword() attache une session au client sur lequel il est
+// appelé. Or supabase-js résout le jeton de chaque requête base de
+// données ainsi :
+//
+//   const { data } = await this.auth.getSession();
+//   return data.session?.access_token ?? this.supabaseKey;
+//
+// Autrement dit, dès qu'un utilisateur se connecte, le client admin
+// cesse d'utiliser la clé service_role et exécute toutes les requêtes
+// suivantes avec le jeton de CE utilisateur — pour toutes les requêtes
+// du serveur, jusqu'au redémarrage. Les tables sans RLS ne le montrent
+// pas, mais toute table protégée par RLS se met à refuser les écritures.
+//
+// On isole donc les connexions sur des clients séparés, afin que les
+// clients admin conservent leurs droits service_role.
+// ============================================================
+export const supabaseAuth = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+  },
+});
+
+export const supabaseAuthSecondary = SUPABASE_SERVICE_ROLE_KEY_SECONDARY
+  ? createClient(SUPABASE_URL_SECONDARY, SUPABASE_SERVICE_ROLE_KEY_SECONDARY, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    })
+  : null;
+
 // Pour les requêtes authentifiées côté frontend
 export const supabaseAnon = (anonKey) => {
   return createClient(SUPABASE_URL, anonKey, {

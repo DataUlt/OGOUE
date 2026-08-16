@@ -546,6 +546,138 @@ async function getDepensesPourPlage(startDate, endDate) {
 }
 
 // ─────────────────────────────────────────────────
+// 📦 CATALOGUE D'ARTICLES / SERVICES
+// ─────────────────────────────────────────────────
+// Le catalogue est partagé par toute l'organisation : c'est lui qui
+// harmonise les libellés entre le gérant et ses agents, et qui évite
+// de ressaisir le prix à chaque vente.
+
+/**
+ * Appel authentifié générique vers /api/articles
+ * @returns {Promise<{ok: boolean, status: number, data: any}>}
+ */
+async function articlesRequest(path, options = {}) {
+  const token = getToken();
+  if (!token) {
+    handleUnauthorized();
+    return { ok: false, status: 401, data: null };
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/articles${path}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+      ...(options.headers || {})
+    }
+  });
+
+  if (response.status === 401) {
+    handleUnauthorized();
+    return { ok: false, status: 401, data: null };
+  }
+
+  let data = null;
+  try {
+    data = await response.json();
+  } catch (e) {
+    data = null;
+  }
+
+  return { ok: response.ok, status: response.status, data };
+}
+
+/**
+ * Récupère le catalogue de l'organisation
+ * @returns {Promise<Array<{id, name, type, unitPrice}>>}
+ */
+async function getArticles() {
+  try {
+    const { ok, data } = await articlesRequest("");
+    if (!ok) return [];
+    return Array.isArray(data?.articles) ? data.articles : [];
+  } catch (error) {
+    console.error("❌ Erreur lors de la récupération du catalogue:", error);
+    return [];
+  }
+}
+
+/**
+ * Ajoute un article au catalogue
+ * @returns {Promise<{ok: boolean, status: number, article: Object|null, error: string|null}>}
+ */
+async function addArticle({ name, type = "produits", unitPrice = 0 }) {
+  try {
+    const { ok, status, data } = await articlesRequest("", {
+      method: "POST",
+      body: JSON.stringify({ name, type, unitPrice })
+    });
+    return {
+      ok,
+      status,
+      article: ok ? data : null,
+      error: ok ? null : (data?.error || "Erreur lors de l'ajout de l'article")
+    };
+  } catch (error) {
+    console.error("❌ Erreur lors de l'ajout de l'article:", error);
+    return { ok: false, status: 0, article: null, error: "Erreur réseau" };
+  }
+}
+
+/**
+ * Ajoute plusieurs articles d'un coup (étape de configuration)
+ * Les noms déjà présents sont ignorés et renvoyés dans `ignored`.
+ */
+async function addArticlesBulk(articles) {
+  try {
+    const { ok, status, data } = await articlesRequest("/bulk", {
+      method: "POST",
+      body: JSON.stringify({ articles })
+    });
+    return {
+      ok,
+      status,
+      created: data?.created || [],
+      ignored: data?.ignored || [],
+      error: ok ? null : (data?.error || "Erreur lors de l'enregistrement du catalogue")
+    };
+  } catch (error) {
+    console.error("❌ Erreur lors de l'enregistrement du catalogue:", error);
+    return { ok: false, status: 0, created: [], ignored: [], error: "Erreur réseau" };
+  }
+}
+
+/** Modifie un article du catalogue */
+async function updateArticle(id, changes) {
+  try {
+    const { ok, status, data } = await articlesRequest(`/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(changes)
+    });
+    return {
+      ok,
+      status,
+      article: ok ? data : null,
+      error: ok ? null : (data?.error || "Erreur lors de la modification")
+    };
+  } catch (error) {
+    console.error("❌ Erreur lors de la modification de l'article:", error);
+    return { ok: false, status: 0, article: null, error: "Erreur réseau" };
+  }
+}
+
+/** Retire un article du catalogue (suppression logique) */
+async function deleteArticle(id) {
+  try {
+    const { ok, status, data } = await articlesRequest(`/${id}`, { method: "DELETE" });
+    return { ok, status, error: ok ? null : (data?.error || "Erreur lors de la suppression") };
+  } catch (error) {
+    console.error("❌ Erreur lors de la suppression de l'article:", error);
+    return { ok: false, status: 0, error: "Erreur réseau" };
+  }
+}
+
+// ─────────────────────────────────────────────────
 // Exposition sur window
 // ─────────────────────────────────────────────────
 window.OGOUE = {
@@ -560,5 +692,10 @@ window.OGOUE = {
   getDepensesPourPeriode,
   getVentesPourPlage,
   getDepensesPourPlage,
-  getResumeMensuel
+  getResumeMensuel,
+  getArticles,
+  addArticle,
+  addArticlesBulk,
+  updateArticle,
+  deleteArticle
 };
