@@ -590,9 +590,14 @@ export async function forgotPassword(req, res) {
 
       // Quota d'envoi d'emails atteint : ce n'est pas un risque d'énumération,
       // il faut le dire à l'utilisateur au lieu de prétendre que l'email est parti.
+      //
+      // Le quota est celui du service d'envoi configuré dans Supabase, et il
+      // se compte par heure : annoncer "quelques minutes" ferait réessayer
+      // l'utilisateur en boucle, sans succès.
       if (error.status === 429 || error.code === "over_email_send_rate_limit") {
+        console.error("⚠️  Quota d'envoi d'e-mails atteint côté Supabase.");
         return res.status(429).json({
-          error: "Trop de demandes de réinitialisation ont été envoyées. Veuillez réessayer dans quelques minutes.",
+          error: "Le service d'envoi d'e-mails a atteint sa limite. Réessayez dans une heure, ou contactez-nous pour réinitialiser votre mot de passe.",
         });
       }
 
