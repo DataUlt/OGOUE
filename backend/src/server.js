@@ -1,5 +1,6 @@
 ﻿import { app } from "./app.js";
 import { ensureBucketExists } from "./utils/supabase-storage.js";
+import { ensureDossiersBucketExists } from "./utils/financing-storage.js";
 
 const port = Number(process.env.PORT || 3001);
 
@@ -9,6 +10,11 @@ console.log(`🚀 Starting server on port ${port}...`);
 ensureBucketExists().catch(err => {
   console.error("⚠️ Warning: Could not ensure bucket exists", err?.message);
   // Continuer quand même, le bucket peut déjà exister
+});
+
+// Bucket prive des pieces de dossier, sur la base de financement
+ensureDossiersBucketExists().catch(err => {
+  console.error("⚠️ Warning: Could not ensure dossiers bucket exists", err?.message);
 });
 
 try {

@@ -9,6 +9,7 @@ import {
   submitApplication,
   uploadApplicationDocument,
   deleteApplicationDocument,
+  getApplicationDocumentUrl,
 } from "../controllers/financing.controller.js";
 import upload from "../middleware/upload.middleware.js";
 
@@ -27,6 +28,7 @@ r.post("/applications/:id/submit", submitApplication);
 
 // Pieces justificatives du dossier
 r.post("/applications/:id/documents", upload.single("file"), uploadApplicationDocument);
+r.get("/applications/:id/documents/:docId/url", getApplicationDocumentUrl);
 r.delete("/applications/:id/documents/:docId", deleteApplicationDocument);
 
 export default r;

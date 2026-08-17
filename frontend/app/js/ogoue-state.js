@@ -821,6 +821,17 @@ async function uploadApplicationDocument(applicationId, file, options = {}) {
   };
 }
 
+/**
+ * Demande un lien de téléchargement pour une pièce.
+ * Le bucket est privé : le lien est signé et ne vaut que quelques
+ * minutes, il ne doit donc jamais être mis en cache ni partagé.
+ * @returns {Promise<string|null>}
+ */
+async function getApplicationDocumentUrl(applicationId, docId) {
+  const { ok, data } = await financingRequest(`/applications/${applicationId}/documents/${docId}/url`);
+  return ok ? data.url : null;
+}
+
 /** Retire une pièce d'un dossier encore ouvert */
 async function deleteApplicationDocument(applicationId, docId) {
   const { ok, status, data } = await financingRequest(
@@ -859,5 +870,6 @@ window.OGOUE = {
   updateApplication,
   submitApplication,
   uploadApplicationDocument,
+  getApplicationDocumentUrl,
   deleteApplicationDocument
 };

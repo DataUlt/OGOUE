@@ -254,8 +254,8 @@ function carteDossier(dossier) {
               ${dossier.documents.map((d) => `
                 <li class="flex items-center gap-2 text-sm">
                   <span class="material-symbols-outlined text-base text-gray-400">description</span>
-                  <a href="${echapper(d.fileUrl)}" target="_blank" rel="noopener"
-                     class="text-primary hover:underline break-all">${echapper(d.name)}</a>
+                  <button type="button" data-dossier="${dossier.id}" data-piece="${d.id}"
+                          class="text-primary hover:underline break-all text-left">${echapper(d.name)}</button>
                 </li>
               `).join("")}
             </ul>
@@ -318,6 +318,19 @@ function carteDossier(dossier) {
   const dossiers = details.filter(Boolean);
 
   liste.innerHTML = dossiers.map(carteDossier).join("");
+
+  // Les pièces sont dans un espace privé : on demande un lien signé,
+  // valable quelques minutes, au moment de l'ouverture.
+  liste.querySelectorAll("[data-piece]").forEach((bouton) => {
+    bouton.addEventListener("click", async () => {
+      const url = await OGOUE.getApplicationDocumentUrl(bouton.dataset.dossier, bouton.dataset.piece);
+      if (!url) {
+        afficherAlerte("Impossible d'ouvrir cette pièce.", "erreur");
+        return;
+      }
+      window.open(url, "_blank", "noopener");
+    });
+  });
 })();
 </script>
 </body>

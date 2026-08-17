@@ -1,6 +1,10 @@
 import { supabaseSecondary } from "../db/supabase.js";
 import { z } from "zod";
-import { uploadFileToSupabase, deleteFileFromSupabase } from "../utils/supabase-storage.js";
+import {
+  uploadDossierFile,
+  deleteDossierFile,
+  createDossierSignedUrl,
+} from "../utils/financing-storage.js";
 
 // ============================================================
 // Financement : offre de credit et dossiers des PME
@@ -280,7 +284,7 @@ export async function getApplication(req, res) {
     const [{ data: docs }, { data: history }] = await Promise.all([
       supabaseSecondary
         .from("application_documents")
-        .select("id, name, file_url, required_document_id, uploaded_at")
+        .select("id, name, required_document_id, uploaded_at")
         .eq("application_id", id)
         .order("uploaded_at", { ascending: true }),
       supabaseSecondary
@@ -292,10 +296,11 @@ export async function getApplication(req, res) {
 
     return res.json({
       ...transformApplication(application),
+      // Pas d'URL ici : le bucket est prive, elle se demande piece par
+      // piece via /documents/:docId/url et n'est valable que 5 minutes.
       documents: (docs || []).map((d) => ({
         id: d.id,
         name: d.name,
-        fileUrl: d.file_url,
         requiredDocumentId: d.required_document_id,
         uploadedAt: d.uploaded_at,
       })),
@@ -508,7 +513,7 @@ export async function uploadApplicationDocument(req, res) {
 
     let fichier;
     try {
-      fichier = await uploadFileToSupabase(req.file.buffer, req.file.originalname, pme.id);
+      fichier = await uploadDossierFile(req.file.buffer, req.file.originalname, pme.id);
     } catch (uploadError) {
       console.error("Erreur uploadApplicationDocument (storage):", uploadError);
       return res.status(500).json({ error: "Le téléversement du fichier a échoué" });
@@ -530,7 +535,7 @@ export async function uploadApplicationDocument(req, res) {
           .in("id", anciennes.map((d) => d.id));
 
         for (const ancienne of anciennes) {
-          await deleteFileFromSupabase(ancienne.storage_path);
+          await deleteDossierFile(ancienne.storage_path);
         }
       }
     }
@@ -541,23 +546,23 @@ export async function uploadApplicationDocument(req, res) {
         application_id: id,
         required_document_id: requiredDocumentId,
         name: req.body.name?.trim() || req.file.originalname,
-        file_url: fichier.fileUrl,
+        // Pas d'URL permanente : le bucket est prive, on signe a la demande
+        file_url: null,
         storage_path: fichier.storagePath,
       })
-      .select("id, name, file_url, required_document_id, uploaded_at")
+      .select("id, name, required_document_id, uploaded_at")
       .single();
 
     if (error) {
       console.error("Erreur uploadApplicationDocument:", error);
       // Ne pas laisser derriere nous un fichier qu'aucune ligne ne reference
-      await deleteFileFromSupabase(fichier.storagePath);
+      await deleteDossierFile(fichier.storagePath);
       return res.status(500).json({ error: "Internal server error" });
     }
 
     return res.status(201).json({
       id: row.id,
       name: row.name,
-      fileUrl: row.file_url,
       requiredDocumentId: row.required_document_id,
       uploadedAt: row.uploaded_at,
     });
@@ -599,11 +604,55 @@ export async function deleteApplicationDocument(req, res) {
       return res.status(500).json({ error: "Internal server error" });
     }
 
-    await deleteFileFromSupabase(document.storage_path);
+    await deleteDossierFile(document.storage_path);
 
     return res.json({ ok: true });
   } catch (error) {
     console.error("Erreur deleteApplicationDocument:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+/**
+ * GET /api/financing/applications/:id/documents/:docId/url
+ * Renvoie une URL de telechargement a duree limitee. Le bucket etant
+ * prive, c'est le seul moyen d'ouvrir une piece, et il exige que le
+ * dossier appartienne bien a la PME connectee.
+ */
+export async function getApplicationDocumentUrl(req, res) {
+  try {
+    if (!supabaseSecondary) return secondaryIndisponible(res);
+    const { id, docId } = req.params;
+
+    const { pme, error: pmeError } = await getPmeForUser(req);
+    if (!pme) return res.status(404).json({ error: pmeError });
+
+    // Le dossier doit etre celui de la PME, quel que soit son statut :
+    // une piece reste consultable une fois le dossier depose.
+    const { data: application } = await supabaseSecondary
+      .from("loan_applications")
+      .select("id")
+      .eq("id", id)
+      .eq("pme_id", pme.id)
+      .maybeSingle();
+
+    if (!application) return res.status(404).json({ error: "Dossier introuvable" });
+
+    const { data: document } = await supabaseSecondary
+      .from("application_documents")
+      .select("id, name, storage_path")
+      .eq("id", docId)
+      .eq("application_id", id)
+      .maybeSingle();
+
+    if (!document) return res.status(404).json({ error: "Pièce introuvable" });
+
+    const url = await createDossierSignedUrl(document.storage_path);
+    if (!url) return res.status(500).json({ error: "Lien de téléchargement indisponible" });
+
+    return res.json({ url, name: document.name });
+  } catch (error) {
+    console.error("Erreur getApplicationDocumentUrl:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 }

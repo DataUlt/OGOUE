@@ -648,8 +648,8 @@ function afficherPieces() {
           <span class="material-symbols-outlined text-emerald-600">check_circle</span>
           <div class="flex-1 min-w-0">
             <p class="font-semibold text-sm dark:text-gray-200">${echapper(exigence.name)}</p>
-            <a href="${echapper(piece.fileUrl)}" target="_blank" rel="noopener"
-               class="text-xs text-primary hover:underline break-all">${echapper(piece.name)}</a>
+            <button type="button" data-ouvrir="${piece.id}"
+                    class="text-xs text-primary hover:underline break-all text-left">${echapper(piece.name)}</button>
           </div>
           <button type="button" data-supprimer="${piece.id}"
                   class="text-sm font-semibold text-red-600 hover:underline">Remplacer</button>
@@ -674,8 +674,8 @@ function afficherPieces() {
     <div class="flex flex-wrap items-center gap-3 rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-3">
       <span class="material-symbols-outlined text-gray-400">attach_file</span>
       <div class="flex-1 min-w-0">
-        <a href="${echapper(piece.fileUrl)}" target="_blank" rel="noopener"
-           class="font-semibold text-sm text-primary hover:underline break-all">${echapper(piece.name)}</a>
+        <button type="button" data-ouvrir="${piece.id}"
+                class="font-semibold text-sm text-primary hover:underline break-all text-left">${echapper(piece.name)}</button>
         <p class="text-xs text-gray-500 dark:text-gray-400">Pièce complémentaire</p>
       </div>
       <button type="button" data-supprimer="${piece.id}"
@@ -701,6 +701,23 @@ function afficherPieces() {
   liste.querySelectorAll("[data-supprimer]").forEach((bouton) => {
     bouton.addEventListener("click", () => retirerPiece(bouton.dataset.supprimer));
   });
+
+  liste.querySelectorAll("[data-ouvrir]").forEach((bouton) => {
+    bouton.addEventListener("click", () => ouvrirPiece(bouton.dataset.ouvrir));
+  });
+}
+
+/**
+ * Les pièces sont stockées dans un espace privé : on demande un lien
+ * signé, valable quelques minutes, au moment où l'on veut les ouvrir.
+ */
+async function ouvrirPiece(docId) {
+  const url = await OGOUE.getApplicationDocumentUrl(dossierCourant.id, docId);
+  if (!url) {
+    afficherAlerte("Impossible d'ouvrir cette pièce.");
+    return;
+  }
+  window.open(url, "_blank", "noopener");
 }
 
 async function televerser(fichier, exigenceId) {
