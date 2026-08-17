@@ -568,10 +568,16 @@ export async function forgotPassword(req, res) {
 
     const parsed = forgotPasswordSchema.parse(req.body);
 
-    const frontendUrl = process.env.FRONTEND_URL;
-    if (!frontendUrl) {
-      console.error("❌ FRONTEND_URL non configurée : impossible de générer un lien de réinitialisation valide");
-      return res.status(500).json({ error: "Erreur lors de la réinitialisation du mot de passe" });
+    // FRONTEND_URL absente ne doit pas casser la reinitialisation : c'est
+    // une erreur de configuration, dont l'utilisateur n'est pas responsable
+    // et qu'il ne peut pas contourner. On se rabat sur l'adresse de
+    // production, en le signalant bruyamment dans les journaux.
+    const frontendUrl = process.env.FRONTEND_URL || "https://www.ogoue.com";
+    if (!process.env.FRONTEND_URL) {
+      console.warn(
+        "⚠️  FRONTEND_URL non configurée : repli sur https://www.ogoue.com " +
+        "pour le lien de réinitialisation. À définir dans l'environnement."
+      );
     }
 
     // Supabase gère automatiquement l'envoi d'email de réinitialisation
