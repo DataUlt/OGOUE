@@ -65,7 +65,7 @@
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-between gap-2 h-20">
                 <div class="flex items-center gap-4">
-                    <a href="module_tableau_bord"><img src="/app/Logo-ogoue (2).png" alt="OGOU� Logo" class="h-28 w-auto"></a>
+                    <a href="module_tableau_bord"><img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-28 w-auto"></a>
                 </div>
                 <button class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-primary/20 text-[#0a0c0a] dark:bg-primary/30 dark:text-white"
                      onclick="window.history.back()">
@@ -84,7 +84,7 @@
                 <div>
                     <h1 class="text-3xl font-bold mb-2">Historique des Suppressions</h1>
                     <p class="text-text-light-secondary dark:text-text-dark-secondary">
-                        Consultez tous les enregistrements supprim�s avec les motifs et informations de suppression
+                        Consultez tous les enregistrements supprimés avec les motifs et informations de suppression
                     </p>
                 </div>
 
@@ -98,13 +98,13 @@
                     </div>
                     <div class="rounded-xl border border-border-light dark:border-border-dark p-6 bg-card-light dark:bg-card-dark shadow-sm">
                         <p class="text-text-light-secondary dark:text-text-dark-secondary text-sm font-medium mb-1">
-                            D�penses Supprim�es
+                            Dépenses Supprimées
                         </p>
                         <p class="text-3xl font-bold text-danger" id="expenses-deleted">0</p>
                     </div>
                     <div class="rounded-xl border border-border-light dark:border-border-dark p-6 bg-card-light dark:bg-card-dark shadow-sm">
                         <p class="text-text-light-secondary dark:text-text-dark-secondary text-sm font-medium mb-1">
-                            Ventes Supprim�es
+                            Ventes Supprimées
                         </p>
                         <p class="text-3xl font-bold text-warning" id="sales-deleted">0</p>
                     </div>
@@ -114,28 +114,28 @@
                 <div class="flex gap-4 flex-wrap">
                     <select id="type-filter" class="px-6 py-2 rounded-lg border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark text-text-light-primary dark:text-text-dark-primary min-w-[180px]">
                         <option value="">Tous les types</option>
-                        <option value="expense">D�penses</option>
+                        <option value="expense">Dépenses</option>
                         <option value="sale">Ventes</option>
                     </select>
 
                     <select id="month-filter" class="px-6 py-2 rounded-lg border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark text-text-light-primary dark:text-text-dark-primary min-w-[180px]">
                         <option value="">Tous les mois</option>
                         <option value="1">Janvier</option>
-                        <option value="2">F�vrier</option>
+                        <option value="2">Février</option>
                         <option value="3">Mars</option>
                         <option value="4">Avril</option>
                         <option value="5">Mai</option>
                         <option value="6">Juin</option>
                         <option value="7">Juillet</option>
-                        <option value="8">Ao�t</option>
+                        <option value="8">Août</option>
                         <option value="9">Septembre</option>
                         <option value="10">Octobre</option>
                         <option value="11">Novembre</option>
-                        <option value="12">D�cembre</option>
+                        <option value="12">Décembre</option>
                     </select>
 
                     <select id="year-filter" class="px-6 py-2 rounded-lg border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark text-text-light-primary dark:text-text-dark-primary min-w-[180px]">
-                        <option value="">Toutes les ann�es</option>
+                        <option value="">Toutes les années</option>
                         <option value="2024">2024</option>
                         <option value="2025">2025</option>
                         <option value="2026">2026</option>
@@ -159,7 +159,7 @@
                                         Date
                                     </th>
                                     <th class="px-6 py-3 text-left font-semibold text-text-light-primary dark:text-text-dark-primary">
-                                        Supprim� par
+                                        Supprimé par
                                     </th>
                                     <th class="px-6 py-3 text-left font-semibold text-text-light-primary dark:text-text-dark-primary">
                                         Motif
@@ -188,7 +188,7 @@
 </div>
 
 <script>
-    // D�terminer l'URL du backend
+    // Déterminer l'URL du backend
     const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
       ? 'http://localhost:3001'
       : 'https://api.ogoue.com';
@@ -196,7 +196,7 @@
     // Initialiser les variables globales
     let currentDeletions = [];
 
-    // R�cup�rer les donn�es d'audit
+    // Récupérer les données d'audit
     async function loadDeletionHistory(filters = {}) {
         try {
             const params = new URLSearchParams();
@@ -211,7 +211,7 @@
             });
 
             if (!response.ok) {
-                throw new Error("Erreur lors du chargement des donn�es");
+                throw new Error("Erreur lors du chargement des données");
             }
 
             const data = await response.json();
@@ -254,7 +254,7 @@
                 <tr>
                     <td colspan="5" class="px-6 py-8 text-center text-text-light-secondary dark:text-text-dark-secondary">
                         <span class="material-symbols-outlined inline-block mr-2">search_off</span>
-                        Aucun enregistrement trouv�
+                        Aucun enregistrement trouvé
                     </td>
                 </tr>
             `;
@@ -266,7 +266,7 @@
                 <td class="px-6 py-4">
                     <span class="inline-block px-2 py-1 rounded-lg text-xs font-semibold
                         ${deletion.type === 'expense' ? 'bg-danger/20 text-danger' : 'bg-success/20 text-success'}">
-                        ${deletion.type === 'expense' ? 'D�pense' : 'Vente'}
+                        ${deletion.type === 'expense' ? 'Dépense' : 'Vente'}
                     </span>
                 </td>
                 <td class="px-6 py-4 text-text-light-secondary dark:text-text-dark-secondary">
@@ -287,7 +287,7 @@
                 <td class="px-6 py-4">
                     ${deletion.supprimePar ? `
                         <div class="font-medium">${deletion.supprimePar.nom}</div>
-                    ` : 'Utilisateur supprim�'}
+                    ` : 'Utilisateur supprimé'}
                 </td>
                 <td class="px-6 py-4 text-text-light-secondary dark:text-text-dark-secondary max-w-xs truncate">
                     ${deletion.motif}
@@ -306,7 +306,7 @@
         `).join('');
     }
 
-    // Afficher les d�tails d'une suppression
+    // Afficher les détails d'une suppression
     async function showDeletionDetail(deletionId) {
         try {
             const response = await fetch(`${API_BASE_URL}/api/audit/deletions/${deletionId}`, {
@@ -323,7 +323,7 @@
             modal.className = "fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4";
             modal.innerHTML = `
                 <div class="bg-card-light dark:bg-card-dark rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
-                    <h2 class="text-2xl font-bold mb-4">D�tails de la Suppression</h2>
+                    <h2 class="text-2xl font-bold mb-4">Détails de la Suppression</h2>
 
                     <div class="space-y-4 mb-6">
                         <div>
@@ -350,7 +350,7 @@
                         </div>
 
                         <div>
-                            <p class="text-sm font-semibold text-text-light-secondary dark:text-text-dark-secondary">Supprim� par</p>
+                            <p class="text-sm font-semibold text-text-light-secondary dark:text-text-dark-secondary">Supprimé par</p>
                             <p class="text-lg font-medium">${deletion.supprimePar?.nom || 'Inconnu'}</p>
                             <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary">${deletion.supprimePar?.email || ''}</p>
                         </div>
@@ -363,28 +363,28 @@
                         </div>
 
                         <div>
-                            <p class="text-sm font-semibold text-text-light-secondary dark:text-text-dark-secondary mb-2">Donn�es supprim�es</p>
+                            <p class="text-sm font-semibold text-text-light-secondary dark:text-text-dark-secondary mb-2">Données supprimées</p>
                             <div class="p-3 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark">
                                 ${(() => {
-                                    // Champs � exclure
+                                    // Champs à exclure
                                     const fieldsToExclude = ['id', 'created_at', 'updated_at', 'receipt_url', 'organization_id', 'receipt_storage_path'];
                                     
                                     // Traduction des champs
                                     const fieldNames = {
                                         'amount': 'Montant',
-                                        'quantity': 'Quantit�',
+                                        'quantity': 'Quantité',
                                         'sale_date': 'Date de vente',
                                         'sale_type': 'Type de vente',
                                         'description': 'Description',
-                                        'receipt_name': 'Nom du re�u',
-                                        'payment_method': 'M�thode de paiement',
+                                        'receipt_name': 'Nom du reçu',
+                                        'payment_method': 'Méthode de paiement',
                                         'date': 'Date',
-                                        'category': 'Cat�gorie',
-                                        'beneficiary': 'B�n�ficiaire',
+                                        'category': 'Catégorie',
+                                        'beneficiary': 'Bénéficiaire',
                                         'notes': 'Notes'
                                     };
                                     
-                                    // Filtrer et formater les donn�es
+                                    // Filtrer et formater les données
                                     const filteredData = Object.entries(deletion.donnees)
                                         .filter(([key]) => !fieldsToExclude.includes(key))
                                         .map(([key, value]) => {
@@ -437,7 +437,7 @@
             });
         } catch (error) {
             console.error("? Erreur:", error);
-            alert("Erreur lors du chargement des d�tails");
+            alert("Erreur lors du chargement des détails");
         }
     }
 
@@ -447,7 +447,7 @@
 
         // Confirmation dialog
         const confirmed = confirm(
-            `�tes-vous s�r de vouloir supprimer cet enregistrement d'audit?\n\nType: ${deletion.type}\nDate: ${new Date(deletion.date).toLocaleDateString('fr-FR')}\nMotif: ${deletion.raison}`
+            `Êtes-vous sûr de vouloir supprimer cet enregistrement d'audit?\n\nType: ${deletion.type}\nDate: ${new Date(deletion.date).toLocaleDateString('fr-FR')}\nMotif: ${deletion.raison}`
         );
 
         if (!confirmed) return;
@@ -474,7 +474,7 @@
             // Show success
             const successDiv = document.createElement('div');
             successDiv.className = 'fixed top-4 right-4 bg-cyan-50 dark:bg-cyan-900 border border-cyan-200 dark:border-cyan-700 text-cyan-800 dark:text-cyan-100 px-4 py-3 rounded-lg';
-            successDiv.textContent = 'Enregistrement d\'audit supprim� avec succ�s';
+            successDiv.textContent = 'Enregistrement d\'audit supprimé avec succès';
             document.body.appendChild(successDiv);
             
             setTimeout(() => successDiv.remove(), 3000);
@@ -484,7 +484,7 @@
         }
     }
 
-    // �v�nements des filtres
+    // Événements des filtres
     document.getElementById("filter-btn").addEventListener("click", async () => {
         try {
             const filters = {
@@ -493,10 +493,10 @@
                 year: document.getElementById("year-filter").value ? parseInt(document.getElementById("year-filter").value) : undefined,
             };
 
-            console.log("Filtres appliqu�s:", filters);
+            console.log("Filtres appliqués:", filters);
             
             const deletions = await loadDeletionHistory(filters);
-            console.log("R�sultats apr�s filtrage:", deletions);
+            console.log("Résultats après filtrage:", deletions);
             
             currentDeletions = deletions;
             renderDeletions(deletions);
@@ -509,7 +509,7 @@
         }
     });
 
-    // Charger au d�marrage
+    // Charger au démarrage
     (async () => {
         await loadStats();
         const deletions = await loadDeletionHistory();
