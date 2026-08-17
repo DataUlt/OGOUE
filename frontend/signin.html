@@ -194,7 +194,7 @@
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="block text-sm font-semibold text-text-light mb-2" for="rccm">
-                  N° RCCM
+                  N° RCCM <span class="font-normal text-text-light-muted">(facultatif)</span>
                 </label>
                 <div class="relative">
                   <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -211,7 +211,7 @@
               </div>
               <div>
                 <label class="block text-sm font-semibold text-text-light mb-2" for="nif">
-                  N° NIF
+                  N° NIF <span class="font-normal text-text-light-muted">(facultatif)</span>
                 </label>
                 <div class="relative">
                   <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -239,6 +239,7 @@
                 name="activity"
                 placeholder="Commerce de détail, services, etc."
                 type="text"
+                required
               />
             </div>
 
@@ -253,6 +254,7 @@
                 name="activity_nature"
                 placeholder="Vente et fabrication de glaçons, ..."
                 type="text"
+                required
               />
             </div>
 
@@ -390,7 +392,10 @@
       errorDiv.classList.add('hidden');
       successDiv.classList.add('hidden');
 
-      if (!email || !password || !confirmPassword || !firstname || !lastname || !entreprise) {
+      // Seuls le RCCM et le NIF sont facultatifs : beaucoup de petites
+      // entreprises n'en disposent pas encore au moment de l'inscription.
+      if (!email || !password || !confirmPassword || !firstname || !lastname
+          || !entreprise || !activity || !activityNature) {
         showError('Veuillez remplir tous les champs requis');
         return;
       }
@@ -427,8 +432,8 @@
             organizationName: entreprise,
             rccmNumber: rccm || null,
             nifNumber: nif || null,
-            activity: activity || null,
-            activityDescription: activityNature || null
+            activity: activity,
+            activityDescription: activityNature
           })
         });
         

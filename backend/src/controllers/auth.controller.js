@@ -2,6 +2,9 @@
 import { z } from "zod";
 import jwt from "jsonwebtoken";
 
+// Seuls le RCCM et le NIF restent facultatifs : beaucoup de petites
+// entreprises n'en disposent pas encore au moment de l'inscription, et
+// les exiger fermerait la porte a une partie du public vise.
 const registerSchema = z.object({
   firstName: z.string().min(1).max(100),
   lastName: z.string().min(1).max(100),
@@ -10,8 +13,8 @@ const registerSchema = z.object({
   organizationName: z.string().min(1).max(200),
   rccmNumber: z.string().optional().nullable(),
   nifNumber: z.string().optional().nullable(),
-  activity: z.string().optional().nullable(),
-  activityDescription: z.string().optional().nullable(),
+  activity: z.string().min(1).max(200),
+  activityDescription: z.string().min(1).max(500),
   role: z.enum(["manager", "agent"]).default("manager"),
 });
 
