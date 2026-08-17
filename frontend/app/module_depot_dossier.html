@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <title>Déposer un dossier - OGOUE</title>
+  <title>Nos partenaires - OGOUE</title>
   <link rel="icon" type="image/png" href="O-removebg-preview.png">
 
   <!-- Tailwind -->
@@ -103,24 +103,20 @@
         Financement
       </h1>
       <p class="text-gray-600 dark:text-gray-400">
-        Consultez les crédits proposés par nos partenaires et constituez votre dossier en ligne.
+        Consultez les crédits proposés par nos partenaires.
       </p>
     </div>
 
     <!-- ONGLETS -->
     <div class="border-b border-gray-200 dark:border-gray-700 mb-8">
-      <nav class="flex gap-8 -mb-px overflow-x-auto">
+      <nav class="flex gap-5 sm:gap-8 -mb-px overflow-x-auto">
         <a href="module_scoring"
            class="flex items-center gap-2 border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 pb-3 pt-4 px-2 whitespace-nowrap">
           <span class="text-sm font-bold tracking-[0.015em]">Score de traçabilité</span>
         </a>
         <a href="module_depot_dossier"
            class="flex items-center gap-2 border-b-[3px] border-b-primary text-[#0a0c0a] dark:text-white pb-3 pt-4 px-2 whitespace-nowrap">
-          <span class="text-sm font-bold tracking-[0.015em]">Déposer un dossier</span>
-        </a>
-        <a href="module_mes_dossiers"
-           class="flex items-center gap-2 border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 pb-3 pt-4 px-2 whitespace-nowrap">
-          <span class="text-sm font-bold tracking-[0.015em]">Mes dossiers</span>
+          <span class="text-sm font-bold tracking-[0.015em]">Nos partenaires</span>
         </a>
       </nav>
     </div>
@@ -194,7 +190,6 @@
                 <th class="px-4 py-3 text-xs font-semibold dark:text-gray-200">Taux d'Intérêt</th>
                 <th class="px-4 py-3 text-xs font-semibold dark:text-gray-200">Typologie</th>
                 <th class="px-4 py-3 text-xs font-semibold dark:text-gray-200">Documents Requis</th>
-                <th class="px-4 py-3 text-xs font-semibold text-center dark:text-gray-200">Action</th>
               </tr>
             </thead>
             <tbody id="corpsTableProduits" class="divide-y divide-[#e8ede8] dark:divide-gray-700"></tbody>
@@ -203,91 +198,6 @@
       </div>
     </section>
 
-    <!-- ══════════ ÉTAPE 3 : CONSTITUER LE DOSSIER ══════════ -->
-    <section id="sectionDossier" class="hidden fade-in">
-      <button id="btnRetourCredits" type="button"
-              class="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline">
-        <span class="material-symbols-outlined text-base">arrow_back</span>
-        Choisir un autre crédit
-      </button>
-
-      <!-- Rappel du crédit choisi -->
-      <div id="recapCredit" class="rounded-2xl bg-white dark:bg-gray-800/40 border border-[#e8ede8] dark:border-gray-700 p-5 mb-6 shadow-soft"></div>
-
-      <!-- Demande -->
-      <div class="rounded-2xl bg-white dark:bg-gray-800/40 border border-[#e8ede8] dark:border-gray-700 p-5 mb-6 shadow-soft">
-        <h3 class="font-bold mb-4 dark:text-white">Votre demande</h3>
-        <form id="formDemande" class="grid gap-4 sm:grid-cols-2">
-          <label class="flex flex-col gap-1">
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Montant demandé (FCFA) *</span>
-            <input id="champMontant" type="number" min="0" step="1000" required
-                   class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-900 focus:border-primary focus:ring-primary"/>
-            <span id="aideMontant" class="text-xs text-gray-500 dark:text-gray-400"></span>
-          </label>
-          <label class="flex flex-col gap-1">
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Durée (mois)</span>
-            <input id="champDuree" type="number" min="1" step="1"
-                   class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-900 focus:border-primary focus:ring-primary"/>
-            <span id="aideDuree" class="text-xs text-gray-500 dark:text-gray-400"></span>
-          </label>
-          <label class="flex flex-col gap-1 sm:col-span-2">
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Objet du financement</span>
-            <textarea id="champObjet" rows="3" maxlength="2000"
-                      placeholder="À quoi servira ce crédit ?"
-                      class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-900 focus:border-primary focus:ring-primary"></textarea>
-          </label>
-          <div class="sm:col-span-2 flex items-center gap-3">
-            <button type="submit" id="btnEnregistrer"
-                    class="inline-flex items-center gap-2 rounded-lg bg-primary/10 text-primary px-4 py-2 text-sm font-bold hover:bg-primary/20 transition">
-              <span class="material-symbols-outlined text-base">save</span>
-              Enregistrer
-            </button>
-            <span id="etatEnregistrement" class="text-sm text-gray-500 dark:text-gray-400"></span>
-          </div>
-        </form>
-      </div>
-
-      <!-- Pièces justificatives -->
-      <div class="rounded-2xl bg-white dark:bg-gray-800/40 border border-[#e8ede8] dark:border-gray-700 p-5 mb-6 shadow-soft">
-        <div class="flex items-center justify-between mb-1">
-          <h3 class="font-bold dark:text-white">Pièces justificatives</h3>
-          <span id="compteurPieces" class="text-sm text-gray-500 dark:text-gray-400"></span>
-        </div>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-          PDF, image ou document Office, 10 Mo maximum par pièce.
-        </p>
-
-        <div id="listePieces" class="flex flex-col gap-3"></div>
-
-        <div class="mt-5 pt-5 border-t border-[#e8ede8] dark:border-gray-700">
-          <h4 class="text-sm font-semibold mb-2 dark:text-gray-200">Ajouter une pièce complémentaire</h4>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">
-            Utile si l'institution vous demande un document qui n'est pas dans la liste.
-          </p>
-          <input id="champPieceLibre" type="file" aria-label="Ajouter une pièce complémentaire"
-                 class="block w-full text-sm text-gray-600 dark:text-gray-300 file:mr-4 file:rounded-lg file:border-0 file:bg-primary/10 file:px-4 file:py-2 file:text-sm file:font-bold file:text-primary hover:file:bg-primary/20"/>
-        </div>
-      </div>
-
-      <!-- Dépôt -->
-      <div class="rounded-2xl bg-white dark:bg-gray-800/40 border border-[#e8ede8] dark:border-gray-700 p-5 shadow-soft">
-        <div id="messageDepot" class="hidden mb-4 rounded-xl px-4 py-3 text-sm"></div>
-        <div class="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h3 class="font-bold dark:text-white">Déposer le dossier</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400">
-              Une fois déposé, votre dossier n'est plus modifiable tant que l'institution
-              ne vous redonne pas la main.
-            </p>
-          </div>
-          <button id="btnDeposer" type="button"
-                  class="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-bold text-white hover:bg-primary/90 transition disabled:opacity-50 disabled:cursor-not-allowed">
-            <span class="material-symbols-outlined text-base">send</span>
-            Déposer mon dossier
-          </button>
-        </div>
-      </div>
-    </section>
 
   </main>
 </div>
@@ -309,12 +219,6 @@ const FCFA = new Intl.NumberFormat("fr-FR");
 let tousLesProduits = [];       // produits actifs, toutes institutions
 let institutions = [];          // institutions qui proposent au moins un credit
 let institutionChoisie = null;
-
-// Dossier en cours de constitution
-let creditChoisi = null;      // detail du produit (avec requiredDocuments)
-let dossierCourant = null;    // dossier brouillon / complement_requis
-let piecesFournies = [];      // pieces deja televersees
-let dossiersOuverts = [];     // dossiers modifiables, par produit
 
 // ─────────── Utilitaires ───────────
 
@@ -357,16 +261,8 @@ function masquerAlerte() {
 // ─────────── Étape 1 : l'institution ───────────
 
 async function chargerCatalogue() {
-  const [produits, dossiers] = await Promise.all([
-    OGOUE.getCreditProducts(),
-    OGOUE.getApplications(),
-  ]);
-
-  tousLesProduits = produits;
-
-  // Un dossier encore modifiable se reprend au lieu d'en ouvrir un second :
-  // l'API refuse de toute façon deux dossiers en cours sur le même produit.
-  dossiersOuverts = dossiers.filter((d) => ["brouillon", "complement_requis"].includes(d.status));
+  tousLesProduits = await OGOUE.getCreditProducts();
+  const produits = tousLesProduits;
 
   // Les institutions sont déduites des crédits publiés : on n'en affiche
   // aucune qui n'aurait rien à proposer, ce qui mènerait à une impasse.
@@ -406,7 +302,6 @@ function afficherInstitutions() {
 
   grille.innerHTML = filtrees.map((institution) => {
     const type = (institution.type || "").toLowerCase() === "banque" ? "Banque" : "Microfinance";
-    const dossierIci = dossiersOuverts.some((d) => d.institution && d.institution.id === institution.id);
 
     return `
       <div class="w-72 rounded-lg border border-black/10 dark:border-gray-700 bg-white dark:bg-gray-800/40 shadow-sm overflow-hidden hover:shadow-lg transition-shadow">
@@ -418,7 +313,6 @@ function afficherInstitutions() {
         <div class="p-4 space-y-2">
           <div class="flex items-start justify-between gap-2">
             <h3 class="text-base font-bold text-slate-900 dark:text-white">${echapper(institution.name)}</h3>
-            ${dossierIci ? '<span class="shrink-0 rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-[10px] font-bold">Dossier en cours</span>' : ""}
           </div>
           <p class="text-xs font-semibold text-[#006699]">${type}</p>
           ${institution.mission ? `<p class="text-xs text-slate-600 dark:text-gray-400 line-clamp-2">${echapper(institution.mission)}</p>` : ""}
@@ -452,7 +346,6 @@ function ouvrirInstitution(institutionId) {
 
   masquerAlerte();
   document.getElementById("sectionInstitutions").classList.add("hidden");
-  document.getElementById("sectionDossier").classList.add("hidden");
   document.getElementById("sectionProduits").classList.remove("hidden");
 
   const type = (institutionChoisie.type || "").toLowerCase() === "banque" ? "Banque" : "Microfinance";
@@ -479,14 +372,13 @@ function afficherProduits() {
 
   if (produits.length === 0) {
     corps.innerHTML = `
-      <tr><td colspan="9" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+      <tr><td colspan="8" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
         ${recherche ? "Aucun produit ne correspond à cette recherche." : "Cette institution ne propose aucun crédit pour le moment."}
       </td></tr>`;
     return;
   }
 
   corps.innerHTML = produits.map((produit) => {
-    const enCours = dossiersOuverts.find((d) => d.product && d.product.id === produit.id);
     const montants = `${FCFA.format(produit.amountMin)} - ${FCFA.format(produit.amountMax)}`;
     const duree = produit.durationMinMonths && produit.durationMaxMonths
       ? `${produit.durationMinMonths} - ${produit.durationMaxMonths} mois`
@@ -513,20 +405,9 @@ function afficherProduits() {
               : '<span class="text-sm text-gray-400 italic">Aucun document</span>'}
           </div>
         </td>
-        <td class="px-4 py-3 text-center">
-          <button type="button" data-produit="${produit.id}"
-                  class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-semibold whitespace-nowrap">
-            <span class="material-symbols-outlined text-sm">${enCours ? "resume" : "upload_file"}</span>
-            <span>${enCours ? "Reprendre mon dossier" : "Déposer un dossier"}</span>
-          </button>
-        </td>
       </tr>
     `;
   }).join("");
-
-  corps.querySelectorAll("[data-produit]").forEach((bouton) => {
-    bouton.addEventListener("click", () => ouvrirDossier(bouton.dataset.produit));
-  });
 }
 
 document.getElementById("rechercheProduit").addEventListener("input", afficherProduits);
@@ -538,337 +419,19 @@ document.getElementById("btnRetourInstitutions").addEventListener("click", () =>
   document.getElementById("sectionInstitutions").classList.remove("hidden");
 });
 
-// ─────────── Étape 2 : le dossier ───────────
-
-async function ouvrirDossier(produitId) {
-  masquerAlerte();
-
-  creditChoisi = await OGOUE.getCreditProduct(produitId);
-  if (!creditChoisi) {
-    afficherAlerte("Ce crédit n'est plus disponible.");
-    return;
-  }
-
-  const existant = dossiersOuverts.find((d) => d.product && d.product.id === produitId);
-
-  if (existant) {
-    dossierCourant = await OGOUE.getApplication(existant.id);
-  } else {
-    const resultat = await OGOUE.createApplication({ creditProductId: produitId });
-
-    if (!resultat.ok) {
-      // 409 : un dossier existe déjà, on le rouvre plutôt que d'échouer
-      if (resultat.status === 409) {
-        const dossiers = await OGOUE.getApplications();
-        const trouve = dossiers.find(
-          (d) => d.product && d.product.id === produitId && ["brouillon", "complement_requis"].includes(d.status)
-        );
-        if (trouve) {
-          dossierCourant = await OGOUE.getApplication(trouve.id);
-        } else {
-          afficherAlerte(resultat.error);
-          return;
-        }
-      } else {
-        afficherAlerte(resultat.error);
-        return;
-      }
-    } else {
-      dossierCourant = await OGOUE.getApplication(resultat.application.id);
-    }
-  }
-
-  if (!dossierCourant) {
-    afficherAlerte("Impossible d'ouvrir ce dossier.");
-    return;
-  }
-
-  piecesFournies = dossierCourant.documents || [];
-  afficherDossier();
-}
-
-function afficherDossier() {
-  document.getElementById("sectionInstitutions").classList.add("hidden");
-  document.getElementById("sectionProduits").classList.add("hidden");
-  document.getElementById("sectionDossier").classList.remove("hidden");
-
-  const institution = creditChoisi.institution ? creditChoisi.institution.name : "Institution partenaire";
-
-  document.getElementById("recapCredit").innerHTML = `
-    <p class="text-sm text-text-light-secondary font-semibold">${echapper(institution)}</p>
-    <h2 class="text-xl font-bold dark:text-white">${echapper(creditChoisi.name)}</h2>
-    ${creditChoisi.objective ? `<p class="mt-1 text-sm text-gray-600 dark:text-gray-400">${echapper(creditChoisi.objective)}</p>` : ""}
-    <div class="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm">
-      <span><span class="text-gray-500 dark:text-gray-400">Montant :</span>
-        <strong class="dark:text-gray-200">${formatMontant(creditChoisi.amountMin, creditChoisi.amountMax)}</strong></span>
-      <span><span class="text-gray-500 dark:text-gray-400">Durée :</span>
-        <strong class="dark:text-gray-200">${formatDuree(creditChoisi.durationMinMonths, creditChoisi.durationMaxMonths)}</strong></span>
-    </div>
-  `;
-
-  // Le dossier peut revenir de l'institution avec une demande de complément
-  if (dossierCourant.status === "complement_requis" && dossierCourant.decisionNote) {
-    afficherAlerte(`L'institution demande un complément : ${dossierCourant.decisionNote}`, "info");
-  }
-
-  document.getElementById("champMontant").value = dossierCourant.amountRequested ?? "";
-  document.getElementById("champDuree").value = dossierCourant.durationMonths ?? "";
-  document.getElementById("champObjet").value = dossierCourant.purpose ?? "";
-
-  document.getElementById("aideMontant").textContent =
-    `Ce crédit va de ${FCFA.format(creditChoisi.amountMin)} à ${FCFA.format(creditChoisi.amountMax)} FCFA.`;
-  document.getElementById("aideDuree").textContent =
-    creditChoisi.durationMinMonths || creditChoisi.durationMaxMonths
-      ? `Durée acceptée : ${formatDuree(creditChoisi.durationMinMonths, creditChoisi.durationMaxMonths)}.`
-      : "";
-
-  afficherPieces();
-}
-
-function afficherPieces() {
-  const liste = document.getElementById("listePieces");
-  const exigees = creditChoisi.requiredDocuments || [];
-
-  const fourniesParExigence = new Map();
-  const libres = [];
-  piecesFournies.forEach((piece) => {
-    if (piece.requiredDocumentId) fourniesParExigence.set(piece.requiredDocumentId, piece);
-    else libres.push(piece);
-  });
-
-  const nbFournies = exigees.filter((e) => fourniesParExigence.has(e.id)).length;
-  document.getElementById("compteurPieces").textContent =
-    exigees.length > 0 ? `${nbFournies} / ${exigees.length} pièce(s) exigée(s)` : "";
-
-  const ligneExigee = (exigence) => {
-    const piece = fourniesParExigence.get(exigence.id);
-    if (piece) {
-      return `
-        <div class="flex flex-wrap items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 dark:bg-emerald-900/10 dark:border-emerald-800 px-4 py-3">
-          <span class="material-symbols-outlined text-emerald-600">check_circle</span>
-          <div class="flex-1 min-w-0">
-            <p class="font-semibold text-sm dark:text-gray-200">${echapper(exigence.name)}</p>
-            <button type="button" data-ouvrir="${piece.id}"
-                    class="text-xs text-primary hover:underline break-all text-left">${echapper(piece.name)}</button>
-          </div>
-          <button type="button" data-supprimer="${piece.id}"
-                  class="text-sm font-semibold text-red-600 hover:underline">Remplacer</button>
-        </div>
-      `;
-    }
-    return `
-      <div class="flex flex-wrap items-center gap-3 rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-3">
-        <span class="material-symbols-outlined text-gray-400">radio_button_unchecked</span>
-        <div class="flex-1 min-w-0">
-          <p class="font-semibold text-sm dark:text-gray-200">${echapper(exigence.name)}</p>
-          <p class="text-xs text-gray-500 dark:text-gray-400">Pièce non fournie</p>
-        </div>
-        <input type="file" data-exigence="${exigence.id}"
-               aria-label="Téléverser : ${echapper(exigence.name)}"
-               class="block text-sm text-gray-600 dark:text-gray-300 file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-primary hover:file:bg-primary/20"/>
-      </div>
-    `;
-  };
-
-  const ligneLibre = (piece) => `
-    <div class="flex flex-wrap items-center gap-3 rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-3">
-      <span class="material-symbols-outlined text-gray-400">attach_file</span>
-      <div class="flex-1 min-w-0">
-        <button type="button" data-ouvrir="${piece.id}"
-                class="font-semibold text-sm text-primary hover:underline break-all text-left">${echapper(piece.name)}</button>
-        <p class="text-xs text-gray-500 dark:text-gray-400">Pièce complémentaire</p>
-      </div>
-      <button type="button" data-supprimer="${piece.id}"
-              class="text-sm font-semibold text-red-600 hover:underline">Retirer</button>
-    </div>
-  `;
-
-  const contenu = [
-    ...exigees.map(ligneExigee),
-    ...libres.map(ligneLibre),
-  ];
-
-  liste.innerHTML = contenu.length > 0
-    ? contenu.join("")
-    : `<p class="text-sm text-gray-500 dark:text-gray-400">Ce crédit n'exige aucune pièce justificative.</p>`;
-
-  liste.querySelectorAll("[data-exigence]").forEach((champ) => {
-    champ.addEventListener("change", () => {
-      if (champ.files[0]) televerser(champ.files[0], champ.dataset.exigence);
-    });
-  });
-
-  liste.querySelectorAll("[data-supprimer]").forEach((bouton) => {
-    bouton.addEventListener("click", () => retirerPiece(bouton.dataset.supprimer));
-  });
-
-  liste.querySelectorAll("[data-ouvrir]").forEach((bouton) => {
-    bouton.addEventListener("click", () => ouvrirPiece(bouton.dataset.ouvrir));
-  });
-}
-
-/**
- * Les pièces sont stockées dans un espace privé : on demande un lien
- * signé, valable quelques minutes, au moment où l'on veut les ouvrir.
- */
-async function ouvrirPiece(docId) {
-  const url = await OGOUE.getApplicationDocumentUrl(dossierCourant.id, docId);
-  if (!url) {
-    afficherAlerte("Impossible d'ouvrir cette pièce.");
-    return;
-  }
-  window.open(url, "_blank", "noopener");
-}
-
-async function televerser(fichier, exigenceId) {
-  masquerAlerte();
-  afficherAlerte("Téléversement en cours…", "info");
-
-  const resultat = await OGOUE.uploadApplicationDocument(dossierCourant.id, fichier, {
-    requiredDocumentId: exigenceId || undefined,
-  });
-
-  if (!resultat.ok) {
-    afficherAlerte(resultat.error);
-    return;
-  }
-
-  await rafraichirDossier();
-  afficherAlerte("Pièce ajoutée.", "succes");
-}
-
-async function retirerPiece(docId) {
-  const resultat = await OGOUE.deleteApplicationDocument(dossierCourant.id, docId);
-  if (!resultat.ok) {
-    afficherAlerte(resultat.error);
-    return;
-  }
-  await rafraichirDossier();
-}
-
-async function rafraichirDossier() {
-  const frais = await OGOUE.getApplication(dossierCourant.id);
-  if (frais) {
-    dossierCourant = frais;
-    piecesFournies = frais.documents || [];
-  }
-  afficherPieces();
-}
-
-// ─────────── Enregistrement et dépôt ───────────
-
-document.getElementById("formDemande").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  await enregistrerDemande(true);
-});
-
-async function enregistrerDemande(avecRetour) {
-  const etat = document.getElementById("etatEnregistrement");
-  const montant = document.getElementById("champMontant").value;
-  const duree = document.getElementById("champDuree").value;
-  const objet = document.getElementById("champObjet").value.trim();
-
-  const changements = {
-    amountRequested: montant === "" ? undefined : Number(montant),
-    durationMonths: duree === "" ? undefined : Number(duree),
-    purpose: objet,
-  };
-
-  etat.textContent = "Enregistrement…";
-  const resultat = await OGOUE.updateApplication(dossierCourant.id, changements);
-
-  if (!resultat.ok) {
-    etat.textContent = "";
-    afficherAlerte(resultat.error);
-    return false;
-  }
-
-  dossierCourant = { ...dossierCourant, ...resultat.application };
-  etat.textContent = "Enregistré.";
-  if (avecRetour) setTimeout(() => { etat.textContent = ""; }, 2500);
-  return true;
-}
-
-document.getElementById("champPieceLibre").addEventListener("change", (e) => {
-  if (e.target.files[0]) {
-    televerser(e.target.files[0], null);
-    e.target.value = "";
-  }
-});
-
-document.getElementById("btnRetourCredits").addEventListener("click", async () => {
-  masquerAlerte();
-  document.getElementById("sectionDossier").classList.add("hidden");
-
-  // Recharger : le dossier qu'on vient de quitter change l'état des boutons
-  await chargerCatalogue();
-
-  if (institutionChoisie) {
-    // L'objet a été reconstruit par le rechargement, on le retrouve par son id
-    ouvrirInstitution(institutionChoisie.id);
-  } else {
-    document.getElementById("sectionInstitutions").classList.remove("hidden");
-  }
-});
-
-document.getElementById("btnDeposer").addEventListener("click", async () => {
-  const bouton = document.getElementById("btnDeposer");
-  const message = document.getElementById("messageDepot");
-  masquerAlerte();
-  message.classList.add("hidden");
-
-  const montant = document.getElementById("champMontant").value;
-  if (montant === "") {
-    afficherAlerte("Le montant demandé est obligatoire pour déposer le dossier.");
-    return;
-  }
-
-  bouton.disabled = true;
-
-  // Le montant saisi doit être enregistré avant le dépôt, sinon l'API
-  // refusera un dossier dont le montant est encore vide.
-  const enregistre = await enregistrerDemande(false);
-  if (!enregistre) {
-    bouton.disabled = false;
-    return;
-  }
-
-  const resultat = await OGOUE.submitApplication(dossierCourant.id);
-
-  if (!resultat.ok) {
-    if (resultat.missing.length > 0) {
-      message.className = "mb-4 rounded-xl px-4 py-3 text-sm bg-red-50 text-red-700 border border-red-200";
-      message.innerHTML = `
-        <p class="font-bold">Il manque ${resultat.missing.length} pièce(s) :</p>
-        <ul class="mt-1 list-disc list-inside">
-          ${resultat.missing.map((m) => `<li>${echapper(m.name)}</li>`).join("")}
-        </ul>
-      `;
-      message.classList.remove("hidden");
-    } else {
-      afficherAlerte(resultat.error);
-    }
-    bouton.disabled = false;
-    return;
-  }
-
-  window.location.href = `module_mes_dossiers?depose=${dossierCourant.id}`;
-});
-
 // ─────────── Démarrage ───────────
 
 (async function demarrer() {
   await chargerCatalogue();
 
-  // Le catalogue de financement.ogoue.com et « Mes dossiers » renvoient ici
-  // avec le crédit choisi : on saute directement à la constitution du dossier.
+  // Un lien peut désigner un crédit précis (?productId=...) : on ouvre alors
+  // directement le catalogue de l'institution qui le propose.
   const produitId = new URLSearchParams(window.location.search).get("productId");
   if (produitId) {
     const produit = tousLesProduits.find((p) => p.id === produitId);
     if (produit && produit.institution) {
-      institutionChoisie = institutions.find((i) => i.id === produit.institution.id) || null;
+      ouvrirInstitution(produit.institution.id);
     }
-    await ouvrirDossier(produitId);
   }
 })();
 </script>

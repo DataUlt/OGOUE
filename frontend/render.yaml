@@ -66,9 +66,6 @@
         source: /app/module_depot_dossier
         destination: /app/module_depot_dossier.html
       - type: rewrite
-        source: /app/module_mes_dossiers
-        destination: /app/module_mes_dossiers.html
-      - type: rewrite
         source: /app/module_historique_suppressions
         destination: /app/module_historique_suppressions.html
       - type: rewrite
