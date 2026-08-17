@@ -66,9 +66,9 @@
     <!-- ===== HEADER OGOUE ===== -->
     <header class="sticky top-0 z-10 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-[#e8ede8] dark:border-gray-700">
         <div class="container mx-auto px-4">
-            <div class="flex items-center justify-between whitespace-nowrap h-20">
+            <div class="flex items-center justify-between gap-2 h-20">
                 <div class="flex items-center gap-4">
-                    <a href="module_tableau_bord"><img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-28 w-auto"></a>
+                    <a href="module_tableau_bord"><img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-10 sm:h-14 md:h-16 w-auto"></a>
                 </div>
 
                 <div class="hidden md:flex items-center gap-9">
@@ -171,7 +171,7 @@
 
                             <!-- Panel calendrier -->
                             <div id="dateFilterPanel"
-                                 class="absolute right-0 mt-2 w-[340px] rounded-xl border border-[#e8ede8] dark:border-gray-700 bg-white dark:bg-card-dark shadow-xl p-4 hidden z-20">
+                                 class="absolute right-0 mt-2 w-[min(340px,calc(100vw-2rem))] rounded-xl border border-[#e8ede8] dark:border-gray-700 bg-white dark:bg-card-dark shadow-xl p-4 hidden z-20">
 
                                 <div class="flex items-center justify-between mb-3">
                                     <button id="prevMonth" class="p-1.5 rounded-full hover:bg-background-light dark:hover:bg-background-dark">
