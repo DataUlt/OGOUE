@@ -332,6 +332,18 @@ document.addEventListener("DOMContentLoaded", function () {
                 <style>
                     /* Forcer une hauteur minimale uniforme par ligne (Charge ↔ Produit) */
                     #compte-resultat .grid.grid-cols-2 > div { min-height: 48px; display: flex; align-items: center; }
+                    /* Le libellé est long, le montant court : on cesse de partager
+                       la ligne en deux moitiés égales. minmax(0,...) autorise les
+                       cellules à se réduire au lieu de déborder l'une sur l'autre. */
+                    #compte-resultat .grid.grid-cols-2 { grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); }
+                    #compte-resultat .grid.grid-cols-2 > div:last-child { justify-content: flex-end; }
+                    /* Sur téléphone, les deux colonnes Charges et Produits sont
+                       empilées : chacune dispose de toute la largeur, et on
+                       resserre les marges pour laisser respirer le texte. */
+                    @media (max-width: 767px) {
+                        #compte-resultat { font-size: 0.8125rem; }
+                        #compte-resultat .px-4 { padding-left: 0.625rem; padding-right: 0.625rem; }
+                    }
                     /* Les fonds pastel restent clairs en mode sombre alors que le texte
                        passe en clair par héritage : on force un texte foncé lisible.
                        Les montants colorés (text-green-600 / text-red-600) gardent leur
@@ -372,30 +384,30 @@ document.addEventListener("DOMContentLoaded", function () {
                         print-color-adjust: exact !important;
                     }
                 </style>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- COLONNE GAUCHE: CHARGES -->
                     <div class="border border-orange-300">
                         <div class="bg-orange-700 text-white px-4 py-3 font-bold text-center">Charges</div>
                         <div class="text-sm">
-                            <div class="grid grid-cols-2 bg-orange-100"><div class="px-4 py-2 font-semibold">Charges d'exploitation</div><div class="px-4 py-2 text-right"></div></div>
-                            ${chargesExploitationItems.map(item => `<div class="grid grid-cols-2"><div class="px-4 py-2">${item.label}</div><div class="px-4 py-2 text-right">${item.amount.toFixed(2).replace('.', ',')} FCFA</div></div>`).join('')}
-                            <div class="grid grid-cols-2 bg-orange-200 font-semibold"><div class="px-4 py-2">Total charges d'exploitation</div><div class="px-4 py-2 text-right">${chargesExploitation.toFixed(2).replace('.', ',')} FCFA</div></div>
+                            <div class="grid grid-cols-2 bg-orange-100"><div class="px-4 py-2 font-semibold">Charges d'exploitation</div><div class="px-4 py-2 text-right whitespace-nowrap"></div></div>
+                            ${chargesExploitationItems.map(item => `<div class="grid grid-cols-2"><div class="px-4 py-2">${item.label}</div><div class="px-4 py-2 text-right whitespace-nowrap">${item.amount.toFixed(2).replace('.', ',')} FCFA</div></div>`).join('')}
+                            <div class="grid grid-cols-2 bg-orange-200 font-semibold"><div class="px-4 py-2">Total charges d'exploitation</div><div class="px-4 py-2 text-right whitespace-nowrap">${chargesExploitation.toFixed(2).replace('.', ',')} FCFA</div></div>
                             
-                            <div class="grid grid-cols-2 bg-orange-100"><div class="px-4 py-2 font-semibold">Charges financières</div><div class="px-4 py-2 text-right"></div></div>
-                            ${chargesFinancieres > 0 ? `<div class="grid grid-cols-2"><div class="px-4 py-2">Intérêts des emprunts</div><div class="px-4 py-2 text-right">${chargesFinancieres.toFixed(2).replace('.', ',')} FCFA</div></div>` : ''}
-                            <div class="grid grid-cols-2 bg-orange-200 font-semibold"><div class="px-4 py-2">Total charges financières</div><div class="px-4 py-2 text-right">${chargesFinancieres.toFixed(2).replace('.', ',')} FCFA</div></div>
+                            <div class="grid grid-cols-2 bg-orange-100"><div class="px-4 py-2 font-semibold">Charges financières</div><div class="px-4 py-2 text-right whitespace-nowrap"></div></div>
+                            ${chargesFinancieres > 0 ? `<div class="grid grid-cols-2"><div class="px-4 py-2">Intérêts des emprunts</div><div class="px-4 py-2 text-right whitespace-nowrap">${chargesFinancieres.toFixed(2).replace('.', ',')} FCFA</div></div>` : ''}
+                            <div class="grid grid-cols-2 bg-orange-200 font-semibold"><div class="px-4 py-2">Total charges financières</div><div class="px-4 py-2 text-right whitespace-nowrap">${chargesFinancieres.toFixed(2).replace('.', ',')} FCFA</div></div>
                             
-                            <div class="grid grid-cols-2 bg-orange-100"><div class="px-4 py-2 font-semibold">Charges exceptionnelles</div><div class="px-4 py-2 text-right"></div></div>
-                            ${chargesExceptionnelles > 0 ? `<div class="grid grid-cols-2"><div class="px-4 py-2">Amendes et autres charges</div><div class="px-4 py-2 text-right">${chargesExceptionnelles.toFixed(2).replace('.', ',')} FCFA</div></div>` : ''}
-                            <div class="grid grid-cols-2 bg-orange-200 font-semibold"><div class="px-4 py-2">Total charges exceptionnelles</div><div class="px-4 py-2 text-right">${chargesExceptionnelles.toFixed(2).replace('.', ',')} FCFA</div></div>
+                            <div class="grid grid-cols-2 bg-orange-100"><div class="px-4 py-2 font-semibold">Charges exceptionnelles</div><div class="px-4 py-2 text-right whitespace-nowrap"></div></div>
+                            ${chargesExceptionnelles > 0 ? `<div class="grid grid-cols-2"><div class="px-4 py-2">Amendes et autres charges</div><div class="px-4 py-2 text-right whitespace-nowrap">${chargesExceptionnelles.toFixed(2).replace('.', ',')} FCFA</div></div>` : ''}
+                            <div class="grid grid-cols-2 bg-orange-200 font-semibold"><div class="px-4 py-2">Total charges exceptionnelles</div><div class="px-4 py-2 text-right whitespace-nowrap">${chargesExceptionnelles.toFixed(2).replace('.', ',')} FCFA</div></div>
                             
-                            ${impotsBenefices > 0 ? `<div class="grid grid-cols-2 bg-orange-100"><div class="px-4 py-2 font-semibold">Impôts sur les bénéfices</div><div class="px-4 py-2 text-right">${impotsBenefices.toFixed(2).replace('.', ',')} FCFA</div></div>` : ''}
+                            ${impotsBenefices > 0 ? `<div class="grid grid-cols-2 bg-orange-100"><div class="px-4 py-2 font-semibold">Impôts sur les bénéfices</div><div class="px-4 py-2 text-right whitespace-nowrap">${impotsBenefices.toFixed(2).replace('.', ',')} FCFA</div></div>` : ''}
                             
-                            <div class="grid grid-cols-2 bg-orange-800 text-white font-bold"><div class="px-4 py-2">Total des charges</div><div class="px-4 py-2 text-right">${totalCharges.toFixed(2).replace('.', ',')} FCFA</div></div>
+                            <div class="grid grid-cols-2 bg-orange-800 text-white font-bold"><div class="px-4 py-2">Total des charges</div><div class="px-4 py-2 text-right whitespace-nowrap">${totalCharges.toFixed(2).replace('.', ',')} FCFA</div></div>
                             
                             ${isBenefice ? `<div class="grid grid-cols-2 bg-orange-100"><div class="px-4 py-2 font-semibold">${resultLabel}</div><div class="px-4 py-2 text-right font-semibold text-green-600">${resultAmount.toFixed(2).replace('.', ',')} FCFA</div></div>` : ''}
                             
-                            <div class="grid grid-cols-2 bg-orange-900 text-white font-bold"><div class="px-4 py-2">Total général</div><div class="px-4 py-2 text-right">${totalGeneral.toFixed(2).replace('.', ',')} FCFA</div></div>
+                            <div class="grid grid-cols-2 bg-orange-900 text-white font-bold"><div class="px-4 py-2">Total général</div><div class="px-4 py-2 text-right whitespace-nowrap">${totalGeneral.toFixed(2).replace('.', ',')} FCFA</div></div>
                         </div>
                     </div>
 
@@ -403,24 +415,24 @@ document.addEventListener("DOMContentLoaded", function () {
                     <div class="border border-teal-300">
                         <div class="bg-teal-700 text-white px-4 py-3 font-bold text-center">Produits</div>
                         <div class="text-sm">
-                            <div class="grid grid-cols-2 bg-teal-100"><div class="px-4 py-2 font-semibold">Produits d'exploitation</div><div class="px-4 py-2 text-right"></div></div>
-                            <div class="grid grid-cols-2"><div class="px-4 py-2">Ventes de produits/services</div><div class="px-4 py-2 text-right">${totalProduits.toFixed(2).replace('.', ',')} FCFA</div></div>
+                            <div class="grid grid-cols-2 bg-teal-100"><div class="px-4 py-2 font-semibold">Produits d'exploitation</div><div class="px-4 py-2 text-right whitespace-nowrap"></div></div>
+                            <div class="grid grid-cols-2"><div class="px-4 py-2">Ventes de produits/services</div><div class="px-4 py-2 text-right whitespace-nowrap">${totalProduits.toFixed(2).replace('.', ',')} FCFA</div></div>
                             ${Array(Math.max(0, chargesExploitationItems.length - 1)).fill(0).map(() => `<div class="grid grid-cols-2"><div class="px-4 py-5"></div><div class="px-4 py-5 text-right"></div></div>`).join('')}
-                            <div class="grid grid-cols-2 bg-teal-200 font-semibold"><div class="px-4 py-2">Total produits d'exploitation</div><div class="px-4 py-2 text-right">${totalProduits.toFixed(2).replace('.', ',')} FCFA</div></div>
+                            <div class="grid grid-cols-2 bg-teal-200 font-semibold"><div class="px-4 py-2">Total produits d'exploitation</div><div class="px-4 py-2 text-right whitespace-nowrap">${totalProduits.toFixed(2).replace('.', ',')} FCFA</div></div>
                             
-                            <div class="grid grid-cols-2 bg-teal-100"><div class="px-4 py-2 font-semibold">Produits financiers</div><div class="px-4 py-2 text-right"></div></div>
-                            ${chargesFinancieres > 0 ? `<div class="grid grid-cols-2"><div class="px-4 py-2"></div><div class="px-4 py-2 text-right"></div></div>` : ''}
-                            <div class="grid grid-cols-2 bg-teal-200 font-semibold"><div class="px-4 py-2">Total produits financiers</div><div class="px-4 py-2 text-right">0.00 FCFA</div></div>
+                            <div class="grid grid-cols-2 bg-teal-100"><div class="px-4 py-2 font-semibold">Produits financiers</div><div class="px-4 py-2 text-right whitespace-nowrap"></div></div>
+                            ${chargesFinancieres > 0 ? `<div class="grid grid-cols-2"><div class="px-4 py-2"></div><div class="px-4 py-2 text-right whitespace-nowrap"></div></div>` : ''}
+                            <div class="grid grid-cols-2 bg-teal-200 font-semibold"><div class="px-4 py-2">Total produits financiers</div><div class="px-4 py-2 text-right whitespace-nowrap">0.00 FCFA</div></div>
                             
-                            <div class="grid grid-cols-2 bg-teal-100"><div class="px-4 py-2 font-semibold">Produits exceptionnels</div><div class="px-4 py-2 text-right"></div></div>
-                            ${chargesExceptionnelles > 0 ? `<div class="grid grid-cols-2"><div class="px-4 py-2"></div><div class="px-4 py-2 text-right"></div></div>` : ''}
-                            <div class="grid grid-cols-2 bg-teal-200 font-semibold"><div class="px-4 py-2">Total produits exceptionnels</div><div class="px-4 py-2 text-right">0.00 FCFA</div></div>
+                            <div class="grid grid-cols-2 bg-teal-100"><div class="px-4 py-2 font-semibold">Produits exceptionnels</div><div class="px-4 py-2 text-right whitespace-nowrap"></div></div>
+                            ${chargesExceptionnelles > 0 ? `<div class="grid grid-cols-2"><div class="px-4 py-2"></div><div class="px-4 py-2 text-right whitespace-nowrap"></div></div>` : ''}
+                            <div class="grid grid-cols-2 bg-teal-200 font-semibold"><div class="px-4 py-2">Total produits exceptionnels</div><div class="px-4 py-2 text-right whitespace-nowrap">0.00 FCFA</div></div>
                             
                             ${!isBenefice ? `<div class="grid grid-cols-2 bg-teal-100"><div class="px-4 py-2 font-semibold">${resultLabel}</div><div class="px-4 py-2 text-right font-semibold text-red-600">${resultAmount.toFixed(2).replace('.', ',')} FCFA</div></div>` : ''}
                             
-                            <div class="grid grid-cols-2 bg-teal-800 text-white font-bold"><div class="px-4 py-2">Total des produits</div><div class="px-4 py-2 text-right">${totalProduits.toFixed(2).replace('.', ',')} FCFA</div></div>
+                            <div class="grid grid-cols-2 bg-teal-800 text-white font-bold"><div class="px-4 py-2">Total des produits</div><div class="px-4 py-2 text-right whitespace-nowrap">${totalProduits.toFixed(2).replace('.', ',')} FCFA</div></div>
                             
-                            <div class="grid grid-cols-2 bg-teal-900 text-white font-bold"><div class="px-4 py-2">Total général</div><div class="px-4 py-2 text-right">${totalGeneral.toFixed(2).replace('.', ',')} FCFA</div></div>
+                            <div class="grid grid-cols-2 bg-teal-900 text-white font-bold"><div class="px-4 py-2">Total général</div><div class="px-4 py-2 text-right whitespace-nowrap">${totalGeneral.toFixed(2).replace('.', ',')} FCFA</div></div>
                         </div>
                     </div>
                 </div>
