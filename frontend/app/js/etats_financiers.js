@@ -1,4 +1,4 @@
-﻿// js/etats_financiers.js
+// js/etats_financiers.js
 
 document.addEventListener("DOMContentLoaded", function () {
     const btn = document.getElementById("dateFilterButton");
@@ -570,7 +570,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     setTimeout(() => ligne.remove(), 300);
                 }
 
-                // Garder en phase les donnees qui alimentent l'export CSV et
+                // Garder en phase les donnees qui alimentent l'export Excel et
                 // l'impression : sans cela, une ligne supprimee y reparaitrait.
                 const donnees = window.etatFinanciersData;
                 if (donnees && Array.isArray(donnees[config.cle])) {
@@ -1057,9 +1057,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     /**
-     * Bouton "Exporter CSV" - exporte les données avec la plage de dates sélectionnée
+     * Bouton "Exporter Excel" - exporte les données avec la plage de dates sélectionnée
      */
-    async function handleExportCSV() {
+    async function handleExportExcel() {
         try {
             if (!window.OGOUE) {
                 alert("Erreur: données non disponibles");
@@ -1079,7 +1079,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-            console.log(`📥 Export CSV pour la période: ${startDate} au ${endDate}`);
+            console.log(`📥 Export Excel pour la période: ${startDate} au ${endDate}`);
 
             // Récupérer les ventes et dépenses pour la plage de dates sélectionnée
             const ventes = await window.OGOUE.getVentesPourPlage?.(startDate, endDate) || [];
@@ -1088,22 +1088,22 @@ document.addEventListener("DOMContentLoaded", function () {
             console.log(`📊 Données récupérées: ${ventes.length} ventes, ${depenses.length} dépenses`);
 
             // Créer le modal
-            const existing = document.getElementById('csvSelectorModal');
+            const existing = document.getElementById('exportSelectorModal');
             if (existing) return;
 
             const modal = document.createElement('div');
-            modal.id = 'csvSelectorModal';
+            modal.id = 'exportSelectorModal';
             modal.style = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.4);z-index:9999;';
 
             const box = document.createElement('div');
             box.style = 'background:white;border-radius:12px;padding:24px;max-width:400px;box-shadow:0 20px 25px rgba(0,0,0,0.15);';
 
             const title = document.createElement('h2');
-            title.textContent = 'Exporter en CSV';
+            title.textContent = 'Exporter en Excel';
             title.style = 'font-size:20px;font-weight:bold;margin-bottom:16px;color:#0d1b19;';
 
             const description = document.createElement('p');
-            description.textContent = 'Cochez les fichiers à télécharger puis cliquez sur Exporter.';
+            description.textContent = 'Cochez les sections à inclure. Elles formeront un onglet chacune dans le même classeur.';
             description.style = 'font-size:14px;color:#666;margin-bottom:20px;';
 
             const checksContainer = document.createElement('div');
@@ -1149,72 +1149,89 @@ document.addEventListener("DOMContentLoaded", function () {
             exportBtn.addEventListener('click', async () => {
                 const selected = Object.keys(checkboxes).filter(key => checkboxes[key].checked);
                 if (selected.length === 0) {
-                    alert('Sélectionnez au moins un fichier');
+                    alert('Sélectionnez au moins une section');
                     return;
                 }
 
                 try {
-                    // Ventes
+                    // Les montants restent des NOMBRES, jamais du texte :
+                    // c'est tout l'intérêt du classeur sur le CSV, l'utilisateur
+                    // peut sommer et filtrer sans retoucher les colonnes.
+                    const nombre = (valeur) => {
+                        const n = parseFloat(valeur);
+                        return Number.isFinite(n) ? n : 0;
+                    };
+
+                    const feuilles = [];
+
                     if (selected.includes('ventes')) {
-                        const csvVentes = generateCSV("VENTES", [
-                            ["Date", "Description", "Type", "Moyen de paiement", "Montant", "Justificatif"],
-                            ...ventes.map(v => [
-                                v.saleDate || v.date || "",
-                                v.description || "",
-                                v.saleType || v.type_vente || "",
-                                v.paymentMethod || v.moyen_paiement || "",
-                                v.amount || v.montant || "",
-                                v.receiptName || v.justificatif || ""
-                            ])
-                        ]);
-                        downloadCSV(csvVentes, "OGOUE_Ventes.csv");
+                        feuilles.push({
+                            nom: "Ventes",
+                            lignes: [
+                                ["Date", "Description", "Type", "Moyen de paiement", "Montant", "Justificatif"],
+                                ...ventes.map(v => [
+                                    v.saleDate || v.date || "",
+                                    v.description || "",
+                                    v.saleType || v.type_vente || "",
+                                    v.paymentMethod || v.moyen_paiement || "",
+                                    nombre(v.amount ?? v.montant),
+                                    v.receiptName || v.justificatif || ""
+                                ])
+                            ]
+                        });
                     }
 
-                    // Dépenses
                     if (selected.includes('depenses')) {
-                        const csvDepenses = generateCSV("DEPENSES", [
-                            ["Date", "Catégorie", "Description", "Montant", "Justificatif"],
-                            ...depenses.map(d => [
-                                d.date || "",
-                                d.category || d.categorie || "",
-                                d.description || "",
-                                d.amount || d.montant || "",
-                                d.receiptName || d.justificatif || ""
-                            ])
-                        ]);
-                        downloadCSV(csvDepenses, "OGOUE_Depenses.csv");
+                        feuilles.push({
+                            nom: "Dépenses",
+                            lignes: [
+                                ["Date", "Catégorie", "Description", "Montant", "Justificatif"],
+                                ...depenses.map(d => [
+                                    d.date || "",
+                                    d.category || d.categorie || "",
+                                    d.description || "",
+                                    nombre(d.amount ?? d.montant),
+                                    d.receiptName || d.justificatif || ""
+                                ])
+                            ]
+                        });
                     }
 
-                    // Flux
                     if (selected.includes('flux')) {
                         const allOperations = [
                             ...ventes.map(v => ({
                                 Date: v.saleDate || v.date || "",
                                 Type: "Vente",
                                 Description: v.description || "",
-                                Montant: v.amount || v.montant || 0,
-                                Catégorie: v.saleType || ""
+                                Montant: nombre(v.amount ?? v.montant),
+                                Catégorie: v.saleType || v.type_vente || ""
                             })),
                             ...depenses.map(d => ({
                                 Date: d.date || "",
                                 Type: "Dépense",
                                 Description: d.description || "",
-                                Montant: -(d.amount || d.montant || 0),
+                                Montant: -nombre(d.amount ?? d.montant),
                                 Catégorie: d.category || d.categorie || ""
                             }))
                         ].sort((a, b) => new Date(a.Date) - new Date(b.Date));
 
-                        const csvFlux = generateCSV("FLUX", [
-                            ["Date", "Type", "Description", "Montant", "Catégorie"],
-                            ...allOperations.map(op => [op.Date, op.Type, op.Description, op.Montant, op.Catégorie])
-                        ]);
-                        downloadCSV(csvFlux, "OGOUE_Flux_Tresorerie.csv");
+                        feuilles.push({
+                            nom: "Flux de trésorerie",
+                            lignes: [
+                                ["Date", "Type", "Description", "Montant", "Catégorie"],
+                                ...allOperations.map(op => [op.Date, op.Type, op.Description, op.Montant, op.Catégorie])
+                            ]
+                        });
                     }
 
-                    alert(`✅ ${selected.length} fichier(s) CSV téléchargé(s) !`);
+                    const { telechargerClasseur } = await import("./xlsx-export.js");
+                    const periode = `${startDate}_${endDate}`;
+                    telechargerClasseur(`OGOUE_Etats_financiers_${periode}.xlsx`, feuilles);
+
+                    alert(`✅ Classeur Excel téléchargé (${feuilles.length} feuille(s)).`);
                     modal.remove();
                 } catch (error) {
-                    console.error("Erreur export CSV:", error);
+                    console.error("Erreur export Excel:", error);
                     alert("❌ Erreur lors de l'export: " + error.message);
                 }
             });
@@ -1235,7 +1252,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
         } catch (error) {
-            console.error("Erreur export CSV:", error);
+            console.error("Erreur export Excel:", error);
             alert("❌ Erreur lors de l'export: " + error.message);
         }
     }
@@ -1419,52 +1436,13 @@ document.addEventListener("DOMContentLoaded", function () {
         printAllBtn.addEventListener("click", handlePrintAll);
     }
 
-    // Export CSV
-    const exportCsvBtn = document.getElementById("exportCsvBtn");
-    if (exportCsvBtn) {
-        exportCsvBtn.addEventListener("click", handleExportCSV);
+    // Export Excel
+    const exportExcelBtn = document.getElementById("exportExcelBtn");
+    if (exportExcelBtn) {
+        exportExcelBtn.addEventListener("click", handleExportExcel);
     }
 });
 
-/**
- * Génère le contenu CSV
- */
-function generateCSV(title, rows) {
-    // Ajouter un titre
-    const csvContent = [
-        [title],
-        ["Export du", new Date().toLocaleDateString("fr-FR")],
-        [],
-        ...rows
-    ]
-        .map(row => row.map(cell => {
-            // Écapper les guillemets et entourer les cellules contenant des virgules
-            const cellStr = String(cell || "");
-            return cellStr.includes(",") || cellStr.includes('"') 
-                ? `"${cellStr.replace(/"/g, '""')}"` 
-                : cellStr;
-        }).join(","))
-        .join("\n");
-    
-    return csvContent;
-}
-
-/**
- * Télécharge un fichier CSV
- */
-function downloadCSV(csvContent, filename) {
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    
-    link.setAttribute("href", url);
-    link.setAttribute("download", filename);
-    link.style.visibility = "hidden";
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
 
 /**
  * Modal pour afficher et télécharger le justificatif
