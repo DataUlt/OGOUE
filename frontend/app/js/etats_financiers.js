@@ -497,13 +497,113 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     /**
-     * Crée le HTML pour l'Historique des Ventes
+     * Branche les boutons de suppression d'un historique.
+     *
+     * Reprend le mecanisme de module_ventes : la suppression passe par
+     * DeletionAuditManager, qui demande un motif et l'enregistre dans la
+     * piste d'audit avant d'appeler l'API. La ligne disparait ensuite en
+     * fondu, sans recharger tout l'ecran.
+     *
+     * @param {HTMLElement} conteneur
+     * @param {"vente"|"depense"} nature
      */
-    function renderHistoriqueVentes(ventes) {
+    async function brancherSuppressions(conteneur, nature) {
+        // API_BASE_URL vient de ogoue-state.js, charge avant ce fichier.
+        // Le repli evite une panne silencieuse si l'ordre venait a changer.
+        const base = typeof API_BASE_URL !== "undefined"
+            ? API_BASE_URL
+            : (["localhost", "127.0.0.1"].includes(window.location.hostname)
+                ? "http://localhost:3001"
+                : "https://api.ogoue.com");
+
+        const config = {
+            vente: {
+                selecteur: ".supprimer-vente",
+                ligne: (id) => `tr[data-vente-id="${id}"]`,
+                url: (id) => `${base}/api/sales/${id}`,
+                titre: "Supprimer cette vente ?",
+                type: "sale",
+                cle: "ventes",
+                cleHtml: "ventesHtml",
+                intitule: "Historique des Ventes",
+                rendu: renderHistoriqueVentes,
+            },
+            depense: {
+                selecteur: ".supprimer-depense",
+                ligne: (id) => `tr[data-depense-id="${id}"]`,
+                url: (id) => `${base}/api/expenses/${id}`,
+                titre: "Supprimer cette dépense ?",
+                type: "expense",
+                cle: "depenses",
+                cleHtml: "depensesHtml",
+                intitule: "Historique des Dépenses",
+                rendu: renderHistoriqueDepenses,
+            },
+        }[nature];
+
+        const boutons = conteneur.querySelectorAll(config.selecteur);
+        if (boutons.length === 0) return;
+
+        const { default: DeletionAuditManager } = await import("./deletion-audit.js");
+
+        boutons.forEach((bouton) => {
+            bouton.addEventListener("click", async () => {
+                const id = bouton.getAttribute("data-id");
+
+                const resultat = await DeletionAuditManager.deleteWithAudit(config.url(id), {
+                    title: config.titre,
+                    message: "Vous êtes sur le point de supprimer cet enregistrement. Veuillez expliquer le motif de cette suppression.",
+                    recordType: config.type,
+                    recordId: id,
+                });
+
+                if (!resultat.success) {
+                    console.error("❌ Erreur suppression:", resultat.error);
+                    alert(`Erreur: ${resultat.error}`);
+                    return;
+                }
+
+                const ligne = conteneur.querySelector(config.ligne(id));
+                if (ligne) {
+                    ligne.style.transition = "opacity 0.3s ease";
+                    ligne.style.opacity = "0";
+                    setTimeout(() => ligne.remove(), 300);
+                }
+
+                // Garder en phase les donnees qui alimentent l'export CSV et
+                // l'impression : sans cela, une ligne supprimee y reparaitrait.
+                const donnees = window.etatFinanciersData;
+                if (donnees && Array.isArray(donnees[config.cle])) {
+                    donnees[config.cle] = donnees[config.cle].filter((e) => String(e.id) !== String(id));
+
+                    const restants = donnees[config.cle];
+                    donnees[config.cleHtml] = `<div class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm p-5">
+                    <h3 class="text-lg font-bold mb-2">${config.intitule} (${restants.length})</h3>
+                    ${config.rendu(restants)}
+                </div>`;
+
+                    const titre = conteneur.querySelector("h3");
+                    if (titre) {
+                        titre.textContent = titre.textContent.replace(/\(\d+\)/, `(${restants.length})`);
+                    }
+                }
+            });
+        });
+    }
+
+    /**
+     * Crée le HTML pour l'Historique des Ventes
+     *
+     * @param {Array} ventes
+     * @param {boolean} avecActions - ajoute la colonne de suppression.
+     *   Volontairement optionnel : la même fonction sert à l'impression,
+     *   où un bouton n'aurait aucun sens sur le papier.
+     */
+    function renderHistoriqueVentes(ventes, avecActions = false) {
         if (ventes.length === 0) {
             return '<p class="mt-4 text-sm text-gray-500 dark:text-gray-400">Aucune vente pour cette période.</p>';
         }
-        
+
         let html = `
             <div class="mt-4 overflow-x-auto rounded-lg border border-[#cfe7e3] dark:border-gray-700">
                 <table class="w-full text-sm">
@@ -518,11 +618,12 @@ document.addEventListener("DOMContentLoaded", function () {
                             <th class="px-4 py-3 text-left font-semibold">Type</th>
                             <th class="px-4 py-3 text-left font-semibold">Créé par</th>
                             <th class="px-4 py-3 text-left font-semibold">Justificatif</th>
+                            ${avecActions ? '<th class="px-4 py-3 text-center font-semibold">Action</th>' : ''}
                         </tr>
                     </thead>
                     <tbody>
         `;
-        
+
         ventes.forEach(v => {
             const rawDate = v.date || v.saleDate || v.sale_date || "";
             const localDate = rawDate ? getLocalDateString(new Date(rawDate)) : "";
@@ -540,7 +641,7 @@ document.addEventListener("DOMContentLoaded", function () {
               : "-";
 
             html += `
-                        <tr class="border-b border-[#cfe7e3] dark:border-gray-700">
+                        <tr class="border-b border-[#cfe7e3] dark:border-gray-700" data-vente-id="${v.id}">
                             <td class="px-4 py-3">${formatDateFR(localDate)}</td>
                             <td class="px-4 py-3">${heure}</td>
                             <td class="px-4 py-3">${produit}</td>
@@ -550,6 +651,11 @@ document.addEventListener("DOMContentLoaded", function () {
                             <td class="px-4 py-3">${type}</td>
                             <td class="px-4 py-3">${creePar}</td>
                             <td class="px-4 py-3 text-xs">${justificatifHtml}</td>
+                            ${avecActions ? `
+                            <td class="px-4 py-3 text-center">
+                                <button type="button" class="supprimer-vente text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-xl"
+                                        title="Supprimer" aria-label="Supprimer cette vente" data-id="${v.id}">🗑️</button>
+                            </td>` : ''}
                         </tr>
             `;
         });
@@ -565,12 +671,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
     /**
      * Crée le HTML pour l'Historique des Dépenses
+     *
+     * @param {Array} depenses
+     * @param {boolean} avecActions - voir renderHistoriqueVentes.
      */
-    function renderHistoriqueDepenses(depenses) {
+    function renderHistoriqueDepenses(depenses, avecActions = false) {
         if (depenses.length === 0) {
             return '<p class="mt-4 text-sm text-gray-500 dark:text-gray-400">Aucune dépense pour cette période.</p>';
         }
-        
+
         let html = `
             <div class="mt-4 overflow-x-auto rounded-lg border border-[#cfe7e3] dark:border-gray-700">
                 <table class="w-full text-sm">
@@ -583,11 +692,12 @@ document.addEventListener("DOMContentLoaded", function () {
                             <th class="px-4 py-3 text-left font-semibold">Moyen Paiement</th>
                             <th class="px-4 py-3 text-left font-semibold">Créé par</th>
                             <th class="px-4 py-3 text-left font-semibold">Justificatif</th>
+                            ${avecActions ? '<th class="px-4 py-3 text-center font-semibold">Action</th>' : ''}
                         </tr>
                     </thead>
                     <tbody>
         `;
-        
+
         depenses.forEach(d => {
             const rawDate = d.date || d.expenseDate || "";
             const localDate = rawDate ? getLocalDateString(new Date(rawDate)) : "";
@@ -603,7 +713,7 @@ document.addEventListener("DOMContentLoaded", function () {
               : "-";
 
             html += `
-                        <tr class="border-b border-[#cfe7e3] dark:border-gray-700">
+                        <tr class="border-b border-[#cfe7e3] dark:border-gray-700" data-depense-id="${d.id}">
                             <td class="px-4 py-3">${formatDateFR(localDate)}</td>
                             <td class="px-4 py-3">${heure}</td>
                             <td class="px-4 py-3">${categorie}</td>
@@ -611,6 +721,11 @@ document.addEventListener("DOMContentLoaded", function () {
                             <td class="px-4 py-3">${paiement}</td>
                             <td class="px-4 py-3">${creePar}</td>
                             <td class="px-4 py-3 text-xs">${justificatifHtml}</td>
+                            ${avecActions ? `
+                            <td class="px-4 py-3 text-center">
+                                <button type="button" class="supprimer-depense text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-xl"
+                                        title="Supprimer" aria-label="Supprimer cette dépense" data-id="${d.id}">🗑️</button>
+                            </td>` : ''}
                         </tr>
             `;
         });
@@ -780,7 +895,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const ventesHtml = `<div class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm p-5">
                     <h3 class="text-lg font-bold mb-2">Historique des Ventes (${ventesFiltered.length})</h3>
-                    ${renderHistoriqueVentes(ventesFiltered)}
+                    ${renderHistoriqueVentes(ventesFiltered, true)}
                 </div>`;
             resultsContainer.innerHTML = ventesHtml;
 
@@ -794,9 +909,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
             });
 
+            brancherSuppressions(resultsContainer, "vente");
+
             window.etatFinanciersData = window.etatFinanciersData || {};
             window.etatFinanciersData.ventes = ventesFiltered;
-            window.etatFinanciersData.ventesHtml = ventesHtml;
+            // Version SANS la colonne Action : c'est elle qui part à
+            // l'impression, et un bouton n'a aucun sens sur le papier.
+            window.etatFinanciersData.ventesHtml = `<div class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm p-5">
+                    <h3 class="text-lg font-bold mb-2">Historique des Ventes (${ventesFiltered.length})</h3>
+                    ${renderHistoriqueVentes(ventesFiltered)}
+                </div>`;
 
             panel.classList.add("hidden");
         } catch (error) {
@@ -840,7 +962,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const depensesHtml = `<div class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm p-5">
                     <h3 class="text-lg font-bold mb-2">Historique des Dépenses (${depensesFiltered.length})</h3>
-                    ${renderHistoriqueDepenses(depensesFiltered)}
+                    ${renderHistoriqueDepenses(depensesFiltered, true)}
                 </div>`;
             resultsContainer.innerHTML = depensesHtml;
 
@@ -854,9 +976,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
             });
 
+            brancherSuppressions(resultsContainer, "depense");
+
             window.etatFinanciersData = window.etatFinanciersData || {};
             window.etatFinanciersData.depenses = depensesFiltered;
-            window.etatFinanciersData.depensesHtml = depensesHtml;
+            // Version SANS la colonne Action, destinée à l'impression.
+            window.etatFinanciersData.depensesHtml = `<div class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm p-5">
+                    <h3 class="text-lg font-bold mb-2">Historique des Dépenses (${depensesFiltered.length})</h3>
+                    ${renderHistoriqueDepenses(depensesFiltered)}
+                </div>`;
 
             panel.classList.add("hidden");
         } catch (error) {
