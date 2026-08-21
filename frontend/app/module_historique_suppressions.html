@@ -366,14 +366,24 @@
                             <p class="text-sm font-semibold text-text-light-secondary dark:text-text-dark-secondary mb-2">Données supprimées</p>
                             <div class="p-3 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark">
                                 ${(() => {
-                                    // Champs à exclure
+                                    // Champs à exclure : données techniques et
+                                    // identifiants internes. Ces derniers n'ont
+                                    // aucun sens pour l'utilisateur et exposent
+                                    // des références qui doivent rester internes.
                                     const fieldsToExclude = ['id', 'created_at', 'updated_at', 'receipt_url', 'organization_id', 'receipt_storage_path'];
-                                    
+
+                                    // La règle de suffixe couvre aussi les champs
+                                    // ajoutés plus tard (agent_id, deleted_by...)
+                                    // sans qu'on ait à penser à les lister.
+                                    const estChampInterne = (key) =>
+                                        fieldsToExclude.includes(key) || key.endsWith('_id') || key.endsWith('_by');
+
                                     // Traduction des champs
                                     const fieldNames = {
                                         'amount': 'Montant',
                                         'quantity': 'Quantité',
                                         'sale_date': 'Date de vente',
+                                        'expense_date': 'Date de la dépense',
                                         'sale_type': 'Type de vente',
                                         'description': 'Description',
                                         'receipt_name': 'Nom du reçu',
@@ -386,7 +396,7 @@
                                     
                                     // Filtrer et formater les données
                                     const filteredData = Object.entries(deletion.donnees)
-                                        .filter(([key]) => !fieldsToExclude.includes(key))
+                                        .filter(([key]) => !estChampInterne(key))
                                         .map(([key, value]) => {
                                             const displayKey = fieldNames[key] || key;
                                             let displayValue = value;
