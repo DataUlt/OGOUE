@@ -70,7 +70,7 @@ const appState = structuredClone(defaultState);
 
 /**
  * Envoie une nouvelle vente à l'API (authentifiée par JWT)
- * @param {Object} vente - { date, description, moyen_paiement, type_vente, quantite, montant, justificatif, file }
+ * @param {Object} vente - { date, description, moyen_paiement, type_vente, quantite, montant, justificatif, client_nom, client_telephone, client_email, file }
  * @param {Function} onProgress - Callback optionnel pour le suivi de la progression (percent)
  * @returns {Promise<Object|null>}
  */
@@ -92,7 +92,14 @@ async function addVente(vente, onProgress) {
     formData.append("quantity", vente.quantite || 1);
     formData.append("amount", vente.montant || 0);
     formData.append("receiptName", vente.justificatif || "");
-    
+    // Le reçu n'est édité que sur demande explicite du gérant.
+    formData.append("editerRecu", vente.editer_recu ? "true" : "false");
+    // Client imprimé sur le reçu édité par OGOUE (facultatif)
+    formData.append("clientName", vente.client_nom || "");
+    formData.append("clientPhone", vente.client_telephone || "");
+    formData.append("clientEmail", vente.client_email || "");
+
+
     // Ajouter le fichier s'il existe
     if (vente.file) {
       formData.append("receipt", vente.file);

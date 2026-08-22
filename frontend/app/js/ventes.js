@@ -28,6 +28,12 @@
   // 📁 GESTION DES UPLOADS
   // =========================
   const fileInput = document.getElementById("file-upload");
+  const zoneChoix = document.getElementById("justificatif-choix");
+  const recuZoneAuto = document.getElementById("recu-zone-auto");
+  const btnChoixRecu = document.getElementById("btn-choix-recu");
+  const btnChoixFichier = document.getElementById("btn-choix-fichier");
+  const btnAnnulerChoixRecu = document.getElementById("btn-annuler-choix-recu");
+  const btnRevenirChoix = document.getElementById("btn-revenir-choix");
   const uploadZoneDefault = document.getElementById("upload-zone-default");
   const uploadZoneSelected = document.getElementById("upload-zone-selected");
   const uploadZoneUploading = document.getElementById("upload-zone-uploading");
@@ -46,11 +52,35 @@
   const MAX_SIZE = 5 * 1024 * 1024; // 5 Mo
 
   function hideAllUploadZones() {
+    zoneChoix?.classList.add("hidden");
+    recuZoneAuto?.classList.add("hidden");
     uploadZoneDefault?.classList.add("hidden");
     uploadZoneSelected?.classList.add("hidden");
     uploadZoneUploading?.classList.add("hidden");
     uploadZoneSuccess?.classList.add("hidden");
     uploadZoneError?.classList.add("hidden");
+  }
+
+  /**
+   * État initial du bloc justificatif : les deux voies proposées à
+   * égalité. Le fichier éventuellement sélectionné est oublié, sinon il
+   * ferait office de justificatif alors que le choix est remis à zéro.
+   */
+  function showChoixJustificatif() {
+    hideAllUploadZones();
+    if (fileInput) fileInput.value = "";
+    zoneChoix?.classList.remove("hidden");
+  }
+
+  /**
+   * Choix retenu : OGOUE éditera le reçu. Aucun fichier ne doit rester
+   * sélectionné, sinon c'est lui qui servirait de justificatif et le
+   * reçu ne serait pas émis.
+   */
+  function showRecuAuto() {
+    hideAllUploadZones();
+    if (fileInput) fileInput.value = "";
+    recuZoneAuto?.classList.remove("hidden");
   }
 
   function showUploadZoneDefault() {
@@ -119,6 +149,26 @@
     } else {
       showUploadZoneDefault();
     }
+  });
+
+  // Voie 1 : OGOUE édite le reçu de la vente.
+  btnChoixRecu?.addEventListener("click", () => {
+    showRecuAuto();
+  });
+
+  // Voie 2 : le gérant joint son propre document (facture d'un tiers,
+  // reçu manuscrit scanné...).
+  btnChoixFichier?.addEventListener("click", () => {
+    showUploadZoneDefault();
+  });
+
+  // Revenir sur son choix, depuis l'une ou l'autre des deux voies.
+  btnAnnulerChoixRecu?.addEventListener("click", () => {
+    showChoixJustificatif();
+  });
+
+  btnRevenirChoix?.addEventListener("click", () => {
+    showChoixJustificatif();
   });
 
   // Bouton pour effacer le fichier
@@ -477,11 +527,20 @@
 
     let justificatifFile = "";
     let file = null;
-    
+
     if (fileInput && fileInput.files && fileInput.files[0]) {
       file = fileInput.files[0];
       justificatifFile = file.name;
     }
+
+    // Le reçu n'est émis que si le gérant l'a explicitement demandé.
+    // Sans choix, la vente part sans justificatif : la colonne restera
+    // vide, avec le lien « Établir un reçu » pour se rattraper.
+    // Ce même drapeau commande la lecture des champs client, qui restent
+    // dans le DOM quand le gérant change d'avis.
+    const editeRecu = !!recuZoneAuto && !recuZoneAuto.classList.contains("hidden");
+    const lireClient = (id) =>
+      editeRecu ? (document.getElementById(id)?.value || "").trim() : "";
 
     return {
       id: generateId(),
@@ -492,6 +551,10 @@
       quantite: isNaN(quantite) ? 0 : quantite,
       montant: isNaN(montant) ? 0 : montant,
       justificatif: justificatifFile,
+      editer_recu: editeRecu,
+      client_nom: lireClient("recu-client-nom"),
+      client_telephone: lireClient("recu-client-telephone"),
+      client_email: lireClient("recu-client-email"),
       file // Ajouter l'objet File pour l'upload
     };
   }
@@ -614,9 +677,28 @@
       </td>
       <td class="px-6 py-4">
         ${
+          // La colonne restitue le choix fait au moment de la saisie :
+          // le fichier joint, ou à défaut le reçu édité par OGOUE.
           vente.justificatif
-            ? `<span class="font-medium text-primary cursor-pointer hover:underline justificatif-link" data-file="${vente.justificatif}" data-url="${vente.justificatifUrl || ''}">${vente.justificatif}</span>`
-            : `-`
+            ? `<span class="justificatif-link inline-flex items-center gap-1 font-medium text-primary cursor-pointer hover:underline break-all" title="Ouvrir le justificatif joint" data-file="${vente.justificatif}" data-url="${vente.justificatifUrl || ''}">
+                 <span class="material-symbols-outlined text-[15px] flex-shrink-0">attach_file</span>${vente.justificatif}
+               </span>`
+            : vente.numeroRecu
+            ? `<span class="recu-lien inline-flex items-center gap-1 font-medium text-primary cursor-pointer hover:underline whitespace-nowrap" title="Ouvrir le reçu ${vente.numeroRecu}" data-id="${vente.id}">
+                 <span class="material-symbols-outlined text-[15px]">description</span>${vente.numeroRecu}
+               </span>`
+            // Vente sans justificatif : les deux mêmes voies que dans le
+            // formulaire restent ouvertes, sans quoi la case resterait
+            // vide définitivement.
+            : `<div class="flex items-center gap-2 whitespace-nowrap">
+                 <button type="button" class="recu-etablir text-xs text-gray-500 dark:text-gray-400 hover:text-primary hover:underline" title="Établir le reçu de cette vente" data-id="${vente.id}">
+                   Établir un reçu
+                 </button>
+                 <span class="text-xs text-gray-300 dark:text-gray-600">·</span>
+                 <button type="button" class="joindre-lien text-xs text-gray-500 dark:text-gray-400 hover:text-primary hover:underline" title="Joindre un justificatif à cette vente" data-id="${vente.id}">
+                   Joindre un fichier
+                 </button>
+               </div>`
         }
       </td>
       <td class="px-6 py-4 text-center">
@@ -647,7 +729,139 @@
       });
     }
 
+    // Reçu déjà établi : un clic le rouvre.
+    const recuLien = tr.querySelector('.recu-lien');
+    if (recuLien) {
+      recuLien.addEventListener('click', () => ouvrirRecu(recuLien));
+    }
+
+    // Vente sans justificatif : on demande d'abord le client, puis on
+    // établit le reçu.
+    const recuEtablir = tr.querySelector('.recu-etablir');
+    if (recuEtablir) {
+      recuEtablir.addEventListener('click', () => demanderClientPuisEtablirRecu(recuEtablir));
+    }
+
+    // L'autre voie de rattrapage : téléverser un document existant.
+    const joindreLien = tr.querySelector('.joindre-lien');
+    if (joindreLien) {
+      joindreLien.addEventListener('click', () => joindreJustificatif(joindreLien));
+    }
+
     return tr;
+  }
+
+  /**
+   * Ouvre le reçu d'une vente.
+   * Le document vit dans un espace privé : on demande un lien signé,
+   * valable quelques minutes, au moment du clic.
+   */
+  async function ouvrirRecu(element) {
+    const venteId = element.getAttribute('data-id');
+    const libelle = element.innerHTML;
+
+    element.disabled = true;
+    element.innerHTML = '<span class="material-symbols-outlined text-[15px]">hourglass_top</span> …';
+
+    try {
+      const token = getToken();
+      const reponse = await fetch(`${API_BASE_URL}/api/sales/${venteId}/recu`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await reponse.json();
+
+      if (!reponse.ok) throw new Error(data.error || "Reçu indisponible");
+
+      window.open(data.url, '_blank', 'noopener');
+    } catch (erreur) {
+      console.error('Erreur reçu:', erreur);
+      alert("Le reçu n'a pas pu être ouvert : " + erreur.message);
+    } finally {
+      element.disabled = false;
+      element.innerHTML = libelle;
+    }
+  }
+
+  /**
+   * Établit le reçu d'une vente qui n'en a pas encore.
+   * La saisie du client est partagée avec le module de scoring, d'où
+   * son extraction dans js/recu-client.js.
+   */
+  function demanderClientPuisEtablirRecu(bouton) {
+    if (!window.OGOUE_RECU) {
+      console.error("recu-client.js n'est pas chargé");
+      return;
+    }
+
+    window.OGOUE_RECU.demanderClientPuisEtablirRecu({
+      venteId: bouton.getAttribute('data-id'),
+      apresEtablissement: async () => {
+        // La case doit maintenant afficher le numéro attribué
+        ventesCacheMois = null;
+        ventesCacheAnnee = null;
+        await renderCompactTable();
+        if (typeof renderFullTable === "function") renderFullTable();
+      }
+    });
+  }
+
+  /**
+   * Joint un justificatif à une vente déjà enregistrée : ouvre le
+   * sélecteur de fichier, puis envoie sur la route de mise à jour.
+   */
+  function joindreJustificatif(bouton) {
+    const venteId = bouton.getAttribute('data-id');
+
+    const champ = document.createElement('input');
+    champ.type = 'file';
+    champ.accept = '.pdf,.jpg,.jpeg,.png';
+    champ.style.display = 'none';
+    document.body.appendChild(champ);
+
+    champ.addEventListener('change', async () => {
+      const fichier = champ.files[0];
+      document.body.removeChild(champ);
+      if (!fichier) return;
+
+      const erreurFichier = validateFile(fichier);
+      if (erreurFichier) {
+        alert(erreurFichier);
+        return;
+      }
+
+      const libelle = bouton.innerHTML;
+      bouton.disabled = true;
+      bouton.innerHTML = '…';
+
+      try {
+        const token = getToken();
+        const formData = new FormData();
+        formData.append('receipt', fichier);
+        formData.append('receiptName', fichier.name);
+
+        const reponse = await fetch(`${API_BASE_URL}/api/sales/${venteId}`, {
+          method: 'PUT',
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData
+        });
+        const data = await reponse.json();
+
+        if (!reponse.ok) throw new Error(data.error || "Envoi impossible");
+
+        // Recharger pour faire apparaître le nom du fichier joint
+        ventesCacheMois = null;
+        ventesCacheAnnee = null;
+        await renderCompactTable();
+        if (typeof renderFullTable === "function") renderFullTable();
+      } catch (erreur) {
+        console.error('Erreur justificatif:', erreur);
+        alert("Le justificatif n'a pas pu être joint : " + erreur.message);
+        bouton.disabled = false;
+        bouton.innerHTML = libelle;
+      }
+    });
+
+    champ.click();
   }
 
   // Modal pour afficher et télécharger le justificatif
@@ -939,7 +1153,7 @@
           v.moyen_paiement || "",
           v.type_vente || "",
           v.created_by_name || "",
-          v.justificatif || ""
+          v.justificatif || v.numeroRecu || ""
         ];
 
         csv += row
@@ -1017,7 +1231,7 @@
 
     form.reset();
     setTodayAsDefaultDate();
-    showUploadZoneDefault(); // Réinitialiser la zone d'upload
+    showChoixJustificatif(); // Le choix est à refaire pour la vente suivante
     
     // Rafraîchir le cache et le tableau
     ventesCacheMois = null;

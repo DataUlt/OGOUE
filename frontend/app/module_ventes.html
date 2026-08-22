@@ -348,14 +348,94 @@
 
                         <div>
                             <p class="text-base font-medium leading-normal pb-2 text-[#0d1b19] dark:text-gray-200">
-                                Joindre le justificatif
+                                Justificatif de la vente
                             </p>
-                            
+
+                            <!-- Deux voies à égalité : OGOUE édite le reçu, ou le gérant
+                                 joint son propre document. La colonne Justificatif du
+                                 tableau restituera ensuite le choix fait ici. -->
+                            <div id="justificatif-choix" class="mt-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <button type="button" id="btn-choix-recu"
+                                        class="group flex flex-col items-center text-center gap-2 px-6 py-8 rounded-lg border-2 border-gray-300 dark:border-gray-600 hover:border-primary dark:hover:border-primary hover:bg-primary/5 transition-colors duration-200">
+                                    <span class="material-symbols-outlined text-4xl text-gray-400 dark:text-gray-500 group-hover:text-primary transition-colors">description</span>
+                                    <span class="text-sm font-semibold text-[#0d1b19] dark:text-gray-100">Éditer le reçu</span>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400">OGOUE établit un reçu numéroté</span>
+                                </button>
+                                <button type="button" id="btn-choix-fichier"
+                                        class="group flex flex-col items-center text-center gap-2 px-6 py-8 rounded-lg border-2 border-gray-300 dark:border-gray-600 hover:border-primary dark:hover:border-primary hover:bg-primary/5 transition-colors duration-200">
+                                    <span class="material-symbols-outlined text-4xl text-gray-400 dark:text-gray-500 group-hover:text-primary transition-colors">upload</span>
+                                    <span class="text-sm font-semibold text-[#0d1b19] dark:text-gray-100">Joindre un fichier</span>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400">Une facture ou un reçu existant</span>
+                                </button>
+                            </div>
+
+                            <!-- Choix retenu : le reçu édité par OGOUE.
+                                 Étape supplémentaire, le client à qui la vente a été
+                                 faite : ces informations sont imprimées sur le reçu,
+                                 sous le nom de l'entreprise. Toutes facultatives —
+                                 une vente au comptoir n'a pas toujours de client nommé. -->
+                            <div id="recu-zone-auto" class="hidden mt-1 p-5 border-2 border-primary bg-primary/10 rounded-lg">
+                                <div class="flex items-start gap-4">
+                                    <span class="material-symbols-outlined text-2xl text-primary">description</span>
+                                    <div class="flex-1 text-left">
+                                        <p class="text-sm font-medium text-[#0d1b19] dark:text-gray-100">
+                                            Reçu de vente OGOUE
+                                        </p>
+                                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                            Un reçu numéroté sera édité à l'enregistrement de la vente.
+                                            Renseignez le client : il figurera sur le document.
+                                        </p>
+                                    </div>
+                                    <button type="button" id="btn-annuler-choix-recu" class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-primary/20 text-gray-600 dark:text-gray-400" title="Changer de justificatif">
+                                        <span class="material-symbols-outlined text-base">close</span>
+                                    </button>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-5">
+                                    <label class="flex flex-col">
+                                        <p class="text-xs font-medium leading-normal pb-1.5 text-[#0d1b19] dark:text-gray-200">
+                                            Nom et prénom du client
+                                        </p>
+                                        <input
+                                            id="recu-client-nom"
+                                            class="form-input w-full rounded-lg text-[#0d1b19] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-11 placeholder:text-gray-400 dark:placeholder:text-gray-500 px-3 text-sm font-normal"
+                                            placeholder="Ex : Jean OBAME"
+                                            type="text"
+                                            autocomplete="off"
+                                        />
+                                    </label>
+                                    <label class="flex flex-col">
+                                        <p class="text-xs font-medium leading-normal pb-1.5 text-[#0d1b19] dark:text-gray-200">
+                                            Téléphone
+                                        </p>
+                                        <input
+                                            id="recu-client-telephone"
+                                            class="form-input w-full rounded-lg text-[#0d1b19] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-11 placeholder:text-gray-400 dark:placeholder:text-gray-500 px-3 text-sm font-normal"
+                                            placeholder="Ex : 077 00 00 00"
+                                            type="tel"
+                                            autocomplete="off"
+                                        />
+                                    </label>
+                                    <label class="flex flex-col">
+                                        <p class="text-xs font-medium leading-normal pb-1.5 text-[#0d1b19] dark:text-gray-200">
+                                            Adresse e-mail
+                                        </p>
+                                        <input
+                                            id="recu-client-email"
+                                            class="form-input w-full rounded-lg text-[#0d1b19] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-11 placeholder:text-gray-400 dark:placeholder:text-gray-500 px-3 text-sm font-normal"
+                                            placeholder="Ex : client@exemple.com"
+                                            type="email"
+                                            autocomplete="off"
+                                        />
+                                    </label>
+                                </div>
+                            </div>
+
                             <!-- Zone d'upload avec état par défaut -->
-                            <div id="upload-zone-default" class="mt-1 flex justify-center px-6 pt-10 pb-12 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg transition-colors duration-200 hover:border-primary dark:hover:border-primary hover:bg-primary/5">
+                            <div id="upload-zone-default" class="hidden mt-1 px-6 pt-10 pb-8 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg transition-colors duration-200 hover:border-primary dark:hover:border-primary hover:bg-primary/5">
                                 <div class="text-center">
                                     <span class="material-symbols-outlined text-5xl text-gray-400 dark:text-gray-500">cloud_upload</span>
-                                    <div class="flex text-sm text-gray-600 dark:text-gray-400 mt-2">
+                                    <div class="flex justify-center text-sm text-gray-600 dark:text-gray-400 mt-2">
                                         <label class="relative cursor-pointer rounded-md font-medium text-primary hover:text-primary/80 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary/50" for="file-upload">
                                             <span>Téléversez un fichier</span>
                                             <input class="sr-only" id="file-upload" name="file-upload" type="file"/>
@@ -365,6 +445,9 @@
                                     <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">
                                         Formats acceptés : PDF, JPEG, PNG. Taille max : 5Mo
                                     </p>
+                                    <button type="button" id="btn-revenir-choix" class="text-xs font-medium text-primary hover:text-primary/80 underline mt-4">
+                                        Changer de justificatif
+                                    </button>
                                 </div>
                             </div>
 
@@ -535,6 +618,7 @@
 <script src="js/ogoue-state.js"></script>
 <script src="js/header-ui.js"></script>
 <script src="js/mobile-menu.js"></script>
+<script src="js/recu-client.js"></script>
 <script src="js/ventes.js"></script>
 <script src="js/topbar-actions.js"></script>
 <script>

@@ -107,9 +107,20 @@ export function composerRecuPdf({ numero, vente, organisation, emisPar }) {
     const gauche = doc.page.margins.left;
     const largeur = doc.page.width - doc.page.margins.left - doc.page.margins.right;
 
-    // ── En-tête : l'entreprise émettrice ──
+    // ── En-tête : les deux parties, face à face ──
+    // L'entreprise émettrice à gauche, le client à droite, comme sur une
+    // facture. Les deux colonnes partent de la même hauteur ; on reprend
+    // ensuite le fil sous la plus longue des deux.
+    const yEnTete = doc.y;
+    // La colonne client est la plus large des deux : ses lignes sont de
+    // loin les plus longues (nom complet, adresse e-mail), là où
+    // l'émetteur n'aligne que des identifiants courts en petit corps.
+    const largeurEmetteur = largeur * 0.45;
+    const xClient = gauche + largeurEmetteur;
+    const largeurClient = largeur - largeurEmetteur;
+
     doc.font("Helvetica-Bold").fontSize(18).fillColor("#0a0c0a")
-       .text(organisation.name || "Entreprise", gauche, doc.y);
+       .text(organisation.name || "Entreprise", gauche, yEnTete, { width: largeurEmetteur });
 
     doc.moveDown(0.2);
     doc.font("Helvetica").fontSize(9).fillColor("#5c6c60");
@@ -118,17 +129,41 @@ export function composerRecuPdf({ numero, vente, organisation, emisPar }) {
       organisation.rccm_number ? `RCCM : ${organisation.rccm_number}` : null,
       organisation.nif_number ? `NIF : ${organisation.nif_number}` : null,
     ].filter(Boolean);
-    identifiants.forEach((ligne) => doc.text(ligne));
+    identifiants.forEach((ligne) => doc.text(ligne, gauche, doc.y, { width: largeurEmetteur }));
+    const yFinEmetteur = doc.y;
+
+    // Le client est saisi au moment de l'édition du reçu, et reste
+    // facultatif : une vente au comptoir n'a pas toujours de client
+    // nommé. Le bloc entier disparaît plutôt que d'imprimer du vide.
+    const client = [
+      vente.client_name ? vente.client_name : null,
+      vente.client_phone ? `Tél. : ${vente.client_phone}` : null,
+      vente.client_email ? `E-mail : ${vente.client_email}` : null,
+    ].filter(Boolean);
+
+    let yFinClient = yEnTete;
+    if (client.length) {
+      doc.font("Helvetica-Bold").fontSize(9).fillColor("#5c6c60")
+         .text("CLIENT", xClient, yEnTete, { width: largeurClient, align: "right" });
+      doc.moveDown(0.3);
+      doc.font("Helvetica").fontSize(10).fillColor("#0a0c0a");
+      client.forEach((ligne) =>
+        doc.text(ligne, xClient, doc.y, { width: largeurClient, align: "right" })
+      );
+      yFinClient = doc.y;
+    }
+
+    doc.y = Math.max(yFinEmetteur, yFinClient);
 
     // ── Titre du document ──
     doc.moveDown(1.5);
     doc.font("Helvetica-Bold").fontSize(15).fillColor("#0088CC")
-       .text("REÇU DE VENTE", { align: "left" });
+       .text("REÇU DE VENTE", gauche, doc.y, { width: largeur, align: "left" });
 
     doc.font("Helvetica").fontSize(10).fillColor("#0a0c0a");
     doc.moveDown(0.3);
-    doc.text(`N° ${numero}`);
-    doc.text(`Date de la vente : ${formatDate(vente.sale_date)}`);
+    doc.text(`N° ${numero}`, gauche, doc.y, { width: largeur });
+    doc.text(`Date de la vente : ${formatDate(vente.sale_date)}`, gauche, doc.y, { width: largeur });
 
     doc.moveDown(0.8);
     doc.moveTo(gauche, doc.y).lineTo(gauche + largeur, doc.y)

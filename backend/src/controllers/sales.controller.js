@@ -19,7 +19,22 @@ const createSchema = z.object({
   quantity: z.coerce.number().positive().default(1),
   amount: z.coerce.number().min(0),
   receiptName: z.string().max(200).optional().nullable(),
+  // "true" quand le gérant a choisi de faire éditer le reçu par OGOUE.
+  // Volontairement une chaîne : z.coerce.boolean() rendrait true pour
+  // la chaîne "false", que le formulaire envoie bel et bien.
+  editerRecu: z.string().max(5).optional().nullable(),
+  // Client du reçu. Facultatifs et acceptés vides : le formulaire les
+  // envoie toujours, même quand le gérant ne les renseigne pas.
+  clientName: z.string().max(150).optional().nullable(),
+  clientPhone: z.string().max(50).optional().nullable(),
+  clientEmail: z.string().max(150).optional().nullable(),
 });
+
+/** Une chaîne vide venue du formulaire vaut absence d'information. */
+function videEnNull(valeur) {
+  const texte = String(valeur ?? "").trim();
+  return texte === "" ? null : texte;
+}
 
 export async function listSales(req, res) {
   try {
@@ -145,22 +160,98 @@ export async function getSaleRecuUrl(req, res) {
 
     const { data: vente } = await supabase
       .from("sales")
-      .select("id, receipt_number, receipt_doc_path")
+      .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_number, receipt_doc_path, client_name, client_phone, client_email")
       .eq("id", id)
       .eq("organization_id", organizationId)
       .maybeSingle();
 
     if (!vente) return res.status(404).json({ error: "Vente introuvable" });
-    if (!vente.receipt_doc_path) {
-      return res.status(404).json({ error: "Aucun reçu n'a été émis pour cette vente" });
+
+    let chemin = vente.receipt_doc_path;
+    let numero = vente.receipt_number;
+
+    // Les ventes enregistrées avant la mise en place des reçus n'en ont
+    // pas. On l'émet à la demande plutôt que de renvoyer une erreur que
+    // l'utilisateur ne pourrait pas résoudre. Le numéro attribué suit la
+    // séquence courante : il ne reflète donc pas la date de la vente.
+    if (!chemin) {
+      const recu = await emettreRecuPourVente(vente, organizationId, req);
+      if (!recu) {
+        return res.status(500).json({ error: "Le reçu n'a pas pu être établi" });
+      }
+      chemin = recu.chemin;
+      numero = recu.numero;
     }
 
-    const url = await urlSigneeRecu(vente.receipt_doc_path);
+    const url = await urlSigneeRecu(chemin);
     if (!url) return res.status(500).json({ error: "Lien de téléchargement indisponible" });
 
-    return res.json({ url, numero: vente.receipt_number });
+    return res.json({ url, numero });
   } catch (error) {
     console.error("Erreur getSaleRecuUrl:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+/**
+ * POST /api/sales/:id/recu
+ * Etablit le recu d'une vente qui n'en a pas encore, en memorisant au
+ * passage le client saisi. Les trois champs client sont facultatifs :
+ * une vente au comptoir n'a pas toujours d'acheteur nomme.
+ */
+export async function etablirSaleRecu(req, res) {
+  try {
+    const { id } = req.params;
+    const organizationId = req.user.organizationId;
+
+    const { data: vente } = await supabase
+      .from("sales")
+      .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_number, receipt_doc_path, client_name, client_phone, client_email")
+      .eq("id", id)
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+
+    if (!vente) return res.status(404).json({ error: "Vente introuvable" });
+
+    // Le reçu existe déjà : le rouvrir sans le réécrire. Le régénérer
+    // consommerait un numéro de plus à chaque clic.
+    if (vente.receipt_doc_path) {
+      const url = await urlSigneeRecu(vente.receipt_doc_path);
+      if (!url) return res.status(500).json({ error: "Lien de téléchargement indisponible" });
+      return res.json({ url, numero: vente.receipt_number });
+    }
+
+    // Mémoriser le client AVANT d'imprimer : le document doit pouvoir
+    // être régénéré à l'identique plus tard.
+    const client = {
+      client_name: videEnNull(req.body?.clientName),
+      client_phone: videEnNull(req.body?.clientPhone),
+      client_email: videEnNull(req.body?.clientEmail),
+    };
+
+    if (client.client_name || client.client_phone || client.client_email) {
+      const { error } = await supabase
+        .from("sales")
+        .update(client)
+        .eq("id", id)
+        .eq("organization_id", organizationId);
+
+      if (error) {
+        console.error("⚠️  Client non enregistré:", error.message);
+      } else {
+        Object.assign(vente, client);
+      }
+    }
+
+    const recu = await emettreRecuPourVente(vente, organizationId, req);
+    if (!recu) return res.status(500).json({ error: "Le reçu n'a pas pu être établi" });
+
+    const url = await urlSigneeRecu(recu.chemin);
+    if (!url) return res.status(500).json({ error: "Lien de téléchargement indisponible" });
+
+    return res.json({ url, numero: recu.numero });
+  } catch (error) {
+    console.error("Erreur etablirSaleRecu:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 }
@@ -249,9 +340,12 @@ export async function createSale(req, res) {
         receipt_name: receiptName,
         receipt_url: receiptUrl,
         receipt_storage_path: receiptStoragePath,
+        client_name: videEnNull(data.clientName),
+        client_phone: videEnNull(data.clientPhone),
+        client_email: videEnNull(data.clientEmail),
         created_by: req.user.userId || req.user.sub || req.user.id,
       })
-      .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, receipt_url, receipt_storage_path, created_at")
+      .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, receipt_url, receipt_storage_path, client_name, client_phone, client_email, created_at")
       .single();
 
     if (error || !row) {
@@ -263,11 +357,18 @@ export async function createSale(req, res) {
       return res.status(500).json({ error: "Internal server error" });
     }
 
-    // Émettre le reçu de la vente.
+    // Émettre le reçu, mais seulement si le gérant l'a demandé et qu'il
+    // n'a pas joint son propre justificatif : le formulaire propose l'un
+    // OU l'autre, et la colonne Justificatif restitue ce choix. Sans
+    // choix, la vente reste sans justificatif — le reçu pourra être
+    // établi plus tard depuis le tableau.
     // Volontairement APRÈS l'insertion et sans jamais la remettre en
     // cause : une vente enregistrée doit le rester, même si la
     // production du document échoue. Le reçu se régénère à la demande.
-    const recu = await emettreRecuPourVente(row, organizationId, req);
+    const recuDemande = String(data.editerRecu).toLowerCase() === "true";
+    const recu = recuDemande && !receiptStoragePath
+      ? await emettreRecuPourVente(row, organizationId, req)
+      : null;
 
     // Transformer snake_case → camelCase pour le frontend
     const transformed = {
@@ -298,38 +399,74 @@ export async function updateSaleReceipt(req, res) {
   try {
     const { id } = req.params;
     const organizationId = req.user.organizationId;
-    const receiptName = req.body.receiptName || (req.file?.originalname || null);
 
     if (!id) {
       return res.status(400).json({ error: "Sale ID is required" });
     }
 
-    // Vérifier que la vente appartient à l'organisation
+    // Vérifier que la vente appartient à l'organisation.
+    // On relit au passage le fichier déjà en place : s'il est remplacé,
+    // plus rien ne le référencera et il faudra le retirer du bucket.
     const { data: checkData, error: checkError } = await supabase
       .from("sales")
-      .select("id")
+      .select("id, receipt_storage_path")
       .eq("id", id)
       .eq("organization_id", organizationId)
       .single();
-    
+
     if (checkError || !checkData) {
       return res.status(404).json({ error: "Sale not found" });
     }
 
-    // Mettre à jour le receipt_name
+    const champs = {
+      receipt_name: req.body.receiptName || req.file?.originalname || null,
+    };
+
+    // Déposer le fichier lui-même. Sans cela, seul son nom serait
+    // enregistré : la colonne afficherait un justificatif que l'aperçu
+    // serait incapable d'ouvrir, faute d'URL.
+    if (req.file) {
+      try {
+        const uploadResult = await uploadFileToSupabase(
+          req.file.buffer,
+          req.file.originalname,
+          organizationId
+        );
+        champs.receipt_name = uploadResult.fileName;
+        champs.receipt_url = uploadResult.fileUrl;
+        champs.receipt_storage_path = uploadResult.storagePath;
+      } catch (uploadError) {
+        console.error("❌ File upload failed:", uploadError?.message);
+        return res.status(400).json({ error: "File upload failed", details: uploadError?.message });
+      }
+    }
+
     const { data: row, error } = await supabase
       .from("sales")
-      .update({ receipt_name: receiptName })
+      .update(champs)
       .eq("id", id)
       .eq("organization_id", organizationId)
-      .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, created_at")
+      .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, receipt_url, receipt_number, created_at")
       .single();
 
     if (error || !row) {
       console.error("Erreur updateSaleReceipt:", error);
+      // Ne pas laisser derrière nous un fichier que plus rien ne cite
+      if (champs.receipt_storage_path) {
+        await deleteFileFromSupabase(champs.receipt_storage_path);
+      }
       return res.status(500).json({ error: "Internal server error" });
     }
-    
+
+    // L'ancien justificatif est devenu orphelin
+    if (
+      champs.receipt_storage_path &&
+      checkData.receipt_storage_path &&
+      checkData.receipt_storage_path !== champs.receipt_storage_path
+    ) {
+      await deleteFileFromSupabase(checkData.receipt_storage_path);
+    }
+
     const transformed = {
       id: row.id,
       date: row.sale_date,
@@ -339,6 +476,8 @@ export async function updateSaleReceipt(req, res) {
       quantite: row.quantity,
       montant: row.amount,
       justificatif: row.receipt_name,
+      justificatifUrl: row.receipt_url,
+      numeroRecu: row.receipt_number,
       created_at: row.created_at
     };
 
