@@ -1,6 +1,7 @@
 ﻿import { app } from "./app.js";
 import { ensureBucketExists } from "./utils/supabase-storage.js";
 import { ensureDossiersBucketExists } from "./utils/financing-storage.js";
+import { ensureRecusBucketExists } from "./utils/recu-vente.js";
 
 const port = Number(process.env.PORT || 3001);
 
@@ -15,6 +16,11 @@ ensureBucketExists().catch(err => {
 // Bucket prive des pieces de dossier, sur la base de financement
 ensureDossiersBucketExists().catch(err => {
   console.error("⚠️ Warning: Could not ensure dossiers bucket exists", err?.message);
+});
+
+// Bucket prive des recus de vente emis par OGOUE
+ensureRecusBucketExists().catch(err => {
+  console.error("⚠️ Warning: Could not ensure recus bucket exists", err?.message);
 });
 
 try {

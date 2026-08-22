@@ -1,6 +1,7 @@
 ﻿import { supabase } from "../db/supabase.js";
 import { z } from "zod";
 import { uploadFileToSupabase, deleteFileFromSupabase } from "../utils/supabase-storage.js";
+import { emettreRecu, urlSigneeRecu } from "../utils/recu-vente.js";
 import { logDeletion } from "../utils/deletion-audit.js";
 
 const listSchema = z.object({
@@ -43,7 +44,7 @@ export async function listSales(req, res) {
     // Récupérer les ventes avec Supabase (filtrées par période côté DB si fournie)
     let query = supabase
       .from("sales")
-      .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, receipt_url, created_at, created_by")
+      .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, receipt_url, receipt_number, created_at, created_by")
       .eq("organization_id", organizationId);
 
     if (finalStartDate && finalEndDate) {
@@ -114,6 +115,9 @@ export async function listSales(req, res) {
       montant: row.amount,
       justificatif: row.receipt_name,
       justificatifUrl: row.receipt_url,
+      // Le reçu émis par OGOUE : on n'expose que son numéro, le PDF
+      // se demande à la pièce via /sales/:id/recu (lien signé).
+      numeroRecu: row.receipt_number,
       created_at: row.created_at,
       created_by_name: row.created_by_name
     }));
@@ -125,6 +129,82 @@ export async function listSales(req, res) {
       return res.status(400).json({ error: "Validation error", details: error.issues });
     }
     return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+/**
+ * GET /api/sales/:id/recu
+ * Lien de telechargement du recu, valable quelques minutes. Le bucket
+ * etant prive, c'est le seul acces possible, et il exige que la vente
+ * appartienne bien a l'organisation de l'appelant.
+ */
+export async function getSaleRecuUrl(req, res) {
+  try {
+    const { id } = req.params;
+    const organizationId = req.user.organizationId;
+
+    const { data: vente } = await supabase
+      .from("sales")
+      .select("id, receipt_number, receipt_doc_path")
+      .eq("id", id)
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+
+    if (!vente) return res.status(404).json({ error: "Vente introuvable" });
+    if (!vente.receipt_doc_path) {
+      return res.status(404).json({ error: "Aucun reçu n'a été émis pour cette vente" });
+    }
+
+    const url = await urlSigneeRecu(vente.receipt_doc_path);
+    if (!url) return res.status(500).json({ error: "Lien de téléchargement indisponible" });
+
+    return res.json({ url, numero: vente.receipt_number });
+  } catch (error) {
+    console.error("Erreur getSaleRecuUrl:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+/**
+ * Emet le recu d'une vente et l'attache a la ligne.
+ *
+ * Ne propage aucune erreur : l'echec du document ne doit jamais
+ * invalider une vente deja enregistree. Le reçu pourra etre reemis.
+ */
+async function emettreRecuPourVente(row, organizationId, req) {
+  try {
+    const { data: organisation } = await supabase
+      .from("organizations")
+      .select("id, name, rccm_number, nif_number, activity")
+      .eq("id", organizationId)
+      .single();
+
+    if (!organisation) {
+      console.warn("⚠️  Organisation introuvable, reçu non émis");
+      return null;
+    }
+
+    const recu = await emettreRecu({
+      vente: row,
+      organisation,
+      emisPar: req.user.role === "agent" ? "Agent" : "Gérant",
+    });
+    if (!recu) return null;
+
+    const { error } = await supabase
+      .from("sales")
+      .update({ receipt_number: recu.numero, receipt_doc_path: recu.chemin })
+      .eq("id", row.id);
+
+    if (error) {
+      console.error("⚠️  Reçu émis mais non rattaché à la vente:", error.message);
+      return null;
+    }
+
+    return recu;
+  } catch (error) {
+    console.error("⚠️  Émission du reçu impossible:", error?.message);
+    return null;
   }
 }
 
@@ -182,7 +262,13 @@ export async function createSale(req, res) {
       }
       return res.status(500).json({ error: "Internal server error" });
     }
-    
+
+    // Émettre le reçu de la vente.
+    // Volontairement APRÈS l'insertion et sans jamais la remettre en
+    // cause : une vente enregistrée doit le rester, même si la
+    // production du document échoue. Le reçu se régénère à la demande.
+    const recu = await emettreRecuPourVente(row, organizationId, req);
+
     // Transformer snake_case → camelCase pour le frontend
     const transformed = {
       id: row.id,
@@ -194,9 +280,10 @@ export async function createSale(req, res) {
       montant: row.amount,
       justificatif: row.receipt_name,
       justificatifUrl: row.receipt_url,
+      numeroRecu: recu?.numero || null,
       created_at: row.created_at
     };
-    
+
     return res.status(201).json(transformed);
   } catch (error) {
     console.error("Erreur createSale:", error);
