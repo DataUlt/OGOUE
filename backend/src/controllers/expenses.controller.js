@@ -202,38 +202,74 @@ export async function updateExpenseReceipt(req, res) {
   try {
     const { id } = req.params;
     const organizationId = req.user.organizationId;
-    const receiptName = req.body.receiptName || (req.file?.originalname || null);
 
     if (!id) {
       return res.status(400).json({ error: "Expense ID is required" });
     }
 
-    // Vérifier que la dépense appartient à l'organisation
+    // Vérifier que la dépense appartient à l'organisation.
+    // On relit au passage le fichier déjà en place : s'il est remplacé,
+    // plus rien ne le référencera et il faudra le retirer du bucket.
     const { data: checkData, error: checkError } = await supabase
       .from("expenses")
-      .select("id")
+      .select("id, receipt_storage_path")
       .eq("id", id)
       .eq("organization_id", organizationId)
       .single();
-    
+
     if (checkError || !checkData) {
       return res.status(404).json({ error: "Expense not found" });
     }
 
-    // Mettre à jour le receipt_name
+    const champs = {
+      receipt_name: req.body.receiptName || req.file?.originalname || null,
+    };
+
+    // Déposer le fichier lui-même. Sans cela, seul son nom serait
+    // enregistré : la dépense passerait pour justifiée alors qu'aucun
+    // document n'existe, et l'aperçu n'aurait aucune URL à ouvrir.
+    if (req.file) {
+      try {
+        const uploadResult = await uploadFileToSupabase(
+          req.file.buffer,
+          req.file.originalname,
+          organizationId
+        );
+        champs.receipt_name = uploadResult.fileName;
+        champs.receipt_url = uploadResult.fileUrl;
+        champs.receipt_storage_path = uploadResult.storagePath;
+      } catch (uploadError) {
+        console.error("❌ File upload failed:", uploadError?.message);
+        return res.status(400).json({ error: "File upload failed", details: uploadError?.message });
+      }
+    }
+
     const { data: row, error } = await supabase
       .from("expenses")
-      .update({ receipt_name: receiptName })
+      .update(champs)
       .eq("id", id)
       .eq("organization_id", organizationId)
-      .select("id, expense_date, category, payment_method, amount, receipt_name, created_at")
+      .select("id, expense_date, category, payment_method, amount, receipt_name, receipt_url, created_at")
       .single();
 
     if (error || !row) {
       console.error("Erreur updateExpenseReceipt:", error);
+      // Ne pas laisser derrière nous un fichier que plus rien ne cite
+      if (champs.receipt_storage_path) {
+        await deleteFileFromSupabase(champs.receipt_storage_path);
+      }
       return res.status(500).json({ error: "Internal server error" });
     }
-    
+
+    // L'ancien justificatif est devenu orphelin
+    if (
+      champs.receipt_storage_path &&
+      checkData.receipt_storage_path &&
+      checkData.receipt_storage_path !== champs.receipt_storage_path
+    ) {
+      await deleteFileFromSupabase(checkData.receipt_storage_path);
+    }
+
     const transformed = {
       id: row.id,
       date: row.expense_date,
@@ -241,6 +277,7 @@ export async function updateExpenseReceipt(req, res) {
       moyen_paiement: row.payment_method,
       montant: row.amount,
       justificatif: row.receipt_name,
+      justificatifUrl: row.receipt_url,
       created_at: row.created_at
     };
 
