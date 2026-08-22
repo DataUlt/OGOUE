@@ -348,6 +348,7 @@ Il permet d'évaluer rapidement un niveau, de comparer et de suivre une évoluti
 <script src="js/ogoue-state.js"></script>
 <script src="js/header-ui.js"></script>
 <script src="js/mobile-menu.js"></script>
+<script src="js/recu-client.js"></script>
 <script>
 // ============================================================
 // CALCUL DYNAMIQUE DU SCORE DE TRAÇABILITÉ
@@ -403,28 +404,46 @@ async function fetchOperations() {
 /**
  * Calcule les pourcentages de traçabilité
  */
+/**
+ * Une vente est justifiée par l'une ou l'autre des deux voies offertes
+ * au moment de la saisie : le reçu numéroté édité par OGOUE, ou le
+ * document que le gérant a joint lui-même. N'en compter qu'une seule
+ * ferait passer pour non justifiées des ventes qui le sont.
+ */
+function venteJustifiee(vente) {
+  return Boolean(vente.numeroRecu) || Boolean((vente.justificatif || "").trim());
+}
+
+/** Une dépense n'a qu'une voie : le document joint. */
+function depenseJustifiee(depense) {
+  return Boolean((depense.justificatif || "").trim());
+}
+
 function calculateScores(operations) {
   if (!operations) return null;
 
   const { sales, expenses } = operations;
 
-  // Les ventes ne comptent plus dans le score.
-  // ------------------------------------------------------------
-  // Chaque vente enregistrée reçoit désormais un reçu émis par OGOUE.
-  // Les compter reviendrait à mesurer 100 % en permanence, et surtout
-  // à présenter comme preuve un document que nous produisons nous-mêmes
-  // à partir de ce que le gérant a saisi. Un justificatif de dépense,
-  // lui, vient d'un tiers : c'est cela que le score doit mesurer, et
-  // c'est ce qui le rend recevable devant une institution financière.
   const totalSales = sales.length;
-  const salesWithReceipt = sales.filter(s => s.numeroRecu).length;
+  const salesWithReceipt = sales.filter(venteJustifiee).length;
   const salesPercentage = totalSales > 0 ? Math.round((salesWithReceipt / totalSales) * 100) : 0;
 
   const totalExpenses = expenses.length;
-  const expensesWithReceipt = expenses.filter(e => e.justificatif && e.justificatif.trim()).length;
+  const expensesWithReceipt = expenses.filter(depenseJustifiee).length;
   const expensesPercentage = totalExpenses > 0 ? Math.round((expensesWithReceipt / totalExpenses) * 100) : 0;
 
-  const globalScore = expensesPercentage;
+  // Le score global, tel que le définit son intitulé : la part des
+  // ventes ET des dépenses associées à un justificatif valide.
+  // ------------------------------------------------------------
+  // On rapporte le total des opérations justifiées au total des
+  // opérations, et non la moyenne des deux pourcentages : sur 20 ventes
+  // toutes justifiées et 1 dépense qui ne l'est pas, une moyenne
+  // annoncerait 50 %, là où la réalité documentaire est de 95 %.
+  const totalOperations = totalSales + totalExpenses;
+  const operationsJustifiees = salesWithReceipt + expensesWithReceipt;
+  const globalScore = totalOperations > 0
+    ? Math.round((operationsJustifiees / totalOperations) * 100)
+    : 0;
 
   return {
     globalScore,
@@ -531,27 +550,38 @@ function openUploadModal() {
     return;
   }
 
-  // Ventes sans justificatif
-  const salesWithoutReceipt = ops.sales.filter(s => !s.justificatif || !s.justificatif.trim());
+  // Ventes sans justificatif — même règle que le score, sinon la liste
+  // réclamerait des pièces pour des ventes déjà couvertes par un reçu.
+  const salesWithoutReceipt = ops.sales.filter(s => !venteJustifiee(s));
   const salesContainer = document.getElementById("salesListContainer");
   
   if (salesWithoutReceipt.length === 0) {
     salesContainer.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-sm">? Toutes les ventes ont un justificatif</p>';
   } else {
+    // Une vente dispose des deux mêmes voies qu'au moment de la saisie :
+    // le reçu édité par OGOUE, ou un document existant à téléverser.
     salesContainer.innerHTML = salesWithoutReceipt.map(sale => `
-      <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-        <input type="checkbox" class="sale-checkbox" data-id="${sale.id}" data-type="sales">
-        <div class="flex-1">
+      <div class="flex flex-wrap items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <div class="flex-1 min-w-[140px]">
           <p class="text-sm font-medium text-[#0a0c0a] dark:text-white">${sale.description || 'Sans description'}</p>
-          <p class="text-xs text-gray-500 dark:text-gray-400">${sale.date} • ${sale.montant} FCFA</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">${formatDateFr(sale.date)} • ${formatMontantFr(sale.montant)}</p>
         </div>
-        <input type="file" class="file-input" data-id="${sale.id}" data-type="sales" style="width: 150px;">
+        <div class="flex items-center gap-2">
+          <button type="button" class="recu-btn inline-flex items-center gap-1 rounded-lg bg-primary/15 px-3 py-2 text-xs font-bold text-primary hover:bg-primary/25 transition whitespace-nowrap" data-id="${sale.id}">
+            <span class="material-symbols-outlined text-[16px]">description</span>
+            Éditer le reçu
+          </button>
+          <button type="button" class="joindre-btn inline-flex items-center gap-1 rounded-lg bg-gray-200 dark:bg-gray-700 px-3 py-2 text-xs font-bold text-[#0a0c0a] dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition whitespace-nowrap" data-id="${sale.id}" data-type="sales">
+            <span class="material-symbols-outlined text-[16px]">upload</span>
+            Joindre un fichier
+          </button>
+        </div>
       </div>
     `).join('');
   }
 
   // Dépenses sans justificatif
-  const expensesWithoutReceipt = ops.expenses.filter(e => !e.justificatif || !e.justificatif.trim());
+  const expensesWithoutReceipt = ops.expenses.filter(e => !depenseJustifiee(e));
   const expensesContainer = document.getElementById("expensesListContainer");
   
   if (ops.expenses.length === 0) {
@@ -561,14 +591,18 @@ function openUploadModal() {
     // Des dépenses existent et toutes ont un justificatif
     expensesContainer.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-sm">? Toutes les dépenses ont un justificatif</p>';
   } else {
+    // Une dépense n'a qu'une voie : son justificatif vient d'un tiers,
+    // OGOUE n'a rien à éditer à sa place.
     expensesContainer.innerHTML = expensesWithoutReceipt.map(expense => `
-      <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-        <input type="checkbox" class="expense-checkbox" data-id="${expense.id}" data-type="expenses">
-        <div class="flex-1">
+      <div class="flex flex-wrap items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <div class="flex-1 min-w-[140px]">
           <p class="text-sm font-medium text-[#0a0c0a] dark:text-white">${expense.categorie || 'Sans catégorie'}</p>
-          <p class="text-xs text-gray-500 dark:text-gray-400">${expense.date} • ${expense.montant} FCFA</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">${formatDateFr(expense.date)} • ${formatMontantFr(expense.montant)}</p>
         </div>
-        <input type="file" class="file-input" data-id="${expense.id}" data-type="expenses" style="width: 150px;">
+        <button type="button" class="joindre-btn inline-flex items-center gap-1 rounded-lg bg-gray-200 dark:bg-gray-700 px-3 py-2 text-xs font-bold text-[#0a0c0a] dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition whitespace-nowrap" data-id="${expense.id}" data-type="expenses">
+          <span class="material-symbols-outlined text-[16px]">upload</span>
+          Joindre un fichier
+        </button>
       </div>
     `).join('');
   }
@@ -583,10 +617,115 @@ function closeUploadModal() {
   closeBtn.disabled = false;
 }
 
+/** Date ISO -> 22/08/2026 */
+function formatDateFr(valeur) {
+  if (!valeur) return "-";
+  const d = new Date(valeur);
+  if (isNaN(d.getTime())) return String(valeur);
+  return d.toLocaleDateString("fr-FR");
+}
+
+/** 12500 -> 12 500 FCFA */
+function formatMontantFr(valeur) {
+  const n = typeof valeur === "string" ? parseFloat(valeur) : valeur;
+  if (typeof n !== "number" || isNaN(n)) return "-";
+  return n.toLocaleString("fr-FR", { maximumFractionDigits: 0 }) + " FCFA";
+}
+
+const TYPES_AUTORISES = ["application/pdf", "image/jpeg", "image/png"];
+const TAILLE_MAX = 5 * 1024 * 1024; // 5 Mo
+
+function validerFichier(fichier) {
+  if (!TYPES_AUTORISES.includes(fichier.type)) {
+    return "Format non autorisé. Utilisez PDF, JPEG ou PNG.";
+  }
+  if (fichier.size > TAILLE_MAX) {
+    return "Fichier trop volumineux. Taille max : 5 Mo.";
+  }
+  return null;
+}
+
 /**
- * Met à jour le justificatif d'une opération
+ * Recalcule le score et referme le modal après un rattrapage.
  */
-async function updateOperationJustificatif(type, operationId, file, inputElement) {
+async function rafraichirApresRattrapage() {
+  window.currentOperations = await fetchOperations();
+  updateUI(calculateScores(window.currentOperations));
+  closeUploadModal();
+}
+
+/**
+ * Voie 1 (ventes uniquement) : faire éditer le reçu par OGOUE, après
+ * saisie éventuelle du client.
+ */
+function etablirRecuDepuisModal(bouton) {
+  if (!window.OGOUE_RECU) {
+    console.error("recu-client.js n'est pas chargé");
+    return;
+  }
+
+  window.OGOUE_RECU.demanderClientPuisEtablirRecu({
+    venteId: bouton.dataset.id,
+    apresEtablissement: async () => {
+      showToast("Reçu établi", 2000);
+      await rafraichirApresRattrapage();
+    }
+  });
+}
+
+/**
+ * Voie 2 (ventes et dépenses) : téléverser un document existant.
+ * Ouvre le sélecteur de fichier, puis envoie sur la route de mise à
+ * jour de l'opération.
+ */
+function joindreFichierDepuisModal(bouton) {
+  const operationId = bouton.dataset.id;
+  const type = bouton.dataset.type;
+
+  const champ = document.createElement("input");
+  champ.type = "file";
+  champ.accept = ".pdf,.jpg,.jpeg,.png";
+  champ.style.display = "none";
+  document.body.appendChild(champ);
+
+  champ.addEventListener("change", async () => {
+    const fichier = champ.files[0];
+    document.body.removeChild(champ);
+    if (!fichier) return;
+
+    const erreurFichier = validerFichier(fichier);
+    if (erreurFichier) {
+      showToast(erreurFichier, 3000);
+      return;
+    }
+
+    const libelle = bouton.innerHTML;
+    bouton.disabled = true;
+    bouton.textContent = "Envoi…";
+
+    const ok = await envoyerJustificatif(type, operationId, fichier);
+
+    if (ok) {
+      showToast(`${fichier.name} téléchargé avec succès`, 2000);
+      await rafraichirApresRattrapage();
+    } else {
+      showToast("Erreur lors du téléchargement du justificatif", 3000);
+      bouton.disabled = false;
+      bouton.innerHTML = libelle;
+    }
+  });
+
+  champ.click();
+}
+
+/**
+ * Envoie le justificatif d'une opération.
+ *
+ * En multipart, et non en JSON : cette fonction n'envoyait auparavant
+ * que le NOM du fichier, jamais son contenu. L'opération paraissait
+ * justifiée alors qu'aucun document n'avait été déposé.
+ */
+async function envoyerJustificatif(type, operationId, fichier) {
   const token = getToken();
   if (!token) {
     handleUnauthorized();
@@ -594,28 +733,17 @@ async function updateOperationJustificatif(type, operationId, file, inputElement
   }
 
   try {
-    // Désactiver le bouton close et show loading state
-    const closeBtn = document.getElementById("closeModalBtn");
-    closeBtn.disabled = true;
-    inputElement.disabled = true;
-
     const endpoint = type === "sales" ? "/api/sales" : "/api/expenses";
-    const url = `${API_BASE_URL}${endpoint}/${operationId}`;
-    
-    console.log("?? Upload vers:", url);
-    console.log("?? Fichier:", file.name);
 
-    const response = await fetch(url, {
+    const formData = new FormData();
+    formData.append("receipt", fichier);
+    formData.append("receiptName", fichier.name);
+
+    const response = await fetch(`${API_BASE_URL}${endpoint}/${operationId}`, {
       method: "PUT",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ receiptName: file.name })
+      headers: { "Authorization": `Bearer ${token}` },
+      body: formData
     });
-
-    console.log("?? Status:", response.status);
-    console.log("?? Headers:", response.headers);
 
     if (response.status === 401) {
       handleUnauthorized();
@@ -623,53 +751,13 @@ async function updateOperationJustificatif(type, operationId, file, inputElement
     }
 
     if (!response.ok) {
-      const text = await response.text();
-      console.error("? Erreur API (text):", text);
-      
-      try {
-        const error = JSON.parse(text);
-        console.error("? Erreur API (json):", error);
-      } catch (e) {
-        // La réponse n'est pas du JSON
-      }
-      
-      closeBtn.disabled = false;
-      inputElement.disabled = false;
+      console.error("Erreur API:", await response.text());
       return false;
     }
 
-    console.log("? Justificatif téléchargé avec succès");
-    
-    // Afficher notification de succès
-    console.log("?? Affichage du toast...");
-    showToast(`? ${file.name} téléchargé avec succès!`, 2000);
-    
-    // Attendre un peu puis rafraîchir et fermer
-    console.log("? Attente de 1500ms...");
-    await new Promise(r => setTimeout(r, 1500));
-    
-    console.log("?? Rafraîchissement des données...");
-    // Refresh the data
-    window.currentOperations = await fetchOperations();
-    console.log("?? Nouvelles opérations:", window.currentOperations);
-    
-    const scores = calculateScores(window.currentOperations);
-    console.log("?? Nouveaux scores:", scores);
-    
-    updateUI(scores);
-    console.log("?? UI mise à jour");
-    
-    // Fermer le modal
-    console.log("? Fermeture du modal...");
-    closeUploadModal();
-    console.log("? Modal fermé");
-    
     return true;
   } catch (error) {
-    console.error("? Erreur:", error);
-    const closeBtn = document.getElementById("closeModalBtn");
-    closeBtn.disabled = false;
-    inputElement.disabled = false;
+    console.error("Erreur envoi justificatif:", error);
     return false;
   }
 }
@@ -722,22 +810,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target.id === "uploadModal") closeUploadModal();
   });
 
-  // File input changes
-  document.addEventListener("change", async (e) => {
-    if (!e.target.classList.contains("file-input")) return;
+  // Les deux voies de rattrapage, depuis la liste des manquants
+  document.addEventListener("click", (e) => {
+    const recuBtn = e.target.closest(".recu-btn");
+    if (recuBtn) {
+      etablirRecuDepuisModal(recuBtn);
+      return;
+    }
 
-    const files = e.target.files;
-    const operationId = e.target.dataset.id;
-    const operationType = e.target.dataset.type;
-
-    if (files.length > 0) {
-      const file = files[0];
-      const success = await updateOperationJustificatif(operationType, operationId, file, e.target);
-      
-      if (!success) {
-        e.target.value = ""; // Reset input
-        showToast("? Erreur lors du téléchargement du justificatif", 3000);
-      }
+    const joindreBtn = e.target.closest(".joindre-btn");
+    if (joindreBtn) {
+      joindreFichierDepuisModal(joindreBtn);
     }
   });
 });
