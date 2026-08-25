@@ -313,12 +313,90 @@
 
                         <div>
                             <p class="text-base font-medium leading-normal pb-2 text-[#0d1b19] dark:text-gray-200">
-                                Joindre le justificatif
+                                Justificatif de la vente
                             </p>
-                            <div class="mt-1 flex justify-center px-6 pt-10 pb-12 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg">
+
+                            <!-- Deux voies &agrave; &eacute;galit&eacute; : OGOUE &eacute;dite le re&ccedil;u, ou l'agent
+                                 joint son propre document. La colonne Justificatif du
+                                 tableau restituera ensuite le choix fait ici. -->
+                            <div id="justificatif-choix" class="mt-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <button type="button" id="btn-choix-recu"
+                                        class="group flex flex-col items-center text-center gap-2 px-6 py-8 rounded-lg border-2 border-gray-300 dark:border-gray-600 hover:border-primary dark:hover:border-primary hover:bg-primary/5 transition-colors duration-200">
+                                    <span class="material-symbols-outlined text-4xl text-gray-400 dark:text-gray-500 group-hover:text-primary transition-colors">description</span>
+                                    <span class="text-sm font-semibold text-[#0d1b19] dark:text-gray-100">&Eacute;diter le re&ccedil;u</span>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400">OGOUE &eacute;tablit un re&ccedil;u num&eacute;rot&eacute;</span>
+                                </button>
+                                <button type="button" id="btn-choix-fichier"
+                                        class="group flex flex-col items-center text-center gap-2 px-6 py-8 rounded-lg border-2 border-gray-300 dark:border-gray-600 hover:border-primary dark:hover:border-primary hover:bg-primary/5 transition-colors duration-200">
+                                    <span class="material-symbols-outlined text-4xl text-gray-400 dark:text-gray-500 group-hover:text-primary transition-colors">upload</span>
+                                    <span class="text-sm font-semibold text-[#0d1b19] dark:text-gray-100">Joindre un fichier</span>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400">Une facture ou un re&ccedil;u existant</span>
+                                </button>
+                            </div>
+
+                            <!-- Choix retenu : le re&ccedil;u &eacute;dit&eacute; par OGOUE, avec son client -->
+                            <div id="recu-zone-auto" class="hidden mt-1 p-5 border-2 border-primary bg-primary/10 rounded-lg">
+                                <div class="flex items-start gap-4">
+                                    <span class="material-symbols-outlined text-2xl text-primary">description</span>
+                                    <div class="flex-1 text-left">
+                                        <p class="text-sm font-medium text-[#0d1b19] dark:text-gray-100">
+                                            Re&ccedil;u de vente OGOUE
+                                        </p>
+                                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                            Un re&ccedil;u num&eacute;rot&eacute; sera &eacute;dit&eacute; &agrave; l'enregistrement de la vente.
+                                            Renseignez le client : il figurera sur le document.
+                                        </p>
+                                    </div>
+                                    <button type="button" id="btn-annuler-choix-recu" class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-primary/20 text-gray-600 dark:text-gray-400" title="Changer de justificatif">
+                                        <span class="material-symbols-outlined text-base">close</span>
+                                    </button>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-5">
+                                    <label class="flex flex-col">
+                                        <p class="text-xs font-medium leading-normal pb-1.5 text-[#0d1b19] dark:text-gray-200">
+                                            Nom et pr&eacute;nom du client
+                                        </p>
+                                        <input
+                                            id="recu-client-nom"
+                                            class="form-input w-full rounded-lg text-[#0d1b19] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-11 placeholder:text-gray-400 dark:placeholder:text-gray-500 px-3 text-sm font-normal"
+                                            placeholder="Ex : Jean OBAME"
+                                            type="text"
+                                            autocomplete="off"
+                                        />
+                                    </label>
+                                    <label class="flex flex-col">
+                                        <p class="text-xs font-medium leading-normal pb-1.5 text-[#0d1b19] dark:text-gray-200">
+                                            T&eacute;l&eacute;phone
+                                        </p>
+                                        <input
+                                            id="recu-client-telephone"
+                                            class="form-input w-full rounded-lg text-[#0d1b19] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-11 placeholder:text-gray-400 dark:placeholder:text-gray-500 px-3 text-sm font-normal"
+                                            placeholder="Ex : 077 00 00 00"
+                                            type="tel"
+                                            autocomplete="off"
+                                        />
+                                    </label>
+                                    <label class="flex flex-col">
+                                        <p class="text-xs font-medium leading-normal pb-1.5 text-[#0d1b19] dark:text-gray-200">
+                                            Adresse e-mail
+                                        </p>
+                                        <input
+                                            id="recu-client-email"
+                                            class="form-input w-full rounded-lg text-[#0d1b19] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-11 placeholder:text-gray-400 dark:placeholder:text-gray-500 px-3 text-sm font-normal"
+                                            placeholder="Ex : client@exemple.com"
+                                            type="email"
+                                            autocomplete="off"
+                                        />
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Zone d'upload avec &eacute;tat par d&eacute;faut -->
+                            <div id="upload-zone-default" class="hidden mt-1 px-6 pt-10 pb-8 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg transition-colors duration-200 hover:border-primary dark:hover:border-primary hover:bg-primary/5">
                                 <div class="text-center">
                                     <span class="material-symbols-outlined text-5xl text-gray-400 dark:text-gray-500">cloud_upload</span>
-                                    <div class="flex text-sm text-gray-600 dark:text-gray-400 mt-2">
+                                    <div class="flex justify-center text-sm text-gray-600 dark:text-gray-400 mt-2">
                                         <label class="relative cursor-pointer rounded-md font-medium text-primary hover:text-primary/80 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary/50" for="file-upload">
                                             <span>T&eacute;l&eacute;versez un fichier</span>
                                             <input class="sr-only" id="file-upload" name="file-upload" type="file"/>
@@ -328,6 +406,62 @@
                                     <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">
                                         Formats accept&eacute;s : PDF, JPEG, PNG. Taille max : 5Mo
                                     </p>
+                                    <button type="button" id="btn-revenir-choix" class="text-xs font-medium text-primary hover:text-primary/80 underline mt-4">
+                                        Changer de justificatif
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Zone apr&egrave;s s&eacute;lection d'un fichier -->
+                            <div id="upload-zone-selected" class="hidden mt-1 p-4 border-2 border-primary bg-primary/10 rounded-lg">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <span class="material-symbols-outlined text-2xl text-primary">insert_drive_file</span>
+                                        <div class="text-left">
+                                            <p class="text-sm font-medium text-[#0d1b19] dark:text-gray-100" id="file-name">Fichier s&eacute;lectionn&eacute;</p>
+                                            <p class="text-xs text-gray-600 dark:text-gray-400" id="file-size">0 Mo</p>
+                                        </div>
+                                    </div>
+                                    <button type="button" id="btn-clear-file" class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-primary/20 text-gray-600 dark:text-gray-400">
+                                        <span class="material-symbols-outlined text-base">close</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Zone pendant l'upload -->
+                            <div id="upload-zone-uploading" class="hidden mt-1 p-4 border-2 border-primary bg-primary/10 rounded-lg">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <span class="material-symbols-outlined text-2xl text-primary animate-spin">hourglass_top</span>
+                                    <div class="text-left">
+                                        <p class="text-sm font-medium text-[#0d1b19] dark:text-gray-100">T&eacute;l&eacute;chargement en cours...</p>
+                                        <p class="text-xs text-gray-600 dark:text-gray-400" id="upload-progress-text">0%</p>
+                                    </div>
+                                </div>
+                                <div class="w-full bg-gray-300 dark:bg-gray-600 rounded-full h-2">
+                                    <div id="upload-progress-bar" class="bg-primary h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Zone apr&egrave;s upload r&eacute;ussi -->
+                            <div id="upload-zone-success" class="hidden mt-1 p-4 border-2 border-cyan-500 bg-cyan-50 dark:bg-cyan-500/10 rounded-lg">
+                                <div class="flex items-center gap-3">
+                                    <span class="material-symbols-outlined text-2xl text-cyan-500">check_circle</span>
+                                    <div class="text-left">
+                                        <p class="text-sm font-medium text-cyan-700 dark:text-cyan-400">Fichier t&eacute;l&eacute;charg&eacute; avec succ&egrave;s</p>
+                                        <p class="text-xs text-cyan-600 dark:text-cyan-300" id="file-success-name">Fichier re&ccedil;u</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Zone erreur upload -->
+                            <div id="upload-zone-error" class="hidden mt-1 p-4 border-2 border-red-500 bg-red-50 dark:bg-red-500/10 rounded-lg">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-2xl text-red-500 flex-shrink-0">error</span>
+                                    <div class="text-left">
+                                        <p class="text-sm font-medium text-red-700 dark:text-red-400">Erreur lors du t&eacute;l&eacute;chargement</p>
+                                        <p class="text-xs text-red-600 dark:text-red-300 mt-1" id="upload-error-message">Une erreur est survenue</p>
+                                        <button type="button" id="btn-retry-file" class="text-xs text-primary hover:text-primary/80 font-medium mt-2 underline">R&eacute;essayer</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -444,6 +578,7 @@
 
 <script src="js/ogoue-state.js"></script>
 <script src="js/header-ui.js"></script>
+<script src="js/recu-client.js"></script>
 <script src="js/ventes.js"></script>
 <script src="js/topbar-actions.js"></script>
 <script>
