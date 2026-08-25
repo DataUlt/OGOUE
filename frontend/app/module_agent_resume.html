@@ -150,14 +150,31 @@
                             <!-- Panel calendrier -->
                             <div
                                 id="dateFilterPanel"
-                                class="absolute right-0 mt-2 w-[min(300px,calc(100vw-2rem))] rounded-xl border border-[#e8ede8] dark:border-gray-700 bg-white dark:bg-card-dark shadow-xl p-4 hidden z-20"
+                                class="absolute right-0 mt-2 w-[min(320px,calc(100vw-2rem))] rounded-xl border border-border-light dark:border-border-dark bg-white dark:bg-card-dark shadow-xl p-4 hidden z-20"
                             >
                                 <!-- Header mois + navigation -->
-                                <div class="flex items-center justify-between mb-3">
+                                <!-- Header (mois + annee editable) -->
+                                <div class="flex items-center justify-between gap-2 mb-3">
                                     <button id="prevMonth" type="button" class="p-1.5 rounded-full hover:bg-background-light dark:hover:bg-background-dark">
                                         <span class="material-symbols-outlined text-base text-gray-600 dark:text-gray-300">chevron_left</span>
                                     </button>
-                                    <p id="monthLabel" class="text-sm font-semibold text-[#0a0c0a] dark:text-gray-100"></p>
+
+                                    <div class="flex items-center gap-2">
+                                        <select
+                                            id="monthSelect"
+                                            class="h-9 rounded-lg border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark px-2 text-sm text-text-light-primary dark:text-text-dark-primary focus:outline-none focus:ring-2 focus:ring-primary/40"
+                                        ></select>
+
+                                        <input
+                                            id="yearInput"
+                                            type="number"
+                                            inputmode="numeric"
+                                            min="1900"
+                                            max="2200"
+                                            class="h-9 w-[92px] rounded-lg border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark px-2 text-sm text-text-light-primary dark:text-text-dark-primary focus:outline-none focus:ring-2 focus:ring-primary/40"
+                                        />
+                                    </div>
+
                                     <button id="nextMonth" type="button" class="p-1.5 rounded-full hover:bg-background-light dark:hover:bg-background-dark">
                                         <span class="material-symbols-outlined text-base text-gray-600 dark:text-gray-300">chevron_right</span>
                                     </button>
@@ -174,7 +191,7 @@
                                 </div>
 
                                 <!-- Actions -->
-                                <div class="flex justify-between items-center pt-3 mt-3 border-t border-[#e8ede8] dark:border-gray-700">
+                                <div class="flex justify-between items-center pt-3 mt-3 border-t border-border-light dark:border-border-dark">
                                     <button
                                         id="resetRange"
                                         type="button"
@@ -273,6 +290,7 @@
 <!-- Store OGOUE -->
 <script src="js/ogoue-state.js"></script>
 <script src="js/header-ui.js"></script>
+<script src="js/periode-selecteurs.js"></script>
 <script src="js/resume.js"></script>
 <script src="js/topbar-actions.js"></script>
 <script>

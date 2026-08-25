@@ -5,22 +5,29 @@ document.addEventListener("DOMContentLoaded", function () {
     const panel = document.getElementById("dateFilterPanel");
     const labelSpan = document.getElementById("dateFilterLabel");
     const calendarGrid = document.getElementById("calendarGrid");
-    const monthLabel = document.getElementById("monthLabel");
+    const monthSelect = document.getElementById("monthSelect");
+    const yearInput = document.getElementById("yearInput");
     const prevMonthBtn = document.getElementById("prevMonth");
     const nextMonthBtn = document.getElementById("nextMonth");
     const resetBtn = document.getElementById("resetRange");
     const closeBtn = document.getElementById("closeCalendar");
 
-    if (!btn || !panel) return;
-
-    const monthNames = [
-        "janvier", "février", "mars", "avril", "mai", "juin",
-        "juillet", "août", "septembre", "octobre", "novembre", "décembre"
-    ];
+    if (!btn || !panel || !monthSelect || !yearInput) return;
 
     let current = new Date();
     let startDate = null;
     let endDate = null;
+
+    // Choix direct du mois et de l'année, en plus des flèches
+    const selecteurs = window.OGOUE_PERIODE?.installerSelecteursMoisAnnee({
+        selectMois: monthSelect,
+        champAnnee: yearInput,
+        lireVue: () => current,
+        ecrireVue: (annee, mois) => {
+            current = new Date(annee, mois, 1);
+            renderCalendar();
+        }
+    });
 
     function pad(n) {
         return n.toString().padStart(2, "0");
@@ -56,7 +63,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function renderCalendar() {
         const year = current.getFullYear();
         const month = current.getMonth();
-        monthLabel.textContent = `${monthNames[month]} ${year}`;
+        selecteurs?.synchroniser();
 
         calendarGrid.innerHTML = "";
 
