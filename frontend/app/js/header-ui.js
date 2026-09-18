@@ -358,7 +358,7 @@
 
   function createPopover(){
     const el = document.createElement('div');
-    el.className = 'fixed z-50 rounded-lg shadow-xl bg-white dark:bg-[#1E293B] border border-gray-300 dark:border-gray-600';
+    el.className = 'ogo-popover fixed z-50 rounded-lg shadow-xl bg-white dark:bg-[#1E293B] border border-gray-300 dark:border-gray-600';
     return el;
   }
 
@@ -531,6 +531,16 @@
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         popover.remove();
+      });
+    });
+
+    // Les boutons de gestion quittent la page. On ferme le panneau en
+    // partant, sinon il reste ouvert et reapparait tel quel au retour
+    // arriere. Le retrait est differe d'un tick pour laisser le navigateur
+    // traiter le clic sur le lien sans que son parent disparaisse dessous.
+    popover.querySelectorAll('a[href]').forEach(link => {
+      link.addEventListener('click', () => {
+        setTimeout(() => popover.remove(), 0);
       });
     });
   }
@@ -753,6 +763,19 @@
       if(notifBtn && !notifBtn.contains(e.target) && notifPopover && !notifPopover.contains(e.target)) { notifPopover.remove(); notifPopover=null; }
       if(settingsBtn && !settingsBtn.contains(e.target) && settingsPopover && !settingsPopover.contains(e.target)) { settingsPopover.remove(); settingsPopover=null; }
       if(profileEl && !profileEl.contains(e.target) && profilePopover && !profilePopover.contains(e.target)) { profilePopover.remove(); profilePopover=null; }
+    });
+
+    // Retour arriere du navigateur : la page peut etre restauree exactement
+    // comme on l'a quittee, panneaux ouverts compris. On repart donc toujours
+    // d'un en-tete propre. Remettre les variables a null est indispensable :
+    // sans cela le bouton croirait son panneau encore ouvert et il faudrait
+    // deux clics pour le rouvrir.
+    window.addEventListener('pageshow', function(e){
+      if(!e.persisted) return;
+      document.querySelectorAll('.ogo-popover').forEach(p => p.remove());
+      notifPopover = null;
+      settingsPopover = null;
+      profilePopover = null;
     });
 
     if(notifBtn) {
