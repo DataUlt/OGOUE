@@ -132,56 +132,28 @@ function groupByDay(ventes, mois, annee) {
   return byDay;
 }
 
-// Fonction helper: obtenir tous les mois/années entre deux dates ISO
-function getMonthsInRange(startISO, endISO) {
-  const start = normalizeDate(startISO);
-  const end = normalizeDate(endISO || startISO);
-  if (!start || !end) return [];
-  
-  const months = [];
-  let current = new Date(start.getFullYear(), start.getMonth(), 1);
-  const endDate = new Date(end.getFullYear(), end.getMonth() + 1, 0);
-  
-  while (current <= endDate) {
-    months.push({
-      month: current.getMonth() + 1,
-      year: current.getFullYear()
-    });
-    current.setMonth(current.getMonth() + 1);
-  }
-  return months;
-}
-
 // ========== CHARGEMENT DES DONNÉES DE LA PÉRIODE (une seule fois, réutilisé par KPI + graphiques) ==========
 async function fetchPeriodData(startDateISO, endDateISO) {
   if (
     !window.OGOUE ||
-    typeof window.OGOUE.getVentesPourPeriode !== "function" ||
-    typeof window.OGOUE.getDepensesPourPeriode !== "function"
+    typeof window.OGOUE.getVentesPourPlage !== "function" ||
+    typeof window.OGOUE.getDepensesPourPlage !== "function"
   ) {
     console.error("OGOUE store non disponible");
     return { ventes: [], depenses: [] };
   }
 
-  // Charger TOUS les mois couverts par la plage, en parallèle (ventes + dépenses)
-  const monthsToLoad = getMonthsInRange(startDateISO, endDateISO);
-  console.log("📅 Mois à charger:", monthsToLoad);
-
-  const requests = monthsToLoad.flatMap(({ month, year }) => [
-    window.OGOUE.getVentesPourPeriode(month, year),
-    window.OGOUE.getDepensesPourPeriode(month, year)
+  // Toute la plage est demandée en une seule requête par type. L'API sait
+  // filtrer sur startDate/endDate ; le découpage mois par mois qui précédait
+  // envoyait deux appels par mois couvert, soit 74 requêtes pour trois ans,
+  // que le navigateur ne traitait que six à la fois.
+  const [ventes, depenses] = await Promise.all([
+    window.OGOUE.getVentesPourPlage(startDateISO, endDateISO),
+    window.OGOUE.getDepensesPourPlage(startDateISO, endDateISO)
   ]);
-  const results = await Promise.all(requests);
 
-  let ventes = [];
-  let depenses = [];
-  for (let i = 0; i < results.length; i += 2) {
-    ventes = ventes.concat(results[i] || []);
-    depenses = depenses.concat(results[i + 1] || []);
-  }
-
-  console.log("📊 Total chargé - Ventes:", ventes.length, "Dépenses:", depenses.length);
-  return { ventes, depenses };
+  console.log("📊 Total chargé - Ventes:", (ventes || []).length, "Dépenses:", (depenses || []).length);
+  return { ventes: ventes || [], depenses: depenses || [] };
 }
 
 // ========== KPI LOADER ==========

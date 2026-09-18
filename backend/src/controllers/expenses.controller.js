@@ -2,6 +2,7 @@
 import { z } from "zod";
 import { uploadFileToSupabase, deleteFileFromSupabase } from "../utils/supabase-storage.js";
 import { logDeletion } from "../utils/deletion-audit.js";
+import { lireToutesLesLignes } from "../utils/pagination.js";
 
 const listSchema = z.object({
   month: z.coerce.number().int().min(1).max(12).optional(),
@@ -38,18 +39,27 @@ export async function listExpenses(req, res) {
       finalEndDate = lastDay.toISOString().split('T')[0];
     }
 
-    let query = supabase
-      .from("expenses")
-      .select("id, expense_date, category, payment_method, amount, receipt_name, receipt_url, created_at, created_by")
-      .eq("organization_id", organizationId);
+    // La requête est reconstruite à chaque page, d'où la fabrique : un
+    // constructeur Supabase déjà exécuté ne peut pas resservir.
+    const construireRequete = () => {
+      let query = supabase
+        .from("expenses")
+        .select("id, expense_date, category, payment_method, amount, receipt_name, receipt_url, created_at, created_by")
+        .eq("organization_id", organizationId);
 
-    if (finalStartDate && finalEndDate) {
-      query = query.gte("expense_date", finalStartDate).lte("expense_date", finalEndDate);
-    }
+      if (finalStartDate && finalEndDate) {
+        query = query.gte("expense_date", finalStartDate).lte("expense_date", finalEndDate);
+      }
 
-    const { data: rows, error } = await query
-      .order("expense_date", { ascending: false })
-      .order("created_at", { ascending: false });
+      // L'ordre sur id départage les dépenses de même date : sans lui la
+      // pagination pourrait en dupliquer et en oublier.
+      return query
+        .order("expense_date", { ascending: false })
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: false });
+    };
+
+    const { data: rows, error } = await lireToutesLesLignes(construireRequete);
 
     if (error) {
       console.error("Erreur listExpenses:", error);

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { uploadFileToSupabase, deleteFileFromSupabase } from "../utils/supabase-storage.js";
 import { emettreRecu, urlSigneeRecu } from "../utils/recu-vente.js";
 import { logDeletion } from "../utils/deletion-audit.js";
+import { lireToutesLesLignes } from "../utils/pagination.js";
 
 const listSchema = z.object({
   month: z.coerce.number().int().min(1).max(12).optional(),
@@ -56,19 +57,28 @@ export async function listSales(req, res) {
       finalEndDate = lastDay.toISOString().split('T')[0];
     }
 
-    // Récupérer les ventes avec Supabase (filtrées par période côté DB si fournie)
-    let query = supabase
-      .from("sales")
-      .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, receipt_url, receipt_number, created_at, created_by")
-      .eq("organization_id", organizationId);
+    // Récupérer les ventes avec Supabase (filtrées par période côté DB si fournie).
+    // La requête est reconstruite à chaque page, d'où la fabrique : un
+    // constructeur Supabase déjà exécuté ne peut pas resservir.
+    const construireRequete = () => {
+      let query = supabase
+        .from("sales")
+        .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, receipt_url, receipt_number, created_at, created_by")
+        .eq("organization_id", organizationId);
 
-    if (finalStartDate && finalEndDate) {
-      query = query.gte("sale_date", finalStartDate).lte("sale_date", finalEndDate);
-    }
+      if (finalStartDate && finalEndDate) {
+        query = query.gte("sale_date", finalStartDate).lte("sale_date", finalEndDate);
+      }
 
-    const { data: rows, error } = await query
-      .order("sale_date", { ascending: false })
-      .order("created_at", { ascending: false });
+      // L'ordre sur id départage les ventes de même date : sans lui la
+      // pagination pourrait en dupliquer et en oublier.
+      return query
+        .order("sale_date", { ascending: false })
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: false });
+    };
+
+    const { data: rows, error } = await lireToutesLesLignes(construireRequete);
 
     if (error) {
       console.error("Erreur listSales:", error);

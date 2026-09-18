@@ -8,25 +8,6 @@ function normalizeDate(iso) {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
 
-function getMonthsInRange(startISO, endISO) {
-  const start = normalizeDate(startISO);
-  const end = normalizeDate(endISO || startISO);
-  if (!start || !end) return [];
-  
-  const months = [];
-  let current = new Date(start.getFullYear(), start.getMonth(), 1);
-  const endDate = new Date(end.getFullYear(), end.getMonth() + 1, 0);
-  
-  while (current <= endDate) {
-    months.push({
-      month: current.getMonth() + 1,
-      year: current.getFullYear()
-    });
-    current.setMonth(current.getMonth() + 1);
-  }
-  return months;
-}
-
 function buildRangeChecker(startISO, endISO) {
   const start = normalizeDate(startISO);
   const end = normalizeDate(endISO || startISO);
@@ -52,16 +33,13 @@ function formatMontant(montant) {
 async function loadAndDisplayStats(startDateISO, endDateISO) {
   if (!window.OGOUE) return;
 
-  const monthsToLoad = getMonthsInRange(startDateISO, endDateISO);
-  let allVentes = [];
-  let allDepenses = [];
-  
-  for (const { month, year } of monthsToLoad) {
-    const ventes = await window.OGOUE.getVentesPourPeriode(month, year);
-    const depenses = await window.OGOUE.getDepensesPourPeriode(month, year);
-    allVentes = allVentes.concat(ventes || []);
-    allDepenses = allDepenses.concat(depenses || []);
-  }
+  // Toute la plage en une seule requête par type. La boucle mois par mois qui
+  // précédait était séquentielle : chaque mois attendait la fin du précédent,
+  // soit 74 allers-retours bout à bout pour une plage de trois ans.
+  const [allVentes, allDepenses] = await Promise.all([
+    window.OGOUE.getVentesPourPlage(startDateISO, endDateISO),
+    window.OGOUE.getDepensesPourPlage(startDateISO, endDateISO)
+  ]).then(([v, d]) => [v || [], d || []]);
 
   const inRange = buildRangeChecker(startDateISO, endDateISO);
   const ventesFiltrees = allVentes.filter((v) => inRange(v.date || v.saleDate || v.sale_date));
