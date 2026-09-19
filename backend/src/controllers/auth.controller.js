@@ -294,7 +294,30 @@ export async function login(req, res) {
 
     if (authError || !authData.session) {
       console.error("Auth error:", authError);
-      return res.status(401).json({ error: "Email ou mot de passe incorrect" });
+
+      // Supabase renvoie volontairement la même erreur qu'un compte soit
+      // inconnu ou que le mot de passe soit faux. Pour dire à la personne ce
+      // qui cloche vraiment, on interroge `users` nous-mêmes.
+      //
+      // La comparaison est insensible à la casse : les e-mails sont stockés
+      // tels que saisis à l'inscription, et une simple majuscule ferait
+      // répondre « vous n'avez pas de compte » à quelqu'un qui en a un.
+      // Les caractères % et _ sont échappés, sinon ils seraient interprétés
+      // comme des jokers par ilike.
+      const motifEmail = parsed.email.replace(/[%_\\]/g, (c) => `\\${c}`);
+      const { data: comptesConnus } = await supabase
+        .from("users")
+        .select("id")
+        .ilike("email", motifEmail)
+        .limit(1);
+
+      if (!comptesConnus || comptesConnus.length === 0) {
+        return res.status(401).json({
+          error: "Oups ! Il semble que vous n'ayez pas encore de compte OGOUE. Inscrivez-vous pour commencer.",
+        });
+      }
+
+      return res.status(401).json({ error: "Mot de passe incorrect" });
     }
 
     // Récupérer les infos utilisateur depuis users
@@ -304,9 +327,16 @@ export async function login(req, res) {
       .eq("auth_id", authData.user.id)
       .maybeSingle();
 
+    // On n'arrive ici que si le mot de passe était BON : Supabase Auth a
+    // validé les identifiants, mais aucun profil ne leur correspond dans
+    // `users`. Ce n'est donc pas un compte inconnu — celui-là est refusé plus
+    // haut par « Email ou mot de passe incorrect » — mais une inscription
+    // restée à moitié faite, que l'utilisateur ne peut pas réparer lui-même.
     if (userError || !userData) {
       console.error("User record error:", userError);
-      return res.status(500).json({ error: "Erreur lors de la récupération du profil utilisateur" });
+      return res.status(500).json({
+        error: "Oups ! Votre inscription n'a pas été finalisée. Contactez-nous pour activer votre accès.",
+      });
     }
 
     return res.json({
@@ -699,9 +729,13 @@ export async function loginSecondary(req, res) {
       .eq("auth_id", authData.user.id)
       .maybeSingle();
 
+    // Même situation que sur la base principale : identifiants valides, mais
+    // pas de profil en face.
     if (userError || !userData) {
       console.error("Secondary user record error:", userError);
-      return res.status(500).json({ error: "Erreur lors de la récupération du profil utilisateur" });
+      return res.status(500).json({
+        error: "Oups ! Votre inscription n'a pas été finalisée. Contactez-nous pour activer votre accès.",
+      });
     }
 
     // Get PME info if exists
