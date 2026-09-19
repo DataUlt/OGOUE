@@ -606,6 +606,28 @@ document.addEventListener("DOMContentLoaded", function () {
      *   Volontairement optionnel : la même fonction sert à l'impression,
      *   où un bouton n'aurait aucun sens sur le papier.
      */
+    /**
+     * Neutralise le texte saisi par l'utilisateur avant insertion dans du
+     * HTML. Les tableaux sont assemblés en chaînes : sans cela, un
+     * commentaire contenant « < » casserait la mise en page, et un
+     * `<img onerror=…>` s'exécuterait dans le navigateur du gérant.
+     */
+    function echapperHtml(valeur) {
+        return String(valeur ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
+
+    /** Cellule « Commentaire » : tronquée à l'écran, complète au survol. */
+    function celluleCommentaire(note) {
+        if (!note) return '<td class="px-4 py-3 text-xs">-</td>';
+        const t = echapperHtml(note);
+        return `<td class="px-4 py-3 text-xs"><span class="block max-w-[16rem] truncate" title="${t}">${t}</span></td>`;
+    }
+
     function renderHistoriqueVentes(ventes, avecActions = false) {
         if (ventes.length === 0) {
             return '<p class="mt-4 text-sm text-gray-500 dark:text-gray-400">Aucune vente pour cette période.</p>';
@@ -625,6 +647,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             <th class="px-4 py-3 text-left font-semibold">Type</th>
                             <th class="px-4 py-3 text-left font-semibold">Créé par</th>
                             <th class="px-4 py-3 text-left font-semibold">Justificatif</th>
+                            <th class="px-4 py-3 text-left font-semibold">Commentaire</th>
                             ${avecActions ? '<th class="px-4 py-3 text-center font-semibold">Action</th>' : ''}
                         </tr>
                     </thead>
@@ -658,6 +681,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             <td class="px-4 py-3">${type}</td>
                             <td class="px-4 py-3">${creePar}</td>
                             <td class="px-4 py-3 text-xs">${justificatifHtml}</td>
+                            ${celluleCommentaire(v.note)}
                             ${avecActions ? `
                             <td class="px-4 py-3 text-center">
                                 <button type="button" class="supprimer-vente text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-xl"
@@ -699,6 +723,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             <th class="px-4 py-3 text-left font-semibold">Moyen Paiement</th>
                             <th class="px-4 py-3 text-left font-semibold">Créé par</th>
                             <th class="px-4 py-3 text-left font-semibold">Justificatif</th>
+                            <th class="px-4 py-3 text-left font-semibold">Commentaire</th>
                             ${avecActions ? '<th class="px-4 py-3 text-center font-semibold">Action</th>' : ''}
                         </tr>
                     </thead>
@@ -728,6 +753,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             <td class="px-4 py-3">${paiement}</td>
                             <td class="px-4 py-3">${creePar}</td>
                             <td class="px-4 py-3 text-xs">${justificatifHtml}</td>
+                            ${celluleCommentaire(d.note)}
                             ${avecActions ? `
                             <td class="px-4 py-3 text-center">
                                 <button type="button" class="supprimer-depense text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-xl"
@@ -1175,14 +1201,15 @@ document.addEventListener("DOMContentLoaded", function () {
                         feuilles.push({
                             nom: "Ventes",
                             lignes: [
-                                ["Date", "Description", "Type", "Moyen de paiement", "Montant", "Justificatif"],
+                                ["Date", "Description", "Type", "Moyen de paiement", "Montant", "Justificatif", "Commentaire"],
                                 ...ventes.map(v => [
                                     v.saleDate || v.date || "",
                                     v.description || "",
                                     v.saleType || v.type_vente || "",
                                     v.paymentMethod || v.moyen_paiement || "",
                                     nombre(v.amount ?? v.montant),
-                                    v.receiptName || v.justificatif || ""
+                                    v.receiptName || v.justificatif || "",
+                                    v.note || ""
                                 ])
                             ]
                         });
@@ -1192,13 +1219,14 @@ document.addEventListener("DOMContentLoaded", function () {
                         feuilles.push({
                             nom: "Dépenses",
                             lignes: [
-                                ["Date", "Catégorie", "Description", "Montant", "Justificatif"],
+                                ["Date", "Catégorie", "Description", "Montant", "Justificatif", "Commentaire"],
                                 ...depenses.map(d => [
                                     d.date || "",
                                     d.category || d.categorie || "",
                                     d.description || "",
                                     nombre(d.amount ?? d.montant),
-                                    d.receiptName || d.justificatif || ""
+                                    d.receiptName || d.justificatif || "",
+                                    d.note || ""
                                 ])
                             ]
                         });

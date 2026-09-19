@@ -98,6 +98,8 @@ async function addVente(vente, onProgress) {
     formData.append("clientName", vente.client_nom || "");
     formData.append("clientPhone", vente.client_telephone || "");
     formData.append("clientEmail", vente.client_email || "");
+    // Commentaire libre du gérant sur cette vente (facultatif)
+    formData.append("note", vente.note || "");
 
 
     // Ajouter le fichier s'il existe
@@ -209,6 +211,8 @@ async function addDepense(depense, onProgress) {
     formData.append("paymentMethod", depense.moyen_paiement || "cash");
     formData.append("amount", depense.montant || 0);
     formData.append("receiptName", depense.justificatif || "");
+    // Commentaire libre du gérant sur cette dépense (facultatif)
+    formData.append("note", depense.note || "");
     
     // Ajouter le fichier s'il existe
     if (depense.file) {

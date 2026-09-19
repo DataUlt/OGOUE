@@ -330,6 +330,7 @@
     const dateInput = document.getElementById("depense-date");
     const moyenInput = document.getElementById("depense-moyen-paiement");
     const montantInput = document.getElementById("depense-montant");
+    const noteInput = document.getElementById("depense-note");
     const fileInput = document.getElementById("depense-file-upload");
 
     if (!dateInput || !moyenInput || !montantInput) {
@@ -365,6 +366,9 @@
       moyen_paiement: moyenPaiement,
       montant: isNaN(montant) ? 0 : montant,
       justificatif: justificatifFile,
+      // Facultatif : absent du contrôle de présence plus haut, une dépense
+      // sans commentaire doit pouvoir s'enregistrer.
+      note: (noteInput?.value || "").trim(),
       file // Ajouter l'objet File pour l'upload
     };
   }
@@ -443,6 +447,21 @@
     }
   }
 
+  /**
+   * Neutralise le texte saisi par l'utilisateur avant insertion dans du
+   * HTML. Les lignes sont construites par innerHTML : sans cela, un
+   * commentaire contenant « < » casserait la mise en page, et un
+   * `<img onerror=…>` s'exécuterait dans le navigateur du gérant.
+   */
+  function echapperHtml(valeur) {
+    return String(valeur ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
   function createRow(depense) {
     const tr = document.createElement("tr");
     tr.className = "border-b dark:border-gray-700";
@@ -478,6 +497,15 @@
           depense.justificatif
             ? `<span class="font-medium text-primary cursor-pointer hover:underline justificatif-link" data-file="${depense.justificatif}" data-url="${depense.justificatifUrl || ''}">${depense.justificatif}</span>`
             : `-`
+        }
+      </td>
+      <td class="px-6 py-4">
+        ${
+          // Tronqué à l'affichage, complet au survol : un commentaire long
+          // écraserait les autres colonnes.
+          depense.note
+            ? `<span class="block max-w-[16rem] truncate" title="${echapperHtml(depense.note)}">${echapperHtml(depense.note)}</span>`
+            : "-"
         }
       </td>
       <td class="px-6 py-4 text-center">
@@ -715,7 +743,7 @@
     if (!depensesAujourdhui.length) {
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+        <td colspan="9" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
           Aucune dépense enregistrée pour aujourd'hui.
         </td>
       `;
@@ -756,7 +784,7 @@
       if (!depensesAujourdhui.length) {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+          <td colspan="9" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
             Aucune dépense enregistrée pour aujourd'hui.
           </td>
         `;

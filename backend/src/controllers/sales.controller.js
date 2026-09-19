@@ -29,6 +29,9 @@ const createSchema = z.object({
   clientName: z.string().max(150).optional().nullable(),
   clientPhone: z.string().max(50).optional().nullable(),
   clientEmail: z.string().max(150).optional().nullable(),
+  // Commentaire libre du gérant, facultatif. Ex. : avance versée, solde
+  // à percevoir. Plafonné pour rester un pense-bête et non un journal.
+  note: z.string().max(1000).optional().nullable(),
 });
 
 /** Une chaîne vide venue du formulaire vaut absence d'information. */
@@ -63,7 +66,7 @@ export async function listSales(req, res) {
     const construireRequete = () => {
       let query = supabase
         .from("sales")
-        .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, receipt_url, receipt_number, created_at, created_by")
+        .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, receipt_url, receipt_number, note, created_at, created_by")
         .eq("organization_id", organizationId);
 
       if (finalStartDate && finalEndDate) {
@@ -143,6 +146,7 @@ export async function listSales(req, res) {
       // Le reçu émis par OGOUE : on n'expose que son numéro, le PDF
       // se demande à la pièce via /sales/:id/recu (lien signé).
       numeroRecu: row.receipt_number,
+      note: row.note,
       created_at: row.created_at,
       created_by_name: row.created_by_name
     }));
@@ -353,9 +357,10 @@ export async function createSale(req, res) {
         client_name: videEnNull(data.clientName),
         client_phone: videEnNull(data.clientPhone),
         client_email: videEnNull(data.clientEmail),
+        note: videEnNull(data.note),
         created_by: req.user.userId || req.user.sub || req.user.id,
       })
-      .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, receipt_url, receipt_storage_path, client_name, client_phone, client_email, created_at")
+      .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, receipt_url, receipt_storage_path, client_name, client_phone, client_email, note, created_at")
       .single();
 
     if (error || !row) {
@@ -392,6 +397,7 @@ export async function createSale(req, res) {
       justificatif: row.receipt_name,
       justificatifUrl: row.receipt_url,
       numeroRecu: recu?.numero || null,
+      note: row.note,
       created_at: row.created_at
     };
 

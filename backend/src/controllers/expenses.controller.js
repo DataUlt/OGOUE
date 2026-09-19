@@ -17,7 +17,16 @@ const createSchema = z.object({
   paymentMethod: z.string().max(50).optional().nullable(),
   amount: z.coerce.number().min(0),
   receiptName: z.string().max(200).optional().nullable(),
+  // Commentaire libre du gérant, facultatif. Ex. : acompte fournisseur,
+  // solde à régler. Plafonné pour rester un pense-bête, pas un journal.
+  note: z.string().max(1000).optional().nullable(),
 });
+
+/** Une chaîne vide venue du formulaire vaut absence d'information. */
+function videEnNull(valeur) {
+  const texte = String(valeur ?? "").trim();
+  return texte === "" ? null : texte;
+}
 
 export async function listExpenses(req, res) {
   try {
@@ -44,7 +53,7 @@ export async function listExpenses(req, res) {
     const construireRequete = () => {
       let query = supabase
         .from("expenses")
-        .select("id, expense_date, category, payment_method, amount, receipt_name, receipt_url, created_at, created_by")
+        .select("id, expense_date, category, payment_method, amount, receipt_name, receipt_url, note, created_at, created_by")
         .eq("organization_id", organizationId);
 
       if (finalStartDate && finalEndDate) {
@@ -119,6 +128,7 @@ export async function listExpenses(req, res) {
       montant: row.amount,
       justificatif: row.receipt_name,
       justificatifUrl: row.receipt_url,
+      note: row.note,
       created_at: row.created_at,
       created_by_name: row.created_by_name
     }));
@@ -172,9 +182,10 @@ export async function createExpense(req, res) {
         receipt_name: receiptName,
         receipt_url: receiptUrl,
         receipt_storage_path: receiptStoragePath,
+        note: videEnNull(data.note),
         created_by: req.user.userId || req.user.sub || req.user.id,
       })
-      .select("id, expense_date, category, payment_method, amount, receipt_name, receipt_url, receipt_storage_path, created_at")
+      .select("id, expense_date, category, payment_method, amount, receipt_name, receipt_url, receipt_storage_path, note, created_at")
       .single();
 
     if (error || !row) {
@@ -195,9 +206,10 @@ export async function createExpense(req, res) {
       montant: row.amount,
       justificatif: row.receipt_name,
       justificatifUrl: row.receipt_url,
+      note: row.note,
       created_at: row.created_at
     };
-    
+
     return res.status(201).json(transformed);
   } catch (error) {
     console.error("Erreur createExpense:", error);

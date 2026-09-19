@@ -297,6 +297,24 @@
                             </label>
                         </div>
 
+                        <label class="flex flex-col">
+                            <p class="text-base font-medium leading-normal pb-2 text-[#0a0c0a] dark:text-gray-200">
+                                Commentaire
+                                <span class="font-normal text-gray-500 dark:text-gray-400">(facultatif)</span>
+                            </p>
+                            <textarea
+                                id="depense-note"
+                                name="note"
+                                rows="3"
+                                maxlength="1000"
+                                class="form-input flex w-full min-w-0 flex-1 rounded-lg text-[#0a0c0a] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark placeholder:text-gray-400 dark:placeholder:text-gray-500 p-[15px] text-base font-normal leading-normal"
+                                placeholder="Ex. : acompte versé au fournisseur, solde à régler à la livraison."
+                            ></textarea>
+                            <span class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                Une précision à retenir sur cette dépense.
+                            </span>
+                        </label>
+
                         <!-- Upload justificatif -->
                         <div>
                             <p class="text-base font-medium leading-normal pb-2 text-[#0a0c0a] dark:text-gray-200">
@@ -419,6 +437,7 @@
                                 <th scope="col" class="px-6 py-4">Moyen de paiement</th>
                                 <th scope="col" class="px-6 py-4">Créé par</th>
                                 <th scope="col" class="px-6 py-4">Justificatif</th>
+                                <th scope="col" class="px-6 py-4">Commentaire</th>
                                 <th scope="col" class="px-6 py-4 text-center">Action</th>
                             </tr>
                             </thead>
@@ -466,6 +485,7 @@
                         <th scope="col" class="px-6 py-4">Moyen de paiement</th>
                         <th scope="col" class="px-6 py-4">Créé par</th>
                         <th scope="col" class="px-6 py-4">Justificatif</th>
+                                <th scope="col" class="px-6 py-4">Commentaire</th>
                         <th scope="col" class="px-6 py-4 text-center">Action</th>
                     </tr>
                     </thead>

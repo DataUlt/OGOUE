@@ -505,6 +505,7 @@
     const typeInput = document.getElementById("vente-type");
     const qteInput = document.getElementById("vente-quantite");
     const montantInput = document.getElementById("vente-montant");
+    const noteInput = document.getElementById("vente-note");
     const fileInput = document.getElementById("file-upload");
 
     if (!dateInput || !moyenInput || !typeInput || !qteInput || !montantInput) {
@@ -555,8 +556,27 @@
       client_nom: lireClient("recu-client-nom"),
       client_telephone: lireClient("recu-client-telephone"),
       client_email: lireClient("recu-client-email"),
+      // Facultatif : absent du contrôle de présence plus haut, une vente
+      // sans commentaire doit pouvoir s'enregistrer.
+      note: (noteInput?.value || "").trim(),
       file // Ajouter l'objet File pour l'upload
     };
+  }
+
+  /**
+   * Neutralise le texte saisi par l'utilisateur avant insertion dans du
+   * HTML. Les lignes du tableau sont construites par innerHTML : sans
+   * cela, un commentaire contenant « < » casserait la mise en page, et
+   * un `<img onerror=…>` s'exécuterait dans le navigateur du gérant.
+   * Convient aussi bien au contenu d'une cellule qu'à un attribut.
+   */
+  function echapperHtml(valeur) {
+    return String(valeur ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
   }
 
   function formatDateFr(value) {
@@ -699,6 +719,15 @@
                    Joindre un fichier
                  </button>
                </div>`
+        }
+      </td>
+      <td class="px-6 py-4">
+        ${
+          // Tronqué à l'affichage, complet au survol : le tableau compte
+          // déjà dix colonnes, un commentaire long les écraserait toutes.
+          vente.note
+            ? `<span class="block max-w-[16rem] truncate" title="${echapperHtml(vente.note)}">${echapperHtml(vente.note)}</span>`
+            : "-"
         }
       </td>
       <td class="px-6 py-4 text-center">
@@ -1067,7 +1096,7 @@
     if (!ventesAujourdhui.length) {
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td colspan="9" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+        <td colspan="11" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
           Aucune vente enregistrée pour aujourd'hui.
         </td>
       `;
@@ -1110,7 +1139,7 @@
       if (!ventesAujourdhui.length) {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td colspan="10" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+          <td colspan="11" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
             Aucune vente enregistrée pour aujourd'hui.
           </td>
         `;
