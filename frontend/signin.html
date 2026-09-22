@@ -106,6 +106,17 @@
             </p>
           </div>
 
+          <!-- Formule choisie sur /tarifs. Rappelée ici pour que la personne
+               sache ce qu'elle est en train de souscrire, et puisse revenir
+               en arrière sans perdre son choix. -->
+          <div id="rappelPlan" class="hidden mb-6 flex items-center justify-between gap-4 rounded-xl border border-primary/30 bg-primary/5 p-4">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-primary">Formule choisie</p>
+              <p class="text-sm font-bold text-text-light"><span id="rappelPlanNom"></span><span id="rappelPlanPrix" class="font-normal text-text-light-muted"></span></p>
+            </div>
+            <a href="/tarifs" class="text-xs font-semibold text-primary hover:underline shrink-0">Changer</a>
+          </div>
+
           <div id="errorMessage" class="hidden p-4 mb-6 bg-red-100/80 border border-red-300 text-red-700 rounded-lg text-sm"></div>
           <div id="successMessage" class="hidden p-4 mb-6 bg-cyan-100/80 border border-cyan-300 text-cyan-700 rounded-lg text-sm"></div>
 
@@ -369,6 +380,43 @@
       ? 'http://localhost:3001'
       : 'https://api.ogoue.com';
 
+    // ── Formule choisie sur /tarifs ───────────────────────────────
+    // Elle transite par l'URL : aucun abonnement n'existe encore en base,
+    // et l'activation se fait a la main apres reception de la preuve de
+    // versement. Ce choix ne donne donc aucun droit par lui-meme, il
+    // oriente seulement la fin du parcours.
+    //
+    // Les libelles sont dupliques depuis tarifs.html : tout changement de
+    // prix doit etre reporte ici, dans tarifs.html et dans paiement.html.
+    const FORMULES = {
+      essentiel:  { nom: "Essentiel",  mensuel: "Gratuit",  annuel: "Gratuit" },
+      pro:    { nom: "Pro",    mensuel: "10 000 FCFA / mois", annuel: "100 000 FCFA / an" },
+      equipe: { nom: "Équipe", mensuel: "25 000 FCFA / mois", annuel: "250 000 FCFA / an" }
+    };
+
+    const PARAMS = new URLSearchParams(location.search);
+    const PLAN_CHOISI = (PARAMS.get('plan') || '').toLowerCase();
+    const PERIODE_CHOISIE = PARAMS.get('periode') === 'annuel' ? 'annuel' : 'mensuel';
+
+    // On n'ouvre pas de compte sans formule choisie : le parcours passe
+    // obligatoirement par /tarifs. Une arrivee directe ici, par signet ou
+    // par un vieux lien, est renvoyee au choix plutot que de laisser
+    // quelqu'un s'inscrire sans savoir ce qu'il souscrit.
+    if (!FORMULES[PLAN_CHOISI]) {
+      location.replace('/tarifs');
+    }
+
+    (function afficherRappelFormule() {
+      const formule = FORMULES[PLAN_CHOISI];
+      if (!formule) return;
+
+      document.getElementById('rappelPlanNom').textContent = formule.nom;
+      const prix = formule[PERIODE_CHOISIE];
+      document.getElementById('rappelPlanPrix').textContent =
+        prix === "Gratuit" ? " — gratuit" : ` — ${prix}`;
+      document.getElementById('rappelPlan').classList.remove('hidden');
+    })();
+
     async function handleSignup(event) {
       event.preventDefault();
       
@@ -472,6 +520,15 @@
           ? 'http://127.0.0.1:8080/app'
           : 'https://www.ogoue.com/app';
         setTimeout(() => {
+          // Formule payante : on passe d'abord par les instructions de
+          // versement. Le compte est deja utilisable, cette page ne bloque
+          // rien — elle explique comment regler et joindre la preuve.
+          if (PLAN_CHOISI && PLAN_CHOISI !== 'essentiel') {
+            window.location.href =
+              `/paiement.html?plan=${encodeURIComponent(PLAN_CHOISI)}&periode=${encodeURIComponent(PERIODE_CHOISIE)}`;
+            return;
+          }
+
           // Etape de configuration du catalogue juste apres la creation du
           // compte. Elle est passable : le bouton "Plus tard" mene au tableau
           // de bord, et le catalogue reste modifiable ensuite.

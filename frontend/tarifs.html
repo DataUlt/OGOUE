@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Tarifs - OGOUE</title>
+  <link rel="icon" type="image/png" href="app/O-removebg-preview.png">
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" crossorigin href="https://fonts.gstatic.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#0088CC",
+            "background-light": "#f6f8f6",
+            "background-dark": "#111712",
+            "text-light": "#0a0c0a",
+            "text-light-muted": "#5c6c60",
+            secondary: "#1E3A5F",
+          },
+          fontFamily: {
+            display: ["Manrope", "sans-serif"],
+          },
+          borderRadius: {
+            DEFAULT: "1rem",
+            lg: "2rem",
+            xl: "3rem",
+            full: "9999px",
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+</head>
+
+<body class="bg-background-light font-display text-text-light antialiased flex flex-col min-h-screen">
+  <div class="relative w-full overflow-x-hidden flex flex-col flex-1">
+
+    <!-- HEADER -->
+    <header class="sticky top-0 z-50 w-full bg-background-light/80 backdrop-blur-md">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20 border-b border-black/10">
+          <div class="flex items-center gap-4">
+            <a href="/" class="flex items-center gap-2">
+              <img src="/app/Logo-ogoue (2).png" alt="OGOUE Logo" class="h-28 w-auto">
+            </a>
+          </div>
+
+          <nav class="hidden md:flex items-center gap-8">
+            <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/">Accueil</a>
+            <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/index.html#features">Fonctionnalités</a>
+            <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/index.html#benefits">Avantages</a>
+            <a class="text-text-light text-sm font-medium transition-colors" href="/tarifs">Tarifs</a>
+            <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/apropos">À propos</a>
+          </nav>
+
+          <div class="hidden md:flex items-center gap-3">
+            <a href="/login" class="text-text-light-muted hover:text-text-light text-sm font-semibold transition-colors">Se connecter</a>
+            <a href="#formules"
+               class="flex min-w-[84px] items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-primary text-background-dark text-sm font-bold tracking-wide hover:bg-primary/90 transition-colors">
+              <span class="truncate">Commencer</span>
+            </a>
+          </div>
+
+          <!-- Mobile -->
+          <button id="mobileBtn" class="md:hidden inline-flex items-center justify-center rounded-full h-10 w-10 border border-black/10 bg-white hover:bg-white/60 transition"
+                  aria-label="Ouvrir le menu">
+            <span class="material-symbols-outlined">menu</span>
+          </button>
+        </div>
+
+        <div id="mobileMenu" class="hidden md:hidden py-4 border-b border-black/10">
+          <div class="flex flex-col gap-2">
+            <a class="rounded-xl px-4 py-3 text-sm font-medium text-text-light-muted hover:text-text-light hover:bg-white/60 transition" href="/">Accueil</a>
+            <a class="rounded-xl px-4 py-3 text-sm font-medium text-text-light-muted hover:text-text-light hover:bg-white/60 transition" href="/index.html#features">Fonctionnalités</a>
+            <a class="rounded-xl px-4 py-3 text-sm font-medium text-text-light-muted hover:text-text-light hover:bg-white/60 transition" href="/index.html#benefits">Avantages</a>
+            <a class="rounded-xl px-4 py-3 text-sm font-medium text-text-light hover:bg-white/60 transition" href="/tarifs">Tarifs</a>
+            <a class="rounded-xl px-4 py-3 text-sm font-medium text-text-light-muted hover:text-text-light hover:bg-white/60 transition" href="/apropos">À propos</a>
+            <div class="pt-2 flex flex-col gap-2">
+              <a href="/login" class="rounded-full h-11 px-6 inline-flex items-center justify-center border border-black/10 bg-white hover:bg-white/60 text-sm font-bold transition">Se connecter</a>
+              <a href="#formules" class="rounded-full h-11 px-6 inline-flex items-center justify-center bg-primary text-background-dark text-sm font-bold hover:bg-primary/90 transition">Voir les formules</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </header>
+
+    <main class="flex-1">
+
+      <!-- HERO -->
+      <section class="pt-20 pb-12 sm:pt-24">
+        <div class="max-w-4xl mx-auto px-6 lg:px-8 text-center">
+          <h1 class="text-4xl font-black tracking-tighter text-text-light sm:text-6xl">
+            Commencez gratuitement.<br class="hidden sm:block" />
+            Payez quand ça vous <span class="text-primary">rapporte</span>.
+          </h1>
+          <p class="mt-6 text-lg text-text-light-muted max-w-2xl mx-auto">
+            Enregistrez vos ventes et vos dépenses sans rien payer, aussi longtemps que vous
+            voulez. Les formules payantes ajoutent les reçus, les justificatifs et vos agents.
+          </p>
+
+          <!-- Bascule mensuel / annuel -->
+          <div class="mt-10 inline-flex items-center gap-1 rounded-full border border-black/10 bg-white p-1">
+            <button type="button" id="btnMensuel"
+                    class="rounded-full px-5 py-2 text-sm font-bold transition-colors bg-primary text-background-dark">
+              Mensuel
+            </button>
+            <button type="button" id="btnAnnuel"
+                    class="rounded-full px-5 py-2 text-sm font-bold transition-colors text-text-light-muted hover:text-text-light">
+              Annuel
+            </button>
+          </div>
+          <p id="noteAnnuel" class="mt-3 text-sm font-semibold text-primary invisible">
+            2 mois offerts sur l'année
+          </p>
+        </div>
+      </section>
+
+      <!-- LES TROIS FORMULES -->
+      <section id="formules" class="pb-24 sm:pb-32 scroll-mt-24">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+
+            <!-- ESSENTIEL -->
+            <div class="rounded-3xl border border-black/10 bg-white p-8 flex flex-col h-full">
+              <h2 class="text-xl font-bold text-text-light">Essentiel</h2>
+              <p class="mt-2 text-sm text-text-light-muted min-h-[40px]">
+                Je commence à mieux gérer mon activité.
+              </p>
+
+              <div class="mt-6">
+                <span class="text-4xl font-black tracking-tighter text-text-light">Gratuit</span>
+                <p class="mt-1 text-sm text-text-light-muted">Pour toujours, sans carte bancaire.</p>
+              </div>
+
+              <a href="/signin?plan=essentiel"
+                 class="mt-8 rounded-full h-12 px-6 inline-flex items-center justify-center border border-black/10 bg-white hover:bg-background-light text-sm font-bold transition-colors">
+                Créer mon compte
+              </a>
+
+              <ul class="mt-8 space-y-3 text-sm">
+                <li class="flex items-start gap-3">
+                  <span class="material-symbols-outlined text-primary text-[20px] shrink-0">check</span>
+                  <span><strong>Ventes et dépenses illimitées</strong></span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="material-symbols-outlined text-primary text-[20px] shrink-0">check</span>
+                  <span>Catalogue d'articles et de prix</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="material-symbols-outlined text-primary text-[20px] shrink-0">check</span>
+                  <span>Tableau de bord et résumé</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="material-symbols-outlined text-primary text-[20px] shrink-0">check</span>
+                  <span>Tableau de flux et historique des ventes</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="material-symbols-outlined text-primary text-[20px] shrink-0">check</span>
+                  <span>3 mois d'historique</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="material-symbols-outlined text-primary text-[20px] shrink-0">check</span>
+                  <span>1 utilisateur</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- BOUTIQUE -->
+            <div class="relative rounded-3xl border-2 border-primary bg-white p-8 flex flex-col h-full shadow-xl lg:-mt-4">
+              <span class="absolute -top-3 left-8 rounded-full bg-primary px-4 py-1 text-xs font-bold text-background-dark">
+                Le plus choisi
+              </span>
+
+              <h2 class="text-xl font-bold text-text-light">Pro</h2>
+              <p class="mt-2 text-sm text-text-light-muted min-h-[40px]">
+                Je veux aller plus loin dans ma gestion.
+              </p>
+
+              <div class="mt-6">
+                <span class="text-4xl font-black tracking-tighter text-text-light"
+                      data-prix data-mensuel="10 000" data-annuel="100 000">10 000</span>
+                <span class="text-xl font-bold text-text-light">FCFA</span>
+                <span class="text-sm text-text-light-muted" data-periode>/ mois</span>
+                <p class="mt-1 text-sm text-text-light-muted" data-detail
+                   data-mensuel="Soit environ 330 FCFA par jour."
+                   data-annuel="Soit 10 mois payés au lieu de 12.">
+                  Soit environ 330 FCFA par jour.
+                </p>
+              </div>
+
+              <a href="/signin?plan=pro&periode=mensuel" data-lien-plan="pro"
+                 class="mt-8 rounded-full h-12 px-6 inline-flex items-center justify-center bg-primary text-background-dark text-sm font-bold hover:bg-primary/90 transition-colors">
+                Choisir Pro
+              </a>
+
+              <p class="mt-3 text-center text-xs text-text-light-muted">
+                Vous créez votre compte, puis vous réglez.
+              </p>
+
+              <ul class="mt-8 space-y-3 text-sm">
+                <li class="flex items-start gap-3">
+                  <span class="material-symbols-outlined text-primary text-[20px] shrink-0">check</span>
+                  <span><strong>Tout l'Essentiel</strong>, plus :</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="material-symbols-outlined text-primary text-[20px] shrink-0">check</span>
+                  <span><strong>Reçus numérotés</strong> au nom de votre entreprise</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="material-symbols-outlined text-primary text-[20px] shrink-0">check</span>
+                  <span>Justificatifs conservés (2 Go)</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="material-symbols-outlined text-primary text-[20px] shrink-0">check</span>
+                  <span>Compte de résultat, historique des dépenses, export Excel et impression</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="material-symbols-outlined text-primary text-[20px] shrink-0">check</span>
+                  <span>Historique illimité</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="material-symbols-outlined text-primary text-[20px] shrink-0">check</span>
+                  <span>Jusqu'à 3 agents</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- ENTREPRISE -->
+            <div class="rounded-3xl border border-black/10 bg-white p-8 flex flex-col h-full">
+              <h2 class="text-xl font-bold text-text-light">Équipe</h2>
+              <p class="mt-2 text-sm text-text-light-muted min-h-[40px]">
+                Nous sommes plusieurs à gérer l'activité.
+              </p>
+
+              <div class="mt-6">
+                <span class="text-4xl font-black tracking-tighter text-text-light"
+                      data-prix data-mensuel="25 000" data-annuel="250 000">25 000</span>
+                <span class="text-xl font-bold text-text-light">FCFA</span>
+                <span class="text-sm text-text-light-muted" data-periode>/ mois</span>
+                <p class="mt-1 text-sm text-text-light-muted" data-detail
+                   data-mensuel="Moins de 6 % du salaire d'un vendeur."
+                   data-annuel="Soit 10 mois payés au lieu de 12.">
+                  Moins de 6 % du salaire d'un vendeur.
+                </p>
+              </div>
+
+              <a href="/signin?plan=equipe&periode=mensuel" data-lien-plan="equipe"
+                 class="mt-8 rounded-full h-12 px-6 inline-flex items-center justify-center border border-black/10 bg-white hover:bg-background-light text-sm font-bold transition-colors">
+                Choisir Équipe
+              </a>
+
+              <p class="mt-3 text-center text-xs text-text-light-muted">
+                Vous créez votre compte, puis vous réglez.
+              </p>
+
+              <ul class="mt-8 space-y-3 text-sm">
+                <li class="flex items-start gap-3">
+                  <span class="material-symbols-outlined text-primary text-[20px] shrink-0">check</span>
+                  <span><strong>Tout Pro</strong>, plus :</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="material-symbols-outlined text-primary text-[20px] shrink-0">check</span>
+                  <span><strong>Agents illimités</strong></span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="material-symbols-outlined text-primary text-[20px] shrink-0">check</span>
+                  <span>Justificatifs conservés (10 Go)</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="material-symbols-outlined text-primary text-[20px] shrink-0">check</span>
+                  <span>Historique des suppressions</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="material-symbols-outlined text-primary text-[20px] shrink-0">check</span>
+                  <span>Score de traçabilité</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="material-symbols-outlined text-primary text-[20px] shrink-0">check</span>
+                  <span>Support prioritaire</span>
+                </li>
+              </ul>
+            </div>
+
+          </div>
+
+          <p class="mt-10 text-center text-sm text-text-light-muted">
+            L'accès aux offres de financement de nos partenaires est inclus dans
+            <strong class="text-text-light">toutes les formules</strong>, y compris la gratuite.
+          </p>
+        </div>
+      </section>
+
+      <!-- COMPARATIF -->
+      <section class="py-24 sm:py-32 bg-white">
+        <div class="max-w-5xl mx-auto px-6 lg:px-8">
+          <h2 class="text-3xl sm:text-5xl font-bold tracking-tighter text-text-light text-center">
+            Le détail, sans mauvaise surprise
+          </h2>
+
+          <div class="mt-12 overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b border-black/10">
+                  <th class="py-4 pr-4 text-left font-semibold text-text-light-muted">Fonctionnalité</th>
+                  <th class="py-4 px-4 text-center font-bold text-text-light">Essentiel</th>
+                  <th class="py-4 px-4 text-center font-bold text-primary">Pro</th>
+                  <th class="py-4 px-4 text-center font-bold text-text-light">Équipe</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="border-b border-black/5">
+                  <td class="py-4 pr-4">Enregistrer ventes et dépenses</td>
+                  <td class="py-4 px-4 text-center">Illimité</td>
+                  <td class="py-4 px-4 text-center">Illimité</td>
+                  <td class="py-4 px-4 text-center">Illimité</td>
+                </tr>
+                <tr class="border-b border-black/5">
+                  <td class="py-4 pr-4">Catalogue d'articles et de prix</td>
+                  <td class="py-4 px-4 text-center"><span class="material-symbols-outlined text-primary text-[20px]">check</span></td>
+                  <td class="py-4 px-4 text-center"><span class="material-symbols-outlined text-primary text-[20px]">check</span></td>
+                  <td class="py-4 px-4 text-center"><span class="material-symbols-outlined text-primary text-[20px]">check</span></td>
+                </tr>
+                <tr class="border-b border-black/5">
+                  <td class="py-4 pr-4">Tableau de bord et résumé</td>
+                  <td class="py-4 px-4 text-center"><span class="material-symbols-outlined text-primary text-[20px]">check</span></td>
+                  <td class="py-4 px-4 text-center"><span class="material-symbols-outlined text-primary text-[20px]">check</span></td>
+                  <td class="py-4 px-4 text-center"><span class="material-symbols-outlined text-primary text-[20px]">check</span></td>
+                </tr>
+                <tr class="border-b border-black/5">
+                  <td class="py-4 pr-4">Historique consultable</td>
+                  <td class="py-4 px-4 text-center">3 mois</td>
+                  <td class="py-4 px-4 text-center">Illimité</td>
+                  <td class="py-4 px-4 text-center">Illimité</td>
+                </tr>
+                <tr class="border-b border-black/5">
+                  <td class="py-4 pr-4">Reçus numérotés pour vos clients</td>
+                  <td class="py-4 px-4 text-center text-text-light-muted">—</td>
+                  <td class="py-4 px-4 text-center"><span class="material-symbols-outlined text-primary text-[20px]">check</span></td>
+                  <td class="py-4 px-4 text-center"><span class="material-symbols-outlined text-primary text-[20px]">check</span></td>
+                </tr>
+                <tr class="border-b border-black/5">
+                  <td class="py-4 pr-4">Justificatifs conservés</td>
+                  <td class="py-4 px-4 text-center text-text-light-muted">—</td>
+                  <td class="py-4 px-4 text-center">2 Go</td>
+                  <td class="py-4 px-4 text-center">10 Go</td>
+                </tr>
+                <tr class="border-b border-black/5">
+                  <td class="py-4 pr-4">Tableau de flux et historique des ventes</td>
+                  <td class="py-4 px-4 text-center"><span class="material-symbols-outlined text-primary text-[20px]">check</span></td>
+                  <td class="py-4 px-4 text-center"><span class="material-symbols-outlined text-primary text-[20px]">check</span></td>
+                  <td class="py-4 px-4 text-center"><span class="material-symbols-outlined text-primary text-[20px]">check</span></td>
+                </tr>
+                <tr class="border-b border-black/5">
+                  <td class="py-4 pr-4">Compte de résultat et historique des dépenses</td>
+                  <td class="py-4 px-4 text-center text-text-light-muted">—</td>
+                  <td class="py-4 px-4 text-center"><span class="material-symbols-outlined text-primary text-[20px]">check</span></td>
+                  <td class="py-4 px-4 text-center"><span class="material-symbols-outlined text-primary text-[20px]">check</span></td>
+                </tr>
+                <tr class="border-b border-black/5">
+                  <td class="py-4 pr-4">Export Excel et impression</td>
+                  <td class="py-4 px-4 text-center text-text-light-muted">—</td>
+                  <td class="py-4 px-4 text-center"><span class="material-symbols-outlined text-primary text-[20px]">check</span></td>
+                  <td class="py-4 px-4 text-center"><span class="material-symbols-outlined text-primary text-[20px]">check</span></td>
+                </tr>
+                <tr class="border-b border-black/5">
+                  <td class="py-4 pr-4">Agents</td>
+                  <td class="py-4 px-4 text-center text-text-light-muted">—</td>
+                  <td class="py-4 px-4 text-center">3</td>
+                  <td class="py-4 px-4 text-center">Illimités</td>
+                </tr>
+                <tr class="border-b border-black/5">
+                  <td class="py-4 pr-4">Historique des suppressions</td>
+                  <td class="py-4 px-4 text-center text-text-light-muted">—</td>
+                  <td class="py-4 px-4 text-center text-text-light-muted">—</td>
+                  <td class="py-4 px-4 text-center"><span class="material-symbols-outlined text-primary text-[20px]">check</span></td>
+                </tr>
+                <tr class="border-b border-black/5">
+                  <td class="py-4 pr-4">Score de traçabilité</td>
+                  <td class="py-4 px-4 text-center text-text-light-muted">—</td>
+                  <td class="py-4 px-4 text-center text-text-light-muted">—</td>
+                  <td class="py-4 px-4 text-center"><span class="material-symbols-outlined text-primary text-[20px]">check</span></td>
+                </tr>
+                <tr class="border-b border-black/5">
+                  <td class="py-4 pr-4">Offres de financement des partenaires</td>
+                  <td class="py-4 px-4 text-center"><span class="material-symbols-outlined text-primary text-[20px]">check</span></td>
+                  <td class="py-4 px-4 text-center"><span class="material-symbols-outlined text-primary text-[20px]">check</span></td>
+                  <td class="py-4 px-4 text-center"><span class="material-symbols-outlined text-primary text-[20px]">check</span></td>
+                </tr>
+                <tr>
+                  <td class="py-4 pr-4">Support</td>
+                  <td class="py-4 px-4 text-center">E-mail</td>
+                  <td class="py-4 px-4 text-center">E-mail</td>
+                  <td class="py-4 px-4 text-center">Prioritaire</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- QUESTIONS -->
+      <section class="py-24 sm:py-32">
+        <div class="max-w-3xl mx-auto px-6 lg:px-8">
+          <h2 class="text-3xl sm:text-5xl font-bold tracking-tighter text-text-light text-center">
+            Questions fréquentes
+          </h2>
+
+          <div class="mt-12 space-y-6">
+            <div class="rounded-xl border border-black/10 bg-white p-6">
+              <h3 class="font-bold text-text-light">La formule gratuite est-elle vraiment gratuite ?</h3>
+              <p class="mt-2 text-text-light-muted">
+                Oui, sans limite de durée et sans carte bancaire. Vous enregistrez autant de
+                ventes et de dépenses que vous voulez. Ce sont les reçus, les justificatifs et
+                les agents qui demandent une formule payante.
+              </p>
+            </div>
+
+            <div class="rounded-xl border border-black/10 bg-white p-6">
+              <h3 class="font-bold text-text-light">Puis-je changer de formule ?</h3>
+              <p class="mt-2 text-text-light-muted">
+                À tout moment, dans les deux sens. Si vous redescendez, vos données restent :
+                vous conservez tout ce que vous avez enregistré, seules les fonctions de la
+                formule supérieure cessent d'être accessibles.
+              </p>
+            </div>
+
+            <div class="rounded-xl border border-black/10 bg-white p-6">
+              <h3 class="font-bold text-text-light">Que se passe-t-il si je remplis mon espace ?</h3>
+              <p class="mt-2 text-text-light-muted">
+                Rien ne s'efface. Vous continuez à enregistrer vos ventes et vos dépenses
+                normalement ; seuls les nouveaux justificatifs attendent que vous fassiez de la
+                place ou que vous passiez à la formule supérieure.
+              </p>
+            </div>
+
+            <div class="rounded-xl border border-black/10 bg-white p-6">
+              <h3 class="font-bold text-text-light">Mes données m'appartiennent-elles ?</h3>
+              <p class="mt-2 text-text-light-muted">
+                Entièrement. Vos ventes et vos dépenses restent les vôtres, consultables et
+                modifiables sur toutes les formules. L'export au format Excel, lui, est inclus
+                à partir de la formule Pro.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA -->
+      <section class="pb-24 sm:pb-32">
+        <div class="max-w-5xl mx-auto px-6 lg:px-8">
+          <div class="rounded-3xl p-10 sm:p-14 bg-background-dark text-center relative overflow-hidden shadow-2xl ring-1 ring-black/10">
+            <div class="absolute top-0 left-0 -ml-10 -mt-10 w-40 h-40 bg-white/5 rounded-full blur-2xl"></div>
+            <div class="absolute bottom-0 right-0 -mr-10 -mb-10 w-40 h-40 bg-primary/20 rounded-full blur-2xl"></div>
+
+            <h2 class="text-3xl sm:text-5xl font-black tracking-tighter text-white relative z-10">
+              Essayez avant de payer.
+            </h2>
+            <p class="mt-4 text-white/80 text-lg max-w-2xl mx-auto relative z-10">
+              Créez votre compte gratuit et enregistrez votre première vente en deux minutes.
+            </p>
+
+            <div class="mt-10 flex justify-center relative z-10">
+              <a href="/signin?plan=essentiel"
+                class="rounded-full h-12 px-8 inline-flex items-center justify-center bg-primary text-background-dark text-base font-bold hover:bg-primary/90 transition w-full sm:w-auto">
+                Créer mon compte gratuitement
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="flex-shrink-0 w-full bg-white py-8">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20 border-t border-black/10">
+          <div class="flex items-center gap-4">
+            <a href="/" class="flex items-center gap-2">
+              <img src="/app/Logo-ogoue (2).png" alt="OGOUE Logo" class="h-28 w-auto">
+            </a>
+          </div>
+
+          <p class="text-sm text-text-light-muted">© 2026 OGOUE. Tous droits réservés.</p>
+
+          <div class="hidden md:flex items-center gap-6 text-sm">
+            <a class="text-text-light-muted hover:text-text-light transition-colors" href="/">Accueil</a>
+            <a class="text-text-light-muted hover:text-text-light transition-colors" href="/tarifs">Tarifs</a>
+            <a class="text-text-light-muted hover:text-text-light transition-colors" href="/apropos">À propos</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    // Menu mobile
+    const btn = document.getElementById("mobileBtn");
+    const menu = document.getElementById("mobileMenu");
+    btn?.addEventListener("click", () => menu.classList.toggle("hidden"));
+
+    // Bascule mensuel / annuel.
+    //
+    // Les deux montants vivent dans des attributs data- sur chaque prix :
+    // la page reste juste si l'un d'eux change, sans toucher au script.
+    (function () {
+      const btnMensuel = document.getElementById("btnMensuel");
+      const btnAnnuel = document.getElementById("btnAnnuel");
+      const noteAnnuel = document.getElementById("noteAnnuel");
+
+      const ACTIF = ["bg-primary", "text-background-dark"];
+      const INACTIF = ["text-text-light-muted", "hover:text-text-light"];
+
+      function afficher(periode) {
+        const annuel = periode === "annuel";
+
+        document.querySelectorAll("[data-prix]").forEach(el => {
+          el.textContent = annuel ? el.dataset.annuel : el.dataset.mensuel;
+        });
+        document.querySelectorAll("[data-periode]").forEach(el => {
+          el.textContent = annuel ? "/ an" : "/ mois";
+        });
+        document.querySelectorAll("[data-detail]").forEach(el => {
+          el.textContent = annuel ? el.dataset.annuel : el.dataset.mensuel;
+        });
+
+        // Les boutons portent la periode choisie jusqu'a l'inscription :
+        // sans cela, quelqu'un qui bascule sur l'annuel arriverait sur une
+        // page de paiement affichant le tarif mensuel.
+        document.querySelectorAll("[data-lien-plan]").forEach(el => {
+          el.href = `/signin?plan=${el.dataset.lienPlan}&periode=${periode}`;
+        });
+
+        // `invisible` plutôt que `hidden` : la note garde sa place et les
+        // trois cartes ne sautent pas verticalement à chaque bascule.
+        noteAnnuel.classList.toggle("invisible", !annuel);
+
+        btnAnnuel.classList.toggle("bg-primary", annuel);
+        btnAnnuel.classList.toggle("text-background-dark", annuel);
+        btnMensuel.classList.toggle("bg-primary", !annuel);
+        btnMensuel.classList.toggle("text-background-dark", !annuel);
+
+        INACTIF.forEach(c => {
+          btnAnnuel.classList.toggle(c, !annuel);
+          btnMensuel.classList.toggle(c, annuel);
+        });
+      }
+
+      btnMensuel?.addEventListener("click", () => afficher("mensuel"));
+      btnAnnuel?.addEventListener("click", () => afficher("annuel"));
+    })();
+  </script>
+</body>
+</html>

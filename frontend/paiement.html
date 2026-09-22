@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Activer mon abonnement - OGOUE</title>
+  <link rel="icon" type="image/png" href="app/O-removebg-preview.png">
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" crossorigin href="https://fonts.gstatic.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#0088CC",
+            "background-light": "#f6f8f6",
+            "background-dark": "#111712",
+            "text-light": "#0a0c0a",
+            "text-light-muted": "#5c6c60",
+            secondary: "#1E3A5F",
+          },
+          fontFamily: {
+            display: ["Manrope", "sans-serif"],
+          },
+          borderRadius: {
+            DEFAULT: "1rem",
+            lg: "2rem",
+            xl: "3rem",
+            full: "9999px",
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+</head>
+
+<body class="bg-background-light font-display text-text-light antialiased flex flex-col min-h-screen">
+  <div class="relative w-full overflow-x-hidden flex flex-col flex-1">
+
+    <!-- HEADER -->
+    <header class="sticky top-0 z-50 w-full bg-background-light/80 backdrop-blur-md">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20 border-b border-black/10">
+          <div class="flex items-center gap-4">
+            <a href="/" class="flex items-center gap-2">
+              <img src="/app/Logo-ogoue (2).png" alt="OGOUE Logo" class="h-28 w-auto">
+            </a>
+          </div>
+          <a href="/tarifs" class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors">
+            Revoir les formules
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1">
+      <section class="py-16 sm:py-24">
+        <div class="max-w-2xl mx-auto px-6 lg:px-8">
+
+          <div class="text-center">
+            <div class="inline-flex items-center justify-center size-14 rounded-full bg-primary/10 text-primary mb-6">
+              <span class="material-symbols-outlined text-3xl">check</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-black tracking-tighter text-text-light">
+              Votre compte est créé
+            </h1>
+            <p class="mt-3 text-text-light-muted">
+              Il reste une étape pour activer votre formule
+              <strong class="text-text-light" id="nomPlan">Pro</strong>.
+            </p>
+          </div>
+
+          <!-- Récapitulatif -->
+          <div class="mt-10 rounded-2xl border border-black/10 bg-white p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-text-light-muted">Formule choisie</p>
+                <p class="text-lg font-bold text-text-light" id="recapPlan">Pro</p>
+              </div>
+              <div class="text-right">
+                <p class="text-sm text-text-light-muted" id="recapPeriode">Mensuel</p>
+                <p class="text-2xl font-black tracking-tighter text-text-light">
+                  <span id="recapMontant">10 000</span> <span class="text-base">FCFA</span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Les trois étapes -->
+          <div class="mt-10 space-y-4">
+
+            <div class="rounded-2xl border border-black/10 bg-white p-6">
+              <div class="flex items-start gap-4">
+                <span class="flex items-center justify-center size-8 shrink-0 rounded-full bg-primary text-background-dark text-sm font-bold">1</span>
+                <div class="flex-1 min-w-0">
+                  <h2 class="font-bold text-text-light">Faites le dépôt par Airtel Money</h2>
+                  <p class="mt-1 text-sm text-text-light-muted">
+                    Envoyez <strong class="text-text-light"><span id="montantDepot">10 000</span> FCFA</strong>
+                    au numéro ci-dessous.
+                  </p>
+
+                  <div class="mt-4 flex items-center gap-3 rounded-xl bg-background-light border border-black/10 p-4">
+                    <span class="material-symbols-outlined text-primary shrink-0">smartphone</span>
+                    <span class="text-xl font-black tracking-tight text-text-light flex-1" id="numeroAirtel">—</span>
+                    <button type="button" id="btnCopier"
+                            class="rounded-full px-4 py-2 text-xs font-bold bg-primary text-background-dark hover:bg-primary/90 transition-colors shrink-0">
+                      Copier
+                    </button>
+                  </div>
+                  <p class="mt-2 text-xs text-text-light-muted" id="titulaireCompte"></p>
+                </div>
+              </div>
+            </div>
+
+            <div class="rounded-2xl border border-black/10 bg-white p-6">
+              <div class="flex items-start gap-4">
+                <span class="flex items-center justify-center size-8 shrink-0 rounded-full bg-primary text-background-dark text-sm font-bold">2</span>
+                <div class="flex-1 min-w-0">
+                  <h2 class="font-bold text-text-light">Envoyez-nous la preuve</h2>
+                  <p class="mt-1 text-sm text-text-light-muted">
+                    Prenez la capture d'écran de la confirmation de paiement et envoyez-la à
+                    cette adresse, <strong class="text-text-light">en mettant le nom de votre
+                    entreprise en objet</strong>. C'est ce nom qui nous permet de relier votre
+                    versement à votre compte.
+                  </p>
+
+                  <div class="mt-4 flex items-center gap-3 rounded-xl bg-background-light border border-black/10 p-4">
+                    <span class="material-symbols-outlined text-primary shrink-0">mail</span>
+                    <span class="text-base font-bold text-text-light flex-1 break-all" id="emailPreuve">—</span>
+                  </div>
+
+                  <a id="lienMail" href="#"
+                     class="mt-4 rounded-full h-11 px-6 inline-flex items-center justify-center bg-primary text-background-dark text-sm font-bold hover:bg-primary/90 transition-colors">
+                    Ouvrir mon e-mail
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div class="rounded-2xl border border-black/10 bg-white p-6">
+              <div class="flex items-start gap-4">
+                <span class="flex items-center justify-center size-8 shrink-0 rounded-full bg-primary text-background-dark text-sm font-bold">3</span>
+                <div class="flex-1 min-w-0">
+                  <h2 class="font-bold text-text-light">Nous activons votre formule</h2>
+                  <p class="mt-1 text-sm text-text-light-muted">
+                    Dès que nous avons vérifié le versement, votre formule est activée et vous
+                    recevez un e-mail de confirmation. Comptez un jour ouvré au maximum.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Accès immédiat -->
+          <div class="mt-10 rounded-2xl border-l-4 border-primary bg-white p-6">
+            <p class="font-bold text-text-light">Vous pouvez commencer tout de suite.</p>
+            <p class="mt-1 text-sm text-text-light-muted">
+              Votre compte est déjà utilisable : enregistrez vos ventes et vos dépenses sans
+              attendre. L'activation de votre formule ne fait qu'ajouter les fonctions
+              correspondantes.
+            </p>
+            <a id="lienApp" href="#"
+               class="mt-5 rounded-full h-12 px-8 inline-flex items-center justify-center border border-black/10 bg-white hover:bg-background-light text-sm font-bold transition-colors">
+              Aller à mon tableau de bord
+            </a>
+          </div>
+
+          <p class="mt-8 text-center text-sm text-text-light-muted">
+            Une question sur votre paiement ? Répondez simplement à l'e-mail ci-dessus.
+          </p>
+
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="flex-shrink-0 w-full bg-white py-8">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20 border-t border-black/10">
+          <div class="flex items-center gap-4">
+            <a href="/" class="flex items-center gap-2">
+              <img src="/app/Logo-ogoue (2).png" alt="OGOUE Logo" class="h-28 w-auto">
+            </a>
+          </div>
+          <p class="text-sm text-text-light-muted">© 2026 OGOUE. Tous droits réservés.</p>
+          <div class="hidden md:flex items-center gap-6 text-sm">
+            <a class="text-text-light-muted hover:text-text-light transition-colors" href="/">Accueil</a>
+            <a class="text-text-light-muted hover:text-text-light transition-colors" href="/tarifs">Tarifs</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    // ════════════════════════════════════════════════════════════════
+    // À RENSEIGNER — coordonnées d'encaissement
+    // ════════════════════════════════════════════════════════════════
+    // Le paiement est traité à la main pour le moment : le client dépose
+    // sur ce numéro, puis envoie sa capture à cette adresse avec le nom de
+    // son entreprise en objet. C'est ce nom qui sert de rapprochement.
+    const ENCAISSEMENT = {
+      // Affiché en gros : espacé pour être lu et recopié sans erreur.
+      numeroAffiche: "+241 74 23 38 31",
+      // Copié dans le presse-papiers : le numéro local à 8 chiffres, celui
+      // qu'attend un transfert Airtel Money depuis le Gabon. L'indicatif
+      // international serait refusé par la plupart des applications.
+      numeroCopie: "74233831",
+      titulaire: "Compte au nom de KIENA PAMBO Leila Charles",
+      email: "legalogoue@gmail.com"
+    };
+
+    // Les montants sont dupliqués depuis tarifs.html. Toute modification de
+    // prix doit être reportée aux deux endroits tant qu'aucun abonnement
+    // n'existe en base.
+    const FORMULES = {
+      pro:    { nom: "Pro",    mensuel: "10 000", annuel: "100 000" },
+      equipe: { nom: "Équipe", mensuel: "25 000", annuel: "250 000" }
+    };
+
+    (function () {
+      const params = new URLSearchParams(location.search);
+      const cle = (params.get("plan") || "pro").toLowerCase();
+      const periode = params.get("periode") === "annuel" ? "annuel" : "mensuel";
+
+      // Une formule inconnue — ou la formule gratuite, qui n'a rien à payer —
+      // n'a rien à faire sur cette page.
+      const formule = FORMULES[cle];
+      if (!formule) {
+        location.replace("/tarifs");
+        return;
+      }
+
+      const montant = formule[periode];
+
+      document.getElementById("nomPlan").textContent = formule.nom;
+      document.getElementById("recapPlan").textContent = formule.nom;
+      document.getElementById("recapPeriode").textContent = periode === "annuel" ? "Annuel" : "Mensuel";
+      document.getElementById("recapMontant").textContent = montant;
+      document.getElementById("montantDepot").textContent = montant;
+
+      document.getElementById("numeroAirtel").textContent = ENCAISSEMENT.numeroAffiche;
+      document.getElementById("emailPreuve").textContent = ENCAISSEMENT.email;
+
+      if (ENCAISSEMENT.titulaire) {
+        document.getElementById("titulaireCompte").textContent = ENCAISSEMENT.titulaire;
+      }
+
+      // Le nom de l'entreprise est deja connu depuis l'inscription : on
+      // pre-remplit l'objet plutot que de demander au client de le retaper,
+      // puisque c'est precisement ce champ qui permet le rapprochement.
+      let entreprise = "";
+      try {
+        const org = JSON.parse(localStorage.getItem("ogo_org") || "null");
+        entreprise = (org && (org.name || org.company_name)) || "";
+      } catch (e) { /* localStorage illisible : on laisse l'objet vide */ }
+
+      const objet = entreprise || "Nom de mon entreprise";
+      const corps =
+        `Bonjour,\n\n` +
+        `Je viens d'effectuer le paiement de la formule ${formule.nom} (${periode}) ` +
+        `pour un montant de ${montant} FCFA.\n\n` +
+        `Vous trouverez la capture d'écran du paiement en pièce jointe.\n\n` +
+        `Entreprise : ${objet}\n`;
+
+      document.getElementById("lienMail").href =
+        `mailto:${ENCAISSEMENT.email}` +
+        `?subject=${encodeURIComponent(objet)}` +
+        `&body=${encodeURIComponent(corps)}`;
+
+      const APP_BASE = (['localhost', '127.0.0.1'].some(h => location.hostname.includes(h)))
+        ? 'http://127.0.0.1:8080/app'
+        : 'https://www.ogoue.com/app';
+      document.getElementById("lienApp").href = APP_BASE + '/module_tableau_bord.html';
+
+      // Copie du numero : sur telephone, le recopier a la main est la
+      // premiere source d'erreur de versement.
+      const btnCopier = document.getElementById("btnCopier");
+      btnCopier?.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(ENCAISSEMENT.numeroCopie);
+          const avant = btnCopier.textContent;
+          btnCopier.textContent = "Copié";
+          setTimeout(() => { btnCopier.textContent = avant; }, 2000);
+        } catch (e) {
+          // Presse-papiers refuse (contexte non securise, permission) :
+          // selectionner le numero permet au moins la copie manuelle.
+          const plage = document.createRange();
+          plage.selectNodeContents(document.getElementById("numeroAirtel"));
+          const sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(plage);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

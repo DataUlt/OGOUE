@@ -29,6 +29,12 @@
         source: /apropos
         destination: /apropos.html
       - type: rewrite
+        source: /tarifs
+        destination: /tarifs.html
+      - type: rewrite
+        source: /paiement
+        destination: /paiement.html
+      - type: rewrite
         source: /agent-login
         destination: /agent-login.html
       - type: rewrite
@@ -44,6 +50,9 @@
       - type: rewrite
         source: /app/module_tableau_bord
         destination: /app/module_tableau_bord.html
+      - type: rewrite
+        source: /app/module_abonnement
+        destination: /app/module_abonnement.html
       - type: rewrite
         source: /app/module_ventes
         destination: /app/module_ventes.html
