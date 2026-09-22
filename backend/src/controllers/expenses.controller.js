@@ -3,6 +3,8 @@ import { z } from "zod";
 import { uploadFileToSupabase, deleteFileFromSupabase } from "../utils/supabase-storage.js";
 import { logDeletion } from "../utils/deletion-audit.js";
 import { lireToutesLesLignes } from "../utils/pagination.js";
+import { appliquerFenetre } from "../config/fenetre-historique.js";
+import { verifierQuota } from "../utils/quota-stockage.js";
 
 const listSchema = z.object({
   month: z.coerce.number().int().min(1).max(12).optional(),
@@ -48,6 +50,16 @@ export async function listExpenses(req, res) {
       finalEndDate = lastDay.toISOString().split('T')[0];
     }
 
+    // La formule gratuite ne donne accès qu'aux derniers mois. Le
+    // plancher est appliqué côté serveur : le frontend peut demander ce
+    // qu'il veut, il ne recevra pas au-delà.
+    const fenetre = appliquerFenetre(
+      { startDate: finalStartDate, endDate: finalEndDate },
+      req.droits?.historiqueMois
+    );
+    finalStartDate = fenetre.startDate;
+    finalEndDate = fenetre.endDate;
+
     // La requête est reconstruite à chaque page, d'où la fabrique : un
     // constructeur Supabase déjà exécuté ne peut pas resservir.
     const construireRequete = () => {
@@ -56,9 +68,11 @@ export async function listExpenses(req, res) {
         .select("id, expense_date, category, payment_method, amount, receipt_name, receipt_url, note, created_at, created_by")
         .eq("organization_id", organizationId);
 
-      if (finalStartDate && finalEndDate) {
-        query = query.gte("expense_date", finalStartDate).lte("expense_date", finalEndDate);
-      }
+      // Bornes indépendantes : la fenêtre de la formule gratuite pose un
+      // début sans fin. Les exiger toutes les deux ferait sauter le
+      // filtre entier et renverrait tout l'historique.
+      if (finalStartDate) query = query.gte("expense_date", finalStartDate);
+      if (finalEndDate) query = query.lte("expense_date", finalEndDate);
 
       // L'ordre sur id départage les dépenses de même date : sans lui la
       // pagination pourrait en dupliquer et en oublier.
@@ -146,9 +160,36 @@ export async function listExpenses(req, res) {
 export async function createExpense(req, res) {
   try {
     const data = createSchema.parse(req.body);
-    
+
     // Récupérer l'organizationId du JWT
     const organizationId = req.user.organizationId;
+
+    // Enregistrer une dépense n'est jamais bridé ; y joindre un document
+    // l'est. Le contrôle porte sur la pièce jointe, pas sur la route.
+    if (req.file && !req.droits?.justificatifs) {
+      return res.status(402).json({
+        error: "Joindre un justificatif n'est pas inclus dans votre formule. Votre dépense peut être enregistrée sans document.",
+        code: "formule_insuffisante",
+        fonction: "justificatifs",
+        formuleActuelle: req.formule,
+      });
+    }
+
+    // Plafond de stockage, verifie AVANT le depot : un fichier envoye
+    // puis refuse aurait deja occupe la place.
+    if (req.file) {
+      const quota = await verifierQuota(organizationId, req.file.size, req.droits?.stockageGo);
+      if (!quota.ok) {
+        return res.status(402).json({
+          error: quota.message,
+          code: "quota_stockage",
+          fonction: "justificatifs",
+          formuleActuelle: req.formule,
+          utilise: quota.utilise,
+          quota: quota.quota,
+        });
+      }
+    }
 
     let receiptUrl = null;
     let receiptStoragePath = null;
@@ -182,6 +223,7 @@ export async function createExpense(req, res) {
         receipt_name: receiptName,
         receipt_url: receiptUrl,
         receipt_storage_path: receiptStoragePath,
+        receipt_size_bytes: req.file?.size ?? null,
         note: videEnNull(data.note),
         created_by: req.user.userId || req.user.sub || req.user.id,
       })
@@ -229,6 +271,31 @@ export async function updateExpenseReceipt(req, res) {
       return res.status(400).json({ error: "Expense ID is required" });
     }
 
+    // Joindre un document après coup relève de la même fonction que le
+    // joindre à la saisie.
+    if (!req.droits?.justificatifs) {
+      return res.status(402).json({
+        error: "Joindre un justificatif n'est pas inclus dans votre formule.",
+        code: "formule_insuffisante",
+        fonction: "justificatifs",
+        formuleActuelle: req.formule,
+      });
+    }
+
+    if (req.file) {
+      const quota = await verifierQuota(organizationId, req.file.size, req.droits?.stockageGo);
+      if (!quota.ok) {
+        return res.status(402).json({
+          error: quota.message,
+          code: "quota_stockage",
+          fonction: "justificatifs",
+          formuleActuelle: req.formule,
+          utilise: quota.utilise,
+          quota: quota.quota,
+        });
+      }
+    }
+
     // Vérifier que la dépense appartient à l'organisation.
     // On relit au passage le fichier déjà en place : s'il est remplacé,
     // plus rien ne le référencera et il faudra le retirer du bucket.
@@ -260,6 +327,7 @@ export async function updateExpenseReceipt(req, res) {
         champs.receipt_name = uploadResult.fileName;
         champs.receipt_url = uploadResult.fileUrl;
         champs.receipt_storage_path = uploadResult.storagePath;
+        champs.receipt_size_bytes = req.file.size;
       } catch (uploadError) {
         console.error("❌ File upload failed:", uploadError?.message);
         return res.status(400).json({ error: "File upload failed", details: uploadError?.message });

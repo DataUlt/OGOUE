@@ -32,6 +32,34 @@ export async function createAgent(req, res) {
       return res.status(400).json({ error: "Organization ID missing" });
     }
 
+    // Plafond d'agents de la formule. `null` vaut illimité, `0` interdit
+    // la fonction : on compte l'existant avant d'en créer un de plus,
+    // sinon un gérant pourrait dépasser en enchaînant les créations.
+    const agentsMax = req.droits?.agentsMax;
+    if (agentsMax !== null && agentsMax !== undefined) {
+      const { count, error: erreurComptage } = await supabase
+        .from("agents")
+        .select("id", { count: "exact", head: true })
+        .eq("organization_id", organizationId);
+
+      if (erreurComptage) {
+        console.error("Erreur comptage agents:", erreurComptage);
+        return res.status(500).json({ error: "Internal server error" });
+      }
+
+      if ((count || 0) >= agentsMax) {
+        return res.status(402).json({
+          error: agentsMax === 0
+            ? "La gestion des agents n'est pas incluse dans votre formule."
+            : `Votre formule permet ${agentsMax} agents, vous les avez tous créés.`,
+          code: "formule_insuffisante",
+          fonction: "agents",
+          formuleActuelle: req.formule,
+          limite: agentsMax,
+        });
+      }
+    }
+
     // Générer un code d'accès unique
     let accessCode = generateAccessCode();
     let codeExists = true;

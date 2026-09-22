@@ -6,8 +6,13 @@ import {
   deleteDeletionRecord
 } from "../controllers/audit.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
+import { exigerFonction } from "../middleware/plan.middleware.js";
 
 const router = express.Router();
+
+// L'historique des suppressions est réservé à la formule Équipe :
+// savoir qui a effacé quoi n'a de sens qu'à plusieurs.
+router.use(exigerFonction("audit", "L'historique des suppressions"));
 
 /**
  * GET /api/audit/deletions
