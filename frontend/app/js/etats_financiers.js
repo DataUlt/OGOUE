@@ -234,66 +234,67 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    /**
-     * Génère le Compte de Résultat simplifié
-     */
-    function generateCompteDeResultat(ventes, depenses) {
-        const totalVentes = ventes.reduce((sum, v) => {
-            const montant = parseFloat(v.montant) || 0;
-            return sum + montant;
-        }, 0);
-        
-        // Regrouper les dépenses par catégorie
-        const depensesByCategory = {};
-        depenses.forEach(d => {
-            const cat = d.categorie || "Autres";
-            const montant = parseFloat(d.montant) || 0;
-            depensesByCategory[cat] = (depensesByCategory[cat] || 0) + montant;
+    // ── Les états financiers sont calculés par le serveur ─────────
+    //
+    // Le compte de résultat et le tableau de flux sont le produit vendu,
+    // pas un simple affichage des ventes. Les calculer ici les aurait
+    // laissés accessibles à une formule qui ne les inclut pas, puisque
+    // les données brutes, elles, appartiennent au client.
+    //
+    // L'appel est mutualisé : le compte de résultat et le tableau de flux
+    // viennent de la même réponse, et l'impression les demande tous les
+    // deux à la suite. Un cache par plage évite trois allers-retours.
+    const _cacheEtats = new Map();
+
+    async function chargerEtats(startDateISO, endDateISO) {
+        const cle = `${startDateISO || ""}|${endDateISO || ""}`;
+        if (_cacheEtats.has(cle)) return _cacheEtats.get(cle);
+
+        const API_BASE_URL = (['localhost', '127.0.0.1'].some(h => location.hostname.includes(h)))
+            ? 'http://localhost:3001'
+            : 'https://api.ogoue.com';
+
+        const params = new URLSearchParams();
+        if (startDateISO) params.set("startDate", startDateISO);
+        if (endDateISO) params.set("endDate", endDateISO);
+
+        const reponse = await fetch(`${API_BASE_URL}/api/etats-financiers?${params}`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` }
         });
-        
-        const totalDepenses = Object.values(depensesByCategory).reduce((sum, v) => sum + v, 0);
-        const resultat = totalVentes - totalDepenses;
-        
-        console.log(`💰 Totaux: Ventes=${totalVentes}, Dépenses=${totalDepenses}, Résultat=${resultat}`);
-        
-        return {
-            totalVentes,
-            depensesByCategory,
-            totalDepenses,
-            resultat
-        };
+
+        if (reponse.status === 402) {
+            // Formule insuffisante : la fenêtre de montée en formule dit
+            // déjà quoi faire, inutile d'empiler une alerte par-dessus.
+            window.OGOUE_PLAN?.fenetreMontee("etatsFinanciers");
+            throw new Error("formule_insuffisante");
+        }
+        if (!reponse.ok) throw new Error(`HTTP ${reponse.status}`);
+
+        const donnees = await reponse.json();
+        _cacheEtats.set(cle, donnees);
+        return donnees;
     }
 
-    /**
-     * Génère le Tableau de Flux de Trésorerie
-     */
-    function generateTableauDeFlux(ventes, depenses) {
-        const fluxEntrants = ventes.reduce((sum, v) => sum + (parseFloat(v.montant) || 0), 0);
-        const fluxSortants = depenses.reduce((sum, d) => sum + (parseFloat(d.montant) || 0), 0);
-        const fluxNet = fluxEntrants - fluxSortants;
-        
-        // Regrouper par moyen de paiement
-        const ventesByPayment = {};
-        ventes.forEach(v => {
-            const method = v.moyen_paiement || "cash";
-            const montant = parseFloat(v.montant) || 0;
-            ventesByPayment[method] = (ventesByPayment[method] || 0) + montant;
-        });
-        
-        const depensesByPayment = {};
-        depenses.forEach(d => {
-            const method = d.moyen_paiement || "cash";
-            const montant = parseFloat(d.montant) || 0;
-            depensesByPayment[method] = (depensesByPayment[method] || 0) + montant;
-        });
-        
-        return {
-            fluxEntrants,
-            fluxSortants,
-            fluxNet,
-            ventesByPayment,
-            depensesByPayment
-        };
+    // Le serveur n'envoie que les documents que la formule ouvre : une
+    // clé absente n'est pas une panne, c'est un verrou. On le dit avec la
+    // fenêtre de montée en formule plutôt qu'avec un « undefined » qui
+    // casserait le rendu plus bas.
+    async function generateCompteDeResultat(startDateISO, endDateISO) {
+        const { compteResultat } = await chargerEtats(startDateISO, endDateISO);
+        if (!compteResultat) {
+            window.OGOUE_PLAN?.fenetreMontee("compteResultat");
+            throw new Error("formule_insuffisante");
+        }
+        return compteResultat;
+    }
+
+    async function generateTableauDeFlux(startDateISO, endDateISO) {
+        const { tableauFlux } = await chargerEtats(startDateISO, endDateISO);
+        if (!tableauFlux) {
+            window.OGOUE_PLAN?.fenetreMontee("tableauFlux");
+            throw new Error("formule_insuffisante");
+        }
+        return tableauFlux;
     }
 
     /**
@@ -803,7 +804,7 @@ document.addEventListener("DOMContentLoaded", function () {
             console.log("✅ Ventes filtrées:", ventesFiltered);
             console.log("✅ Dépenses filtrées:", depensesFiltered);
 
-            const compteResultat = generateCompteDeResultat(ventesFiltered, depensesFiltered);
+            const compteResultat = await generateCompteDeResultat(startDate, endDate);
 
             console.log("📈 Compte de Résultat généré:", compteResultat);
 
@@ -865,7 +866,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const ventesFiltered = filterByDateRange(ventes);
             const depensesFiltered = filterByDateRange(depenses);
-            const tableauFlux = generateTableauDeFlux(ventesFiltered, depensesFiltered);
+            const tableauFlux = await generateTableauDeFlux(startDate, endDate);
 
             let resultsContainer = document.getElementById("etatFinanciersResults");
             if (!resultsContainer) {
@@ -1322,8 +1323,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 const depensesFiltered = filterByDateRange(depenses);
 
                 // Générer les HTML
-                const compteData = generateCompteDeResultat(ventesFiltered, depensesFiltered);
-                const fluxData = generateTableauDeFlux(ventesFiltered, depensesFiltered);
+                const compteData = await generateCompteDeResultat(startDate, endDate);
+                const fluxData = await generateTableauDeFlux(startDate, endDate);
 
                 // Stocker les données et HTML pour impression
                 window.etatFinanciersData = window.etatFinanciersData || {};

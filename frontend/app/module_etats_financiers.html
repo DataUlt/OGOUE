@@ -227,11 +227,11 @@
 
                 <!-- Boutons -->
                 <div class="flex flex-wrap justify-end gap-3">
-                    <button id="exportExcelBtn" class="flex items-center gap-2 rounded-lg h-10 px-4 bg-primary/20 text-sm font-bold hover:bg-primary/30 transition">
+                    <button id="exportExcelBtn" data-exige="exportDocuments" class="flex items-center gap-2 rounded-lg h-10 px-4 bg-primary/20 text-sm font-bold hover:bg-primary/30 transition">
                         <span class="material-symbols-outlined">download</span>
                         Exporter Excel
                     </button>
-                    <button id="printAllBtn" class="flex items-center gap-2 rounded-lg h-10 px-4 bg-primary/20 text-sm font-bold hover:bg-primary/30 transition">
+                    <button id="printAllBtn" data-exige="exportDocuments" class="flex items-center gap-2 rounded-lg h-10 px-4 bg-primary/20 text-sm font-bold hover:bg-primary/30 transition">
                         <span class="material-symbols-outlined">print</span>
                         Imprimer
                     </button>
@@ -251,7 +251,7 @@
                         <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary flex-grow">
                             Synthèse des charges et produits de l'exercice.
                         </p>
-                        <button id="generateCompteBtn" class="rounded-lg h-9 px-4 bg-primary/20 text-sm font-bold">Générer l'aperçu</button>
+                        <button id="generateCompteBtn" data-exige="compteResultat" class="rounded-lg h-9 px-4 bg-primary/20 text-sm font-bold">Générer l'aperçu</button>
                     </div>
 
                     <!-- Tableau de Flux -->
@@ -265,7 +265,7 @@
                         <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary flex-grow">
                             Analyse des flux de liquidités entrants et sortants.
                         </p>
-                        <button id="generateFluxBtn" class="rounded-lg h-9 px-4 bg-primary/20 text-sm font-bold">Générer l'aperçu</button>
+                        <button id="generateFluxBtn" data-exige="tableauFlux" class="rounded-lg h-9 px-4 bg-primary/20 text-sm font-bold">Générer l'aperçu</button>
                     </div>
 
                     <!-- Historique des ventes -->
@@ -279,7 +279,7 @@
                         <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary flex-grow">
                             Suivi détaillé de toutes les ventes réalisées.
                         </p>
-                        <button id="generateVentesBtn" class="rounded-lg h-9 px-4 bg-primary/20 text-sm font-bold">Générer l'aperçu</button>
+                        <button id="generateVentesBtn" data-exige="historiqueVentes" class="rounded-lg h-9 px-4 bg-primary/20 text-sm font-bold">Générer l'aperçu</button>
                     </div>
 
                     <!-- Historiques des dépenses -->
@@ -293,7 +293,7 @@
                         <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary flex-grow">
                             Suivi détaillé de toutes les dépenses engagées.
                         </p>
-                        <button id="generateDepensesBtn" class="rounded-lg h-9 px-4 bg-primary/20 text-sm font-bold">Générer l'aperçu</button>
+                        <button id="generateDepensesBtn" data-exige="historiqueDepenses" class="rounded-lg h-9 px-4 bg-primary/20 text-sm font-bold">Générer l'aperçu</button>
                     </div>
 
                     <!-- Historique des suppressions -->
@@ -307,7 +307,7 @@
                         <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary flex-grow">
                             Suivi des suppressions avec motifs et agents.
                         </p>
-                        <button id="viewSuppressionHistoryBtn" class="rounded-lg h-9 px-4 bg-primary/20 text-sm font-bold">Consulter l'historique</button>
+                        <button id="viewSuppressionHistoryBtn" data-exige="audit" class="rounded-lg h-9 px-4 bg-primary/20 text-sm font-bold">Consulter l'historique</button>
                     </div>
 
                 </div>
@@ -321,6 +321,7 @@
 
 <!-- Store OGOUE -->
 <script src="js/ogoue-state.js"></script>
+<script src="js/plan-ui.js"></script>
 <script src="js/header-ui.js"></script>
 <script src="js/mobile-menu.js"></script>
 
@@ -353,5 +354,15 @@
     });
 </script>
 
+<script>
+  // La page n'est plus reservee en bloc : la formule gratuite y entre
+  // pour son tableau de flux et son historique des ventes. Chaque carte
+  // porte desormais son propre data-exige, que plan-ui applique tout
+  // seul ; il ne reste ici que le cas ou une formule fermerait la page
+  // entiere.
+  window.OGOUE_PLAN?.chargee.then(() => {
+    window.OGOUE_PLAN.exigerPage("etatsFinanciers");
+  });
+</script>
 </body>
 </html>
