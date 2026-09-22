@@ -154,6 +154,7 @@
     </div>
 
     <script src="js/ogoue-state.js"></script>
+<script src="js/plan-ui.js"></script>
     <script src="js/header-ui.js"></script>
     <script src="js/mobile-menu.js"></script>
 
@@ -260,5 +261,13 @@
         // Charger au d&eacute;marrage
         loadAgents();
     </script>
+<script>
+  // Page entierement reservee aux formules qui ouvrent les agents.
+  // Le backend refuse deja la creation ; ceci evite d'afficher une
+  // page utilisable en apparence et bloquante en pratique.
+  window.OGOUE_PLAN?.chargee.then(() => {
+    window.OGOUE_PLAN.exigerPage("agents");
+  });
+</script>
 </body>
 </html>

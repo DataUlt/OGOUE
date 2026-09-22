@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html class="light" lang="fr">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Mon abonnement - OGOUE</title>
+    <link rel="icon" type="image/png" href="O-removebg-preview.png">
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0088CC",
+                        "secondary": "#1E3A5F",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#111712",
+                        "card-light": "#FFFFFF",
+                        "card-dark": "#1a2622",
+                        "text-light-primary": "#0a0c0a",
+                        "text-dark-primary": "#E2E8F0",
+                        "text-light-secondary": "#5c6c60",
+                        "text-dark-secondary": "#94A3B8",
+                        "border-light": "#e8ede8",
+                        "border-dark": "#334155",
+                    },
+                    fontFamily: { "display": ["Manrope", "sans-serif"] },
+                    borderRadius: { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+
+<body class="font-display bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+
+    <!-- HEADER -->
+    <header class="sticky top-0 z-10 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-[#e8ede8] dark:border-gray-700">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between gap-2 h-20">
+                <a href="module_tableau_bord"><img src="/app/Logo-ogoue (2).png" alt="OGOUE" class="h-28 w-auto"></a>
+                <a href="module_tableau_bord" class="text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary hover:text-primary transition-colors">
+                    Retour au tableau de bord
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow">
+        <div class="container mx-auto px-4 py-8 max-w-5xl">
+
+            <h1 class="text-3xl font-bold mb-2">Mon abonnement</h1>
+            <p class="text-text-light-secondary dark:text-text-dark-secondary mb-8">
+                Votre formule actuelle et les options disponibles pour
+                <strong id="nomEntreprise" class="text-text-light-primary dark:text-text-dark-primary">votre entreprise</strong>.
+            </p>
+
+            <!-- FORMULE EN COURS -->
+            <section id="carteActuelle"
+                     class="rounded-2xl border-2 border-primary bg-card-light dark:bg-card-dark p-6 mb-10">
+                <div class="flex flex-wrap items-start justify-between gap-4">
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-wide text-primary" id="carteEtiquette">Formule actuelle</p>
+                        <p class="mt-1 text-3xl font-black tracking-tight" id="formuleNom">…</p>
+                        <p class="mt-1 text-sm text-text-light-secondary dark:text-text-dark-secondary" id="formulePrix"></p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary" id="formuleEcheance"></p>
+                        <button type="button" id="btnRetourFormule"
+                                class="hidden mt-2 text-sm font-semibold text-primary hover:underline">
+                            ← Revenir à ma formule
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Temps restant avant l'échéance -->
+                <div id="blocEcheance" class="hidden mt-6 pt-6 border-t border-border-light dark:border-border-dark">
+                    <div class="flex items-center justify-between text-sm mb-2">
+                        <span class="font-semibold" id="echeanceTitre"></span>
+                        <span class="text-text-light-secondary dark:text-text-dark-secondary" id="echeanceDate"></span>
+                    </div>
+                    <div class="w-full h-2 rounded-full bg-border-light dark:bg-border-dark overflow-hidden">
+                        <div id="echeanceBarre" class="h-full rounded-full bg-primary transition-all" style="width:0%"></div>
+                    </div>
+                    <p class="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary" id="echeanceNote"></p>
+                </div>
+
+                <!-- Consommation du stockage -->
+                <div id="blocStockage" class="hidden mt-6 pt-6 border-t border-border-light dark:border-border-dark">
+                    <div class="flex items-center justify-between text-sm mb-2">
+                        <span class="font-semibold">Justificatifs conservés</span>
+                        <span class="text-text-light-secondary dark:text-text-dark-secondary" id="stockageTexte"></span>
+                    </div>
+                    <div class="w-full h-2 rounded-full bg-border-light dark:bg-border-dark overflow-hidden">
+                        <div id="stockageBarre" class="h-full rounded-full bg-primary transition-all" style="width:0%"></div>
+                    </div>
+                </div>
+
+                <!-- Ce que la formule inclut -->
+                <ul id="listeDroits" class="mt-6 pt-6 border-t border-border-light dark:border-border-dark grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm"></ul>
+            </section>
+
+            <!-- CHOIX D'UNE AUTRE FORMULE -->
+            <h2 class="text-2xl font-bold mb-2">Changer de formule</h2>
+            <p class="text-text-light-secondary dark:text-text-dark-secondary mb-6">
+                Vos données sont conservées dans tous les cas. Changer de formule ouvre ou
+                referme des fonctions, sans jamais rien effacer.
+            </p>
+
+            <div class="inline-flex items-center gap-1 rounded-full border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark p-1 mb-6">
+                <button type="button" id="btnMensuel" class="rounded-full px-5 py-2 text-sm font-bold bg-primary text-white">Mensuel</button>
+                <button type="button" id="btnAnnuel" class="rounded-full px-5 py-2 text-sm font-bold text-text-light-secondary dark:text-text-dark-secondary">Annuel</button>
+            </div>
+            <p id="noteAnnuel" class="text-sm font-semibold text-primary mb-6 invisible">2 mois offerts sur l'année</p>
+
+            <div id="grilleFormules" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+
+            <!-- INSTRUCTIONS DE PAIEMENT -->
+            <section id="blocPaiement" class="hidden mt-10 rounded-2xl border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark p-6">
+                <h2 class="text-xl font-bold">Activer la formule <span id="paiementFormule"></span></h2>
+                <p class="mt-1 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+                    Le règlement se fait par Airtel Money. Votre formule est activée dès que
+                    nous avons vérifié le versement, sous un jour ouvré.
+                </p>
+
+                <!-- Ce que le changement apporte, avant de demander l'argent -->
+                <div class="mt-6 rounded-xl bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark p-5">
+                    <p class="text-sm font-bold mb-3">Ce que cette formule vous donne</p>
+                    <ul id="paiementDroits" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm"></ul>
+                </div>
+
+                <div class="mt-6 space-y-4">
+                    <div class="flex items-start gap-4">
+                        <span class="flex items-center justify-center size-8 shrink-0 rounded-full bg-primary text-white text-sm font-bold">1</span>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-bold">Versez <span id="paiementMontant"></span> FCFA</p>
+                            <div class="mt-3 flex items-center gap-3 rounded-xl bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark p-4">
+                                <span class="material-symbols-outlined text-primary shrink-0">smartphone</span>
+                                <span class="text-xl font-black tracking-tight flex-1" id="numeroAirtel"></span>
+                                <button type="button" id="btnCopier" class="rounded-full px-4 py-2 text-xs font-bold bg-primary text-white hover:bg-primary/90 transition-colors shrink-0">Copier</button>
+                            </div>
+                            <p class="mt-2 text-xs text-text-light-secondary dark:text-text-dark-secondary" id="titulaireCompte"></p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4">
+                        <span class="flex items-center justify-center size-8 shrink-0 rounded-full bg-primary text-white text-sm font-bold">2</span>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-bold">Envoyez la capture d'écran</p>
+                            <p class="mt-1 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+                                L'objet du message doit porter le nom de votre entreprise : c'est
+                                ce qui nous permet de relier votre versement à votre compte.
+                            </p>
+                            <a id="lienMail" href="#"
+                               class="mt-4 rounded-full h-11 px-6 inline-flex items-center justify-center bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors">
+                                Ouvrir mon e-mail
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+</div>
+
+<script src="js/ogoue-state.js"></script>
+<script src="js/plan-ui.js"></script>
+<script>
+(function () {
+    // Coordonnees d'encaissement : identiques a paiement.html. Le
+    // reglement est traite a la main, c'est le nom de l'entreprise en
+    // objet du mail qui sert de rapprochement.
+    const ENCAISSEMENT = {
+        numeroAffiche: "+241 74 23 38 31",
+        numeroCopie: "74233831",
+        titulaire: "Compte au nom de KIENA PAMBO Leila Charles",
+        email: "legalogoue@gmail.com"
+    };
+
+    const API_BASE_URL = (['localhost', '127.0.0.1'].some(h => location.hostname.includes(h)))
+        ? 'http://localhost:3001' : 'https://api.ogoue.com';
+
+    const DROITS_LISIBLES = [
+        ["recus", "Reçus numérotés"],
+        ["justificatifs", "Justificatifs conservés"],
+        ["compteResultat", "Compte de résultat"],
+        ["historiqueDepenses", "Historique des dépenses"],
+        ["exportDocuments", "Export Excel et impression"],
+        ["audit", "Historique des suppressions"],
+        ["scoreTracabilite", "Score de traçabilité"],
+    ];
+
+    let periode = "mensuel";
+    let etat = null;
+
+    const fmt = (n) => Number(n).toLocaleString("fr-FR");
+    const go = (o) => o >= 1073741824
+        ? `${(o / 1073741824).toFixed(1).replace(".", ",")} Go`
+        : `${Math.round(o / 1048576)} Mo`;
+
+    function entreprise() {
+        try {
+            const org = JSON.parse(localStorage.getItem("ogo_org") || "null");
+            return (org && (org.name || org.company_name)) || "";
+        } catch (e) { return ""; }
+    }
+
+    /**
+     * Liste de ce qu'une formule ouvre ou ferme.
+     *
+     * @param {object} droits    - droits de la formule decrite
+     * @param {object} [actuels] - droits en cours ; fournis, ils font
+     *   ressortir ce que le changement apporte reellement. C'est ce
+     *   delta qui decide, pas la liste complete.
+     */
+    function listeDroitsHtml(droits, actuels) {
+        const ligne = (ouvert, libelle, nouveau) => `
+            <li class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-[18px] ${ouvert ? 'text-primary' : 'text-gray-400'}">${ouvert ? 'check' : 'lock'}</span>
+                <span class="${ouvert ? '' : 'text-text-light-secondary dark:text-text-dark-secondary'}">${libelle}</span>
+                ${nouveau ? '<span class="ml-1 rounded-full bg-primary/10 text-primary text-[11px] font-bold px-2 py-0.5">Nouveau</span>' : ''}
+            </li>`;
+
+        let html = DROITS_LISIBLES.map(([cle, libelle]) =>
+            ligne(!!droits[cle], libelle, actuels && droits[cle] && !actuels[cle])
+        ).join("");
+
+        const histNouveau = actuels && droits.historiqueMois !== actuels.historiqueMois;
+        html += ligne(true,
+            `Historique ${droits.historiqueMois ? droits.historiqueMois + " mois" : "illimité"}`,
+            histNouveau);
+
+        const agents = droits.agentsMax === 0
+            ? "Aucun agent"
+            : (droits.agentsMax === null ? "Agents illimités" : droits.agentsMax + " agents");
+        const agentsNouveau = actuels && droits.agentsMax !== actuels.agentsMax;
+        html += ligne(droits.agentsMax !== 0, agents, agentsNouveau);
+
+        if (droits.stockageGo) {
+            const stockNouveau = actuels && droits.stockageGo !== actuels.stockageGo;
+            html += ligne(true, `${droits.stockageGo} Go de justificatifs`, stockNouveau);
+        }
+
+        return html;
+    }
+
+    /**
+     * Remplit la carte du haut.
+     *
+     * Elle sert deux usages : montrer la formule en cours, et prévisualiser
+     * celle qu'on envisage. C'est le même cadre, au même endroit — on
+     * compare donc au même emplacement, sans avoir à mémoriser la liste
+     * précédente en descendant la page.
+     *
+     * @param {string} cle - formule à afficher ; celle en cours par défaut
+     */
+    /** Une date ISO en 22/10/2026. */
+    function dateLisible(iso) {
+        if (!iso) return "";
+        const [a, m, j] = String(iso).slice(0, 10).split("-");
+        return `${j}/${m}/${a}`;
+    }
+
+    /**
+     * Jauge du temps restant avant l'échéance.
+     *
+     * Elle se vide en avançant vers la date de fin, comme un réservoir :
+     * une barre qui se remplit dirait « bientôt complet », alors que ce
+     * qu'on veut faire sentir, c'est qu'il reste de moins en moins.
+     */
+    function afficherEcheance(enCours) {
+        const bloc = document.getElementById("blocEcheance");
+        const ab = etat.abonnement;
+
+        if (!enCours) {
+            // Sous un aperçu, l'échéance de la formule souscrite n'aurait
+            // aucun sens.
+            bloc.classList.add("hidden");
+            return;
+        }
+
+        if (!ab || ab.joursRestants === null) {
+            // Sur la formule gratuite, il n'y a rien à décompter.
+            if (!etat.droits?.prixMensuel) {
+                bloc.classList.add("hidden");
+                return;
+            }
+
+            // Formule payante sans date de fin : elle n'expirera jamais.
+            // La contrainte organizations_plan_payant_date_fin l'interdit
+            // desormais, mais une base où la migration n'est pas encore
+            // passée peut porter la trace d'une activation incomplète. La
+            // masquer en silence est précisément ce qui la rendait
+            // invisible.
+            document.getElementById("echeanceTitre").textContent = "Aucune échéance enregistrée";
+            document.getElementById("echeanceDate").textContent = "";
+            const anomalie = document.getElementById("echeanceBarre");
+            anomalie.style.width = "100%";
+            anomalie.classList.remove("bg-primary", "bg-red-500");
+            anomalie.classList.add("bg-orange-500");
+            document.getElementById("echeanceNote").textContent =
+                "Cette formule n'a pas de date de fin et ne se fermera donc jamais d'elle-même. Signalez-le pour que votre abonnement soit régularisé.";
+            bloc.classList.remove("hidden");
+            return;
+        }
+
+        const restants = ab.joursRestants;
+        const pct = Math.max(0, Math.min(100, (restants / ab.joursTotal) * 100));
+
+        document.getElementById("echeanceTitre").textContent =
+            restants === 0
+                ? "Dernier jour de votre abonnement"
+                : `Il vous reste ${restants} jour${restants > 1 ? "s" : ""}`;
+
+        document.getElementById("echeanceDate").textContent =
+            `Jusqu'au ${dateLisible(ab.expireLe)}`;
+
+        const barre = document.getElementById("echeanceBarre");
+        barre.style.width = `${pct}%`;
+        // Le bleu de marque ne dit pas l'urgence : au dernier tiers du
+        // mois il passe à l'orange, puis au rouge dans la dernière
+        // semaine, quand il reste encore le temps de verser.
+        barre.classList.remove("bg-primary", "bg-orange-500", "bg-red-500");
+        barre.classList.add(restants <= 7 ? "bg-red-500" : (restants <= 15 ? "bg-orange-500" : "bg-primary"));
+
+        document.getElementById("echeanceNote").textContent = restants <= 15
+            ? "Sans renouvellement, votre compte repassera automatiquement en Essentiel à cette date. Vos données seront conservées."
+            : "Le renouvellement se fait par Airtel Money, comme la souscription.";
+
+        bloc.classList.remove("hidden");
+    }
+
+    function afficherCarteHaut(cle) {
+        const { formule, droits, stockage, catalogue } = etat;
+        const enCours = cle === formule;
+        const f = catalogue[cle] || droits;
+
+        document.getElementById("carteEtiquette").textContent =
+            enCours ? "Formule actuelle" : "Aperçu de la formule";
+        document.getElementById("formuleNom").textContent = f.nom;
+
+        const prixMensuel = f.prixMensuel;
+        document.getElementById("formulePrix").textContent = enCours
+            ? (prixMensuel ? `${fmt(prixMensuel)} FCFA par mois` : "Gratuit, sans limite de durée")
+            : `${fmt(periode === "annuel" ? f.prixAnnuel : prixMensuel)} FCFA ${periode === "annuel" ? "par an" : "par mois"} — non souscrite`;
+
+        document.getElementById("btnRetourFormule").classList.toggle("hidden", enCours);
+
+        afficherEcheance(enCours);
+
+        // La consommation ne concerne que la formule réellement souscrite :
+        // l'afficher sous un aperçu laisserait croire qu'elle s'y applique.
+        const blocStockage = document.getElementById("blocStockage");
+        if (enCours && droits.stockageGo && stockage?.utiliseOctets !== null && stockage?.utiliseOctets !== undefined) {
+            const pct = Math.min(100, (stockage.utiliseOctets / stockage.quotaOctets) * 100);
+            document.getElementById("stockageTexte").textContent =
+                `${go(stockage.utiliseOctets)} sur ${droits.stockageGo} Go`;
+            const barreS = document.getElementById("stockageBarre");
+            // Une barre à 0 % est invisible : on laisse un trait, sinon le
+            // gérant croit la jauge cassée plutôt que son espace intact.
+            barreS.style.width = `${Math.max(pct, stockage.utiliseOctets > 0 ? 2 : 0)}%`;
+            // Au-delà de 75 % le bleu de marque n'alerte plus, au-delà de
+            // 90 % il ment. Mêmes seuils que dans le panneau de profil :
+            // une même jauge ne doit pas se comporter de deux façons.
+            barreS.classList.remove("bg-primary", "bg-orange-500", "bg-red-500");
+            barreS.classList.add(pct >= 90 ? "bg-red-500" : (pct >= 75 ? "bg-orange-500" : "bg-primary"));
+            blocStockage.classList.remove("hidden");
+        } else {
+            blocStockage.classList.add("hidden");
+        }
+
+        // En aperçu, les droits sont comparés à ceux en cours : les gains
+        // portent un « Nouveau ».
+        document.getElementById("listeDroits").innerHTML =
+            enCours ? listeDroitsHtml(droits) : listeDroitsHtml(f, droits);
+    }
+
+    function afficherGrille(selection) {
+        const { formule, catalogue } = etat;
+        const grille = document.getElementById("grilleFormules");
+
+        grille.innerHTML = Object.entries(catalogue).map(([cle, f]) => {
+            const actuelle = cle === formule;
+            const prix = periode === "annuel" ? f.prixAnnuel : f.prixMensuel;
+            const suffixe = periode === "annuel" ? "/ an" : "/ mois";
+
+            // Les trois cartes sont cliquables, y compris la formule en
+            // cours : c'est par elle qu'on revient après avoir regardé
+            // ailleurs. La carte entière réagit, pas seulement son bouton,
+            // parce que c'est le rectangle qu'on vise instinctivement.
+            const choisie = cle === selection;
+            // Une seule carte porte la bordure bleue à la fois. Tant que
+            // rien n'est sélectionné, elle marque la formule en cours ;
+            // dès qu'on en regarde une autre, elle la suit. Deux cartes
+            // encadrées en même temps ne diraient plus ce qu'on regarde.
+            const encadree = selection ? choisie : actuelle;
+
+            return `
+            <div data-choisir="${cle}" role="button" tabindex="0"
+                 class="rounded-2xl border ${encadree ? 'border-primary border-2' : 'border-border-light dark:border-border-dark'} bg-card-light dark:bg-card-dark p-6 flex flex-col cursor-pointer hover:border-primary hover:shadow-md transition-all ${encadree ? 'shadow-md' : ''}">
+                <h3 class="text-lg font-bold">${f.nom}</h3>
+                <p class="mt-1 text-sm text-text-light-secondary dark:text-text-dark-secondary min-h-[40px]">${f.resume || ""}</p>
+                <p class="mt-4 text-2xl font-black tracking-tight">
+                    ${prix ? fmt(prix) + ' <span class="text-base font-bold">FCFA</span> <span class="text-sm font-normal text-text-light-secondary dark:text-text-dark-secondary">' + suffixe + '</span>' : "Gratuit"}
+                </p>
+                <div class="mt-5">
+                ${actuelle
+                    ? `<span class="block text-center rounded-full h-11 px-5 leading-[44px] text-sm font-bold bg-primary/10 text-primary">Votre formule</span>`
+                    : (f.prixMensuel === 0
+                        ? `<button type="button" data-redescendre class="w-full rounded-full h-11 px-5 text-sm font-bold text-text-light-secondary dark:text-text-dark-secondary border border-border-light dark:border-border-dark hover:border-primary hover:text-primary transition-colors">Redescendre en ${f.nom}</button>`
+                        : `<button type="button" data-souscrire="${cle}" class="w-full rounded-full h-11 px-5 text-sm font-bold bg-primary text-white hover:bg-primary/90 transition-colors">Choisir ${f.nom}</button>`)}
+                </div>
+            </div>`;
+        }).join("");
+
+        // Cliquer la carte montre la formule ; cliquer son bouton engage
+        // la souscription. Confondre les deux ferait surgir une demande
+        // d'argent a chaque coup d'oeil.
+        grille.querySelectorAll("[data-choisir]").forEach(carte => {
+            carte.addEventListener("click", () => selectionner(carte.dataset.choisir, false));
+            // La carte n'est pas un <button> : sans cela, elle resterait
+            // inatteignable au clavier malgre son role et son tabindex.
+            carte.addEventListener("keydown", (e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    selectionner(carte.dataset.choisir, false);
+                }
+            });
+        });
+
+        grille.querySelectorAll("[data-souscrire]").forEach(bouton => {
+            bouton.addEventListener("click", (e) => {
+                // Sans cela le clic remonterait jusqu'a la carte, qui
+                // refermerait aussitot ce que le bouton vient d'ouvrir.
+                e.stopPropagation();
+                selectionner(bouton.dataset.souscrire, true);
+            });
+        });
+
+        const boutonRetour = grille.querySelector("[data-redescendre]");
+        if (boutonRetour) {
+            boutonRetour.addEventListener("click", (e) => {
+                e.stopPropagation();
+                demanderRetourGratuit(boutonRetour);
+            });
+        }
+    }
+
+    /**
+     * Retour à la formule gratuite, après confirmation.
+     *
+     * La descente est immédiate et sans contrepartie à réclamer, mais
+     * elle referme des fonctions : mieux vaut nommer lesquelles avant,
+     * que de les voir disparaître après.
+     */
+    function demanderRetourGratuit(bouton) {
+        const actuelle = etat?.catalogue?.[etat.formule];
+        const gratuite = etat?.catalogue?.essentiel;
+        if (!gratuite) return;
+
+        const perdues = [];
+        if (actuelle?.compteResultat) perdues.push("le compte de résultat et l'historique des dépenses");
+        if (actuelle?.exportDocuments) perdues.push("l'export Excel et l'impression");
+        if (actuelle?.recus) perdues.push("les reçus numérotés");
+        if (actuelle?.justificatifs) perdues.push("l'envoi de nouveaux justificatifs");
+        if (actuelle?.audit) perdues.push("l'historique des suppressions");
+        if (actuelle?.agentsMax !== 0) perdues.push("vos agents");
+
+        const fond = document.createElement("div");
+        fond.className = "fixed inset-0 z-[120] flex items-center justify-center bg-black/50 p-4";
+        fond.innerHTML = `
+          <div class="w-full max-w-md rounded-2xl bg-card-light dark:bg-card-dark p-6 shadow-2xl">
+            <h3 class="text-lg font-bold">Redescendre en ${gratuite.nom} ?</h3>
+            <p class="mt-3 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+              Vos ventes, vos dépenses et vos justificatifs déjà enregistrés
+              <strong>restent intacts</strong>. Ce qui se referme :
+            </p>
+            <ul class="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary list-disc pl-5 space-y-1">
+              ${perdues.map(p => `<li>${p}</li>`).join("")}
+              <li>l'historique redevient consultable sur 3 mois</li>
+            </ul>
+            <p class="mt-3 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+              Vous pourrez souscrire à nouveau à tout moment : rien n'est à reconstruire.
+            </p>
+            <p data-erreur class="mt-3 text-sm text-red-600 dark:text-red-400 hidden"></p>
+            <div class="mt-6 flex flex-col sm:flex-row gap-3">
+              <button type="button" data-annuler
+                      class="flex-1 rounded-full h-11 px-5 border border-border-light dark:border-border-dark text-sm font-bold hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                Annuler
+              </button>
+              <button type="button" data-confirmer
+                      class="flex-1 rounded-full h-11 px-5 bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors">
+                Confirmer
+              </button>
+            </div>
+          </div>
+        `;
+
+        const fermer = () => fond.remove();
+        fond.addEventListener("click", (e) => {
+            if (e.target === fond || e.target.hasAttribute("data-annuler")) fermer();
+        });
+
+        const confirmer = fond.querySelector("[data-confirmer]");
+        const erreur = fond.querySelector("[data-erreur]");
+
+        confirmer.addEventListener("click", async () => {
+            // Le libellé est relu dans le finally : déclaré ici, et non
+            // dans le try, pour qu'il y soit encore en cas d'échec.
+            const libelle = confirmer.textContent;
+            confirmer.disabled = true;
+            confirmer.textContent = "En cours…";
+            erreur.classList.add("hidden");
+
+            try {
+                const reponse = await fetch(`${API_BASE_URL}/api/plan/redescendre`, {
+                    method: "POST",
+                    headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` }
+                });
+                const data = await reponse.json().catch(() => ({}));
+
+                if (!reponse.ok) {
+                    erreur.textContent = data.error || "Le changement n'a pas pu être enregistré.";
+                    erreur.classList.remove("hidden");
+                    return;
+                }
+
+                fermer();
+                // On relit la formule au lieu de la deviner : c'est le
+                // serveur qui fait foi, et la page entière en dépend.
+                await charger();
+            } catch (e) {
+                erreur.textContent = "Connexion impossible. Réessayez dans un instant.";
+                erreur.classList.remove("hidden");
+            } finally {
+                confirmer.disabled = false;
+                confirmer.textContent = libelle;
+            }
+        });
+
+        document.body.appendChild(fond);
+    }
+
+    /**
+     * Affiche une formule, et le cas échéant sa souscription.
+     *
+     * @param {string} cle
+     * @param {boolean} souscrire - true au clic sur « Choisir X », false
+     *   pour un simple coup d'oeil. Les instructions de versement ne
+     *   sortent que sur une intention explicite : les faire surgir à
+     *   chaque survol de carte reviendrait à réclamer de l'argent à
+     *   quelqu'un qui compare encore.
+     */
+    function selectionner(cle, souscrire) {
+        const f = etat.catalogue[cle];
+        const estActuelle = cle === etat.formule;
+        const aSouscrire = souscrire && !estActuelle && f.prixMensuel > 0;
+
+        // La carte du haut bascule sur la formule regardée : c'est là que
+        // l'utilisateur lit ce à quoi il aurait droit.
+        afficherCarteHaut(cle);
+        afficherGrille(estActuelle ? null : cle);
+
+        if (!aSouscrire) {
+            document.getElementById("blocPaiement").classList.add("hidden");
+            document.getElementById("carteActuelle").scrollIntoView({ behavior: "smooth", block: "center" });
+            return;
+        }
+
+        const montant = periode === "annuel" ? f.prixAnnuel : f.prixMensuel;
+        const nomEntreprise = entreprise() || "Nom de mon entreprise";
+
+        document.getElementById("paiementFormule").textContent = f.nom;
+        document.getElementById("paiementMontant").textContent = fmt(montant);
+
+        // Les droits de la formule visée, comparés à ceux en cours : les
+        // gains portent un « Nouveau », ce qui répond à la seule question
+        // qui compte — qu'est-ce que je gagne à payer ?
+        document.getElementById("paiementDroits").innerHTML =
+            listeDroitsHtml(f, etat.droits);
+        document.getElementById("numeroAirtel").textContent = ENCAISSEMENT.numeroAffiche;
+        document.getElementById("titulaireCompte").textContent = ENCAISSEMENT.titulaire;
+
+        const corps =
+            `Bonjour,\n\nJe viens d'effectuer le paiement de la formule ${f.nom} (${periode}) ` +
+            `pour un montant de ${fmt(montant)} FCFA.\n\n` +
+            `Vous trouverez la capture d'écran du paiement en pièce jointe.\n\n` +
+            `Entreprise : ${nomEntreprise}\n`;
+        document.getElementById("lienMail").href =
+            `mailto:${ENCAISSEMENT.email}?subject=${encodeURIComponent(nomEntreprise)}&body=${encodeURIComponent(corps)}`;
+
+        const bloc = document.getElementById("blocPaiement");
+        bloc.classList.remove("hidden");
+        // On descend sur les instructions : la personne vient de décider,
+        // elle veut savoir combien verser et où. L'aperçu du haut a déjà
+        // joué son rôle au moment où elle comparait.
+        bloc.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function basculer(p) {
+        periode = p;
+        const annuel = p === "annuel";
+        document.getElementById("noteAnnuel").classList.toggle("invisible", !annuel);
+        document.getElementById("btnAnnuel").classList.toggle("bg-primary", annuel);
+        document.getElementById("btnAnnuel").classList.toggle("text-white", annuel);
+        document.getElementById("btnMensuel").classList.toggle("bg-primary", !annuel);
+        document.getElementById("btnMensuel").classList.toggle("text-white", !annuel);
+        afficherGrille();
+        // Les instructions et l'apercu portaient le montant de l'autre
+        // periode : on revient a la formule reelle plutot que de laisser
+        // des chiffres devenus faux.
+        afficherCarteHaut(etat.formule);
+        document.getElementById("blocPaiement").classList.add("hidden");
+    }
+
+    document.getElementById("btnRetourFormule").addEventListener("click", () => {
+        afficherCarteHaut(etat.formule);
+        afficherGrille();
+        document.getElementById("blocPaiement").classList.add("hidden");
+    });
+
+    document.getElementById("btnMensuel").addEventListener("click", () => basculer("mensuel"));
+    document.getElementById("btnAnnuel").addEventListener("click", () => basculer("annuel"));
+
+    document.getElementById("btnCopier").addEventListener("click", async () => {
+        const btn = document.getElementById("btnCopier");
+        try {
+            await navigator.clipboard.writeText(ENCAISSEMENT.numeroCopie);
+            btn.textContent = "Copié";
+            setTimeout(() => { btn.textContent = "Copier"; }, 2000);
+        } catch (e) {
+            const plage = document.createRange();
+            plage.selectNodeContents(document.getElementById("numeroAirtel"));
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(plage);
+        }
+    });
+
+    // Nommee et appelee separement, et non en IIFE : le retour a la
+    // formule gratuite la rappelle pour relire l'etat depuis le serveur.
+    async function charger() {
+        const nom = entreprise();
+        if (nom) document.getElementById("nomEntreprise").textContent = nom;
+
+        try {
+            const r = await fetch(`${API_BASE_URL}/api/plan`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` }
+            });
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            etat = await r.json();
+
+            afficherCarteHaut(etat.formule);
+            afficherGrille();
+        } catch (e) {
+            console.error("Abonnement non chargé :", e);
+            document.getElementById("formuleNom").textContent = "Indisponible";
+            document.getElementById("formulePrix").textContent =
+                "Impossible de lire votre formule pour le moment. Réessayez dans un instant.";
+        }
+    }
+
+    charger();
+})();
+</script>
+</body>
+</html>

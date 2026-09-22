@@ -529,5 +529,14 @@
     })();
 </script>
 
+<script src="js/plan-ui.js"></script>
+<script>
+  // Page entierement reservee : on attend la formule avant de la
+  // laisser voir. Le backend refuse deja les appels, ceci evite
+  // seulement d'afficher une page vide et incomprehensible.
+  window.OGOUE_PLAN?.chargee.then(() => {
+    window.OGOUE_PLAN.exigerPage("audit");
+  });
+</script>
 </body>
 </html>

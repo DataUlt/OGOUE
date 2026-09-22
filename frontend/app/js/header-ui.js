@@ -491,13 +491,20 @@
     // le même catalogue. La gestion des agents reste réservée au gérant.
     const gestionDiv = document.createElement('div');
     const lienAgents = isAgent ? '' : `
-          <a href="module_agents.html" class="block w-full px-4 py-2 rounded-lg text-background-light bg-primary hover:bg-text-light font-medium text-sm text-center transition-colors inline-flex items-center justify-center gap-2">
+          <a href="module_agents.html" data-exige="agents" class="block w-full px-4 py-2 rounded-lg text-background-light bg-primary hover:bg-text-light font-medium text-sm text-center transition-colors inline-flex items-center justify-center gap-2">
             <span class="material-symbols-outlined" style="font-size: 18px;">group</span>
             Gérer les Agents
           </a>`;
     gestionDiv.innerHTML = `
       <div class="text-xs font-bold uppercase text-gray-500 dark:text-gray-400 mb-3">Gestion</div>
-      <div class="space-y-2">${lienAgents}
+      <div class="space-y-2">
+        <a href="module_abonnement.html" class="flex items-center justify-between w-full px-4 py-2 rounded-lg border border-black/10 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm transition-colors">
+          <span class="inline-flex items-center gap-2 text-gray-700 dark:text-gray-300">
+            <span class="material-symbols-outlined" style="font-size: 18px;">workspace_premium</span>
+            Mon abonnement
+          </span>
+          <span class="font-bold text-primary" data-formule-nom>…</span>
+        </a>${lienAgents}
         <a href="module_articles.html" class="block w-full px-4 py-2 rounded-lg text-background-light bg-primary hover:bg-text-light font-medium text-sm text-center transition-colors inline-flex items-center justify-center gap-2">
           <span class="material-symbols-outlined" style="font-size: 18px;">storefront</span>
           ${isAgent ? 'La boutique' : 'Ma boutique'}
@@ -543,6 +550,17 @@
         setTimeout(() => popover.remove(), 0);
       });
     });
+
+    // Le panneau est construit au clic, bien apres le passage initial de
+    // plan-ui : sans cet appel, « Gerer les Agents » resterait ouvert sur
+    // une formule qui ne l'inclut pas. Pose apres les gestionnaires
+    // ci-dessus pour que l'interception du verrou prenne le dessus.
+    window.OGOUE_PLAN?.appliquer(popover);
+
+    window.OGOUE_PLAN?.chargee.then(({ droits }) => {
+      const cible = popover.querySelector('[data-formule-nom]');
+      if (cible) cible.textContent = droits?.nom || 'Essentiel';
+    }).catch(() => {});
   }
 
   // ============ PROFILE RENDER ============
@@ -646,6 +664,93 @@
       content.appendChild(nifDiv);
     }
     
+    // Formule souscrite. C'est l'endroit ou l'utilisateur vient chercher
+    // « qui suis-je » : son abonnement y a sa place au meme titre que son
+    // nom et son organisation.
+    const abonnementDiv = document.createElement('div');
+    abonnementDiv.className = 'text-sm space-y-2';
+    abonnementDiv.innerHTML = `
+      <div class="flex items-center justify-between">
+        <span class="font-medium text-gray-600 dark:text-gray-400">Formule</span>
+        <a href="module_abonnement.html" class="text-teal-600 dark:text-teal-400 text-xs font-medium hover:text-teal-700 dark:hover:text-teal-300">Changer</a>
+      </div>
+      <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-base text-primary">workspace_premium</span>
+          <span class="font-semibold text-gray-900 dark:text-white" data-formule-nom>…</span>
+        </div>
+        <div class="hidden mt-2" data-formule-echeance>
+          <div class="flex items-center justify-between text-xs mb-1">
+            <span class="text-gray-600 dark:text-gray-400" data-echeance-texte></span>
+          </div>
+          <div class="w-full h-1.5 rounded-full bg-gray-200 dark:bg-gray-600 overflow-hidden">
+            <div class="h-full rounded-full bg-primary transition-all" style="width:0%" data-echeance-barre></div>
+          </div>
+        </div>
+
+        <div class="hidden mt-3 pt-3 border-t border-gray-200 dark:border-gray-600" data-formule-stockage>
+          <div class="flex items-center justify-between text-xs mb-1">
+            <span class="text-gray-600 dark:text-gray-400">Justificatifs</span>
+            <span class="text-gray-600 dark:text-gray-400" data-stockage-texte></span>
+          </div>
+          <div class="w-full h-1.5 rounded-full bg-gray-200 dark:bg-gray-600 overflow-hidden">
+            <div class="h-full rounded-full bg-primary transition-all" style="width:0%" data-stockage-barre></div>
+          </div>
+        </div>
+      </div>
+    `;
+    content.appendChild(abonnementDiv);
+
+    // Le panneau est construit a la demande : la formule est demandee ici
+    // plutot que conservee, pour refleter une activation faite entre-temps.
+    window.OGOUE_PLAN?.chargee.then(({ droits, abonnement, stockage }) => {
+      const cible = abonnementDiv.querySelector('[data-formule-nom]');
+      if (cible) cible.textContent = droits?.nom || 'Essentiel';
+
+      // Consommation des justificatifs. Absente sur la formule gratuite,
+      // qui n'en conserve aucun : afficher « 0 sur 0 Go » ne dirait rien
+      // de plus que le cadenas deja pose sur la fonction.
+      if (droits?.stockageGo && stockage?.utiliseOctets !== null
+          && stockage?.utiliseOctets !== undefined && stockage?.quotaOctets) {
+        const utilise = stockage.utiliseOctets;
+        const pctS = Math.min(100, (utilise / stockage.quotaOctets) * 100);
+        const lisible = utilise >= 1073741824
+          ? `${(utilise / 1073741824).toFixed(1).replace('.', ',')} Go`
+          : `${Math.round(utilise / 1048576)} Mo`;
+
+        abonnementDiv.querySelector('[data-stockage-texte]').textContent =
+          `${lisible} sur ${droits.stockageGo} Go`;
+
+        const barreS = abonnementDiv.querySelector('[data-stockage-barre]');
+        // Une barre a 0 % est invisible : on laisse un trait, sinon le
+        // gerant croit la jauge cassee plutot que son espace intact.
+        barreS.style.width = `${Math.max(pctS, utilise > 0 ? 2 : 0)}%`;
+        barreS.classList.remove('bg-primary');
+        barreS.classList.add(pctS >= 90 ? 'bg-red-500' : (pctS >= 75 ? 'bg-orange-500' : 'bg-primary'));
+
+        abonnementDiv.querySelector('[data-formule-stockage]').classList.remove('hidden');
+      }
+
+      // Compte a rebours : seulement quand il y a une echeance. Sur la
+      // formule gratuite il n'y a rien a decompter, et une jauge vide y
+      // ferait croire a un abonnement sur le point de tomber.
+      if (!abonnement || abonnement.joursRestants === null) return;
+
+      const bloc = abonnementDiv.querySelector('[data-formule-echeance]');
+      const restants = abonnement.joursRestants;
+      const pct = Math.max(0, Math.min(100, (restants / abonnement.joursTotal) * 100));
+
+      abonnementDiv.querySelector('[data-echeance-texte]').textContent =
+        restants === 0 ? 'Dernier jour' : `${restants} jour${restants > 1 ? 's' : ''} restant${restants > 1 ? 's' : ''}`;
+
+      const barre = abonnementDiv.querySelector('[data-echeance-barre]');
+      barre.style.width = `${pct}%`;
+      barre.classList.remove('bg-primary');
+      barre.classList.add(restants <= 7 ? 'bg-red-500' : (restants <= 15 ? 'bg-orange-500' : 'bg-primary'));
+
+      bloc.classList.remove('hidden');
+    }).catch(() => {});
+
     // Logout
     const logoutLink = document.createElement('div');
     logoutLink.className = 'text-sm text-red-600 dark:text-red-400 pt-2 border-t border-gray-200 dark:border-gray-600';

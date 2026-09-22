@@ -207,7 +207,7 @@
                            class="shrink-0 whitespace-nowrap flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
                             <p class="text-sm font-bold leading-normal tracking-[0.015em]">Résumé</p>
                         </a>
-                        <a href="module_etats_financiers"
+                        <a data-exige="etatsFinanciers" href="module_etats_financiers"
                            class="shrink-0 whitespace-nowrap flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
                             <p class="text-sm font-bold leading-normal tracking-[0.015em]">Analyse financière</p>
                         </a>
@@ -322,7 +322,7 @@
                             </p>
                             
                             <!-- Zone d'upload avec état par défaut -->
-                            <div id="upload-zone-default" class="mt-1 flex justify-center px-6 pt-10 pb-12 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg transition-colors duration-200 hover:border-primary dark:hover:border-primary hover:bg-primary/5">
+                            <div data-exige="justificatifs" id="upload-zone-default" class="mt-1 flex justify-center px-6 pt-10 pb-12 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg transition-colors duration-200 hover:border-primary dark:hover:border-primary hover:bg-primary/5">
                                 <div class="text-center">
                                     <span class="material-symbols-outlined text-5xl text-gray-400 dark:text-gray-500">cloud_upload</span>
                                     <div class="flex text-sm text-gray-600 dark:text-gray-400 mt-2">
@@ -498,6 +498,7 @@
 </div>
 
 <script src="js/ogoue-state.js"></script>
+<script src="js/plan-ui.js"></script>
 <script src="js/header-ui.js"></script>
 <script src="js/mobile-menu.js"></script>
 <script src="js/depenses.js"></script>
