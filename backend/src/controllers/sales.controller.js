@@ -1,6 +1,11 @@
 ﻿import { supabase } from "../db/supabase.js";
 import { z } from "zod";
-import { uploadFileToSupabase, deleteFileFromSupabase } from "../utils/supabase-storage.js";
+import {
+  uploadFileToSupabase,
+  deleteFileFromSupabase,
+  urlSigneeJustificatif,
+  cheminDepuisUrlPublique,
+} from "../utils/supabase-storage.js";
 import { emettreRecu, urlSigneeRecu } from "../utils/recu-vente.js";
 import { logDeletion } from "../utils/deletion-audit.js";
 import { lireToutesLesLignes } from "../utils/pagination.js";
@@ -156,7 +161,6 @@ export async function listSales(req, res) {
       quantite: row.quantity,
       montant: row.amount,
       justificatif: row.receipt_name,
-      justificatifUrl: row.receipt_url,
       // Le reçu émis par OGOUE : on n'expose que son numéro, le PDF
       // se demande à la pièce via /sales/:id/recu (lien signé).
       numeroRecu: row.receipt_number,
@@ -217,6 +221,48 @@ export async function getSaleRecuUrl(req, res) {
     return res.json({ url, numero });
   } catch (error) {
     console.error("Erreur getSaleRecuUrl:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+/**
+ * GET /api/sales/:id/justificatif
+ *
+ * Lien temporaire vers le justificatif joint a une vente.
+ *
+ * Le bucket est prive : l'URL ne peut plus etre enregistree une fois
+ * pour toutes, elle est signee a chaque demande et vaut cinq minutes.
+ * Le filtre sur organization_id est ce qui protege reellement le
+ * document — sans lui, un identifiant devine suffirait a obtenir un
+ * lien valable vers la piece d'une autre entreprise.
+ */
+export async function getSaleJustificatifUrl(req, res) {
+  try {
+    const { id } = req.params;
+    const organizationId = req.user.organizationId;
+
+    const { data: vente } = await supabase
+      .from("sales")
+      .select("id, receipt_name, receipt_storage_path, receipt_url")
+      .eq("id", id)
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+
+    if (!vente) return res.status(404).json({ error: "Vente introuvable" });
+
+    // Les lignes d'avant la fermeture du bucket n'ont parfois que
+    // l'ancienne URL publique : le chemin s'y relit.
+    const chemin = vente.receipt_storage_path || cheminDepuisUrlPublique(vente.receipt_url);
+    if (!chemin) {
+      return res.status(404).json({ error: "Aucun justificatif joint à cette vente" });
+    }
+
+    const url = await urlSigneeJustificatif(chemin);
+    if (!url) return res.status(500).json({ error: "Lien de téléchargement indisponible" });
+
+    return res.json({ url, nom: vente.receipt_name || null });
+  } catch (error) {
+    console.error("Erreur getSaleJustificatifUrl:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 }
@@ -362,7 +408,9 @@ export async function createSale(req, res) {
       }
     }
 
-    let receiptUrl = null;
+    // Plus aucune URL publique n'est enregistree : le bucket est prive et
+    // le lien s'emet a la demande, par GET /api/sales/:id/justificatif.
+    const receiptUrl = null;
     let receiptStoragePath = null;
     let receiptName = data.receiptName || null;
 
@@ -374,7 +422,6 @@ export async function createSale(req, res) {
           req.file.originalname,
           organizationId
         );
-        receiptUrl = uploadResult.fileUrl;
         receiptStoragePath = uploadResult.storagePath;
         receiptName = uploadResult.fileName;
       } catch (uploadError) {
@@ -438,7 +485,6 @@ export async function createSale(req, res) {
       quantite: row.quantity,
       montant: row.amount,
       justificatif: row.receipt_name,
-      justificatifUrl: row.receipt_url,
       numeroRecu: recu?.numero || null,
       note: row.note,
       created_at: row.created_at
@@ -517,7 +563,7 @@ export async function updateSaleReceipt(req, res) {
           organizationId
         );
         champs.receipt_name = uploadResult.fileName;
-        champs.receipt_url = uploadResult.fileUrl;
+        champs.receipt_url = null;
         champs.receipt_storage_path = uploadResult.storagePath;
         champs.receipt_size_bytes = req.file.size;
       } catch (uploadError) {
@@ -561,7 +607,6 @@ export async function updateSaleReceipt(req, res) {
       quantite: row.quantity,
       montant: row.amount,
       justificatif: row.receipt_name,
-      justificatifUrl: row.receipt_url,
       numeroRecu: row.receipt_number,
       created_at: row.created_at
     };

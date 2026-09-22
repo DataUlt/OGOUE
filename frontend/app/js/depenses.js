@@ -495,7 +495,7 @@
       <td class="px-6 py-4">
         ${
           depense.justificatif
-            ? `<span class="font-medium text-primary cursor-pointer hover:underline justificatif-link" data-file="${depense.justificatif}" data-url="${depense.justificatifUrl || ''}">${depense.justificatif}</span>`
+            ? `<span class="font-medium text-primary cursor-pointer hover:underline justificatif-link" data-file="${depense.justificatif}" data-justif-id="${depense.id}">${depense.justificatif}</span>`
             : `-`
         }
       </td>
@@ -519,10 +519,28 @@
     if (depense.justificatif) {
       const link = tr.querySelector('.justificatif-link');
       if (link) {
-        link.addEventListener('click', () => {
+        // Le bucket est privé : il n'y a plus d'URL à porter dans le
+        // tableau. Le lien se demande au clic et vaut cinq minutes —
+        // signer les justificatifs de toutes les lignes au chargement
+        // ferait autant d'appels que de dépenses, pour un seul ouvert.
+        link.addEventListener('click', async () => {
           const fileName = link.getAttribute('data-file');
-          const fileUrl = link.getAttribute('data-url');
-          openJustificatifModal(fileName, fileUrl);
+          const depenseId = link.getAttribute('data-justif-id');
+          const libelle = link.textContent;
+          link.textContent = '…';
+          try {
+            const reponse = await fetch(`${API_BASE_URL}/api/expenses/${depenseId}/justificatif`, {
+              headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
+            });
+            const data = await reponse.json();
+            if (!reponse.ok) throw new Error(data.error || "Justificatif indisponible");
+            openJustificatifModal(fileName, data.url);
+          } catch (erreur) {
+            console.error('Erreur justificatif:', erreur);
+            alert("Le justificatif n'a pas pu être ouvert : " + erreur.message);
+          } finally {
+            link.textContent = libelle;
+          }
         });
       }
     }
@@ -706,7 +724,8 @@
     if (typeof getDepensesPourPeriode === "function") {
       let depenses = await getDepensesPourPeriode(mois, annee);
       
-      // Le backend retourne déjà justificatifUrl mappé, pas besoin de remappe
+      // Le backend ne renvoie plus d'URL : le bucket est privé, le
+      // lien se signe au clic. Seul l'id de la ligne est nécessaire.
       // Mettre à jour le cache
       depensesCache = depenses;
       depensesCacheMois = mois;

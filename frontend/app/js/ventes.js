@@ -700,7 +700,7 @@
           // La colonne restitue le choix fait au moment de la saisie :
           // le fichier joint, ou à défaut le reçu édité par OGOUE.
           vente.justificatif
-            ? `<span class="justificatif-link inline-flex items-center gap-1 font-medium text-primary cursor-pointer hover:underline break-all" title="Ouvrir le justificatif joint" data-file="${vente.justificatif}" data-url="${vente.justificatifUrl || ''}">
+            ? `<span class="justificatif-link inline-flex items-center gap-1 font-medium text-primary cursor-pointer hover:underline break-all" title="Ouvrir le justificatif joint" data-file="${vente.justificatif}" data-justif-id="${vente.id}">
                  <span class="material-symbols-outlined text-[15px] flex-shrink-0">attach_file</span>${vente.justificatif}
                </span>`
             : vente.numeroRecu
@@ -741,10 +741,28 @@
     if (vente.justificatif) {
       const link = tr.querySelector('.justificatif-link');
       if (link) {
-        link.addEventListener('click', () => {
+        // Le bucket est privé : il n'y a plus d'URL à porter dans le
+        // tableau. Le lien se demande au clic et vaut cinq minutes —
+        // signer les justificatifs de toutes les lignes au chargement
+        // ferait autant d'appels que de ventes, pour un seul ouvert.
+        link.addEventListener('click', async () => {
           const fileName = link.getAttribute('data-file');
-          const fileUrl = link.getAttribute('data-url');
-          openJustificatifModal(fileName, fileUrl);
+          const venteId = link.getAttribute('data-justif-id');
+          const libelle = link.innerHTML;
+          link.innerHTML = '<span class="material-symbols-outlined text-[15px]">hourglass_top</span> …';
+          try {
+            const reponse = await fetch(`${API_BASE_URL}/api/sales/${venteId}/justificatif`, {
+              headers: { Authorization: `Bearer ${getToken()}` }
+            });
+            const data = await reponse.json();
+            if (!reponse.ok) throw new Error(data.error || "Justificatif indisponible");
+            openJustificatifModal(fileName, data.url);
+          } catch (erreur) {
+            console.error('Erreur justificatif:', erreur);
+            alert("Le justificatif n'a pas pu être ouvert : " + erreur.message);
+          } finally {
+            link.innerHTML = libelle;
+          }
         });
       }
     }
@@ -1059,7 +1077,8 @@
     if (typeof getVentesPourPeriode === "function") {
       let ventes = await getVentesPourPeriode(mois, annee);
       
-      // Le backend retourne déjà justificatifUrl mappé, pas besoin de remappe
+      // Le backend ne renvoie plus d'URL : le bucket est privé, le
+      // lien se signe au clic. Seul l'id de la ligne est nécessaire.
       // Mettre à jour le cache
       ventesCache = ventes;
       ventesCacheMois = mois;

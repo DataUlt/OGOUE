@@ -1,6 +1,11 @@
 ﻿import { supabase } from "../db/supabase.js";
 import { z } from "zod";
-import { uploadFileToSupabase, deleteFileFromSupabase } from "../utils/supabase-storage.js";
+import {
+  uploadFileToSupabase,
+  deleteFileFromSupabase,
+  urlSigneeJustificatif,
+  cheminDepuisUrlPublique,
+} from "../utils/supabase-storage.js";
 import { logDeletion } from "../utils/deletion-audit.js";
 import { lireToutesLesLignes } from "../utils/pagination.js";
 import { appliquerFenetre } from "../config/fenetre-historique.js";
@@ -141,7 +146,6 @@ export async function listExpenses(req, res) {
       moyen_paiement: row.payment_method,
       montant: row.amount,
       justificatif: row.receipt_name,
-      justificatifUrl: row.receipt_url,
       note: row.note,
       created_at: row.created_at,
       created_by_name: row.created_by_name
@@ -191,7 +195,9 @@ export async function createExpense(req, res) {
       }
     }
 
-    let receiptUrl = null;
+    // Plus aucune URL publique n'est enregistree : le bucket est prive et
+    // le lien s'emet a la demande, par GET /api/expenses/:id/justificatif.
+    const receiptUrl = null;
     let receiptStoragePath = null;
     let receiptName = data.receiptName || null;
 
@@ -203,7 +209,6 @@ export async function createExpense(req, res) {
           req.file.originalname,
           organizationId
         );
-        receiptUrl = uploadResult.fileUrl;
         receiptStoragePath = uploadResult.storagePath;
         receiptName = uploadResult.fileName;
       } catch (uploadError) {
@@ -247,7 +252,6 @@ export async function createExpense(req, res) {
       moyen_paiement: row.payment_method,
       montant: row.amount,
       justificatif: row.receipt_name,
-      justificatifUrl: row.receipt_url,
       note: row.note,
       created_at: row.created_at
     };
@@ -325,7 +329,7 @@ export async function updateExpenseReceipt(req, res) {
           organizationId
         );
         champs.receipt_name = uploadResult.fileName;
-        champs.receipt_url = uploadResult.fileUrl;
+        champs.receipt_url = null;
         champs.receipt_storage_path = uploadResult.storagePath;
         champs.receipt_size_bytes = req.file.size;
       } catch (uploadError) {
@@ -367,7 +371,6 @@ export async function updateExpenseReceipt(req, res) {
       moyen_paiement: row.payment_method,
       montant: row.amount,
       justificatif: row.receipt_name,
-      justificatifUrl: row.receipt_url,
       created_at: row.created_at
     };
 
@@ -471,6 +474,48 @@ export async function deleteExpense(req, res) {
     return res.json({ message: "Expense deleted successfully" });
   } catch (error) {
     console.error("Erreur deleteExpense:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+/**
+ * GET /api/expenses/:id/justificatif
+ *
+ * Lien temporaire vers le justificatif joint a une depense.
+ *
+ * Le bucket est prive : l'URL ne peut plus etre enregistree une fois
+ * pour toutes, elle est signee a chaque demande et vaut cinq minutes.
+ * Le filtre sur organization_id est ce qui protege reellement le
+ * document — sans lui, un identifiant devine suffirait a obtenir un
+ * lien valable vers la piece d'une autre entreprise.
+ */
+export async function getExpenseJustificatifUrl(req, res) {
+  try {
+    const { id } = req.params;
+    const organizationId = req.user.organizationId;
+
+    const { data: depense } = await supabase
+      .from("expenses")
+      .select("id, receipt_name, receipt_storage_path, receipt_url")
+      .eq("id", id)
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+
+    if (!depense) return res.status(404).json({ error: "Dépense introuvable" });
+
+    // Les lignes d'avant la fermeture du bucket n'ont parfois que
+    // l'ancienne URL publique : le chemin s'y relit.
+    const chemin = depense.receipt_storage_path || cheminDepuisUrlPublique(depense.receipt_url);
+    if (!chemin) {
+      return res.status(404).json({ error: "Aucun justificatif joint à cette dépense" });
+    }
+
+    const url = await urlSigneeJustificatif(chemin);
+    if (!url) return res.status(500).json({ error: "Lien de téléchargement indisponible" });
+
+    return res.json({ url, nom: depense.receipt_name || null });
+  } catch (error) {
+    console.error("Erreur getExpenseJustificatifUrl:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 }

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { listSales, createSale, updateSaleReceipt, deleteSale, getSaleRecuUrl, etablirSaleRecu } from "../controllers/sales.controller.js";
+import { listSales, createSale, updateSaleReceipt, deleteSale, getSaleRecuUrl, etablirSaleRecu, getSaleJustificatifUrl } from "../controllers/sales.controller.js";
 import upload from "../middleware/upload.middleware.js";
 import { exigerFonction } from "../middleware/plan.middleware.js";
 
@@ -15,6 +15,11 @@ r.post("/", upload.single("receipt"), createSale);
 // baisse de formule ne doit pas devenir inaccessible.
 r.get("/:id/recu", getSaleRecuUrl);
 r.post("/:id/recu", exigerFonction("recus", "L'émission de reçus numérotés"), etablirSaleRecu);
+
+// Même principe pour le justificatif joint : le bucket est privé, le
+// lien se signe à la demande. Consulter reste ouvert à toutes les
+// formules — c'est le document du client, seul son dépôt est réservé.
+r.get("/:id/justificatif", getSaleJustificatifUrl);
 
 r.put("/:id", upload.single("receipt"), updateSaleReceipt);
 r.delete("/:id", deleteSale);
