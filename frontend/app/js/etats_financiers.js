@@ -629,6 +629,76 @@ document.addEventListener("DOMContentLoaded", function () {
         return `<td class="px-4 py-3 text-xs"><span class="block max-w-[16rem] truncate" title="${t}">${t}</span></td>`;
     }
 
+    const API_JUSTIF = (['localhost', '127.0.0.1'].some(h => location.hostname.includes(h)))
+        ? 'http://localhost:3001'
+        : 'https://api.ogoue.com';
+
+    /**
+     * Cellule « Justificatif » d'une ligne d'historique.
+     *
+     * Une vente peut etre couverte de deux facons : un fichier joint par
+     * le gerant, ou le recu numerote qu'OGOUE edite lui-meme. Cet ecran
+     * ne connaissait que la premiere, et affichait « - » sur une vente
+     * parfaitement justifiee — alors que module_ventes, lui, montrait le
+     * recu. Les deux tableaux disent desormais la meme chose.
+     *
+     * Aucune URL n'est posee dans le tableau : le bucket est prive, les
+     * liens se signent a la demande au clic.
+     */
+    function celluleJustificatifHtml(ligne, genre) {
+        if (ligne.justificatif) {
+            return `<span class="font-medium text-primary cursor-pointer hover:underline justificatif-link inline-flex items-center gap-1"
+                          title="Ouvrir le justificatif joint"
+                          data-file="${ligne.justificatif}" data-justif-id="${ligne.id}" data-justif-genre="${genre}" data-justif-quoi="fichier">
+                      <span class="material-symbols-outlined text-[14px] flex-shrink-0">attach_file</span>${ligne.justificatif}
+                    </span>`;
+        }
+        if (genre === "vente" && ligne.numeroRecu) {
+            return `<span class="font-medium text-primary cursor-pointer hover:underline justificatif-link inline-flex items-center gap-1 whitespace-nowrap"
+                          title="Ouvrir le reçu ${ligne.numeroRecu}"
+                          data-file="${ligne.numeroRecu}" data-justif-id="${ligne.id}" data-justif-genre="vente" data-justif-quoi="recu">
+                      <span class="material-symbols-outlined text-[14px]">description</span>${ligne.numeroRecu}
+                    </span>`;
+        }
+        return "-";
+    }
+
+    /** Ouvre au clic le document de la ligne, par un lien signe. */
+    function brancherJustificatifs(conteneur) {
+        conteneur.querySelectorAll('.justificatif-link').forEach(link => {
+            link.addEventListener('click', async () => {
+                const nom = link.getAttribute('data-file');
+                const id = link.getAttribute('data-justif-id');
+                const genre = link.getAttribute('data-justif-genre');
+                const quoi = link.getAttribute('data-justif-quoi');
+
+                const chemin = quoi === 'recu'
+                    ? `/api/sales/${id}/recu`
+                    : `/api/${genre === 'vente' ? 'sales' : 'expenses'}/${id}/justificatif`;
+
+                const libelle = link.innerHTML;
+                link.innerHTML = '<span class="material-symbols-outlined text-[14px]">hourglass_top</span> …';
+                try {
+                    const reponse = await fetch(`${API_JUSTIF}${chemin}`, {
+                        headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
+                    });
+                    const data = await reponse.json();
+                    if (!reponse.ok) throw new Error(data.error || "Document indisponible");
+                    // Le reçu est un PDF fabriqué par OGOUE : il s'ouvre
+                    // dans un onglet, comme dans module_ventes. Le fichier
+                    // joint garde son aperçu, qui sait afficher une image.
+                    if (quoi === 'recu') window.open(data.url, '_blank', 'noopener');
+                    else openJustificatifModal(nom, data.url);
+                } catch (erreur) {
+                    console.error('Erreur justificatif:', erreur);
+                    alert("Le document n'a pas pu être ouvert : " + erreur.message);
+                } finally {
+                    link.innerHTML = libelle;
+                }
+            });
+        });
+    }
+
     function renderHistoriqueVentes(ventes, avecActions = false) {
         if (ventes.length === 0) {
             return '<p class="mt-4 text-sm text-gray-500 dark:text-gray-400">Aucune vente pour cette période.</p>';
@@ -665,11 +735,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const paiement = v.moyen_paiement || v.moyenPaiement || "-";
             const type = v.type_vente === "produits" ? "Produits" : v.type_vente === "services" ? "Service" : v.type_vente || "-";
             const creePar = v.created_by_name || "-";
-            const justificatif = v.justificatif || v.receipt || "-";
-            const justificatifUrl = v.justificatifUrl || v.receiptUrl || "";
-            const justificatifHtml = justificatif !== "-"
-              ? `<span class="font-medium text-primary cursor-pointer hover:underline justificatif-link" data-file="${justificatif}" data-url="${justificatifUrl}">${justificatif}</span>`
-              : "-";
+            const justificatifHtml = celluleJustificatifHtml(v, "vente");
 
             html += `
                         <tr class="border-b border-[#cfe7e3] dark:border-gray-700" data-vente-id="${v.id}">
@@ -739,11 +805,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const montantNum = parseFloat(d.montant) || 0;
             const paiement = d.moyen_paiement || d.moyenPaiement || "-";
             const creePar = d.created_by_name || "-";
-            const justificatif = d.justificatif || "-";
-            const justificatifUrl = d.justificatifUrl || "";
-            const justificatifHtml = justificatif !== "-"
-              ? `<span class="font-medium text-primary cursor-pointer hover:underline justificatif-link" data-file="${justificatif}" data-url="${justificatifUrl}">${justificatif}</span>`
-              : "-";
+            const justificatifHtml = celluleJustificatifHtml(d, "depense");
 
             html += `
                         <tr class="border-b border-[#cfe7e3] dark:border-gray-700" data-depense-id="${d.id}">
@@ -933,15 +995,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 </div>`;
             resultsContainer.innerHTML = ventesHtml;
 
-            // Ajouter les event listeners pour les justificatifs
-            const justificatifLinks = resultsContainer.querySelectorAll('.justificatif-link');
-            justificatifLinks.forEach(link => {
-                link.addEventListener('click', () => {
-                    const fileName = link.getAttribute('data-file');
-                    const fileUrl = link.getAttribute('data-url');
-                    openJustificatifModal(fileName, fileUrl);
-                });
-            });
+            brancherJustificatifs(resultsContainer);
 
             brancherSuppressions(resultsContainer, "vente");
 
@@ -1000,15 +1054,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 </div>`;
             resultsContainer.innerHTML = depensesHtml;
 
-            // Ajouter les event listeners pour les justificatifs
-            const justificatifLinks = resultsContainer.querySelectorAll('.justificatif-link');
-            justificatifLinks.forEach(link => {
-                link.addEventListener('click', () => {
-                    const fileName = link.getAttribute('data-file');
-                    const fileUrl = link.getAttribute('data-url');
-                    openJustificatifModal(fileName, fileUrl);
-                });
-            });
+            brancherJustificatifs(resultsContainer);
 
             brancherSuppressions(resultsContainer, "depense");
 
