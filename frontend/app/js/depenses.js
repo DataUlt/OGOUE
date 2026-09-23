@@ -475,7 +475,7 @@
         ${formatHeure(depense.created_at)}
       </td>
       <td class="px-6 py-4">
-        ${depense.categorie || "-"}
+        ${echapperHtml(depense.categorie || "-")}
       </td>
       <td class="px-6 py-4">
         ${formatMontant(depense.montant)}
@@ -486,16 +486,16 @@
             ? "Mobile Money"
             : depense.moyen_paiement === "cash"
             ? "Cash"
-            : depense.moyen_paiement || "-"
+            : echapperHtml(depense.moyen_paiement || "-")
         }
       </td>
       <td class="px-6 py-4">
-        ${depense.created_by_name || "-"}
+        ${echapperHtml(depense.created_by_name || "-")}
       </td>
       <td class="px-6 py-4">
         ${
           depense.justificatif
-            ? `<span class="font-medium text-primary cursor-pointer hover:underline justificatif-link" data-file="${depense.justificatif}" data-justif-id="${depense.id}">${depense.justificatif}</span>`
+            ? `<span class="font-medium text-primary cursor-pointer hover:underline justificatif-link" data-file="${echapperHtml(depense.justificatif)}" data-justif-id="${echapperHtml(depense.id)}">${echapperHtml(depense.justificatif)}</span>`
             : `-`
         }
       </td>

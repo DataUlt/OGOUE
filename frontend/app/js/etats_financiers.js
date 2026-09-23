@@ -649,15 +649,15 @@ document.addEventListener("DOMContentLoaded", function () {
         if (ligne.justificatif) {
             return `<span class="font-medium text-primary cursor-pointer hover:underline justificatif-link inline-flex items-center gap-1"
                           title="Ouvrir le justificatif joint"
-                          data-file="${ligne.justificatif}" data-justif-id="${ligne.id}" data-justif-genre="${genre}" data-justif-quoi="fichier">
-                      <span class="material-symbols-outlined text-[14px] flex-shrink-0">attach_file</span>${ligne.justificatif}
+                          data-file="${echapperHtml(ligne.justificatif)}" data-justif-id="${echapperHtml(ligne.id)}" data-justif-genre="${genre}" data-justif-quoi="fichier">
+                      <span class="material-symbols-outlined text-[14px] flex-shrink-0">attach_file</span>${echapperHtml(ligne.justificatif)}
                     </span>`;
         }
         if (genre === "vente" && ligne.numeroRecu) {
             return `<span class="font-medium text-primary cursor-pointer hover:underline justificatif-link inline-flex items-center gap-1 whitespace-nowrap"
-                          title="Ouvrir le reçu ${ligne.numeroRecu}"
-                          data-file="${ligne.numeroRecu}" data-justif-id="${ligne.id}" data-justif-genre="vente" data-justif-quoi="recu">
-                      <span class="material-symbols-outlined text-[14px]">description</span>${ligne.numeroRecu}
+                          title="Ouvrir le reçu ${echapperHtml(ligne.numeroRecu)}"
+                          data-file="${echapperHtml(ligne.numeroRecu)}" data-justif-id="${echapperHtml(ligne.id)}" data-justif-genre="vente" data-justif-quoi="recu">
+                      <span class="material-symbols-outlined text-[14px]">description</span>${echapperHtml(ligne.numeroRecu)}
                     </span>`;
         }
         return "-";
@@ -729,12 +729,12 @@ document.addEventListener("DOMContentLoaded", function () {
             const rawDate = v.date || v.saleDate || v.sale_date || "";
             const localDate = rawDate ? getLocalDateString(new Date(rawDate)) : "";
             const heure = v.created_at ? formatHeureGabon(new Date(v.created_at)) : "-";
-            const produit = v.description || "-";
+            const produit = echapperHtml(v.description || "-");
             const quantite = v.quantite || 1;
             const montantNum = parseFloat(v.montant) || 0;
-            const paiement = v.moyen_paiement || v.moyenPaiement || "-";
-            const type = v.type_vente === "produits" ? "Produits" : v.type_vente === "services" ? "Service" : v.type_vente || "-";
-            const creePar = v.created_by_name || "-";
+            const paiement = echapperHtml(v.moyen_paiement || v.moyenPaiement || "-");
+            const type = v.type_vente === "produits" ? "Produits" : v.type_vente === "services" ? "Service" : echapperHtml(v.type_vente || "-");
+            const creePar = echapperHtml(v.created_by_name || "-");
             const justificatifHtml = celluleJustificatifHtml(v, "vente");
 
             html += `
@@ -801,10 +801,10 @@ document.addEventListener("DOMContentLoaded", function () {
             const rawDate = d.date || d.expenseDate || "";
             const localDate = rawDate ? getLocalDateString(new Date(rawDate)) : "";
             const heure = d.created_at ? formatHeureGabon(new Date(d.created_at)) : "-";
-            const categorie = d.categorie || d.category || "-";
+            const categorie = echapperHtml(d.categorie || d.category || "-");
             const montantNum = parseFloat(d.montant) || 0;
-            const paiement = d.moyen_paiement || d.moyenPaiement || "-";
-            const creePar = d.created_by_name || "-";
+            const paiement = echapperHtml(d.moyen_paiement || d.moyenPaiement || "-");
+            const creePar = echapperHtml(d.created_by_name || "-");
             const justificatifHtml = celluleJustificatifHtml(d, "depense");
 
             html += `

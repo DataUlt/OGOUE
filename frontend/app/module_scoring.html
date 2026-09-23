@@ -563,7 +563,7 @@ function openUploadModal() {
     salesContainer.innerHTML = salesWithoutReceipt.map(sale => `
       <div class="flex flex-wrap items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
         <div class="flex-1 min-w-[140px]">
-          <p class="text-sm font-medium text-[#0a0c0a] dark:text-white">${sale.description || 'Sans description'}</p>
+          <p class="text-sm font-medium text-[#0a0c0a] dark:text-white">${echapperHtml(sale.description || 'Sans description')}</p>
           <p class="text-xs text-gray-500 dark:text-gray-400">${formatDateFr(sale.date)} • ${formatMontantFr(sale.montant)}</p>
         </div>
         <div class="flex items-center gap-2">
@@ -596,7 +596,7 @@ function openUploadModal() {
     expensesContainer.innerHTML = expensesWithoutReceipt.map(expense => `
       <div class="flex flex-wrap items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
         <div class="flex-1 min-w-[140px]">
-          <p class="text-sm font-medium text-[#0a0c0a] dark:text-white">${expense.categorie || 'Sans catégorie'}</p>
+          <p class="text-sm font-medium text-[#0a0c0a] dark:text-white">${echapperHtml(expense.categorie || 'Sans catégorie')}</p>
           <p class="text-xs text-gray-500 dark:text-gray-400">${formatDateFr(expense.date)} • ${formatMontantFr(expense.montant)}</p>
         </div>
         <button type="button" class="joindre-btn inline-flex items-center gap-1 rounded-lg bg-gray-200 dark:bg-gray-700 px-3 py-2 text-xs font-bold text-[#0a0c0a] dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition whitespace-nowrap" data-id="${expense.id}" data-type="expenses">
@@ -765,6 +765,18 @@ async function envoyerJustificatif(type, operationId, fichier) {
 /**
  * Affiche une notification toast
  */
+// Le libelle d'une vente et la categorie d'une depense sont saisis
+// librement puis reinjectes en HTML : sans echappement, une balise y
+// passe et s'execute pour tous ceux qui ouvrent la page.
+function echapperHtml(valeur) {
+  return String(valeur ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function showToast(message, duration = 3000) {
   const toast = document.createElement('div');
   toast.style.cssText = `

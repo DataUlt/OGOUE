@@ -161,6 +161,18 @@
     <script type="module">
         import { createAgent, listAgents, deleteAgent, copyAccessCode } from './js/agents-management.js';
 
+        // Le prénom de l'agent est saisi par le gérant et réinjecté ici
+        // dans du HTML : sans échappement, « <img onerror=…> » s'exécute
+        // à chaque ouverture de la page, pour lui comme pour ses agents.
+        function echapperHtml(valeur) {
+            return String(valeur ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
+
         // Charger la liste des agents au chargement
         async function loadAgents() {
             try {
@@ -193,7 +205,7 @@
                 <div class="p-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                     <div class="flex items-center justify-between">
                         <div class="flex-1">
-                            <h3 class="text-lg font-semibold text-text-light dark:text-white">${agent.firstName}</h3>
+                            <h3 class="text-lg font-semibold text-text-light dark:text-white">${echapperHtml(agent.firstName)}</h3>
                             <div class="mt-3 space-y-2">
                                 <div class="flex items-center gap-3">
                                     <span class="text-sm text-text-light-muted dark:text-gray-400">Code d'acc&egrave;s :</span>

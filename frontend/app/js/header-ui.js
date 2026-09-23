@@ -7,6 +7,17 @@
     ? 'http://localhost:3001'
     : 'https://api.ogoue.com';
 
+  // Le nom de l'entreprise vient de la base et repasse en HTML dans le
+  // panneau de profil. Il est saisi librement à l'inscription.
+  function echapperHtmlEntete(valeur) {
+    return String(valeur ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
   function qs(sel, ctx = document) { return ctx.querySelector(sel); }
 
   const mockNotifications = [
@@ -617,8 +628,8 @@
           <span class="material-symbols-outlined text-base text-teal-700 dark:text-teal-300">account_circle</span>
         </div>
         <div class="flex-1 min-w-0">
-          <p class="text-sm font-semibold text-gray-900 dark:text-white">${user.firstName}${user.lastName ? ' ' + user.lastName : ''}</p>
-          <p class="text-xs text-gray-600 dark:text-gray-400">${orgName}</p>
+          <p class="text-sm font-semibold text-gray-900 dark:text-white">${echapperHtmlEntete(user.firstName)}${user.lastName ? ' ' + echapperHtmlEntete(user.lastName) : ''}</p>
+          <p class="text-xs text-gray-600 dark:text-gray-400">${echapperHtmlEntete(orgName)}</p>
         </div>
         <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-400 text-2xl leading-none" data-close>✕</button>
       </div>
@@ -635,7 +646,7 @@
       orgDiv.className = 'text-sm text-gray-700 dark:text-gray-300';
       orgDiv.innerHTML = `
         <span class="material-symbols-outlined text-base align-middle mr-2">business</span>
-        <span class="font-medium">${org.name || org.id || 'Organisation'}</span>
+        <span class="font-medium">${echapperHtmlEntete(org.name || org.id || 'Organisation')}</span>
       `;
       content.appendChild(orgDiv);
       

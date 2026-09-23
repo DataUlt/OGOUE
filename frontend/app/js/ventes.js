@@ -666,7 +666,7 @@
         ${formatHeure(vente.created_at)}
       </td>
       <td class="px-6 py-4">
-        ${vente.description || "-"}
+        ${echapperHtml(vente.description || "-")}
       </td>
       <td class="px-6 py-4">
         ${vente.quantite ?? "-"}
@@ -680,7 +680,7 @@
             ? "Mobile Money"
             : vente.moyen_paiement === "cash"
             ? "Cash"
-            : vente.moyen_paiement || "-"
+            : echapperHtml(vente.moyen_paiement || "-")
         }
       </td>
       <td class="px-6 py-4">
@@ -689,23 +689,23 @@
             ? "Produits"
             : vente.type_vente === "services"
             ? "Service"
-            : vente.type_vente || "-"
+            : echapperHtml(vente.type_vente || "-")
         }
       </td>
       <td class="px-6 py-4">
-        ${vente.created_by_name || "-"}
+        ${echapperHtml(vente.created_by_name || "-")}
       </td>
       <td class="px-6 py-4">
         ${
           // La colonne restitue le choix fait au moment de la saisie :
           // le fichier joint, ou à défaut le reçu édité par OGOUE.
           vente.justificatif
-            ? `<span class="justificatif-link inline-flex items-center gap-1 font-medium text-primary cursor-pointer hover:underline break-all" title="Ouvrir le justificatif joint" data-file="${vente.justificatif}" data-justif-id="${vente.id}">
-                 <span class="material-symbols-outlined text-[15px] flex-shrink-0">attach_file</span>${vente.justificatif}
+            ? `<span class="justificatif-link inline-flex items-center gap-1 font-medium text-primary cursor-pointer hover:underline break-all" title="Ouvrir le justificatif joint" data-file="${echapperHtml(vente.justificatif)}" data-justif-id="${echapperHtml(vente.id)}">
+                 <span class="material-symbols-outlined text-[15px] flex-shrink-0">attach_file</span>${echapperHtml(vente.justificatif)}
                </span>`
             : vente.numeroRecu
-            ? `<span class="recu-lien inline-flex items-center gap-1 font-medium text-primary cursor-pointer hover:underline whitespace-nowrap" title="Ouvrir le reçu ${vente.numeroRecu}" data-id="${vente.id}">
-                 <span class="material-symbols-outlined text-[15px]">description</span>${vente.numeroRecu}
+            ? `<span class="recu-lien inline-flex items-center gap-1 font-medium text-primary cursor-pointer hover:underline whitespace-nowrap" title="Ouvrir le reçu ${echapperHtml(vente.numeroRecu)}" data-id="${echapperHtml(vente.id)}">
+                 <span class="material-symbols-outlined text-[15px]">description</span>${echapperHtml(vente.numeroRecu)}
                </span>`
             // Vente sans justificatif : les deux mêmes voies que dans le
             // formulaire restent ouvertes, sans quoi la case resterait
