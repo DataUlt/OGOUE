@@ -18,6 +18,7 @@ import { planMiddleware } from "./middleware/plan.middleware.js";
 import { stockageUtilise } from "./utils/quota-stockage.js";
 import { FORMULES, FORMULE_PAR_DEFAUT, droitsDe } from "./config/plans.js";
 import { supabase } from "./db/supabase.js";
+import { enTetesSecurite } from "./middleware/securite.middleware.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -67,6 +68,10 @@ const corsOptions = {
   allowedHeaders: ["Content-Type", "Authorization"],
   optionsSuccessStatus: 200,
 };
+
+// Posés avant tout le reste : une réponse d'erreur ou un fichier
+// statique doit les porter aussi.
+app.use(enTetesSecurite);
 
 app.use(cors(corsOptions));
 
