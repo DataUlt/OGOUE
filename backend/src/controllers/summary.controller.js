@@ -1,5 +1,6 @@
 ﻿import { supabase } from "../db/supabase.js";
 import { z } from "zod";
+import { appliquerFenetre } from "../config/fenetre-historique.js";
 
 const schema = z.object({
   month: z.coerce.number().int().min(1).max(12),
@@ -15,8 +16,30 @@ export async function monthSummary(req, res) {
     const organizationId = req.user.organizationId;
 
     // Plage de dates du mois demandé (filtrage fait par la DB, pas en JS)
-    const firstDay = new Date(year, month - 1, 1).toISOString().split("T")[0];
+    const premierJour = new Date(year, month - 1, 1).toISOString().split("T")[0];
     const lastDay = new Date(year, month, 0).toISOString().split("T")[0];
+
+    // La fenêtre de consultation de la formule s'applique ici aussi.
+    // Le résumé raisonne en mois plutôt qu'en plage, mais il lit les
+    // mêmes tables : sans ce plancher, demander « janvier 2024 » sur la
+    // formule gratuite renvoyait les totaux de janvier 2024, quand la
+    // liste des ventes, elle, s'arrêtait à trois mois.
+    const { startDate: firstDay, tronque } = appliquerFenetre(
+      { startDate: premierJour, endDate: lastDay },
+      req.droits?.historiqueMois
+    );
+
+    // Mois entièrement antérieur au plancher : il n'y a rien à montrer,
+    // et le borner donnerait une plage inversée que la base accepterait
+    // en renvoyant zéro — un zéro qu'on ne saurait pas lire.
+    if (firstDay > lastDay) {
+      return res.json({
+        month, year,
+        totalSales: 0, totalExpenses: 0, result: 0,
+        salesCount: 0, expensesCount: 0,
+        horsFenetre: true,
+      });
+    }
 
     // Récupérer ventes et dépenses en parallèle, déjà filtrées par période
     const [{ data: salesData, error: salesError }, { data: expensesData, error: expensesError }] =
@@ -59,6 +82,10 @@ export async function monthSummary(req, res) {
       result: totalSales - totalExpenses,
       salesCount: filteredSales.length,
       expensesCount: filteredExpenses.length,
+      // Mois partiellement couvert par la fenêtre de la formule : les
+      // totaux sont justes pour ce qui est consultable, mais ils ne
+      // valent pas pour le mois entier.
+      tronque,
     });
   } catch (error) {
     console.error("Erreur monthSummary:", error);

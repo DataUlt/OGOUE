@@ -1,6 +1,7 @@
 import { supabase } from "../db/supabase.js";
 import { z } from "zod";
 import { lireToutesLesLignes } from "../utils/pagination.js";
+import { appliquerFenetre } from "../config/fenetre-historique.js";
 
 const plageSchema = z.object({
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
@@ -56,8 +57,19 @@ function grouper(lignes, cle, defaut) {
  */
 export async function getEtatsFinanciers(req, res) {
   try {
-    const { startDate, endDate } = plageSchema.parse(req.query);
+    const demande = plageSchema.parse(req.query);
     const organizationId = req.user.organizationId;
+
+    // La fenêtre de consultation de la formule s'applique ici aussi.
+    // Elle ne l'était que sur /api/sales et /api/expenses : la page
+    // d'analyse financière, ouverte à la formule gratuite depuis qu'elle
+    // donne le tableau de flux, offrait donc une porte latérale vers
+    // l'historique complet — il suffisait d'y choisir une période
+    // ancienne. Le plancher se pose avant la requête, pas après.
+    const { startDate, endDate, tronque } = appliquerFenetre(
+      demande,
+      req.droits?.historiqueMois
+    );
 
     const [ventesRes, depensesRes] = await Promise.all([
       lireMontants("sales", "sale_date", "", organizationId, startDate, endDate),
@@ -77,7 +89,15 @@ export async function getEtatsFinanciers(req, res) {
     const totalDepenses = somme(depenses);
 
     const reponse = {
-      periode: { startDate: startDate || null, endDate: endDate || null },
+      // La période renvoyée est celle réellement appliquée, et non celle
+      // demandée : un document daté d'une plage qu'il ne couvre pas
+      // serait un faux, et le client pourrait le présenter comme tel.
+      periode: {
+        startDate: startDate || null,
+        endDate: endDate || null,
+        tronque,
+        demande: tronque ? { startDate: demande.startDate || null } : undefined,
+      },
       // Ce que la formule ouvre, pour que la page sache quoi cadenasser
       // sans avoir a redemander /api/plan.
       autorise: {
