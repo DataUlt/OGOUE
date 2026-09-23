@@ -1,19 +1,19 @@
 ﻿import { supabase } from "../db/supabase.js";
 import { z } from "zod";
-import crypto from "crypto";
+import { codeAleatoire } from "../config/secrets.js";
 
 /**
- * Génère un code d'accès unique pour un agent
- * Format: XXX-XXX-XXX (9 caractères alphanumériques)
+ * Génère un code d'accès pour un agent. Format : XXX-XXX-XXX.
+ *
+ * Ce code est un identifiant de connexion à part entière : il ouvre
+ * l'accès aux ventes et aux dépenses de l'entreprise. Il était tiré avec
+ * Math.random(), dont l'état interne se reconstitue à partir de quelques
+ * tirages — connaître deux ou trois codes émis permettait de prédire les
+ * suivants. Il vient désormais de crypto (voir config/secrets.js).
  */
 function generateAccessCode() {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let code = "";
-  for (let i = 0; i < 9; i++) {
-    if (i === 3 || i === 6) code += "-";
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return code;
+  const brut = codeAleatoire(9);
+  return `${brut.slice(0, 3)}-${brut.slice(3, 6)}-${brut.slice(6, 9)}`;
 }
 
 const createAgentSchema = z.object({

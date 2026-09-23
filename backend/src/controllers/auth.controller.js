@@ -1,6 +1,7 @@
 ﻿import { supabase, supabaseSecondary, supabaseAuth, supabaseAuthSecondary } from "../db/supabase.js";
 import { z } from "zod";
 import jwt from "jsonwebtoken";
+import { JWT_SECRET } from "../config/secrets.js";
 
 // Seuls le RCCM et le NIF restent facultatifs : beaucoup de petites
 // entreprises n'en disposent pas encore au moment de l'inscription, et
@@ -9,7 +10,9 @@ const registerSchema = z.object({
   firstName: z.string().min(1).max(100),
   lastName: z.string().min(1).max(100),
   email: z.string().email(),
-  password: z.string().min(6),
+  // 8 caracteres : le minimum raisonnable face a une attaque par
+  // dictionnaire. La limitation de debit sur /login fait le reste.
+  password: z.string().min(8),
   organizationName: z.string().min(1).max(200),
   rccmNumber: z.string().optional().nullable(),
   nifNumber: z.string().optional().nullable(),
@@ -408,7 +411,9 @@ export async function registerAgent(req, res) {
     const agentRegisterSchema = z.object({
       accessCode: z.string().min(1),
       email: z.string().email(),
-      password: z.string().min(6),
+      // 8 caracteres : le minimum raisonnable face a une attaque par
+  // dictionnaire. La limitation de debit sur /login fait le reste.
+  password: z.string().min(8),
       firstName: z.string().min(1).max(100),
       lastName: z.string().min(1).max(100),
     });
@@ -502,11 +507,10 @@ export async function loginAgent(req, res) {
     });
 
     const parsed = agentLoginSchema.parse(req.body);
-    
-    // DEBUG: Log received code
-    console.log("🔍 [DEBUG] Received accessCode:", JSON.stringify(parsed.accessCode));
-    console.log("🔍 [DEBUG] Code length:", parsed.accessCode.length);
-    console.log("🔍 [DEBUG] Code charCodes:", [...parsed.accessCode].map(c => c.charCodeAt(0)));
+
+    // Le code présenté ne se journalise pas : c'est un identifiant de
+    // connexion, et les journaux de Render se lisent, se conservent et
+    // s'exportent.
 
     // Vérifier que le code d'accès est valide et actif
     const { data: agentRecord, error: agentError } = await supabase
@@ -517,21 +521,12 @@ export async function loginAgent(req, res) {
       .single();
 
     if (agentError || !agentRecord) {
-      console.error("❌ [DEBUG] Agent code invalid. Error:", agentError);
-      
-      // Additional debug: try to get ALL agents to compare
-      const { data: allAgents, error: allError } = await supabase
-        .from("agents")
-        .select("id, access_code, is_active");
-      
-      console.log("📋 [DEBUG] All agents in DB:", allAgents?.map(a => ({
-        id: a.id,
-        code: a.access_code,
-        active: a.is_active,
-        received: parsed.accessCode,
-        match: a.access_code === parsed.accessCode
-      })));
-      
+      // Un échec de connexion ne déclenche plus de relevé de comparaison.
+      // La version précédente lisait TOUS les agents de la base et
+      // écrivait leurs codes d'accès en clair dans les journaux, à chaque
+      // tentative ratée : une seule frappe erronée suffisait à y déverser
+      // les identifiants de toutes les entreprises du service.
+      console.warn("Tentative de connexion agent avec un code invalide");
       return res.status(401).json({ error: "Code d'accès invalide ou désactivé" });
     }
 
@@ -550,15 +545,13 @@ export async function loginAgent(req, res) {
         role: "agent",
         organizationId: agentRecord.organization_id,
       },
-      process.env.JWT_SECRET || "default_secret",
+      JWT_SECRET,
       { expiresIn: "24h" }
     );
 
-    console.log("✅ [DEBUG] Agent login successful:", {
-      id: agentRecord.id,
-      name: agentRecord.first_name,
-      code: agentRecord.access_code
-    });
+    // Le code d'accès ne figure pas dans la trace : identifier l'agent
+    // suffit à suivre ce qui s'est passé.
+    console.log("✅ Connexion agent:", agentRecord.id);
 
     // Retourner le token et les infos utilisateur
     return res.json({
@@ -657,7 +650,9 @@ export async function forgotPassword(req, res) {
 export async function resetPassword(req, res) {
   try {
     const resetPasswordSchema = z.object({
-      password: z.string().min(6),
+      // 8 caracteres : le minimum raisonnable face a une attaque par
+  // dictionnaire. La limitation de debit sur /login fait le reste.
+  password: z.string().min(8),
     });
 
     const parsed = resetPasswordSchema.parse(req.body);
@@ -780,7 +775,9 @@ export async function registerSecondary(req, res) {
       firstName: z.string().min(1).max(100),
       lastName: z.string().min(1).max(100),
       email: z.string().email(),
-      password: z.string().min(6),
+      // 8 caracteres : le minimum raisonnable face a une attaque par
+  // dictionnaire. La limitation de debit sur /login fait le reste.
+  password: z.string().min(8),
       companyName: z.string().min(1).max(200),
       rccmNumber: z.string().optional().nullable(),
       nifNumber: z.string().optional().nullable(),

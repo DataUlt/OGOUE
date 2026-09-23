@@ -1,5 +1,6 @@
 ﻿import jwt from "jsonwebtoken";
 import { supabase } from "../db/supabase.js";
+import { JWT_SECRET } from "../config/secrets.js";
 
 /**
  * Middleware pour vérifier et décoder le JWT Supabase
@@ -9,32 +10,36 @@ export async function authMiddleware(req, res, next) {
   try {
     // Récupérer le token du header Authorization
     const authHeader = req.headers.authorization;
-    console.log("Authorization header:", authHeader ? "présent" : "ABSENT");
-    
+
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      console.error("Token manquant ou format invalide");
       return res.status(401).json({ error: "Token manquant" });
     }
 
     const token = authHeader.substring(7); // Enlever "Bearer "
-    console.log("Token length:", token.length);
 
     // 1️⃣ Essayer de vérifier comme JWT agent d'abord
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || "default_secret");
+      const decoded = jwt.verify(token, JWT_SECRET);
       if (decoded.role === "agent") {
-        // C'est un agent JWT
+        // Un jeton d'agent sans organisation ne mène nulle part : le
+        // laisser passer ferait tourner les requêtes suivantes sur un
+        // filtre `organization_id = undefined`, dont le comportement
+        // dépend du pilote plutôt que d'une règle décidée ici.
+        if (!decoded.organizationId) {
+          return res.status(401).json({ error: "Token agent incomplet" });
+        }
         req.user = {
           sub: decoded.sub,
           agentId: decoded.agentId,
           role: "agent",
           organizationId: decoded.organizationId,
         };
-        console.log("✅ Agent JWT vérifié");
         return next();
       }
     } catch (jwtErr) {
-      console.log("❌ Pas un JWT agent valide, essayant Supabase Auth...");
+      // Ce n'est pas un jeton agent : on tente Supabase Auth ci-dessous.
+      // Le détail de l'échec ne se journalise pas, il ne dirait qu'une
+      // chose déjà connue et exposerait la forme du jeton présenté.
     }
 
     // 2️⃣ Si ce n'est pas un JWT agent, vérifier avec Supabase
@@ -58,13 +63,24 @@ export async function authMiddleware(req, res, next) {
       .eq("auth_id", userData.user.id)
       .maybeSingle();
 
-    if (!recordError && userRecord) {
-      req.user.userId = userRecord.id;
-      req.user.organizationId = userRecord.organization_id;
-      req.user.role = userRecord.role;
+    // Échec fermé : sans fiche utilisateur, il n'y a ni organisation ni
+    // rôle. Auparavant la requête continuait quand même, et les
+    // contrôleurs filtraient sur `organization_id = undefined`. Rien ne
+    // garantissait que ce filtre reste vide, et exigerGerant aurait vu
+    // un rôle absent, pas un rôle refusé.
+    if (recordError || !userRecord) {
+      console.error("Fiche utilisateur introuvable pour", userData.user.id);
+      return res.status(403).json({ error: "Compte non rattaché à une entreprise" });
     }
 
-    console.log("✅ Supabase Auth token vérifié");
+    req.user.userId = userRecord.id;
+    req.user.organizationId = userRecord.organization_id;
+    req.user.role = userRecord.role;
+
+    if (!req.user.organizationId) {
+      return res.status(403).json({ error: "Compte non rattaché à une entreprise" });
+    }
+
     next();
   } catch (err) {
     console.error("Auth middleware error:", err);
