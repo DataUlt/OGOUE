@@ -208,6 +208,16 @@ document.addEventListener("DOMContentLoaded", function () {
      * Filtre les données par plage de date (startDate, endDate)
      * Compare les parties date uniquement (YYYY-MM-DD) pour éviter les problèmes de fuseau
      */
+    /**
+     * Plage à demander à l'API. Sans elle, seul le mois de la date de
+     * début était chargé : une période 01/2024 → 12/2026 ne renvoyait
+     * que janvier 2024.
+     */
+    function plagePeriode() {
+        if (!startDate) return undefined;
+        return { startDate, endDate: endDate || startDate };
+    }
+
     function filterByDateRange(items) {
         if (!startDate) return items;
         
@@ -853,8 +863,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         try {
             const [ventes, depenses] = await Promise.all([
-                window.OGOUE.getVentesPourPeriode(month, year),
-                window.OGOUE.getDepensesPourPeriode(month, year)
+                window.OGOUE.getVentesPourPeriode(month, year, plagePeriode()),
+                window.OGOUE.getDepensesPourPeriode(month, year, plagePeriode())
             ]);
 
             console.log("📊 Ventes reçues:", ventes);
@@ -922,8 +932,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         try {
             const [ventes, depenses] = await Promise.all([
-                window.OGOUE.getVentesPourPeriode(month, year),
-                window.OGOUE.getDepensesPourPeriode(month, year)
+                window.OGOUE.getVentesPourPeriode(month, year, plagePeriode()),
+                window.OGOUE.getDepensesPourPeriode(month, year, plagePeriode())
             ]);
 
             const ventesFiltered = filterByDateRange(ventes);
@@ -978,7 +988,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const year = today.getFullYear();
 
         try {
-            const ventes = await window.OGOUE.getVentesPourPeriode(month, year);
+            const ventes = await window.OGOUE.getVentesPourPeriode(month, year, plagePeriode());
             const ventesFiltered = filterByDateRange(ventes);
 
             let resultsContainer = document.getElementById("etatFinanciersResults");
@@ -1037,7 +1047,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const year = today.getFullYear();
 
         try {
-            const depenses = await window.OGOUE.getDepensesPourPeriode(month, year);
+            const depenses = await window.OGOUE.getDepensesPourPeriode(month, year, plagePeriode());
             const depensesFiltered = filterByDateRange(depenses);
 
             let resultsContainer = document.getElementById("etatFinanciersResults");
@@ -1360,8 +1370,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 // Récupérer les données
                 const [ventes, depenses] = await Promise.all([
-                    window.OGOUE.getVentesPourPeriode(month, year),
-                    window.OGOUE.getDepensesPourPeriode(month, year)
+                    window.OGOUE.getVentesPourPeriode(month, year, plagePeriode()),
+                    window.OGOUE.getDepensesPourPeriode(month, year, plagePeriode())
                 ]);
 
                 // Filtrer par dates

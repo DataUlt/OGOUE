@@ -305,14 +305,24 @@ async function addDepense(depense, onProgress) {
 // 📥 RÉCUPÉRATION DEPUIS L'API
 // ─────────────────────────────────────────────────
 
+// Le backend accepte soit month/year, soit startDate/endDate.
+function paramsPeriode(mois, annee, plage) {
+  if (plage && plage.startDate && plage.endDate) {
+    return new URLSearchParams({ startDate: plage.startDate, endDate: plage.endDate });
+  }
+  return new URLSearchParams({ month: mois, year: annee });
+}
+
 /**
  * Récupère les ventes pour une période donnée (authentifiée par JWT)
  * orgId est déduit du token JWT côté backend
  * @param {number} mois - 1-12
  * @param {number} annee - ex: 2025
+ * @param {{startDate: string, endDate: string}} [plage] - YYYY-MM-DD ;
+ *   si fournie, elle remplace le mois : une période peut couvrir plusieurs mois
  * @returns {Promise<Array>}
  */
-async function getVentesPourPeriode(mois, annee) {
+async function getVentesPourPeriode(mois, annee, plage) {
   const token = getToken();
   if (!token) {
     console.warn("Pas de token, redirection vers login");
@@ -321,10 +331,7 @@ async function getVentesPourPeriode(mois, annee) {
   }
 
   try {
-    const params = new URLSearchParams({
-      month: mois,
-      year: annee
-    });
+    const params = paramsPeriode(mois, annee, plage);
 
     const response = await fetch(`${API_BASE_URL}/api/sales?${params}`, {
       method: "GET",
@@ -360,7 +367,7 @@ async function getVentesPourPeriode(mois, annee) {
  * @param {number} annee - ex: 2025
  * @returns {Promise<Array>}
  */
-async function getDepensesPourPeriode(mois, annee) {
+async function getDepensesPourPeriode(mois, annee, plage) {
   const token = getToken();
   if (!token) {
     console.warn("Pas de token, redirection vers login");
@@ -369,10 +376,7 @@ async function getDepensesPourPeriode(mois, annee) {
   }
 
   try {
-    const params = new URLSearchParams({
-      month: mois,
-      year: annee
-    });
+    const params = paramsPeriode(mois, annee, plage);
 
     const response = await fetch(`${API_BASE_URL}/api/expenses?${params}`, {
       method: "GET",
