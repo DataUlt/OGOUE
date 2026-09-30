@@ -51,6 +51,23 @@
   let abonnement = null;
   let stockage = null;
 
+  // L'abonnement est l'affaire du gerant : un agent apprend qu'une
+  // fonction est fermee, pas quelle formule la ouvrirait ni son prix.
+  function estAgent() {
+    try {
+      return JSON.parse(localStorage.getItem("user") || "null")?.role === "agent";
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function libelleVerrou(fonction) {
+    const libelle = LIBELLES[fonction] || "Cette fonction";
+    return estAgent()
+      ? `${libelle} — non disponible`
+      : `${libelle} — formule ${formuleQuiOuvre(fonction).nom}`;
+  }
+
   /**
    * La formule la moins chere qui ouvre une fonction.
    *
@@ -154,13 +171,17 @@
     if (bulleCible === el) return;
     bulleCible = el;
 
-    const { nom, prixMensuel } = formuleQuiOuvre(fonction);
-    const libelle = LIBELLES[fonction] || "Cette fonction";
+    const { prixMensuel } = formuleQuiOuvre(fonction);
     const prix = prixLisible(prixMensuel);
 
     const b = construireBulle();
-    b.innerHTML = `
-      <div style="font-weight:700">${libelle} — formule ${nom}</div>
+    b.innerHTML = estAgent()
+      ? `
+      <div style="font-weight:700">${libelleVerrou(fonction)}</div>
+      <div style="opacity:.75;margin-top:2px">Adressez-vous à votre gérant.</div>
+    `
+      : `
+      <div style="font-weight:700">${libelleVerrou(fonction)}</div>
       <div style="opacity:.75;margin-top:2px">
         ${prix ? `À partir de ${prix}. ` : ''}Cliquez pour changer de formule.
       </div>
@@ -244,7 +265,25 @@
     const fond = document.createElement('div');
     fond.id = 'ogo-modal-formule';
     fond.className = 'fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4';
-    fond.innerHTML = `
+    fond.innerHTML = estAgent() ? `
+      <div class="w-full max-w-md rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-2xl">
+        <div class="flex items-center justify-center size-12 rounded-full bg-primary/10 text-primary mx-auto mb-4">
+          <span class="material-symbols-outlined text-2xl">lock</span>
+        </div>
+        <h3 class="text-lg font-bold text-center text-[#0a0c0a] dark:text-white">
+          ${libelle} — non disponible
+        </h3>
+        <p class="mt-2 text-sm text-center text-gray-600 dark:text-gray-400">
+          Cette fonction n'est pas ouverte sur ce compte. Adressez-vous à votre gérant.
+        </p>
+        <div class="mt-6 flex">
+          <button type="button" data-fermer
+                  class="flex-1 rounded-full h-11 px-5 bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors">
+            Compris
+          </button>
+        </div>
+      </div>
+    ` : `
       <div class="w-full max-w-md rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-2xl">
         <div class="flex items-center justify-center size-12 rounded-full bg-primary/10 text-primary mx-auto mb-4">
           <span class="material-symbols-outlined text-2xl">lock</span>
@@ -307,8 +346,7 @@
       // Le nom de la formule est lu a la demande, pas fige ici : une
       // infobulle native (title) serait lente, non stylable, et
       // doublerait la notre.
-      el.setAttribute('aria-label',
-        `${LIBELLES[fonction] || 'Cette fonction'} — formule ${formuleQuiOuvre(fonction).nom}`);
+      el.setAttribute('aria-label', libelleVerrou(fonction));
       surveillerSurvol(el, fonction);
 
       // capture:true et stopImmediatePropagation : les boutons concernes
