@@ -113,8 +113,9 @@
             Payez quand ça vous <span class="text-primary">rapporte</span>.
           </h1>
           <p class="mt-6 text-lg text-text-light-muted max-w-2xl mx-auto">
-            Enregistrez vos ventes et vos dépenses sans rien payer, aussi longtemps que vous
-            voulez. Les formules payantes ajoutent les reçus, les justificatifs et vos agents.
+            Enregistrez jusqu'à 70 ventes et dépenses par mois sans rien payer. Quand votre
+            activité grandit, les formules payantes suivent : plus d'opérations, vos
+            justificatifs et vos agents.
           </p>
 
           <!-- Bascule mensuel / annuel -->
@@ -159,7 +160,7 @@
               <ul class="mt-8 space-y-3 text-sm">
                 <li class="flex items-start gap-3">
                   <span class="material-symbols-outlined text-primary text-[20px] shrink-0">check</span>
-                  <span><strong>Ventes et dépenses illimitées</strong></span>
+                  <span><strong>70 ventes et dépenses par mois</strong></span>
                 </li>
                 <li class="flex items-start gap-3">
                   <span class="material-symbols-outlined text-primary text-[20px] shrink-0">check</span>
@@ -223,6 +224,10 @@
                 </li>
                 <li class="flex items-start gap-3">
                   <span class="material-symbols-outlined text-primary text-[20px] shrink-0">check</span>
+                  <span><strong>1 500 ventes et dépenses par mois</strong></span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="material-symbols-outlined text-primary text-[20px] shrink-0">check</span>
                   <span><strong>Reçus numérotés</strong> au nom de votre entreprise</span>
                 </li>
                 <li class="flex items-start gap-3">
@@ -279,6 +284,10 @@
                 </li>
                 <li class="flex items-start gap-3">
                   <span class="material-symbols-outlined text-primary text-[20px] shrink-0">check</span>
+                  <span><strong>Ventes et dépenses illimitées</strong></span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="material-symbols-outlined text-primary text-[20px] shrink-0">check</span>
                   <span><strong>Agents illimités</strong></span>
                 </li>
                 <li class="flex items-start gap-3">
@@ -328,10 +337,22 @@
               </thead>
               <tbody>
                 <tr class="border-b border-black/5">
-                  <td class="py-4 pr-4">Enregistrer ventes et dépenses</td>
-                  <td class="py-4 px-4 text-center">Illimité</td>
-                  <td class="py-4 px-4 text-center">Illimité</td>
-                  <td class="py-4 px-4 text-center">Illimité</td>
+                  <td class="py-4 pr-4">Ventes et dépenses enregistrées</td>
+                  <td class="py-4 px-4 text-center">70 / mois</td>
+                  <td class="py-4 px-4 text-center">1 500 / mois</td>
+                  <td class="py-4 px-4 text-center">Illimitées</td>
+                </tr>
+                <tr class="border-b border-black/5">
+                  <td class="py-4 pr-4">Justificatifs conservés</td>
+                  <td class="py-4 px-4 text-center text-text-light-muted">—</td>
+                  <td class="py-4 px-4 text-center">2 Go</td>
+                  <td class="py-4 px-4 text-center">10 Go</td>
+                </tr>
+                <tr class="border-b border-black/5">
+                  <td class="py-4 pr-4">Agents</td>
+                  <td class="py-4 px-4 text-center text-text-light-muted">—</td>
+                  <td class="py-4 px-4 text-center">3</td>
+                  <td class="py-4 px-4 text-center">Illimités</td>
                 </tr>
                 <tr class="border-b border-black/5">
                   <td class="py-4 pr-4">Catalogue d'articles et de prix</td>
@@ -358,12 +379,6 @@
                   <td class="py-4 px-4 text-center"><span class="material-symbols-outlined text-primary text-[20px]">check</span></td>
                 </tr>
                 <tr class="border-b border-black/5">
-                  <td class="py-4 pr-4">Justificatifs conservés</td>
-                  <td class="py-4 px-4 text-center text-text-light-muted">—</td>
-                  <td class="py-4 px-4 text-center">2 Go</td>
-                  <td class="py-4 px-4 text-center">10 Go</td>
-                </tr>
-                <tr class="border-b border-black/5">
                   <td class="py-4 pr-4">Tableau de flux et historique des ventes</td>
                   <td class="py-4 px-4 text-center"><span class="material-symbols-outlined text-primary text-[20px]">check</span></td>
                   <td class="py-4 px-4 text-center"><span class="material-symbols-outlined text-primary text-[20px]">check</span></td>
@@ -380,12 +395,6 @@
                   <td class="py-4 px-4 text-center text-text-light-muted">—</td>
                   <td class="py-4 px-4 text-center"><span class="material-symbols-outlined text-primary text-[20px]">check</span></td>
                   <td class="py-4 px-4 text-center"><span class="material-symbols-outlined text-primary text-[20px]">check</span></td>
-                </tr>
-                <tr class="border-b border-black/5">
-                  <td class="py-4 pr-4">Agents</td>
-                  <td class="py-4 px-4 text-center text-text-light-muted">—</td>
-                  <td class="py-4 px-4 text-center">3</td>
-                  <td class="py-4 px-4 text-center">Illimités</td>
                 </tr>
                 <tr class="border-b border-black/5">
                   <td class="py-4 pr-4">Historique des suppressions</td>
@@ -428,9 +437,18 @@
             <div class="rounded-xl border border-black/10 bg-white p-6">
               <h3 class="font-bold text-text-light">La formule gratuite est-elle vraiment gratuite ?</h3>
               <p class="mt-2 text-text-light-muted">
-                Oui, sans limite de durée et sans carte bancaire. Vous enregistrez autant de
-                ventes et de dépenses que vous voulez. Ce sont les reçus, les justificatifs et
-                les agents qui demandent une formule payante.
+                Oui, sans limite de durée et sans carte bancaire. Vous enregistrez jusqu'à
+                70 ventes et dépenses par mois, et ce compteur repart à zéro chaque mois. Au-delà,
+                comme pour les reçus, les justificatifs et les agents, il faut une formule payante.
+              </p>
+            </div>
+
+            <div class="rounded-xl border border-black/10 bg-white p-6">
+              <h3 class="font-bold text-text-light">Que se passe-t-il si j'atteins ma limite d'opérations ?</h3>
+              <p class="mt-2 text-text-light-muted">
+                Rien ne s'efface et vous consultez toujours tout ce que vous avez enregistré.
+                Seules les nouvelles saisies attendent le mois suivant, ou reprennent tout de
+                suite si vous passez à la formule supérieure. Vous êtes prévenu avant d'y arriver.
               </p>
             </div>
 
