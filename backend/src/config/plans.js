@@ -45,6 +45,10 @@ export const FORMULES = {
     // Fenetre de consultation, en mois. Au-dela, les operations restent
     // en base mais ne sont plus renvoyees.
     historiqueMois: 3,
+    // Ventes et depenses creees par mois calendaire, les deux confondues.
+    // C'est le levier de volume : une activite qui saisit davantage est
+    // une activite qui tourne, et qui peut payer.
+    operationsMois: 70,
     agentsMax: 0,
     stockageGo: 0,
   },
@@ -65,6 +69,7 @@ export const FORMULES = {
     audit: false,
     scoreTracabilite: false,
     historiqueMois: null,
+    operationsMois: 1500,
     agentsMax: 3,
     stockageGo: 2,
   },
@@ -85,6 +90,7 @@ export const FORMULES = {
     audit: true,
     scoreTracabilite: true,
     historiqueMois: null,
+    operationsMois: null,
     agentsMax: null,
     stockageGo: 10,
   },

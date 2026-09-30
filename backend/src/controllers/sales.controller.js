@@ -11,6 +11,7 @@ import { logDeletion } from "../utils/deletion-audit.js";
 import { lireToutesLesLignes } from "../utils/pagination.js";
 import { appliquerFenetre } from "../config/fenetre-historique.js";
 import { verifierQuota } from "../utils/quota-stockage.js";
+import { verifierQuotaOperations } from "../utils/quota-operations.js";
 
 const listSchema = z.object({
   month: z.coerce.number().int().min(1).max(12).optional(),
@@ -380,9 +381,23 @@ export async function createSale(req, res) {
     // Récupérer l'organizationId du JWT
     const organizationId = req.user.organizationId;
 
-    // Enregistrer une vente n'est jamais bridé ; y joindre un document
-    // l'est. Le contrôle porte donc sur la pièce jointe, pas sur la
-    // route : une formule gratuite doit pouvoir saisir ses ventes.
+    // Nombre d'operations du mois, verifie en premier : inutile d'examiner
+    // la piece jointe d'une vente qui ne sera pas enregistree.
+    const volume = await verifierQuotaOperations(organizationId, req.droits?.operationsMois);
+    if (!volume.ok) {
+      return res.status(402).json({
+        error: volume.message,
+        code: "quota_operations",
+        formuleActuelle: req.formule,
+        utilisees: volume.utilisees,
+        limite: volume.limite,
+      });
+    }
+
+    // Enregistrer une vente n'est pas bridé au-delà de ce volume ; y
+    // joindre un document l'est. Le contrôle porte donc sur la pièce
+    // jointe, pas sur la route : une formule gratuite doit pouvoir saisir
+    // ses ventes.
     if (req.file && !req.droits?.justificatifs) {
       return res.status(402).json({
         error: "Joindre un justificatif n'est pas inclus dans votre formule. Votre vente peut être enregistrée sans document.",

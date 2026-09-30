@@ -50,6 +50,7 @@
   let catalogue = null;
   let abonnement = null;
   let stockage = null;
+  let operations = null;
 
   // L'abonnement est l'affaire du gerant : un agent apprend qu'une
   // fonction est fermee, pas quelle formule la ouvrirait ni son prix.
@@ -113,6 +114,7 @@
       catalogue = data.catalogue || null;
       abonnement = data.abonnement || null;
       stockage = data.stockage || null;
+      operations = data.operations || null;
       return data;
     } catch (e) {
       // Reseau indisponible : on laisse l'interface intacte. Le backend
@@ -373,19 +375,191 @@
     return false;
   }
 
+  // ---------------------------------------------------------------
+  // Quota mensuel d'operations
+  // ---------------------------------------------------------------
+  // Le serveur refuse la saisie une fois la limite atteinte. Le compteur
+  // sert a ce que ce refus ne tombe jamais par surprise : le gerant voit
+  // venir la limite, et sait quoi faire quand il y est.
+
+  // Au-dela de 80 %, le compteur previent ; a 100 %, il bloque.
+  const SEUIL_ALERTE = 0.8;
+
+  function nombre(n) {
+    return Number(n).toLocaleString('fr-FR');
+  }
+
+  /** La formule la moins chere dont la limite depasse celle en cours. */
+  function formuleAuDessus() {
+    if (!catalogue || !droits) return null;
+    const actuelle = droits.operationsMois;
+    const suivante = Object.values(catalogue)
+      .filter(f => f.operationsMois === null || f.operationsMois > actuelle)
+      .sort((a, b) => (a.prixMensuel || 0) - (b.prixMensuel || 0))[0];
+    return suivante || null;
+  }
+
+  /**
+   * Remplit les elements [data-compteur-operations] de la page.
+   *
+   * Rien ne s'affiche sans limite (Equipe) ni si le comptage a echoue :
+   * un compteur faux ferait plus de mal qu'aucun compteur. L'agent ne voit
+   * le bandeau qu'a l'approche de la limite, sans prix ni formule : c'est
+   * l'affaire de son gerant, mais il doit comprendre pourquoi la saisie
+   * va s'arreter.
+   */
+  function afficherCompteurOperations() {
+    const cibles = document.querySelectorAll('[data-compteur-operations]');
+    if (!cibles.length) return;
+
+    const limite = operations?.limite;
+    const utilisees = operations?.utilisees;
+    const mesurable = limite !== null && limite !== undefined
+      && utilisees !== null && utilisees !== undefined;
+
+    cibles.forEach(el => {
+      if (!mesurable) { el.classList.add('hidden'); el.innerHTML = ''; return; }
+
+      const ratio = utilisees / limite;
+      const atteinte = utilisees >= limite;
+      const alerte = ratio >= SEUIL_ALERTE;
+      const agent = estAgent();
+
+      if (agent && !alerte) { el.classList.add('hidden'); el.innerHTML = ''; return; }
+
+      const pct = Math.min(100, ratio * 100);
+      const couleur = atteinte ? 'bg-red-500' : (alerte ? 'bg-orange-500' : 'bg-primary');
+      const cadre = atteinte
+        ? 'border-red-200 bg-red-50 dark:border-red-900/60 dark:bg-red-950/30'
+        : (alerte
+          ? 'border-orange-200 bg-orange-50 dark:border-orange-900/60 dark:bg-orange-950/30'
+          : 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/40');
+
+      const suivante = formuleAuDessus();
+      let message = '';
+      if (atteinte) {
+        message = agent
+          ? "La limite d'opérations du mois est atteinte. Adressez-vous à votre gérant."
+          : `Limite atteinte. La saisie reprend le 1er du mois prochain${suivante ? `, ou tout de suite avec la formule ${suivante.nom}` : ''}.`;
+      } else if (alerte) {
+        const reste = limite - utilisees;
+        message = agent
+          ? `Plus que ${nombre(reste)} opération${reste > 1 ? 's' : ''} ce mois-ci pour ce compte.`
+          : `Plus que ${nombre(reste)} opération${reste > 1 ? 's' : ''} ce mois-ci${suivante ? `. La formule ${suivante.nom} en offre ${suivante.operationsMois === null ? 'un nombre illimité' : nombre(suivante.operationsMois)}` : ''}.`;
+      }
+
+      const lien = !agent && alerte && suivante
+        ? `<a href="module_abonnement.html" class="shrink-0 font-bold text-primary hover:underline">Changer de formule</a>`
+        : '';
+
+      el.innerHTML = `
+        <div class="rounded-lg border ${cadre} px-4 py-3 text-sm">
+          <div class="flex items-center justify-between gap-3 mb-2">
+            <span class="font-semibold text-[#0a0c0a] dark:text-white">Opérations ce mois-ci</span>
+            <span class="text-gray-600 dark:text-gray-300">${nombre(utilisees)} / ${nombre(limite)}</span>
+          </div>
+          <div class="w-full h-1.5 rounded-full bg-gray-200 dark:bg-gray-600 overflow-hidden">
+            <div class="h-full rounded-full ${couleur} transition-all" style="width:${Math.max(pct, utilisees > 0 ? 2 : 0)}%"></div>
+          </div>
+          ${message ? `
+          <div class="mt-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <p class="text-gray-700 dark:text-gray-300">${message}</p>
+            ${lien}
+          </div>` : ''}
+        </div>`;
+      el.classList.remove('hidden');
+    });
+  }
+
+  /**
+   * Fenetre affichee quand le serveur refuse une saisie pour quota.
+   *
+   * Remplace l'alerte brute : le gerant y apprend que rien n'est perdu et
+   * comment continuer, avec le bouton pour le faire.
+   */
+  function fenetreQuota(message) {
+    const existante = document.getElementById('ogo-modal-formule');
+    if (existante) existante.remove();
+
+    const suivante = formuleAuDessus();
+    const agent = estAgent();
+
+    const fond = document.createElement('div');
+    fond.id = 'ogo-modal-formule';
+    fond.className = 'fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4';
+    fond.innerHTML = `
+      <div class="w-full max-w-md rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-2xl">
+        <div class="flex items-center justify-center size-12 rounded-full bg-primary/10 text-primary mx-auto mb-4">
+          <span class="material-symbols-outlined text-2xl">event_repeat</span>
+        </div>
+        <h3 class="text-lg font-bold text-center text-[#0a0c0a] dark:text-white">
+          Limite d'opérations du mois atteinte
+        </h3>
+        <p class="mt-2 text-sm text-center text-gray-600 dark:text-gray-400">
+          ${agent
+            ? "Ce compte a atteint le nombre d'opérations prévu ce mois-ci. Rien n'est perdu. Adressez-vous à votre gérant."
+            : (message || "Vos données restent consultables. La saisie reprendra le 1er du mois prochain.")}
+        </p>
+        <div class="mt-6 flex flex-col sm:flex-row gap-3">
+          <button type="button" data-fermer
+                  class="flex-1 rounded-full h-11 px-5 ${!agent && suivante ? 'border border-black/10 dark:border-gray-600 text-[#0a0c0a] dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700' : 'bg-primary text-white hover:bg-primary/90'} text-sm font-bold transition-colors">
+            ${!agent && suivante ? 'Plus tard' : 'Compris'}
+          </button>
+          ${!agent && suivante ? `
+          <a href="module_abonnement.html"
+             class="flex-1 rounded-full h-11 px-5 inline-flex items-center justify-center bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors">
+            Passer à ${suivante.nom}
+          </a>` : ''}
+        </div>
+      </div>
+    `;
+
+    fond.addEventListener('click', (e) => {
+      if (e.target === fond || e.target.hasAttribute('data-fermer')) fond.remove();
+    });
+    document.body.appendChild(fond);
+  }
+
+  /**
+   * Une vente ou une depense vient d'etre enregistree.
+   *
+   * Le compteur avance localement plutot que de redemander /api/plan a
+   * chaque saisie : le serveur reste juge, cet affichage n'est qu'un
+   * reflet. Un refus pour quota le recale sur la limite.
+   */
+  function operationAjoutee() {
+    if (operations && operations.utilisees !== null && operations.utilisees !== undefined) {
+      operations.utilisees += 1;
+      afficherCompteurOperations();
+    }
+  }
+
+  function quotaAtteint(detail) {
+    if (operations && detail?.limite) {
+      operations.utilisees = detail.utilisees ?? detail.limite;
+      operations.limite = detail.limite;
+    }
+    afficherCompteurOperations();
+    fenetreQuota(detail?.message);
+  }
+
   window.OGOUE_PLAN = {
     chargee: chargerFormule().then(() => {
       appliquer();
-      document.dispatchEvent(new CustomEvent('ogoue:formule', { detail: { formule, droits, abonnement, stockage } }));
-      return { formule, droits, abonnement, stockage };
+      afficherCompteurOperations();
+      document.dispatchEvent(new CustomEvent('ogoue:formule', { detail: { formule, droits, abonnement, stockage, operations } }));
+      return { formule, droits, abonnement, stockage, operations };
     }),
     autorise,
     appliquer,
     exigerPage,
     fenetreMontee,
+    operationAjoutee,
+    quotaAtteint,
     get formule() { return formule; },
     get droits() { return droits; },
     get abonnement() { return abonnement; },
     get stockage() { return stockage; },
+    get operations() { return operations; },
   };
 })();

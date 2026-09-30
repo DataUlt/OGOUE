@@ -16,6 +16,7 @@ import etatsFinanciersRoutes from "./routes/etats-financiers.routes.js";
 import { authMiddleware } from "./middleware/auth.middleware.js";
 import { planMiddleware } from "./middleware/plan.middleware.js";
 import { stockageUtilise } from "./utils/quota-stockage.js";
+import { operationsDuMois, debutDuMois } from "./utils/quota-operations.js";
 import { FORMULES, FORMULE_PAR_DEFAUT, droitsDe } from "./config/plans.js";
 import { supabase } from "./db/supabase.js";
 import { enTetesSecurite } from "./middleware/securite.middleware.js";
@@ -111,9 +112,12 @@ app.get("/api/plan", authMiddleware, planMiddleware, async (req, res) => {
   // La consommation n'a de sens que si la formule ouvre les documents.
   // Sur la formule gratuite, l'interroger ferait un aller-retour en base
   // pour afficher « 0 sur 0 ».
-  const stockage = req.droits?.stockageGo
-    ? await stockageUtilise(req.user?.organizationId)
-    : null;
+  const limiteOperations = req.droits?.operationsMois ?? null;
+  const [stockage, operations] = await Promise.all([
+    req.droits?.stockageGo ? stockageUtilise(req.user?.organizationId) : null,
+    // Sans limite, rien a decompter : on s'epargne trois comptages.
+    limiteOperations !== null ? operationsDuMois(req.user?.organizationId) : null,
+  ]);
 
   res.json({
     formule: req.formule,
@@ -125,6 +129,14 @@ app.get("/api/plan", authMiddleware, planMiddleware, async (req, res) => {
     stockage: {
       utiliseOctets: stockage,
       quotaOctets: (req.droits?.stockageGo || 0) * 1024 * 1024 * 1024,
+    },
+    // Ventes et depenses du mois en cours, pour le compteur des pages de
+    // saisie. `utilisees` vaut null si la formule n'a pas de limite ou si
+    // le comptage a echoue : le frontend n'affiche alors rien.
+    operations: {
+      utilisees: operations,
+      limite: limiteOperations,
+      depuis: debutDuMois(),
     },
     // Le catalogue complet accompagne la formule en cours : la page
     // d'abonnement affiche ainsi exactement les prix et les limites que

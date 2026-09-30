@@ -68,6 +68,25 @@ const appState = structuredClone(defaultState);
 // 📤 ENVOI VERS L'API
 // ─────────────────────────────────────────────────
 
+/** Erreur d'API qui garde le corps de la réponse (code, limite…). */
+function erreurApi(errorData, status) {
+  const erreur = new Error(errorData?.error || `HTTP ${status}`);
+  erreur.detail = errorData || null;
+  return erreur;
+}
+
+/**
+ * Un refus pour quota d'opérations ouvre la fenêtre dédiée plutôt qu'une
+ * alerte brute. Renvoie true si l'erreur a été prise en charge.
+ */
+function signalerQuotaOperations(erreur) {
+  if (erreur?.detail?.code !== "quota_operations" || !window.OGOUE_PLAN?.quotaAtteint) {
+    return false;
+  }
+  window.OGOUE_PLAN.quotaAtteint({ ...erreur.detail, message: erreur.detail.error });
+  return true;
+}
+
 /**
  * Envoie une nouvelle vente à l'API (authentifiée par JWT)
  * @param {Object} vente - { date, description, moyen_paiement, type_vente, quantite, montant, justificatif, client_nom, client_telephone, client_email, file }
@@ -109,7 +128,9 @@ async function addVente(vente, onProgress) {
 
     // Créer un XMLHttpRequest pour tracker la progression
     if (vente.file && onProgress) {
-      return new Promise((resolve, reject) => {
+      // `await` : sans lui, un refus du serveur échapperait au catch
+      // ci-dessous et n'y serait jamais expliqué à l'utilisateur.
+      return await new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
 
         // Suivi de la progression
@@ -131,6 +152,7 @@ async function addVente(vente, onProgress) {
             try {
               const data = JSON.parse(xhr.responseText);
               console.log("✅ Vente ajoutée:", data);
+              window.OGOUE_PLAN?.operationAjoutee?.();
               resolve(data);
             } catch (e) {
               reject(new Error("Erreur de parsing réponse"));
@@ -138,7 +160,7 @@ async function addVente(vente, onProgress) {
           } else {
             try {
               const errorData = JSON.parse(xhr.responseText);
-              reject(new Error(errorData.error || `HTTP ${xhr.status}`));
+              reject(erreurApi(errorData, xhr.status));
             } catch (e) {
               reject(new Error(`HTTP ${xhr.status}`));
             }
@@ -175,16 +197,19 @@ async function addVente(vente, onProgress) {
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Erreur API addVente:", errorData);
-        throw new Error(errorData.error || `HTTP ${response.status}`);
+        throw erreurApi(errorData, response.status);
       }
 
       const data = await response.json();
       console.log("✅ Vente ajoutée:", data);
+      window.OGOUE_PLAN?.operationAjoutee?.();
       return data;
     }
   } catch (error) {
     console.error("❌ Erreur lors de l'ajout de vente:", error);
-    alert(`Erreur lors de l'ajout de vente: ${error.message}`);
+    if (!signalerQuotaOperations(error)) {
+      alert(`Erreur lors de l'ajout de vente: ${error.message}`);
+    }
     return null;
   }
 }
@@ -221,7 +246,9 @@ async function addDepense(depense, onProgress) {
 
     // Créer un XMLHttpRequest pour tracker la progression
     if (depense.file && onProgress) {
-      return new Promise((resolve, reject) => {
+      // `await` : sans lui, un refus du serveur échapperait au catch
+      // ci-dessous et n'y serait jamais expliqué à l'utilisateur.
+      return await new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
 
         // Suivi de la progression
@@ -243,6 +270,7 @@ async function addDepense(depense, onProgress) {
             try {
               const data = JSON.parse(xhr.responseText);
               console.log("✅ Dépense ajoutée:", data);
+              window.OGOUE_PLAN?.operationAjoutee?.();
               resolve(data);
             } catch (e) {
               reject(new Error("Erreur de parsing réponse"));
@@ -250,7 +278,7 @@ async function addDepense(depense, onProgress) {
           } else {
             try {
               const errorData = JSON.parse(xhr.responseText);
-              reject(new Error(errorData.error || `HTTP ${xhr.status}`));
+              reject(erreurApi(errorData, xhr.status));
             } catch (e) {
               reject(new Error(`HTTP ${xhr.status}`));
             }
@@ -287,16 +315,19 @@ async function addDepense(depense, onProgress) {
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Erreur API addDepense:", errorData);
-        throw new Error(errorData.error || `HTTP ${response.status}`);
+        throw erreurApi(errorData, response.status);
       }
 
       const data = await response.json();
       console.log("✅ Dépense ajoutée:", data);
+      window.OGOUE_PLAN?.operationAjoutee?.();
       return data;
     }
   } catch (error) {
     console.error("❌ Erreur lors de l'ajout de dépense:", error);
-    alert(`Erreur lors de l'ajout de dépense: ${error.message}`);
+    if (!signalerQuotaOperations(error)) {
+      alert(`Erreur lors de l'ajout de dépense: ${error.message}`);
+    }
     return null;
   }
 }

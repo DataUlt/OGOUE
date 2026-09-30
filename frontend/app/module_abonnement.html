@@ -113,6 +113,20 @@
                     </div>
                 </div>
 
+                <!-- Opérations du mois -->
+                <div id="blocOperations" class="hidden mt-6 pt-6 border-t border-border-light dark:border-border-dark">
+                    <div class="flex items-center justify-between text-sm mb-2">
+                        <span class="font-semibold">Opérations ce mois-ci</span>
+                        <span class="text-text-light-secondary dark:text-text-dark-secondary" id="operationsTexte"></span>
+                    </div>
+                    <div class="w-full h-2 rounded-full bg-border-light dark:bg-border-dark overflow-hidden">
+                        <div id="operationsBarre" class="h-full rounded-full bg-primary transition-all" style="width:0%"></div>
+                    </div>
+                    <p class="mt-2 text-sm text-text-light-secondary dark:text-text-dark-secondary">
+                        Ventes et dépenses confondues. Le compteur repart à zéro le 1er de chaque mois.
+                    </p>
+                </div>
+
                 <!-- Ce que la formule inclut -->
                 <ul id="listeDroits" class="mt-6 pt-6 border-t border-border-light dark:border-border-dark grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm"></ul>
             </section>
@@ -239,7 +253,14 @@
                 ${nouveau ? '<span class="ml-1 rounded-full bg-primary/10 text-primary text-[11px] font-bold px-2 py-0.5">Nouveau</span>' : ''}
             </li>`;
 
-        let html = DROITS_LISIBLES.map(([cle, libelle]) =>
+        // Le volume en tête : c'est ce qui distingue d'abord les formules.
+        const operations = droits.operationsMois === null || droits.operationsMois === undefined
+            ? "Ventes et dépenses illimitées"
+            : `${fmt(droits.operationsMois)} ventes et dépenses par mois`;
+        const operationsNouveau = actuels && droits.operationsMois !== actuels.operationsMois;
+        let html = ligne(true, operations, operationsNouveau);
+
+        html += DROITS_LISIBLES.map(([cle, libelle]) =>
             ligne(!!droits[cle], libelle, actuels && droits[cle] && !actuels[cle])
         ).join("");
 
@@ -385,6 +406,26 @@
             blocStockage.classList.remove("hidden");
         } else {
             blocStockage.classList.add("hidden");
+        }
+
+        // Même logique pour le compteur mensuel : formule souscrite
+        // seulement, et rien si elle n'a pas de limite.
+        const blocOperations = document.getElementById("blocOperations");
+        const ops = etat.operations;
+        if (enCours && ops && ops.limite !== null && ops.limite !== undefined
+            && ops.utilisees !== null && ops.utilisees !== undefined) {
+            const pctO = Math.min(100, (ops.utilisees / ops.limite) * 100);
+            document.getElementById("operationsTexte").textContent =
+                `${fmt(ops.utilisees)} sur ${fmt(ops.limite)}`;
+            const barreO = document.getElementById("operationsBarre");
+            barreO.style.width = `${Math.max(pctO, ops.utilisees > 0 ? 2 : 0)}%`;
+            // Seuils du compteur des pages de saisie : 80 % prévient,
+            // 100 % bloque.
+            barreO.classList.remove("bg-primary", "bg-orange-500", "bg-red-500");
+            barreO.classList.add(pctO >= 100 ? "bg-red-500" : (pctO >= 80 ? "bg-orange-500" : "bg-primary"));
+            blocOperations.classList.remove("hidden");
+        } else {
+            blocOperations.classList.add("hidden");
         }
 
         // En aperçu, les droits sont comparés à ceux en cours : les gains
