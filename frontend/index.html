@@ -427,288 +427,57 @@
             <h2 class="text-3xl sm:text-5xl font-bold tracking-tighter text-text-light">
               Commencer avec OGOUE, c'est simple.
             </h2>
+            <p class="mt-4 text-lg text-text-light-muted">
+              Quelques minutes de vidéo pour prendre l'outil en main, étape par étape.
+            </p>
           </div>
 
-          <div class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <!-- Tutoriels vidéo. Pour en ajouter un : copier un <article>,
+               changer le numéro, le titre et l'identifiant YouTube (data-video
+               et l'image). La vidéo ne se charge qu'au clic : la page reste
+               légère, y compris sur une connexion mobile. -->
+          <div class="mt-16 grid grid-cols-1 md:grid-cols-2 gap-10 max-w-5xl mx-auto">
 
-            <div>
-              <div class="flex items-center justify-center size-10 rounded-full bg-primary text-background-dark font-bold">1</div>
-              <h3 class="mt-5 text-lg font-bold">Créez votre compte</h3>
-              <p class="mt-2 text-sm text-text-light-muted">
-                Inscrivez votre entreprise et accédez à votre espace de gestion.
-              </p>
-            </div>
-
-            <div>
-              <div class="flex items-center justify-center size-10 rounded-full bg-primary text-background-dark font-bold">2</div>
-              <h3 class="mt-5 text-lg font-bold">Enregistrez vos opérations</h3>
-              <p class="mt-2 text-sm text-text-light-muted">
-                Ajoutez vos ventes et vos dépenses au fur et à mesure de votre activité.
-              </p>
-            </div>
-
-            <div>
-              <div class="flex items-center justify-center size-10 rounded-full bg-primary text-background-dark font-bold">3</div>
-              <h3 class="mt-5 text-lg font-bold">Consultez vos chiffres</h3>
-              <p class="mt-2 text-sm text-text-light-muted">
-                Retrouvez vos informations et suivez votre activité depuis votre espace.
-              </p>
-            </div>
-
-            <div>
-              <div class="flex items-center justify-center size-10 rounded-full bg-primary text-background-dark font-bold">4</div>
-              <h3 class="mt-5 text-lg font-bold">Exportez quand on vous le demande</h3>
-              <p class="mt-2 text-sm text-text-light-muted">
-                Compte de résultat, tableau de trésorerie, historique daté : en Excel,
-                prêts pour votre banquier ou votre comptable.
-              </p>
-            </div>
-
-          </div>
-
-          <div class="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <figure class="m-0 flex h-full flex-col">
-              <div class="flex flex-1 flex-col rounded-xl border border-black/10 bg-white shadow-sm overflow-hidden">
-                <div class="flex items-center gap-1 px-2.5 py-2 border-b border-black/10 bg-background-light">
-                  <span class="size-1.5 rounded-full bg-black/15"></span>
-                  <span class="size-1.5 rounded-full bg-black/15"></span>
-                  <span class="size-1.5 rounded-full bg-black/15"></span>
-                </div>
-                <div class="flex-1 p-3 space-y-2">
-                  <div>
-                    <p class="text-[8px] font-semibold text-text-light-muted">Date de la transaction<span class="text-red-500">*</span></p>
-                    <div class="mt-1 h-5 rounded border border-black/10 bg-background-light flex items-center px-1.5">
-                      <span class="text-[9px] text-text-light">25/08/2026</span>
-                    </div>
-                  </div>
-                  <div>
-                    <p class="text-[8px] font-semibold text-text-light-muted">Nom de l'article / service<span class="text-red-500">*</span></p>
-                    <div class="mt-1 h-5 rounded border border-black/10 bg-background-light flex items-center px-1.5">
-                      <span class="text-[9px] text-text-light">Article 1</span>
-                    </div>
-                  </div>
-                  <div class="grid grid-cols-2 gap-2">
-                  <div>
-                    <p class="text-[8px] font-semibold text-text-light-muted">Moyen de paiement<span class="text-red-500">*</span></p>
-                    <div class="mt-1 h-5 rounded border border-black/10 bg-background-light flex items-center px-1.5">
-                      <span class="text-[9px] text-text-light">Cash</span>
-                    </div>
-                  </div>
-                  <div>
-                    <p class="text-[8px] font-semibold text-text-light-muted">Type de vente<span class="text-red-500">*</span></p>
-                    <div class="mt-1 h-5 rounded border border-black/10 bg-background-light flex items-center px-1.5">
-                      <span class="text-[9px] text-text-light">Vente de produits</span>
-                    </div>
-                  </div>
-                  </div>
-                  <div class="grid grid-cols-2 gap-2">
-                  <div>
-                    <p class="text-[8px] font-semibold text-text-light-muted">Quantité<span class="text-red-500">*</span></p>
-                    <div class="mt-1 h-5 rounded border border-black/10 bg-background-light flex items-center px-1.5">
-                      <span class="text-[9px] text-text-light">3</span>
-                    </div>
-                  </div>
-                  <div>
-                    <p class="text-[8px] font-semibold text-text-light-muted">Prix Total<span class="text-red-500">*</span></p>
-                    <div class="mt-1 h-5 rounded border border-black/10 bg-background-light flex items-center px-1.5">
-                      <span class="text-[9px] text-text-light">12 500 FCFA</span>
-                    </div>
-                  </div>
-                  </div>
-                  <div>
-                    <p class="text-[8px] font-semibold text-text-light-muted">Justificatif de la vente</p>
-                    <div class="mt-1 grid grid-cols-2 gap-2">
-                      <div class="rounded border-2 border-primary bg-primary/10 py-2 flex flex-col items-center gap-0.5">
-                        <span class="material-symbols-outlined text-[13px] text-primary">description</span>
-                        <span class="text-[7px] font-bold text-text-light leading-tight">Éditer le reçu</span>
-                      </div>
-                      <div class="rounded border border-black/10 py-2 flex flex-col items-center gap-0.5">
-                        <span class="material-symbols-outlined text-[13px] text-text-light-muted">upload</span>
-                        <span class="text-[7px] font-bold text-text-light-muted leading-tight">Joindre un fichier</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="flex justify-end">
-                    <span class="rounded-full bg-primary px-2.5 py-1 text-[8px] font-bold text-background-dark">Enregistrer la vente</span>
-                  </div>
-                </div>
+            <article class="flex flex-col">
+              <div class="flex items-center gap-3">
+                <div class="flex items-center justify-center size-10 shrink-0 rounded-full bg-primary text-background-dark font-bold">1</div>
+                <h3 class="text-lg font-bold">Créez votre compte</h3>
               </div>
-              <figcaption class="mt-3 text-center text-sm font-semibold text-text-light">Créer une vente</figcaption>
-            </figure>
-            <figure class="m-0 flex h-full flex-col">
-              <div class="flex flex-1 flex-col rounded-xl border border-black/10 bg-white shadow-sm overflow-hidden">
-                <div class="flex items-center gap-1 px-2.5 py-2 border-b border-black/10 bg-background-light">
-                  <span class="size-1.5 rounded-full bg-black/15"></span>
-                  <span class="size-1.5 rounded-full bg-black/15"></span>
-                  <span class="size-1.5 rounded-full bg-black/15"></span>
-                </div>
-                <div class="flex-1 p-3 space-y-2">
-                  <div>
-                    <p class="text-[8px] font-semibold text-text-light-muted">Date de la transaction</p>
-                    <div class="mt-1 h-5 rounded border border-black/10 bg-background-light flex items-center px-1.5">
-                      <span class="text-[9px] text-text-light">25/08/2026</span>
-                    </div>
-                  </div>
-                  <div>
-                    <p class="text-[8px] font-semibold text-text-light-muted">Catégorie</p>
-                    <div class="mt-1 h-5 rounded border border-black/10 bg-background-light flex items-center px-1.5">
-                      <span class="text-[9px] text-text-light">Impôts et taxes</span>
-                    </div>
-                  </div>
-                  <div>
-                    <p class="text-[8px] font-semibold text-text-light-muted">Moyen de paiement</p>
-                    <div class="mt-1 h-5 rounded border border-black/10 bg-background-light flex items-center px-1.5">
-                      <span class="text-[9px] text-text-light">Cash</span>
-                    </div>
-                  </div>
-                  <div>
-                    <p class="text-[8px] font-semibold text-text-light-muted">Montant</p>
-                    <div class="mt-1 h-5 rounded border border-black/10 bg-background-light flex items-center px-1.5">
-                      <span class="text-[9px] text-text-light">45 000 FCFA</span>
-                    </div>
-                  </div>
-                  <div>
-                    <p class="text-[8px] font-semibold text-text-light-muted">Joindre le justificatif</p>
-                    <div class="mt-1 rounded border-2 border-dashed border-black/15 py-3 flex flex-col items-center gap-0.5">
-                      <span class="material-symbols-outlined text-[15px] text-text-light-muted/60">cloud_upload</span>
-                      <span class="text-[7px] font-semibold text-primary">Téléversez un fichier</span>
-                    </div>
-                  </div>
-                  <div class="flex justify-end">
-                    <span class="rounded-full bg-primary px-2.5 py-1 text-[8px] font-bold text-background-dark">Enregistrer la dépense</span>
-                  </div>
-                </div>
+              <p class="mt-2 text-sm text-text-light-muted">Inscrivez votre entreprise et accédez à votre espace de gestion en quelques minutes.</p>
+              <div class="mt-5 relative aspect-video overflow-hidden rounded-xl border border-black/10 bg-background-dark shadow-sm" data-video="E2xaClDDy1k" data-titre="Créez votre compte">
+                <button type="button" class="group absolute inset-0 w-full h-full" aria-label="Lire la vidéo : Créez votre compte">
+                  <img src="https://i.ytimg.com/vi/E2xaClDDy1k/hqdefault.jpg" alt="" loading="lazy"
+                       class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]">
+                  <span class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></span>
+                  <span class="absolute inset-0 flex items-center justify-center">
+                    <span class="flex items-center justify-center size-16 rounded-full bg-primary text-white shadow-xl transition-transform group-hover:scale-110">
+                      <span class="material-symbols-outlined text-4xl" style="font-variation-settings:'FILL' 1">play_arrow</span>
+                    </span>
+                  </span>
+                </button>
               </div>
-              <figcaption class="mt-3 text-center text-sm font-semibold text-text-light">Ajouter une dépense</figcaption>
-            </figure>
-            <figure class="m-0 flex h-full flex-col">
-              <div class="flex flex-1 flex-col rounded-xl border border-black/10 bg-white shadow-sm overflow-hidden">
-                <div class="flex items-center gap-1 px-2.5 py-2 border-b border-black/10 bg-background-light">
-                  <span class="size-1.5 rounded-full bg-black/15"></span>
-                  <span class="size-1.5 rounded-full bg-black/15"></span>
-                  <span class="size-1.5 rounded-full bg-black/15"></span>
-                </div>
-                <div class="flex-1 p-3 space-y-2">
-                  <div class="flex items-center gap-1 rounded border border-black/10 px-1.5 py-1">
-                    <span class="material-symbols-outlined text-[11px] text-text-light-muted">calendar_month</span>
-                    <span class="text-[7px] text-text-light-muted">01/08/2026 - 25/08/2026</span>
-                  </div>
-                  <p class="text-[9px] font-bold text-text-light">Ventes récentes</p>
-                  <div>
-                    <div class="grid grid-cols-[1fr_auto] gap-2 items-center py-1.5 border-b border-black/5">
-                      <div>
-                        <p class="text-[9px] font-medium leading-tight text-text-light">Article 1</p>
-                        <p class="text-[7px] text-text-light-muted">25/08/2026 · Cash</p>
-                      </div>
-                      <div class="text-right">
-                        <p class="text-[9px] font-semibold text-text-light">12 500 FCFA</p>
-                        <p class="text-[7px] font-medium text-primary">REC-2026-000004</p>
-                      </div>
-                    </div>
-                    <div class="grid grid-cols-[1fr_auto] gap-2 items-center py-1.5 border-b border-black/5">
-                      <div>
-                        <p class="text-[9px] font-medium leading-tight text-text-light">Article 2</p>
-                        <p class="text-[7px] text-text-light-muted">25/08/2026 · Cash</p>
-                      </div>
-                      <div class="text-right">
-                        <p class="text-[9px] font-semibold text-text-light">85 000 FCFA</p>
-                        <p class="text-[7px] font-medium text-primary">REC-2026-000003</p>
-                      </div>
-                    </div>
-                    <div class="grid grid-cols-[1fr_auto] gap-2 items-center py-1.5 border-b border-black/5">
-                      <div>
-                        <p class="text-[9px] font-medium leading-tight text-text-light">Service 1</p>
-                        <p class="text-[7px] text-text-light-muted">25/08/2026 · Cash</p>
-                      </div>
-                      <div class="text-right">
-                        <p class="text-[9px] font-semibold text-text-light">31 000 FCFA</p>
-                        <p class="text-[7px] font-medium text-primary">facture.pdf</p>
-                      </div>
-                    </div>
-                    <div class="grid grid-cols-[1fr_auto] gap-2 items-center py-1.5 border-b border-black/5">
-                      <div>
-                        <p class="text-[9px] font-medium leading-tight text-text-light">Article 1</p>
-                        <p class="text-[7px] text-text-light-muted">25/08/2026 · Cash</p>
-                      </div>
-                      <div class="text-right">
-                        <p class="text-[9px] font-semibold text-text-light">12 500 FCFA</p>
-                        <p class="text-[7px] font-medium text-primary">REC-2026-000002</p>
-                      </div>
-                    </div>
-                    <div class="grid grid-cols-[1fr_auto] gap-2 items-center py-1.5 border-b border-black/5">
-                      <div>
-                        <p class="text-[9px] font-medium leading-tight text-text-light">Service 2</p>
-                        <p class="text-[7px] text-text-light-muted">24/08/2026 · Mobile Money</p>
-                      </div>
-                      <div class="text-right">
-                        <p class="text-[9px] font-semibold text-text-light">7 000 FCFA</p>
-                        <p class="text-[7px] font-medium text-primary">REC-2026-000001</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="flex items-center justify-between rounded border border-black/10 bg-background-light px-2 py-1.5">
-                    <span class="text-[8px] font-semibold text-text-light-muted">Total de la période</span>
-                    <span class="text-[10px] font-black tracking-tight text-text-light">148 500 FCFA</span>
-                  </div>
-                </div>
+            </article>
+
+            <article class="flex flex-col">
+              <div class="flex items-center gap-3">
+                <div class="flex items-center justify-center size-10 shrink-0 rounded-full bg-primary text-background-dark font-bold">2</div>
+                <h3 class="text-lg font-bold">Remplissez votre catalogue</h3>
               </div>
-              <figcaption class="mt-3 text-center text-sm font-semibold text-text-light">Consulter les chiffres</figcaption>
-            </figure>
-            <figure class="m-0 flex h-full flex-col">
-              <div class="flex flex-1 flex-col rounded-xl border border-black/10 bg-white shadow-sm overflow-hidden">
-                <div class="flex items-center gap-1 px-2.5 py-2 border-b border-black/10 bg-background-light">
-                  <span class="size-1.5 rounded-full bg-black/15"></span>
-                  <span class="size-1.5 rounded-full bg-black/15"></span>
-                  <span class="size-1.5 rounded-full bg-black/15"></span>
-                </div>
-                <div class="flex-1 p-3 space-y-2">
-                  <div class="rounded-lg border border-black/10 bg-background-light p-2">
-                    <div class="flex items-center gap-1">
-                      <span class="material-symbols-outlined text-[11px] text-primary">trending_up</span>
-                      <span class="text-[7px] font-semibold text-text-light-muted">Total des ventes</span>
-                    </div>
-                    <p class="mt-0.5 text-[13px] font-black tracking-tight text-text-light">486 000 FCFA</p>
-                  </div>
-                  <div class="rounded-lg border border-black/10 bg-background-light p-2">
-                    <div class="flex items-center gap-1">
-                      <span class="material-symbols-outlined text-[11px] text-text-light-muted">trending_down</span>
-                      <span class="text-[7px] font-semibold text-text-light-muted">Total des dépenses</span>
-                    </div>
-                    <p class="mt-0.5 text-[13px] font-black tracking-tight text-text-light">212 000 FCFA</p>
-                  </div>
-                  <div class="rounded-lg border border-black/10 bg-background-light p-2">
-                    <div class="flex items-center gap-1">
-                      <span class="material-symbols-outlined text-[11px] text-primary">account_balance_wallet</span>
-                      <span class="text-[7px] font-semibold text-text-light-muted">Solde</span>
-                    </div>
-                    <p class="mt-0.5 text-[13px] font-black tracking-tight text-text-light">274 000 FCFA</p>
-                  </div>
-                  <div class="rounded-lg border border-black/10 p-2">
-                    <p class="text-[7px] font-semibold text-text-light-muted">Score de traçabilité</p>
-                    <div class="mt-1.5 flex items-center gap-1.5">
-                      <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-black/10">
-                        <div class="h-full w-5/6 rounded-full bg-primary"></div>
-                      </div>
-                      <span class="text-[9px] font-bold text-text-light">83%</span>
-                    </div>
-                  </div>
-                  <div class="rounded-lg border border-black/10 p-2">
-                    <p class="text-[7px] font-semibold text-text-light-muted">Répartition des ventes</p>
-                    <div class="mt-1.5 space-y-1">
-                      <div class="flex items-center justify-between">
-                        <span class="text-[8px] text-text-light">Article 1</span>
-                        <span class="text-[8px] font-semibold text-text-light">52 %</span>
-                      </div>
-                      <div class="flex items-center justify-between">
-                        <span class="text-[8px] text-text-light">Service 1</span>
-                        <span class="text-[8px] font-semibold text-text-light">31 %</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              <p class="mt-2 text-sm text-text-light-muted">Enregistrez une fois vos articles et vos services, avec leurs prix, pour saisir vos ventes plus vite.</p>
+              <div class="mt-5 relative aspect-video overflow-hidden rounded-xl border border-black/10 bg-background-dark shadow-sm" data-video="dtjZvHN8Emo" data-titre="Remplissez votre catalogue">
+                <button type="button" class="group absolute inset-0 w-full h-full" aria-label="Lire la vidéo : Remplissez votre catalogue">
+                  <img src="https://i.ytimg.com/vi/dtjZvHN8Emo/hqdefault.jpg" alt="" loading="lazy"
+                       class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]">
+                  <span class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></span>
+                  <span class="absolute inset-0 flex items-center justify-center">
+                    <span class="flex items-center justify-center size-16 rounded-full bg-primary text-white shadow-xl transition-transform group-hover:scale-110">
+                      <span class="material-symbols-outlined text-4xl" style="font-variation-settings:'FILL' 1">play_arrow</span>
+                    </span>
+                  </span>
+                </button>
               </div>
-              <figcaption class="mt-3 text-center text-sm font-semibold text-text-light">Vue d'ensemble</figcaption>
-            </figure>
+            </article>
+
           </div>
 
           <p class="mt-12 text-center text-xl font-bold text-text-light">
@@ -1140,6 +909,22 @@
   </div>
 
   <script>
+    // Tutoriels : la vignette laisse place au lecteur YouTube au clic.
+    // youtube-nocookie : pas de cookie de suivi tant que la vidéo n'est
+    // pas lancée.
+    document.querySelectorAll('[data-video]').forEach(function (cadre) {
+      cadre.querySelector('button')?.addEventListener('click', function () {
+        const iframe = document.createElement('iframe');
+        iframe.src = 'https://www.youtube-nocookie.com/embed/' + cadre.dataset.video + '?autoplay=1&rel=0';
+        iframe.title = cadre.dataset.titre || 'Tutoriel OGOUE';
+        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+        iframe.allowFullscreen = true;
+        iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+        iframe.className = 'absolute inset-0 w-full h-full';
+        cadre.replaceChildren(iframe);
+      });
+    });
+
     // Mobile menu
     const btn = document.getElementById("mobileBtn");
     const menu = document.getElementById("mobileMenu");
