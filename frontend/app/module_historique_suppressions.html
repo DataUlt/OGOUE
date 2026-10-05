@@ -151,22 +151,22 @@
                 <!-- TABLEAU DES SUPPRESSIONS -->
                 <div class="rounded-xl border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark shadow-sm overflow-hidden">
                     <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
+                        <table data-cartes class="w-full text-sm">
                             <thead>
                                 <tr class="border-b border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark">
-                                    <th class="px-6 py-3 text-left font-semibold text-text-light-primary dark:text-text-dark-primary">
+                                    <th data-carte="titre" class="px-6 py-3 text-left font-semibold text-text-light-primary dark:text-text-dark-primary">
                                         Type
                                     </th>
-                                    <th class="px-6 py-3 text-left font-semibold text-text-light-primary dark:text-text-dark-primary">
+                                    <th data-carte="meta" class="px-6 py-3 text-left font-semibold text-text-light-primary dark:text-text-dark-primary">
                                         Date
                                     </th>
-                                    <th class="px-6 py-3 text-left font-semibold text-text-light-primary dark:text-text-dark-primary">
+                                    <th data-carte="meta" class="px-6 py-3 text-left font-semibold text-text-light-primary dark:text-text-dark-primary">
                                         Supprimé par
                                     </th>
                                     <th class="px-6 py-3 text-left font-semibold text-text-light-primary dark:text-text-dark-primary">
                                         Motif
                                     </th>
-                                    <th class="px-6 py-3 text-center font-semibold text-text-light-primary dark:text-text-dark-primary">
+                                    <th data-carte="actions" class="px-6 py-3 text-center font-semibold text-text-light-primary dark:text-text-dark-primary">
                                         Actions
                                     </th>
                                 </tr>
@@ -530,6 +530,7 @@
 </script>
 
 <script src="js/plan-ui.js"></script>
+<script src="js/tableau-cartes.js"></script>
 <script>
   // Page entierement reservee : on attend la formule avant de la
   // laisser voir. Le backend refuse deja les appels, ceci evite

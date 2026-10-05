@@ -340,18 +340,18 @@
                     </div>
 
                     <div class="overflow-x-auto bg-white dark:bg-card-dark rounded-xl shadow-sm border border-[#e8ede8]/70 dark:border-gray-700/70">
-                        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                        <table data-cartes class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                             <thead class="text-xs text-gray-700 dark:text-gray-300 uppercase bg-gray-50 dark:bg-gray-800/50">
                             <tr>
-                                <th scope="col" class="px-6 py-4">Date</th>
-                                <th scope="col" class="px-6 py-4">Heure</th>
-                                <th scope="col" class="px-6 py-4">Cat&eacute;gorie</th>
-                                <th scope="col" class="px-6 py-4">Montant</th>
-                                <th scope="col" class="px-6 py-4">Moyen de paiement</th>
+                                <th data-carte="meta" scope="col" class="px-6 py-4">Date</th>
+                                <th data-carte="meta" scope="col" class="px-6 py-4">Heure</th>
+                                <th data-carte="titre" scope="col" class="px-6 py-4">Cat&eacute;gorie</th>
+                                <th data-carte="montant" scope="col" class="px-6 py-4">Montant</th>
+                                <th data-carte="meta" scope="col" class="px-6 py-4">Moyen de paiement</th>
                                 <th scope="col" class="px-6 py-4">Cr&eacute;&eacute; par</th>
                                 <th scope="col" class="px-6 py-4">Justificatif</th>
                                 <th scope="col" class="px-6 py-4">Commentaire</th>
-                                <th scope="col" class="px-6 py-4 text-center">Action</th>
+                                <th data-carte="actions" scope="col" class="px-6 py-4 text-center">Action</th>
                             </tr>
                             </thead>
                             <tbody id="depenses-tbody"></tbody>
@@ -388,18 +388,18 @@
             </div>
 
             <div class="px-6 pb-6 pt-3 overflow-x-auto overflow-y-auto">
-                <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                <table data-cartes class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                     <thead class="text-xs text-gray-700 dark:text-gray-300 uppercase bg-gray-50 dark:bg-gray-800/50">
                     <tr>
-                        <th scope="col" class="px-6 py-4">Date</th>
-                        <th scope="col" class="px-6 py-4">Heure</th>
-                        <th scope="col" class="px-6 py-4">Cat&eacute;gorie</th>
-                        <th scope="col" class="px-6 py-4">Montant</th>
-                        <th scope="col" class="px-6 py-4">Moyen de paiement</th>
+                        <th data-carte="meta" scope="col" class="px-6 py-4">Date</th>
+                        <th data-carte="meta" scope="col" class="px-6 py-4">Heure</th>
+                        <th data-carte="titre" scope="col" class="px-6 py-4">Cat&eacute;gorie</th>
+                        <th data-carte="montant" scope="col" class="px-6 py-4">Montant</th>
+                        <th data-carte="meta" scope="col" class="px-6 py-4">Moyen de paiement</th>
                         <th scope="col" class="px-6 py-4">Cr&eacute;&eacute; par</th>
                         <th scope="col" class="px-6 py-4">Justificatif</th>
                                 <th scope="col" class="px-6 py-4">Commentaire</th>
-                        <th scope="col" class="px-6 py-4 text-center">Action</th>
+                        <th data-carte="actions" scope="col" class="px-6 py-4 text-center">Action</th>
                     </tr>
                     </thead>
                     <tbody id="depenses-full-tbody"></tbody>
@@ -412,6 +412,7 @@
 
 <script src="js/ogoue-state.js"></script>
 <script src="js/plan-ui.js"></script>
+<script src="js/tableau-cartes.js"></script>
 <script src="js/header-ui.js"></script>
 <script src="js/depenses.js"></script>
 <script src="js/topbar-actions.js"></script>

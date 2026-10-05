@@ -169,13 +169,13 @@
                 </div>
 
                 <div id="articles-table-wrapper" class="hidden overflow-x-auto">
-                    <table class="w-full text-left">
+                    <table data-cartes class="w-full text-left">
                         <thead>
                             <tr class="border-b border-gray-200 dark:border-gray-700 text-sm text-text-light-muted dark:text-gray-400">
-                                <th class="py-3 pr-4 font-medium">Nom</th>
-                                <th class="py-3 pr-4 font-medium">Type</th>
-                                <th class="py-3 pr-4 font-medium text-right">Prix unitaire</th>
-                                <th class="py-3 font-medium text-right">Actions</th>
+                                <th data-carte="titre" class="py-3 pr-4 font-medium">Nom</th>
+                                <th data-carte="meta" class="py-3 pr-4 font-medium">Type</th>
+                                <th data-carte="montant" class="py-3 pr-4 font-medium text-right">Prix unitaire</th>
+                                <th data-carte="actions" class="py-3 font-medium text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="articles-tbody"></tbody>
@@ -199,6 +199,7 @@
     </div>
 
     <script src="js/ogoue-state.js"></script>
+    <script src="js/tableau-cartes.js"></script>
     <script src="js/header-ui.js"></script>
     <script src="js/topbar-actions.js"></script>
     <script>

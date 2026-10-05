@@ -519,20 +519,20 @@
                     </div>
 
                     <div class="overflow-x-auto bg-white dark:bg-[#182c29] rounded-xl shadow-sm border border-[#cfe7e3]/70 dark:border-gray-700/70">
-                        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                        <table data-cartes class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                             <thead class="text-xs text-gray-700 dark:text-gray-300 uppercase bg-gray-50 dark:bg-gray-800/50">
                             <tr>
-                                <th class="px-6 py-4" scope="col">Date</th>
-                                <th class="px-6 py-4" scope="col">Heure</th>
-                                <th class="px-6 py-4" scope="col">Article</th>
-                                <th class="px-6 py-4" scope="col">Quantit&eacute;</th>
-                                <th class="px-6 py-4" scope="col">Prix Total</th>
-                                <th class="px-6 py-4" scope="col">Paiement</th>
-                                <th class="px-6 py-4" scope="col">Type</th>
+                                <th data-carte="meta" class="px-6 py-4" scope="col">Date</th>
+                                <th data-carte="meta" class="px-6 py-4" scope="col">Heure</th>
+                                <th data-carte="titre" class="px-6 py-4" scope="col">Article</th>
+                                <th data-carte="meta-lib" data-carte-lib="Qté" class="px-6 py-4" scope="col">Quantit&eacute;</th>
+                                <th data-carte="montant" class="px-6 py-4" scope="col">Prix Total</th>
+                                <th data-carte="meta" class="px-6 py-4" scope="col">Paiement</th>
+                                <th data-carte="meta" class="px-6 py-4" scope="col">Type</th>
                                 <th class="px-6 py-4" scope="col">Cr&eacute;&eacute; par</th>
                                 <th class="px-6 py-4" scope="col">Justificatif</th>
                                 <th class="px-6 py-4" scope="col">Commentaire</th>
-                                <th class="px-6 py-4 text-center" scope="col">Action</th>
+                                <th data-carte="actions" class="px-6 py-4 text-center" scope="col">Action</th>
                             </tr>
                             </thead>
                             <tbody id="ventes-tbody"></tbody>
@@ -575,20 +575,20 @@
             </div>
 
             <div class="px-6 pb-6 pt-3 overflow-x-auto overflow-y-auto">
-                <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                <table data-cartes class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                     <thead class="text-xs text-gray-700 dark:text-gray-300 uppercase bg-gray-50 dark:bg-gray-800/50">
                     <tr>
-                        <th class="px-6 py-4" scope="col">Date</th>
-                        <th class="px-6 py-4" scope="col">Heure</th>
-                        <th class="px-6 py-4" scope="col">Article</th>
-                        <th class="px-6 py-4" scope="col">Quantit&eacute;</th>
-                        <th class="px-6 py-4" scope="col">Prix Total</th>
-                        <th class="px-6 py-4" scope="col">Paiement</th>
-                        <th class="px-6 py-4" scope="col">Type</th>
+                        <th data-carte="meta" class="px-6 py-4" scope="col">Date</th>
+                        <th data-carte="meta" class="px-6 py-4" scope="col">Heure</th>
+                        <th data-carte="titre" class="px-6 py-4" scope="col">Article</th>
+                        <th data-carte="meta-lib" data-carte-lib="Qté" class="px-6 py-4" scope="col">Quantit&eacute;</th>
+                        <th data-carte="montant" class="px-6 py-4" scope="col">Prix Total</th>
+                        <th data-carte="meta" class="px-6 py-4" scope="col">Paiement</th>
+                        <th data-carte="meta" class="px-6 py-4" scope="col">Type</th>
                         <th class="px-6 py-4" scope="col">Cr&eacute;&eacute; par</th>
                         <th class="px-6 py-4" scope="col">Justificatif</th>
                         <th class="px-6 py-4" scope="col">Commentaire</th>
-                        <th class="px-6 py-4 text-center" scope="col">Action</th>
+                        <th data-carte="actions" class="px-6 py-4 text-center" scope="col">Action</th>
                     </tr>
                     </thead>
                     <tbody id="ventes-full-tbody"></tbody>
@@ -601,6 +601,7 @@
 
 <script src="js/ogoue-state.js"></script>
 <script src="js/plan-ui.js"></script>
+<script src="js/tableau-cartes.js"></script>
 <script src="js/header-ui.js"></script>
 <script src="js/recu-client.js"></script>
 <script src="js/ventes.js"></script>
