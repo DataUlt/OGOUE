@@ -227,28 +227,28 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="flex flex-col gap-2 rounded-xl p-6 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-sm">
                             <p class="text-base font-medium text-text-light-secondary dark:text-text-dark-secondary">Chiffre d'Affaires</p>
-                            <p id="kpi-chiffre-affaires" class="tracking-tight text-2xl xl:text-3xl font-bold whitespace-nowrap">-</p>
+                            <!-- Emplacements gris le temps du premier chargement : jamais
+                                 un tiret ni un chiffre fictif, qu'on pourrait prendre pour
+                                 une vraie valeur. dashboard.js les remplace. -->
+                            <p id="kpi-chiffre-affaires" class="tracking-tight text-2xl xl:text-3xl font-bold whitespace-nowrap"><span class="inline-block h-8 w-40 max-w-full rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse align-middle"></span></p>
                             <p id="kpi-ca-trend" class="text-success text-sm font-semibold leading-normal flex items-center gap-1">
-                                <span class="material-symbols-outlined !text-base">trending_up</span>
-                                <span>Chargement...</span>
+                                <span class="inline-block h-4 w-24 rounded bg-gray-200 dark:bg-gray-700 animate-pulse"></span>
                             </p>
                         </div>
 
                         <div class="flex flex-col gap-2 rounded-xl p-6 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-sm">
                             <p class="text-base font-medium text-text-light-secondary dark:text-text-dark-secondary">Dépenses</p>
-                            <p id="kpi-depenses" class="tracking-tight text-2xl xl:text-3xl font-bold whitespace-nowrap">-</p>
+                            <p id="kpi-depenses" class="tracking-tight text-2xl xl:text-3xl font-bold whitespace-nowrap"><span class="inline-block h-8 w-40 max-w-full rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse align-middle"></span></p>
                             <p id="kpi-depenses-trend" class="text-danger text-sm font-semibold leading-normal flex items-center gap-1">
-                                <span class="material-symbols-outlined !text-base">trending_down</span>
-                                <span>Chargement...</span>
+                                <span class="inline-block h-4 w-24 rounded bg-gray-200 dark:bg-gray-700 animate-pulse"></span>
                             </p>
                         </div>
 
                         <div class="flex flex-col gap-2 rounded-xl p-6 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-sm">
                             <p class="text-base font-medium text-text-light-secondary dark:text-text-dark-secondary">Résultat Net</p>
-                            <p id="kpi-resultat" class="tracking-tight text-2xl xl:text-3xl font-bold whitespace-nowrap">-</p>
+                            <p id="kpi-resultat" class="tracking-tight text-2xl xl:text-3xl font-bold whitespace-nowrap"><span class="inline-block h-8 w-40 max-w-full rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse align-middle"></span></p>
                             <p id="kpi-resultat-trend" class="text-success text-sm font-semibold leading-normal flex items-center gap-1">
-                                <span class="material-symbols-outlined !text-base">arrow_upward</span>
-                                <span>Chargement...</span>
+                                <span class="inline-block h-4 w-24 rounded bg-gray-200 dark:bg-gray-700 animate-pulse"></span>
                             </p>
                         </div>
                     </div>
@@ -259,41 +259,21 @@
                     <div class="lg:col-span-2 flex flex-col gap-4 rounded-xl border border-border-light dark:border-border-dark p-6 bg-card-light dark:bg-card-dark shadow-sm">
                         <p class="text-lg font-semibold">Évolution du Chiffre d'Affaires</p>
                         <div id="chart-evolution" class="flex min-h-[220px] flex-1 flex-col justify-end">
-                            <!-- (SVG inchangé) -->
-                            <svg fill="none" height="100%" preserveAspectRatio="none" viewBox="0 0 472 150" width="100%" xmlns="http://www.w3.org/2000/svg">
-                                <defs>
-                                    <linearGradient id="chartGradient" x1="236" x2="236" y1="1" y2="149" gradientUnits="userSpaceOnUse">
-                                        <stop stop-color="#0088CC" stop-opacity="0.2"/>
-                                        <stop offset="1" stop-color="#0088CC" stop-opacity="0"/>
-                                    </linearGradient>
-                                </defs>
-                                <path d="M0 115C18.1538 115 18.1538 30 36.3077 30C54.4615 30 54.4615 50 72.6154 50C90.7692 50 90.7692 100 108.923 100C127.077 100 127.077 40 145.231 40C163.385 40 163.385 110 181.538 110C199.692 110 199.692 70 217.846 70C236 70 236 55 254.154 55C272.308 55 272.308 130 290.462 130C308.615 130 308.615 140 326.769 140C344.923 140 344.923 10 363.077 10C381.231 10 381.231 90 399.385 90C417.538 90 417.538 135 435.692 135C453.846 135 453.846 35 472 35" stroke="#94A3B8" stroke-dasharray="4 4" stroke-linecap="round" stroke-width="2"/>
-                                <path d="M0 109C18.1538 109 18.1538 21 36.3077 21C54.4615 21 54.4615 41 72.6154 41C90.7692 41 90.7692 93 108.923 93C127.077 93 127.077 33 145.231 33C163.385 33 163.385 101 181.538 101C199.692 101 199.692 61 217.846 61C236 61 236 45 254.154 45C272.308 45 272.308 121 290.462 121C308.615 121 308.615 149 326.769 149C344.923 149 344.923 1 363.077 1C381.231 1 381.231 81 399.385 81C417.538 81 417.538 129 435.692 129C453.846 129 453.846 25 472 25" stroke="#0088CC" stroke-linecap="round" stroke-width="3"/>
-                                <path d="M0 109C18.1538 109 18.1538 21 36.3077 21C54.4615 21 54.4615 41 72.6154 41C90.7692 41 90.7692 93 108.923 93C127.077 93 127.077 33 145.231 33C163.385 33 163.385 101 181.538 101C199.692 101 199.692 61 217.846 61C236 61 236 45 254.154 45C272.308 45 272.308 121 290.462 121C308.615 121 308.615 149 326.769 149C344.923 149 344.923 1 363.077 1C381.231 1 381.231 81 399.385 81C417.538 81 417.538 129 435.692 129C453.846 129 453.846 25 472 25V150H0V109Z" fill="url(#chartGradient)"/>
-                            </svg>
+                            <!-- Emplacement le temps du chargement. La courbe dessinée
+                                 ici auparavant était fictive et passait pour de vraies
+                                 ventes. dashboard.js remplace ce bloc. -->
+                            <div class="flex-1 min-h-[220px] rounded-lg bg-gray-100 dark:bg-gray-800 animate-pulse"></div>
                         </div>
                     </div>
 
                     <div id="chart-repartition" class="lg:col-span-1 flex flex-col gap-4 rounded-xl border border-border-light dark:border-border-dark p-6 bg-card-light dark:bg-card-dark shadow-sm">
                         <p class="text-lg font-semibold">Répartition du CA par Catégorie</p>
-                        <div class="flex-1 flex items-center justify-center min-h-[220px] relative">
-                            <svg class="w-full h-full" viewBox="0 0 36 36">
-                                <circle class="stroke-current text-cyan-400" cx="18" cy="18" r="15.9155" fill="transparent" stroke-width="3.5" stroke-dasharray="35 100" stroke-dashoffset="0"/>
-                                <circle class="stroke-current text-cyan-400" cx="18" cy="18" r="15.9155" fill="transparent" stroke-width="3.5" stroke-dasharray="30 100" stroke-dashoffset="-35"/>
-                                <circle class="stroke-current text-cyan-400" cx="18" cy="18" r="15.9155" fill="transparent" stroke-width="3.5" stroke-dasharray="20 100" stroke-dashoffset="-65"/>
-                                <circle class="stroke-current text-cyan-400" cx="18" cy="18" r="15.9155" fill="transparent" stroke-width="3.5" stroke-dasharray="15 100" stroke-dashoffset="-85"/>
-                            </svg>
-                            <div class="absolute flex flex-col items-center">
-                                <span class="text-xs text-text-light-secondary dark:text-text-dark-secondary">Total</span>
-                                <span class="text-2xl font-bold">12.5M</span>
-                            </div>
+                        <!-- Emplacement le temps du chargement, remplacé par dashboard.js.
+                             L'ancien anneau affichait un total et des catégories fictifs. -->
+                        <div class="flex-1 flex items-center justify-center min-h-[220px]">
+                            <div class="size-40 rounded-full border-[14px] border-gray-100 dark:border-gray-800 animate-pulse"></div>
                         </div>
-                        <div class="grid grid-cols-2 gap-x-4 gap-y-2 pt-2 border-t border-border-light dark:border-border-dark text-sm">
-                            <div class="flex items-center gap-2"><div class="size-2.5 rounded-full bg-cyan-400"></div><span>Plomberie</span></div>
-                            <div class="flex items-center gap-2"><div class="size-2.5 rounded-full bg-cyan-400"></div><span>Matériaux</span></div>
-                            <div class="flex items-center gap-2"><div class="size-2.5 rounded-full bg-cyan-400"></div><span>Outillage</span></div>
-                            <div class="flex items-center gap-2"><div class="size-2.5 rounded-full bg-cyan-400"></div><span>Peinture</span></div>
-                        </div>
+                        <div class="h-4 w-2/3 rounded bg-gray-100 dark:bg-gray-800 animate-pulse"></div>
                     </div>
                 </section>
 

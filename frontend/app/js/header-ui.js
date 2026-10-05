@@ -796,6 +796,8 @@
       if(confirm('Êtes-vous sûr ?')) {
         localStorage.removeItem('authToken');
         localStorage.removeItem('user');
+        // Chiffres mémorisés par le tableau de bord (ogoue-state.js)
+        if (typeof oublierChiffresMemorises === 'function') oublierChiffresMemorises();
         // Redirect to marketing login page (env-aware)
         const MARKETING_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
           ? 'http://localhost:8080'

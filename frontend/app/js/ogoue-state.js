@@ -30,6 +30,21 @@ function getCurrentUser() {
 }
 
 /**
+ * Efface les chiffres que le tableau de bord garde pour s'afficher vite
+ * (clés ogo_tdb_*, voir dashboard.js). À la déconnexion, rien de
+ * l'activité ne doit rester dans le navigateur.
+ */
+function oublierChiffresMemorises() {
+  try {
+    Object.keys(localStorage)
+      .filter((cle) => cle.startsWith("ogo_tdb_"))
+      .forEach((cle) => localStorage.removeItem(cle));
+  } catch (e) {
+    // Stockage inaccessible : il n'y a alors rien à effacer.
+  }
+}
+
+/**
  * Gère les réponses non autorisées (401)
  * Nettoie les données d'auth et redirige vers login
  */
@@ -40,6 +55,7 @@ function handleUnauthorized() {
   localStorage.removeItem("authToken");
   localStorage.removeItem("user");
   localStorage.removeItem("ogo_org");
+  oublierChiffresMemorises();
   const MARKETING_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
     ? 'http://127.0.0.1:8080'
     : 'https://www.ogoue.com';

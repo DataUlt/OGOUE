@@ -586,6 +586,64 @@ function loadAndDisplayChartRepartition(startDateISO, endDateISO, ventes) {
   }
 }
 
+// ========== MÉMOIRE DU DERNIER AFFICHAGE ==========
+// Au rechargement, les chiffres de la dernière visite s'affichent tout de
+// suite, puis sont remplacés par ceux du serveur dès qu'ils arrivent :
+// l'écran n'attend plus le réseau pour montrer quelque chose de juste,
+// à quelques opérations près.
+//
+// La clé porte l'utilisateur et l'organisation : sur un appareil partagé,
+// personne ne voit les chiffres d'un autre. Seul le mois en cours est
+// conservé, réduit aux champs que le tableau de bord lit.
+// La déconnexion efface ces clés (ogoue-state.js, header-ui.js).
+
+const PREFIXE_MEMOIRE = "ogo_tdb_";
+
+function cleMemoire() {
+  try {
+    const user = JSON.parse(localStorage.getItem("user") || "null");
+    if (!user?.id) return null;
+    return `${PREFIXE_MEMOIRE}${user.organizationId || "org"}_${user.id}`;
+  } catch (e) {
+    return null;
+  }
+}
+
+function lireMemoire(debut) {
+  const cle = cleMemoire();
+  if (!cle) return null;
+  try {
+    const memoire = JSON.parse(localStorage.getItem(cle) || "null");
+    // Un autre mois : ces chiffres ne correspondent plus à la période.
+    if (!memoire || memoire.debut !== debut) return null;
+    return memoire;
+  } catch (e) {
+    return null;
+  }
+}
+
+function ecrireMemoire(debut, ventes, depenses) {
+  const cle = cleMemoire();
+  if (!cle) return;
+  try {
+    localStorage.setItem(cle, JSON.stringify({
+      debut,
+      ventes: ventes.map((v) => ({
+        date: v.date || v.sale_date || v.saleDate,
+        montant: v.montant ?? v.amount,
+        description: v.description
+      })),
+      depenses: depenses.map((d) => ({
+        date: d.date || d.expense_date || d.expenseDate,
+        montant: d.montant ?? d.amount
+      }))
+    }));
+  } catch (e) {
+    // Espace du navigateur plein ou stockage interdit : on s'en passe,
+    // la page attendra simplement le serveur comme avant.
+  }
+}
+
 // Charger les KPI et graphiques au lancement de la page + sur changement de filtre
 document.addEventListener("DOMContentLoaded", async function () {
   // Initialiser avec la plage par défaut (mois courant jusqu'à aujourd'hui)
@@ -613,18 +671,30 @@ document.addEventListener("DOMContentLoaded", async function () {
   console.log("✅ window.OGOUE est disponible");
 
   const filterState = getDefaultDateRange();
+  const periodeParDefaut = getDefaultDateRange();
   // Cache de la dernière période chargée, réutilisé par le changement de devise
   // (évite de re-télécharger les ventes/dépenses juste pour changer l'affichage)
   let cachedVentes = [];
   let cachedDepenses = [];
 
+  function afficher(ventes, depenses) {
+    loadAndDisplayKPI(filterState.startDate, filterState.endDate, ventes, depenses);
+    loadAndDisplayChartEvolution(filterState.startDate, filterState.endDate, ventes);
+    loadAndDisplayChartRepartition(filterState.startDate, filterState.endDate, ventes);
+  }
+
+  // Seule la période par défaut (le mois en cours) est mémorisée : c'est
+  // celle qu'on retrouve à chaque rechargement.
+  const surPeriodeParDefaut = () =>
+    filterState.startDate === periodeParDefaut.startDate
+    && filterState.endDate === periodeParDefaut.endDate;
+
   async function refreshDashboard() {
     const { ventes, depenses } = await fetchPeriodData(filterState.startDate, filterState.endDate);
     cachedVentes = ventes;
     cachedDepenses = depenses;
-    loadAndDisplayKPI(filterState.startDate, filterState.endDate, ventes, depenses);
-    loadAndDisplayChartEvolution(filterState.startDate, filterState.endDate, ventes);
-    loadAndDisplayChartRepartition(filterState.startDate, filterState.endDate, ventes);
+    afficher(ventes, depenses);
+    if (surPeriodeParDefaut()) ecrireMemoire(filterState.startDate, ventes, depenses);
   }
 
   // Écoute le filtre de date (événement dispatché par le datepicker du HTML)
@@ -646,6 +716,13 @@ document.addEventListener("DOMContentLoaded", async function () {
     loadAndDisplayChartRepartition(filterState.startDate, filterState.endDate, cachedVentes);
   });
 
-  // Premier affichage (plage par défaut: mois en cours jusqu'à aujourd'hui)
+  // Premier affichage (plage par défaut: mois en cours jusqu'à aujourd'hui).
+  // Les chiffres mémorisés d'abord, s'il y en a, puis ceux du serveur.
+  const memoire = lireMemoire(filterState.startDate);
+  if (memoire) {
+    cachedVentes = memoire.ventes || [];
+    cachedDepenses = memoire.depenses || [];
+    afficher(cachedVentes, cachedDepenses);
+  }
   await refreshDashboard();
 });
