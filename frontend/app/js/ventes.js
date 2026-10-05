@@ -723,10 +723,12 @@
       </td>
       <td class="px-6 py-4">
         ${
-          // Tronqué à l'affichage, complet au survol : le tableau compte
-          // déjà dix colonnes, un commentaire long les écraserait toutes.
+          // Tronqué à l'affichage : le tableau compte déjà dix colonnes,
+          // un commentaire long les écraserait toutes. Un clic l'ouvre en
+          // entier (commentaire-complet.js), le survol ne suffisant pas
+          // sur téléphone.
           vente.note
-            ? `<span class="block max-w-[16rem] truncate" title="${echapperHtml(vente.note)}">${echapperHtml(vente.note)}</span>`
+            ? `<button type="button" class="commentaire-complet block max-w-[16rem] truncate text-left underline decoration-dotted underline-offset-2 hover:text-primary" title="Lire le commentaire" data-commentaire="${echapperHtml(vente.note)}">${echapperHtml(vente.note)}</button>`
             : "-"
         }
       </td>

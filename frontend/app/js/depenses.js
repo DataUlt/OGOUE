@@ -501,10 +501,12 @@
       </td>
       <td class="px-6 py-4">
         ${
-          // Tronqué à l'affichage, complet au survol : un commentaire long
-          // écraserait les autres colonnes.
+          // Tronqué à l'affichage : un commentaire long écraserait les
+          // autres colonnes. Un clic l'ouvre en entier
+          // (commentaire-complet.js), le survol ne suffisant pas sur
+          // téléphone.
           depense.note
-            ? `<span class="block max-w-[16rem] truncate" title="${echapperHtml(depense.note)}">${echapperHtml(depense.note)}</span>`
+            ? `<button type="button" class="commentaire-complet block max-w-[16rem] truncate text-left underline decoration-dotted underline-offset-2 hover:text-primary" title="Lire le commentaire" data-commentaire="${echapperHtml(depense.note)}">${echapperHtml(depense.note)}</button>`
             : "-"
         }
       </td>

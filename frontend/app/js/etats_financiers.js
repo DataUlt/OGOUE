@@ -636,7 +636,9 @@ document.addEventListener("DOMContentLoaded", function () {
     function celluleCommentaire(note) {
         if (!note) return '<td class="px-4 py-3 text-xs">-</td>';
         const t = echapperHtml(note);
-        return `<td class="px-4 py-3 text-xs"><span class="block max-w-[16rem] truncate" title="${t}">${t}</span></td>`;
+        // Un clic ouvre le texte entier (commentaire-complet.js) : le
+        // survol seul ne servait a rien sur telephone.
+        return `<td class="px-4 py-3 text-xs"><button type="button" class="commentaire-complet block max-w-[16rem] truncate text-left underline decoration-dotted underline-offset-2 hover:text-primary" title="Lire le commentaire" data-commentaire="${t}">${t}</button></td>`;
     }
 
     const API_JUSTIF = (['localhost', '127.0.0.1'].some(h => location.hostname.includes(h)))
