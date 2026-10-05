@@ -716,20 +716,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
         let html = `
             <div class="mt-4 overflow-x-auto rounded-lg border border-[#cfe7e3] dark:border-gray-700">
-                <table class="w-full text-sm">
+                <table data-cartes class="w-full text-sm">
                     <thead>
                         <tr class="bg-background-light dark:bg-background-dark border-b border-[#cfe7e3] dark:border-gray-700">
-                            <th class="px-4 py-3 text-left font-semibold">Date</th>
-                            <th class="px-4 py-3 text-left font-semibold">Heure</th>
-                            <th class="px-4 py-3 text-left font-semibold">Produit</th>
-                            <th class="px-4 py-3 text-center font-semibold">Quantité</th>
-                            <th class="px-4 py-3 text-right font-semibold">Montant</th>
-                            <th class="px-4 py-3 text-left font-semibold">Moyen Paiement</th>
-                            <th class="px-4 py-3 text-left font-semibold">Type</th>
+                            <th data-carte="meta" class="px-4 py-3 text-left font-semibold">Date</th>
+                            <th data-carte="meta" class="px-4 py-3 text-left font-semibold">Heure</th>
+                            <th data-carte="titre" class="px-4 py-3 text-left font-semibold">Produit</th>
+                            <th data-carte="meta-lib" data-carte-lib="Qté" class="px-4 py-3 text-center font-semibold">Quantité</th>
+                            <th data-carte="montant" class="px-4 py-3 text-right font-semibold">Montant</th>
+                            <th data-carte="meta" class="px-4 py-3 text-left font-semibold">Moyen Paiement</th>
+                            <th data-carte="meta" class="px-4 py-3 text-left font-semibold">Type</th>
                             <th class="px-4 py-3 text-left font-semibold">Créé par</th>
                             <th class="px-4 py-3 text-left font-semibold">Justificatif</th>
                             <th class="px-4 py-3 text-left font-semibold">Commentaire</th>
-                            ${avecActions ? '<th class="px-4 py-3 text-center font-semibold">Action</th>' : ''}
+                            ${avecActions ? '<th data-carte="actions" class="px-4 py-3 text-center font-semibold">Action</th>' : ''}
                         </tr>
                     </thead>
                     <tbody>
@@ -790,18 +790,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
         let html = `
             <div class="mt-4 overflow-x-auto rounded-lg border border-[#cfe7e3] dark:border-gray-700">
-                <table class="w-full text-sm">
+                <table data-cartes class="w-full text-sm">
                     <thead>
                         <tr class="bg-background-light dark:bg-background-dark border-b border-[#cfe7e3] dark:border-gray-700">
-                            <th class="px-4 py-3 text-left font-semibold">Date</th>
-                            <th class="px-4 py-3 text-left font-semibold">Heure</th>
-                            <th class="px-4 py-3 text-left font-semibold">Catégorie</th>
-                            <th class="px-4 py-3 text-right font-semibold">Montant</th>
-                            <th class="px-4 py-3 text-left font-semibold">Moyen Paiement</th>
+                            <th data-carte="meta" class="px-4 py-3 text-left font-semibold">Date</th>
+                            <th data-carte="meta" class="px-4 py-3 text-left font-semibold">Heure</th>
+                            <th data-carte="titre" class="px-4 py-3 text-left font-semibold">Catégorie</th>
+                            <th data-carte="montant" class="px-4 py-3 text-right font-semibold">Montant</th>
+                            <th data-carte="meta" class="px-4 py-3 text-left font-semibold">Moyen Paiement</th>
                             <th class="px-4 py-3 text-left font-semibold">Créé par</th>
                             <th class="px-4 py-3 text-left font-semibold">Justificatif</th>
                             <th class="px-4 py-3 text-left font-semibold">Commentaire</th>
-                            ${avecActions ? '<th class="px-4 py-3 text-center font-semibold">Action</th>' : ''}
+                            ${avecActions ? '<th data-carte="actions" class="px-4 py-3 text-center font-semibold">Action</th>' : ''}
                         </tr>
                     </thead>
                     <tbody>
@@ -846,6 +846,47 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     /**
+     * Zone ou s'affiche l'apercu genere, placee la ou on l'attend.
+     *
+     * Sur telephone, les cartes sont empilees : un apercu ajoute en bas de
+     * page tombait sous toutes les autres cartes, hors de vue, et rien ne
+     * disait qu'il fallait descendre. Il s'insere donc juste sous la carte
+     * cliquee. Sur grand ecran, les cartes sont cote a cote : l'apercu
+     * reste sous la grille, ou il prend toute la largeur. Dans les deux
+     * cas, l'ecran defile jusqu'a lui.
+     *
+     * La zone garde le meme id, sur lequel s'appuient l'export et
+     * l'impression.
+     *
+     * @param {string} idBouton - bouton « Générer l'aperçu » clique
+     */
+    function conteneurResultats(idBouton) {
+        let zone = document.getElementById("etatFinanciersResults");
+        if (!zone) {
+            zone = document.createElement("div");
+            zone.id = "etatFinanciersResults";
+        }
+
+        const carte = document.getElementById(idBouton)?.closest(".grid > div");
+        const grille = carte?.parentElement;
+        const empilees = grille
+            && getComputedStyle(grille).gridTemplateColumns.trim().split(/\s+/).length === 1;
+
+        if (empilees) {
+            // Dans la grille, l'espacement vient deja de son « gap ».
+            zone.className = "col-span-full scroll-mt-24";
+            carte.after(zone);
+        } else {
+            zone.className = "mt-8 scroll-mt-24";
+            document.querySelector("main .container .max-w-7xl").appendChild(zone);
+        }
+
+        // Apres que l'appelant y a pose son contenu.
+        setTimeout(() => zone.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
+        return zone;
+    }
+
+    /**
      * Bouton "Générer l'aperçu" - Compte de Résultat uniquement
      */
     async function handleGenerateCompte() {
@@ -881,13 +922,7 @@ document.addEventListener("DOMContentLoaded", function () {
             console.log("📈 Compte de Résultat généré:", compteResultat);
 
             // Créer ou récupérer le conteneur de résultat
-            let resultsContainer = document.getElementById("etatFinanciersResults");
-            if (!resultsContainer) {
-                resultsContainer = document.createElement("div");
-                resultsContainer.id = "etatFinanciersResults";
-                resultsContainer.className = "mt-8";
-                document.querySelector("main .container .max-w-7xl").appendChild(resultsContainer);
-            }
+            const resultsContainer = conteneurResultats("generateCompteBtn");
 
             // REMPLACER le contenu (pas ajouter)
             const compteHtml = `<div class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm p-5">
@@ -906,13 +941,7 @@ document.addEventListener("DOMContentLoaded", function () {
         } catch (error) {
             console.error("❌ Erreur lors de la génération du compte de résultat:", error);
             alert("Erreur lors du chargement des données: " + (error && error.message ? error.message : error));
-            let resultsContainer = document.getElementById("etatFinanciersResults");
-            if (!resultsContainer) {
-                resultsContainer = document.createElement("div");
-                resultsContainer.id = "etatFinanciersResults";
-                resultsContainer.className = "mt-8";
-                document.querySelector("main .container .max-w-7xl").appendChild(resultsContainer);
-            }
+            const resultsContainer = conteneurResultats("generateCompteBtn");
             resultsContainer.innerHTML = `<div class="bg-card-light text-red-700 rounded-xl shadow-sm p-5">Erreur: ${error && error.message ? error.message : error}</div>`;
         }
     }
@@ -940,13 +969,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const depensesFiltered = filterByDateRange(depenses);
             const tableauFlux = await generateTableauDeFlux(startDate, endDate);
 
-            let resultsContainer = document.getElementById("etatFinanciersResults");
-            if (!resultsContainer) {
-                resultsContainer = document.createElement("div");
-                resultsContainer.id = "etatFinanciersResults";
-                resultsContainer.className = "mt-8";
-                document.querySelector("main .container .max-w-7xl").appendChild(resultsContainer);
-            }
+            const resultsContainer = conteneurResultats("generateFluxBtn");
 
             const fluxHtml = `<div class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm p-5">
                     <h3 class="text-lg font-bold mb-2">Tableau de Flux de Trésorerie</h3>
@@ -963,13 +986,7 @@ document.addEventListener("DOMContentLoaded", function () {
         } catch (error) {
             console.error("Erreur lors de la génération du tableau de flux:", error);
             alert("Erreur lors du chargement des données: " + (error && error.message ? error.message : error));
-            let resultsContainer = document.getElementById("etatFinanciersResults");
-            if (!resultsContainer) {
-                resultsContainer = document.createElement("div");
-                resultsContainer.id = "etatFinanciersResults";
-                resultsContainer.className = "mt-8";
-                document.querySelector("main .container .max-w-7xl").appendChild(resultsContainer);
-            }
+            const resultsContainer = conteneurResultats("generateFluxBtn");
             resultsContainer.innerHTML = `<div class="bg-card-light text-red-700 rounded-xl shadow-sm p-5">Erreur: ${error && error.message ? error.message : error}</div>`;
         }
     }
@@ -991,13 +1008,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const ventes = await window.OGOUE.getVentesPourPeriode(month, year, plagePeriode());
             const ventesFiltered = filterByDateRange(ventes);
 
-            let resultsContainer = document.getElementById("etatFinanciersResults");
-            if (!resultsContainer) {
-                resultsContainer = document.createElement("div");
-                resultsContainer.id = "etatFinanciersResults";
-                resultsContainer.className = "mt-8";
-                document.querySelector("main .container .max-w-7xl").appendChild(resultsContainer);
-            }
+            const resultsContainer = conteneurResultats("generateVentesBtn");
 
             const ventesHtml = `<div class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm p-5">
                     <h3 class="text-lg font-bold mb-2">Historique des Ventes (${ventesFiltered.length})</h3>
@@ -1022,13 +1033,7 @@ document.addEventListener("DOMContentLoaded", function () {
         } catch (error) {
             console.error("Erreur lors de la génération de l'historique ventes:", error);
             alert("Erreur lors du chargement des données: " + (error && error.message ? error.message : error));
-            let resultsContainer = document.getElementById("etatFinanciersResults");
-            if (!resultsContainer) {
-                resultsContainer = document.createElement("div");
-                resultsContainer.id = "etatFinanciersResults";
-                resultsContainer.className = "mt-8";
-                document.querySelector("main .container .max-w-7xl").appendChild(resultsContainer);
-            }
+            const resultsContainer = conteneurResultats("generateVentesBtn");
             resultsContainer.innerHTML = `<div class="bg-card-light text-red-700 rounded-xl shadow-sm p-5">Erreur: ${error && error.message ? error.message : error}</div>`;
         }
     }
@@ -1050,13 +1055,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const depenses = await window.OGOUE.getDepensesPourPeriode(month, year, plagePeriode());
             const depensesFiltered = filterByDateRange(depenses);
 
-            let resultsContainer = document.getElementById("etatFinanciersResults");
-            if (!resultsContainer) {
-                resultsContainer = document.createElement("div");
-                resultsContainer.id = "etatFinanciersResults";
-                resultsContainer.className = "mt-8";
-                document.querySelector("main .container .max-w-7xl").appendChild(resultsContainer);
-            }
+            const resultsContainer = conteneurResultats("generateDepensesBtn");
 
             const depensesHtml = `<div class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm p-5">
                     <h3 class="text-lg font-bold mb-2">Historique des Dépenses (${depensesFiltered.length})</h3>
@@ -1080,13 +1079,7 @@ document.addEventListener("DOMContentLoaded", function () {
         } catch (error) {
             console.error("Erreur lors de la génération de l'historique dépenses:", error);
             alert("Erreur lors du chargement des données: " + (error && error.message ? error.message : error));
-            let resultsContainer = document.getElementById("etatFinanciersResults");
-            if (!resultsContainer) {
-                resultsContainer = document.createElement("div");
-                resultsContainer.id = "etatFinanciersResults";
-                resultsContainer.className = "mt-8";
-                document.querySelector("main .container .max-w-7xl").appendChild(resultsContainer);
-            }
+            const resultsContainer = conteneurResultats("generateDepensesBtn");
             resultsContainer.innerHTML = `<div class="bg-card-light text-red-700 rounded-xl shadow-sm p-5">Erreur: ${error && error.message ? error.message : error}</div>`;
         }
     }
