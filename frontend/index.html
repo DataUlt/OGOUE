@@ -436,7 +436,7 @@
                changer le numéro, le titre et l'identifiant YouTube (data-video
                et l'image). La vidéo ne se charge qu'au clic : la page reste
                légère, y compris sur une connexion mobile. -->
-          <div class="mt-16 grid grid-cols-1 md:grid-cols-2 gap-10 max-w-5xl mx-auto">
+          <div class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
 
             <article class="flex flex-col">
               <div class="flex items-center gap-3">
@@ -467,6 +467,26 @@
               <div class="mt-5 relative aspect-video overflow-hidden rounded-xl border border-black/10 bg-background-dark shadow-sm" data-video="dtjZvHN8Emo" data-titre="Remplissez votre catalogue">
                 <button type="button" class="group absolute inset-0 w-full h-full" aria-label="Lire la vidéo : Remplissez votre catalogue">
                   <img src="https://i.ytimg.com/vi/dtjZvHN8Emo/hqdefault.jpg" alt="" loading="lazy"
+                       class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]">
+                  <span class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></span>
+                  <span class="absolute inset-0 flex items-center justify-center">
+                    <span class="flex items-center justify-center size-16 rounded-full bg-primary text-white shadow-xl transition-transform group-hover:scale-110">
+                      <span class="material-symbols-outlined text-4xl" style="font-variation-settings:'FILL' 1">play_arrow</span>
+                    </span>
+                  </span>
+                </button>
+              </div>
+            </article>
+
+            <article class="flex flex-col">
+              <div class="flex items-center gap-3">
+                <div class="flex items-center justify-center size-10 shrink-0 rounded-full bg-primary text-background-dark font-bold">3</div>
+                <h3 class="text-lg font-bold">Faites le tour d'OGOUE</h3>
+              </div>
+              <p class="mt-2 text-sm text-text-light-muted">Un parcours de A à Z de la solution, sans entrer dans les détails, pour voir tout ce qu'elle vous apporte.</p>
+              <div class="mt-5 relative aspect-video overflow-hidden rounded-xl border border-black/10 bg-background-dark shadow-sm" data-video="nO7nZ8Mj7gk" data-titre="Faites le tour d'OGOUE">
+                <button type="button" class="group absolute inset-0 w-full h-full" aria-label="Lire la vidéo : Faites le tour d'OGOUE">
+                  <img src="https://i.ytimg.com/vi/nO7nZ8Mj7gk/hqdefault.jpg" alt="" loading="lazy"
                        class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]">
                   <span class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></span>
                   <span class="absolute inset-0 flex items-center justify-center">
