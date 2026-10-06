@@ -78,6 +78,9 @@
         source: /app/module_historique_suppressions
         destination: /app/module_historique_suppressions.html
       - type: rewrite
+        source: /app/module_aide
+        destination: /app/module_aide.html
+      - type: rewrite
         source: /app/module_agent_dashboard
         destination: /app/module_agent_dashboard.html
       - type: rewrite
