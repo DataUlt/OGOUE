@@ -5,43 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catalogue Articles &amp; Services - OGOUE</title>
     <link rel="icon" type="image/png" href="O-removebg-preview.png">
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        primary: "#0088CC",
-                        "background-light": "#f6f8f6",
-                        "background-dark": "#111712",
-                        "card-dark": "#1a2622",
-                        "text-light": "#0a0c0a",
-                        "text-light-muted": "#5c6c60",
-                        secondary: "#1E3A5F",
-                    },
-                    fontFamily: {
-                        display: ["Manrope", "sans-serif"],
-                    },
-                    borderRadius: {
-                        DEFAULT: "1rem",
-                        lg: "2rem",
-                        xl: "3rem",
-                        full: "9999px",
-                    },
-                },
-            },
-        };
-    </script>
-
-    <style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            /* Palette OGOUE v2 — fond blanc, marine du logo, cyan de la vague, orange de la flèche */
+            "primary": "#0B2A5B",
+            "secondary": "#0B2A5B",
+            "ink": "#0B1F3F",
+            "ink2": "#4A5870",
+            "muted": "#7A869A",
+            "soft": "#F4F6F9",
+            "soft2": "#EBEFF4",
+            "line": "#E7EBF0",
+            "hero": "#0B2A5B",
+            "cyan": { DEFAULT: "#14B8D9", ink: "#007C96", soft: "#E2F6FA" },
+            "orange": { DEFAULT: "#F2A04B", ink: "#A65A0F", soft: "#FDF0E1" },
+            /* Noms conservés pour dashboard.js et les modules existants */
+            "background-light": "#FFFFFF",
+            "background-dark": "#0A111F",
+            "card-light": "#FFFFFF",
+            "card-dark": "#121B2D",
+            "text-light-primary": "#0B1F3F",
+            "text-dark-primary": "#F1F4F9",
+            "text-light-secondary": "#4A5870",
+            "text-dark-secondary": "#B2BDCF",
+            "border-light": "#E7EBF0",
+            "border-dark": "#1E2A41",
+            "success": "#007C96",
+            "danger": "#A65A0F"
+          },
+          fontFamily: { display: ["Geist", "system-ui", "sans-serif"] },
+          boxShadow: { soft: "0 1px 2px rgba(11,31,63,.06), 0 4px 14px -6px rgba(11,31,63,.14)" }
         }
-    </style>
+      }
+    };
+  </script>
+  <style>
+    .material-symbols-rounded { font-variation-settings: 'FILL' 0, 'wght' 450, 'GRAD' 0, 'opsz' 24; user-select: none; }
+    .icon-fill { font-variation-settings: 'FILL' 1, 'wght' 450, 'GRAD' 0, 'opsz' 24; }
+    .tabular { font-variant-numeric: tabular-nums; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
+    /* Tableau du jour : assez compact pour que toutes les colonnes restent visibles */
+    @media (min-width: 768px) { .section-jour { margin-left: -2.75rem; margin-right: -2.75rem; } }
+    .tableau-compact table { font-size: 13px; }
+    .tableau-compact th, .tableau-compact td { padding-left: .625rem; padding-right: .625rem; }
+    .tableau-compact .commentaire-complet { max-width: 14rem; }
+    .no-scrollbar { scrollbar-width: none; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
+  </style>
     <!-- Restriction d'acces : un agent est redirige vers ses propres pages -->
     <script src="js/role-guard.js"></script>
 </head>
@@ -80,122 +103,104 @@
             </div>
         </header>
 
-        <main class="max-w-5xl w-full mx-auto px-6 lg:px-8 py-12">
+        <main class="flex-grow pb-14">
+      <div class="mx-auto flex w-full max-w-[1120px] flex-col gap-6 md:gap-8 px-[18px] pt-2 md:px-11 md:pt-10">
 
-            <!-- Bandeau affiche uniquement juste apres la creation du compte -->
-            <div id="onboarding-banner" class="hidden mb-10 rounded-lg bg-primary/10 dark:bg-primary/20 border border-primary/30 p-6">
-                <h2 class="text-xl font-bold mb-2">Bienvenue sur OGOUE</h2>
-                <p class="text-text-light-muted dark:text-gray-400">
-                    Enregistrez ici les articles et services que vous vendez le plus souvent, avec leur prix.
-                    Vous n'aurez plus à les ressaisir : ils vous seront proposés automatiquement lors de chaque
-                    vente, pour vous comme pour vos agents. Vous pourrez modifier cette liste à tout moment.
-                </p>
+        <!-- Bandeau affiché uniquement juste après la création du compte -->
+        <div id="onboarding-banner" class="hidden rounded-[28px] bg-hero p-6 text-white md:p-8">
+          <div class="flex items-center gap-2 text-cyan"><span class="material-symbols-rounded icon-fill text-[22px]">flag</span><span class="text-[13px] font-bold uppercase tracking-[.08em]">Première étape</span></div>
+          <h2 class="mt-3 text-[26px] font-semibold tracking-[-0.03em]">Bienvenue sur OGOUE</h2>
+          <p class="mt-2 max-w-[640px] text-[15.5px] leading-relaxed text-white/80">
+            Enregistrez ici les articles et services que vous vendez le plus souvent, avec leur prix.
+            Vous n'aurez plus à les ressaisir : ils vous seront proposés automatiquement lors de chaque
+            vente, pour vous comme pour vos agents. Vous pourrez modifier cette liste à tout moment.
+          </p>
+        </div>
+
+        <div class="flex items-start gap-4">
+          <!-- Retour à la page précédente (masqué pendant la configuration) -->
+          <button type="button" id="btn-retour" onclick="history.back()" title="Retour"
+                  class="mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-soft text-ink dark:bg-card-dark dark:text-white">
+            <span class="material-symbols-rounded">arrow_back</span>
+          </button>
+          <div>
+            <h1 class="text-[30px] md:text-[40px] font-semibold leading-tight tracking-[-0.04em]">Catalogue articles &amp; services</h1>
+            <p class="mt-1.5 max-w-[620px] text-[15.5px] text-ink2 dark:text-text-dark-secondary">
+              Ces articles alimentent la liste déroulante du formulaire de vente et harmonisent
+              les libellés dans toute votre entreprise.
+            </p>
+          </div>
+        </div>
+
+        <!-- Formulaire d'ajout (identifiants inchangés pour le script de la page) -->
+        <form id="article-form" class="flex flex-col gap-4 rounded-[30px] bg-soft p-5 md:p-7 dark:bg-card-dark">
+          <h2 class="text-[17px] font-semibold tracking-[-0.01em]">Ajouter un article ou un service</h2>
+          <div class="grid grid-cols-1 gap-2.5 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)]">
+            <label class="flex flex-col gap-2">
+              <span class="text-[14px] font-semibold">Nom <span class="text-orange-ink">*</span></span>
+              <input id="article-name" name="name" required maxlength="200" placeholder="Ex: Robe, Coupe de cheveux, ..." class="h-14 w-full rounded-2xl border-0 bg-white px-[18px] text-base text-ink placeholder:text-muted focus:ring-2 focus:ring-cyan dark:bg-background-dark dark:text-white">
+            </label>
+            <div class="flex flex-col gap-2">
+              <span class="text-[14px] font-semibold">Type</span>
+              <select id="article-type" name="type" class="sr-only" tabindex="-1" aria-hidden="true">
+                <option value="produits">Produit</option>
+                <option value="services">Service</option>
+              </select>
+              <div class="flex h-14 gap-1 rounded-2xl bg-white p-[5px] dark:bg-background-dark" data-tuiles="article-type">
+                <button type="button" data-value="produits" class="flex-1 min-w-0 h-[46px] rounded-[12px] text-[14.5px] font-semibold text-ink2 transition data-[on=true]:bg-primary data-[on=true]:text-white dark:data-[on=true]:bg-white dark:data-[on=true]:text-ink">Produit</button>
+                <button type="button" data-value="services" class="flex-1 min-w-0 h-[46px] rounded-[12px] text-[14.5px] font-semibold text-ink2 transition data-[on=true]:bg-primary data-[on=true]:text-white dark:data-[on=true]:bg-white dark:data-[on=true]:text-ink">Service</button>
+              </div>
             </div>
+            <label class="flex flex-col gap-2">
+              <span class="text-[14px] font-semibold">Prix unitaire (FCFA)</span>
+              <input id="article-price" name="unitPrice" type="number" min="0" step="1" value="0" class="h-14 w-full rounded-2xl border-0 bg-white px-[18px] text-base text-ink placeholder:text-muted focus:ring-2 focus:ring-cyan dark:bg-background-dark dark:text-white tabular font-semibold">
+            </label>
+          </div>
 
-            <div class="mb-10 flex items-start gap-4">
-                <!-- Retour a la page precedente (masque pendant la configuration,
-                     ou l'on reviendrait sur la creation de compte) -->
-                <button type="button"
-                        id="btn-retour"
-                        onclick="history.back()"
-                        title="Retour"
-                        class="flex-shrink-0 mt-1 flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 dark:bg-primary/30 text-primary hover:bg-primary/30 dark:hover:bg-primary/40 transition-colors">
-                    <span class="material-symbols-outlined">arrow_back</span>
-                </button>
-                <div>
-                    <h1 class="text-3xl sm:text-4xl font-black leading-tight tracking-[-0.033em] mb-2">
-                        Catalogue articles &amp; services
-                    </h1>
-                    <p class="text-text-light-muted dark:text-gray-400 text-base">
-                        Ces articles alimentent la liste déroulante du formulaire de vente et harmonisent
-                        les libellés dans toute votre entreprise.
-                    </p>
-                </div>
-            </div>
+          <div id="form-message" class="hidden rounded-2xl p-3 text-sm"></div>
 
-            <!-- Formulaire d'ajout -->
-            <form id="article-form" class="bg-white dark:bg-card-dark rounded-lg p-6 shadow-sm mb-8">
-                <h2 class="text-lg font-bold mb-4">Ajouter un article ou un service</h2>
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <p class="flex items-center gap-1.5 text-[13.5px] text-ink2 dark:text-text-dark-secondary"><span class="material-symbols-rounded text-[17px]">auto_awesome</span>Le prix se remplit tout seul quand vous choisissez l'article dans une vente.</p>
+            <button type="submit" id="article-submit" class="flex h-[52px] items-center justify-center gap-2 rounded-full bg-primary px-7 text-[15.5px] font-semibold text-white disabled:opacity-50">
+              <span class="material-symbols-rounded text-[21px]">add</span>Ajouter au catalogue
+            </button>
+          </div>
+        </form>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="flex flex-col">
-                        <label class="text-sm font-medium pb-2" for="article-name">
-                            Nom <span class="text-red-500">*</span>
-                        </label>
-                        <input id="article-name" name="name" required maxlength="200"
-                               class="form-input rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-background-dark text-text-light dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 h-12 px-4 text-base"
-                               placeholder="Ex: Robe, Coupe de cheveux, ...">
-                    </div>
+        <!-- Catalogue (lignes générées par le script de la page) -->
+        <section class="flex flex-col gap-3">
+          <h2 class="text-[20px] font-semibold tracking-[-0.025em]">Votre catalogue <span id="article-count" class="font-normal text-ink2 dark:text-text-dark-secondary"></span></h2>
+          <div id="articles-loading" class="rounded-[22px] bg-soft p-6 text-ink2 dark:bg-card-dark dark:text-text-dark-secondary">Chargement du catalogue...</div>
+          <div id="articles-empty" class="hidden rounded-[22px] bg-soft p-6 text-ink2 dark:bg-card-dark dark:text-text-dark-secondary">
+            Votre catalogue est vide. Ajoutez votre premier article ci-dessus.
+          </div>
+          <div id="articles-filtres" class="hidden mb-4 flex flex-wrap gap-2">
+            <button type="button" data-filtre="tous" class="h-10 rounded-full px-5 text-sm font-semibold">Tous · <span data-compte="tous">0</span></button>
+            <button type="button" data-filtre="produits" class="h-10 rounded-full px-5 text-sm font-semibold">Produits · <span data-compte="produits">0</span></button>
+            <button type="button" data-filtre="services" class="h-10 rounded-full px-5 text-sm font-semibold">Services · <span data-compte="services">0</span></button>
+          </div>
+          <div id="articles-table-wrapper" class="hidden overflow-x-auto rounded-[22px] px-5 shadow-[inset_0_0_0_1px_#E7EBF0] dark:shadow-[inset_0_0_0_1px_#1E2A41]">
+            <table data-cartes class="w-full text-left text-[15px]">
+              <thead>
+                <tr class="border-b border-line text-[12.5px] font-semibold text-ink2 dark:border-border-dark dark:text-text-dark-secondary">
+                  <th data-carte="titre" class="py-3.5 pr-4 font-semibold">Nom</th>
+                  <th data-carte="meta" class="py-3.5 pr-4 font-semibold">Type</th>
+                  <th data-carte="montant" class="py-3.5 pr-4 text-right font-semibold">Prix unitaire</th>
+                  <th data-carte="actions" class="py-3.5 text-right font-semibold">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="articles-tbody"></tbody>
+            </table>
+          </div>
+        </section>
 
-                    <div class="flex flex-col">
-                        <label class="text-sm font-medium pb-2" for="article-type">Type</label>
-                        <select id="article-type" name="type"
-                                class="form-select rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-background-dark text-text-light dark:text-white h-12 px-4 text-base">
-                            <option value="produits">Produit</option>
-                            <option value="services">Service</option>
-                        </select>
-                    </div>
-
-                    <div class="flex flex-col">
-                        <label class="text-sm font-medium pb-2" for="article-price">
-                            Prix unitaire (FCFA)
-                        </label>
-                        <input id="article-price" name="unitPrice" type="number" min="0" step="1" value="0"
-                               class="form-input rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-background-dark text-text-light dark:text-white h-12 px-4 text-base">
-                    </div>
-                </div>
-
-                <div id="form-message" class="hidden mt-4 rounded-md p-3 text-sm"></div>
-
-                <div class="mt-6 flex justify-end">
-                    <button type="submit" id="article-submit"
-                            class="inline-flex items-center justify-center gap-2 rounded-full h-12 px-8 bg-primary text-background-dark text-base font-bold hover:bg-primary/90 transition-colors disabled:opacity-50">
-                        <span class="material-symbols-outlined text-xl">add</span>
-                        <span>Ajouter au catalogue</span>
-                    </button>
-                </div>
-            </form>
-
-            <!-- Liste du catalogue -->
-            <div class="bg-white dark:bg-card-dark rounded-lg p-6 shadow-sm">
-                <h2 class="text-lg font-bold mb-4">
-                    Votre catalogue <span id="article-count" class="text-text-light-muted dark:text-gray-400 font-normal"></span>
-                </h2>
-
-                <div id="articles-loading" class="text-text-light-muted dark:text-gray-400 py-6">Chargement du catalogue...</div>
-
-                <div id="articles-empty" class="hidden text-text-light-muted dark:text-gray-400 py-6">
-                    Votre catalogue est vide. Ajoutez votre premier article ci-dessus.
-                </div>
-
-                <div id="articles-table-wrapper" class="hidden overflow-x-auto">
-                    <table data-cartes class="w-full text-left">
-                        <thead>
-                            <tr class="border-b border-gray-200 dark:border-gray-700 text-sm text-text-light-muted dark:text-gray-400">
-                                <th data-carte="titre" class="py-3 pr-4 font-medium">Nom</th>
-                                <th data-carte="meta" class="py-3 pr-4 font-medium">Type</th>
-                                <th data-carte="montant" class="py-3 pr-4 font-medium text-right">Prix unitaire</th>
-                                <th data-carte="actions" class="py-3 font-medium text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="articles-tbody"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Bouton de fin d'etape, affiche uniquement en configuration -->
-            <div id="onboarding-actions" class="hidden mt-10 flex flex-col sm:flex-row justify-end gap-4">
-                <a href="module_tableau_bord.html"
-                   class="inline-flex items-center justify-center rounded-full h-12 px-8 bg-gray-200 dark:bg-gray-700 text-text-light dark:text-white text-base font-bold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                    Plus tard
-                </a>
-                <a href="module_tableau_bord.html"
-                   class="inline-flex items-center justify-center rounded-full h-12 px-8 bg-primary text-background-dark text-base font-bold hover:bg-primary/90 transition-colors">
-                    Terminer et accéder à l'application
-                </a>
-            </div>
-
-        </main>
+        <!-- Bouton de fin d'étape, affiché uniquement en configuration -->
+        <div id="onboarding-actions" class="hidden flex flex-col-reverse gap-2.5 sm:flex-row sm:justify-end">
+          <a href="module_tableau_bord.html" class="flex h-[56px] items-center justify-center rounded-full bg-soft px-7 text-[15.5px] font-semibold dark:bg-card-dark">Plus tard</a>
+          <a href="module_tableau_bord.html" class="flex h-[56px] items-center justify-center rounded-full bg-primary px-7 text-[15.5px] font-semibold text-white shadow-[0_12px_28px_-14px_rgba(11,42,91,.6)]">Terminer et accéder à l'application</a>
+        </div>
+      </div>
+    </main>
     </div>
 
     <script src="js/ogoue-state.js"></script>
@@ -274,7 +279,46 @@
                 messageBox.classList.add("hidden");
             }
 
+            let dernierArticles = [];
+            let filtreArticles = "tous";
+
+            function estService(a) {
+                return a.type === "services";
+            }
+
+            function filtrerArticles(articles) {
+                if (filtreArticles === "produits") return articles.filter(function (a) { return !estService(a); });
+                if (filtreArticles === "services") return articles.filter(estService);
+                return articles;
+            }
+
+            function renderFiltres(articles) {
+                const barre = document.getElementById("articles-filtres");
+                barre.classList.toggle("hidden", articles.length === 0);
+                const compte = {
+                    tous: articles.length,
+                    produits: articles.filter(function (a) { return !estService(a); }).length,
+                    services: articles.filter(estService).length
+                };
+                barre.querySelectorAll("[data-filtre]").forEach(function (b) {
+                    const actif = b.dataset.filtre === filtreArticles;
+                    b.className = "h-10 rounded-full px-5 text-sm font-semibold " +
+                        (actif ? "bg-primary text-white" : "bg-soft text-ink dark:bg-card-dark dark:text-text-dark-primary");
+                    b.querySelector("[data-compte]").textContent = compte[b.dataset.filtre];
+                });
+            }
+
+            document.querySelectorAll("#articles-filtres [data-filtre]").forEach(function (b) {
+                b.addEventListener("click", function () {
+                    filtreArticles = b.dataset.filtre;
+                    render(dernierArticles);
+                });
+            });
+
             function render(articles) {
+                dernierArticles = articles;
+                renderFiltres(articles);
+                const visibles = filtrerArticles(articles);
                 loadingEl.classList.add("hidden");
                 countEl.textContent = articles.length ? `(${articles.length})` : "";
 
@@ -288,9 +332,14 @@
                 tableWrapper.classList.remove("hidden");
                 tbody.innerHTML = "";
 
-                articles.forEach(function (a) {
+                if (visibles.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="py-6 text-center text-ink2">Aucun article dans cette catégorie.</td></tr>';
+                    return;
+                }
+
+                visibles.forEach(function (a) {
                     const tr = document.createElement("tr");
-                    tr.className = "border-b border-gray-100 dark:border-gray-700";
+                    tr.className = "border-b border-line dark:border-border-dark";
 
                     const tdName = document.createElement("td");
                     tdName.className = "py-3 pr-4 font-medium";
@@ -309,7 +358,7 @@
 
                     const editBtn = document.createElement("button");
                     editBtn.type = "button";
-                    editBtn.className = "text-primary hover:underline text-sm font-medium mr-4";
+                    editBtn.className = "text-cyan-ink hover:underline text-sm font-semibold mr-4";
                     editBtn.textContent = "Modifier le prix";
                     editBtn.addEventListener("click", function () { onEditPrice(a); });
 
@@ -406,5 +455,25 @@
             refresh();
         })();
     </script>
+<script>
+  (function () {
+    document.querySelectorAll('[data-tuiles]').forEach(group => {
+      const sel = document.getElementById(group.dataset.tuiles);
+      if (!sel) return;
+      const sync = () => group.querySelectorAll('[data-value]').forEach(b => { b.dataset.on = String(b.dataset.value === sel.value); });
+      group.addEventListener('click', ev => {
+        const b = ev.target.closest('[data-value]');
+        if (!b) return;
+        sel.value = b.dataset.value;
+        sel.dispatchEvent(new Event('change', { bubbles: true }));
+        sync();
+      });
+      sel.addEventListener('change', sync);
+      sel.form && sel.form.addEventListener('reset', () => setTimeout(sync));
+      setInterval(sync, 400);
+      sync();
+    });
+  })();
+</script>
 </body>
 </html>

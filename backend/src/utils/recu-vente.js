@@ -1,4 +1,6 @@
 import PDFDocument from "pdfkit";
+import fs from "fs";
+import { fileURLToPath } from "url";
 import { supabase } from "../db/supabase.js";
 
 // ============================================================
@@ -111,6 +113,13 @@ export function composerRecuPdf({ numero, vente, organisation, emisPar }) {
     // L'entreprise émettrice à gauche, le client à droite, comme sur une
     // facture. Les deux colonnes partent de la même hauteur ; on reprend
     // ensuite le fil sous la plus longue des deux.
+    // Logo OGOUE en haut du reçu. Si le fichier manque, le reçu part sans logo.
+    const cheminLogo = fileURLToPath(new URL("../../assets/logo-ogoue.png", import.meta.url));
+    if (fs.existsSync(cheminLogo)) {
+      doc.image(cheminLogo, gauche, doc.y, { fit: [130, 46] });
+      doc.y = doc.y + 56;
+    }
+
     const yEnTete = doc.y;
     // La colonne client est la plus large des deux : ses lignes sont de
     // loin les plus longues (nom complet, adresse e-mail), là où

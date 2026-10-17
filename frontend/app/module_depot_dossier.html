@@ -6,14 +6,12 @@
   <title>Nos partenaires - OGOUE</title>
   <link rel="icon" type="image/png" href="O-removebg-preview.png">
 
-  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-
-  <!-- Fonts & icons -->
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 
   <script>
     tailwind.config = {
@@ -21,29 +19,61 @@
       theme: {
         extend: {
           colors: {
-            "primary": "#0088CC",
-            "background-light": "#f6f8f6",
-            "background-dark": "#111712",
-            "text-light-primary": "#0a0c0a",
-            "text-light-secondary": "#4c9a8d",
+            /* Palette OGOUE v2 — fond blanc, marine du logo, cyan de la vague, orange de la flèche */
+            "primary": "#0B2A5B",
+            "secondary": "#0B2A5B",
+            "ink": "#0B1F3F",
+            "ink2": "#4A5870",
+            "muted": "#7A869A",
+            "soft": "#F4F6F9",
+            "soft2": "#EBEFF4",
+            "line": "#E7EBF0",
+            "hero": "#0B2A5B",
+            "cyan": { DEFAULT: "#14B8D9", ink: "#007C96", soft: "#E2F6FA" },
+            "orange": { DEFAULT: "#F2A04B", ink: "#A65A0F", soft: "#FDF0E1" },
+            /* Noms conservés pour dashboard.js et les modules existants */
+            "background-light": "#FFFFFF",
+            "background-dark": "#0A111F",
+            "card-light": "#FFFFFF",
+            "card-dark": "#121B2D",
+            "text-light-primary": "#0B1F3F",
+            "text-dark-primary": "#F1F4F9",
+            "text-light-secondary": "#4A5870",
+            "text-dark-secondary": "#B2BDCF",
+            "border-light": "#E7EBF0",
+            "border-dark": "#1E2A41",
+            "success": "#007C96",
+            "danger": "#A65A0F"
           },
-          fontFamily: { "display": ["Manrope", "sans-serif"] },
-          borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
-          boxShadow: {
-            "soft": "0 10px 30px rgba(13,27,25,.08)",
-            "lift": "0 14px 40px rgba(13,27,25,.12)"
-          }
-        },
-      },
-    }
+          fontFamily: { display: ["Geist", "system-ui", "sans-serif"] },
+          boxShadow: { soft: "0 1px 2px rgba(11,31,63,.06), 0 4px 14px -6px rgba(11,31,63,.14)" }
+        }
+      }
+    };
   </script>
-
   <style>
-    .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 500,'GRAD' 0,'opsz' 24; }
+    .material-symbols-rounded { font-variation-settings: 'FILL' 0, 'wght' 450, 'GRAD' 0, 'opsz' 24; user-select: none; }
+    .icon-fill { font-variation-settings: 'FILL' 1, 'wght' 450, 'GRAD' 0, 'opsz' 24; }
+    .tabular { font-variant-numeric: tabular-nums; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
+    /* Tableau du jour : assez compact pour que toutes les colonnes restent visibles */
+    @media (min-width: 768px) { .section-jour { margin-left: -2.75rem; margin-right: -2.75rem; } }
+    .tableau-compact table { font-size: 13px; }
+    .tableau-compact th, .tableau-compact td { padding-left: .625rem; padding-right: .625rem; }
+    .tableau-compact .commentaire-complet { max-width: 14rem; }
+    .no-scrollbar { scrollbar-width: none; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
+  </style>
+  <style>
     .fade-in { animation: fade .18s ease-out both; }
     @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    /* Tableau : assez compact pour que toutes les colonnes restent visibles */
+    @media (min-width: 768px) { .section-jour { margin-left: -2.75rem; margin-right: -2.75rem; } }
+    .tableau-compact table { font-size: 13px; }
+    .tableau-compact th, .tableau-compact td { padding-left: .625rem; padding-right: .625rem; }
   </style>
-
   <!-- Restriction d'acces : un agent est redirige vers ses propres pages -->
   <script src="js/role-guard.js"></script>
 </head>
@@ -93,115 +123,103 @@
   </header>
   <!-- ===== FIN HEADER ===== -->
 
-  <main class="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <main class="flex-grow pb-14">
+    <div class="mx-auto flex w-full max-w-[1120px] flex-col gap-6 md:gap-8 px-[18px] pt-2 md:px-11 md:pt-10">
 
-    <div class="flex flex-col gap-2 mb-6">
-      <h1 class="text-3xl sm:text-4xl font-black leading-tight tracking-[-0.033em] dark:text-white">
-        Financement
-      </h1>
-      <p class="text-gray-600 dark:text-gray-400">
-        Vous cherchez un financement pour votre activité ?
-      </p>
-      <p class="text-gray-600 dark:text-gray-400">
-        Découvrez les offres de financement disponibles sur OGOUE et préparez votre demande.
-      </p>
-    </div>
-
-    <!-- ONGLETS -->
-    <div class="border-b border-gray-200 dark:border-gray-700 mb-8">
-      <nav class="flex gap-5 sm:gap-8 -mb-px overflow-x-auto">
-        <a href="module_scoring"
-           class="flex items-center gap-2 border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 pb-3 pt-4 px-2 whitespace-nowrap">
-          <span class="text-sm font-bold tracking-[0.015em]">Score de traçabilité</span>
-        </a>
-        <a href="module_depot_dossier"
-           class="flex items-center gap-2 border-b-[3px] border-b-primary text-[#0a0c0a] dark:text-white pb-3 pt-4 px-2 whitespace-nowrap">
-          <span class="text-sm font-bold tracking-[0.015em]">Nos partenaires</span>
-        </a>
-      </nav>
-    </div>
-
-    <!-- Bandeau d'alerte global -->
-    <div id="alerte" class="hidden mb-6 rounded-xl px-4 py-3 text-sm"></div>
-
-    <!-- ══════════ ÉTAPE 1 : CHOISIR L'INSTITUTION ══════════ -->
-    <section id="sectionInstitutions">
-      <div class="mb-6">
-        <h2 class="text-2xl font-bold dark:text-white">Les offres disponibles</h2>
-        <p class="text-gray-600 dark:text-gray-400 mt-1">
-          Trouvez le financement adapté à votre activité.
-        </p>
+      <div>
+        <h1 class="text-[30px] md:text-[40px] font-semibold leading-tight tracking-[-0.04em]">Financement</h1>
+        <p class="mt-1.5 text-[15.5px] text-ink2">Vous cherchez un financement pour votre activité ? Découvrez les offres de financement disponibles sur OGOUE et préparez votre demande.</p>
       </div>
 
-      <div class="mb-6">
-        <div class="flex items-center gap-3 bg-white dark:bg-gray-800/40 rounded-full border border-[#e8ede8] dark:border-gray-700 px-5 py-3 shadow-soft">
-          <span class="material-symbols-outlined text-gray-400">search</span>
+      <!-- ONGLETS -->
+      <div class="border-b border-line">
+        <nav class="flex gap-5 sm:gap-8 -mb-px overflow-x-auto">
+          <a href="module_scoring"
+             class="flex items-center gap-2 border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 pb-3 pt-4 px-2 whitespace-nowrap">
+            <span class="text-sm font-bold tracking-[0.015em]">Score de traçabilité</span>
+          </a>
+          <a href="module_depot_dossier"
+             class="flex items-center gap-2 border-b-[3px] border-b-primary text-[#0a0c0a] dark:text-white pb-3 pt-4 px-2 whitespace-nowrap">
+            <span class="text-sm font-bold tracking-[0.015em]">Nos partenaires</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Bandeau d'alerte global -->
+      <div id="alerte" class="hidden rounded-xl px-4 py-3 text-sm"></div>
+
+      <!-- ══════════ ÉTAPE 1 : CHOISIR L'INSTITUTION ══════════ -->
+      <section id="sectionInstitutions" class="flex flex-col gap-5">
+        <div>
+          <h2 class="text-[24px] md:text-[26px] font-semibold tracking-[-0.03em]">Les offres disponibles</h2>
+          <p class="mt-1 text-[15px] text-ink2">Trouvez le financement adapté à votre activité.</p>
+        </div>
+
+        <div class="flex items-center gap-3 rounded-full bg-soft px-5 py-3">
+          <span class="material-symbols-rounded text-muted">search</span>
           <input id="rechercheInstitution" type="text" placeholder="Rechercher une institution"
                  aria-label="Rechercher une institution"
-                 class="flex-1 bg-transparent border-0 p-0 outline-0 focus:ring-0 text-[#0a0c0a] dark:text-gray-200 placeholder:text-gray-400"/>
+                 class="flex-1 bg-transparent border-0 p-0 outline-0 focus:ring-0 text-[15px] text-ink placeholder:text-muted"/>
         </div>
-      </div>
 
-      <div id="institutionsChargement" class="text-gray-500 dark:text-gray-400 py-8 text-center">
-        Chargement des institutions…
-      </div>
+        <div id="institutionsChargement" class="py-8 text-center text-ink2">
+          Chargement des institutions…
+        </div>
 
-      <div id="institutionsVide" class="hidden rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 p-10 text-center">
-        <span class="material-symbols-outlined text-4xl text-gray-400">account_balance</span>
-        <p class="mt-3 font-semibold dark:text-white">Aucune offre de financement disponible pour le moment</p>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-          Les premières offres de nos partenaires seront bientôt disponibles sur OGOUE.
-        </p>
-        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-          En attendant, continuez à utiliser OGOUE pour mieux organiser vos ventes,
-          vos dépenses et vos comptes.
-        </p>
-      </div>
+        <div id="institutionsVide" class="hidden rounded-[26px] bg-soft p-10 text-center">
+          <span class="material-symbols-rounded text-4xl text-muted">account_balance</span>
+          <p class="mt-3 font-semibold text-ink">Aucune offre de financement disponible pour le moment</p>
+          <p class="mt-1 text-sm text-ink2 max-w-md mx-auto">
+            Les premières offres de nos partenaires seront bientôt disponibles sur OGOUE.
+          </p>
+          <p class="mt-2 text-sm text-ink2 max-w-md mx-auto">
+            En attendant, continuez à utiliser OGOUE pour mieux organiser vos ventes,
+            vos dépenses et vos comptes.
+          </p>
+        </div>
 
-      <div id="institutionsGrille" class="flex flex-wrap gap-6 justify-center"></div>
-    </section>
+        <div id="institutionsGrille" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
+      </section>
 
-    <!-- ══════════ ÉTAPE 2 : CHOISIR LE PRODUIT ══════════ -->
-    <section id="sectionProduits" class="hidden fade-in">
-      <button id="btnRetourInstitutions" type="button"
-              class="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline">
-        <span class="material-symbols-outlined text-base">arrow_back</span>
-        Changer d'institution
-      </button>
+      <!-- ══════════ ÉTAPE 2 : CHOISIR LE PRODUIT ══════════ -->
+      <section id="sectionProduits" class="hidden fade-in flex flex-col gap-5">
+        <button id="btnRetourInstitutions" type="button"
+                class="inline-flex items-center gap-1 self-start text-sm font-semibold text-cyan-ink hover:underline">
+          <span class="material-symbols-rounded text-base">arrow_back</span>
+          Changer d'institution
+        </button>
 
-      <div id="enteteInstitution" class="mb-6"></div>
+        <div id="enteteInstitution"></div>
 
-      <div class="mb-6">
-        <div class="flex items-center gap-3 bg-white dark:bg-gray-800/40 rounded-full border border-[#e8ede8] dark:border-gray-700 px-5 py-3 shadow-soft">
+        <div class="flex items-center gap-3 rounded-full bg-soft px-5 py-3">
           <input id="rechercheProduit" type="text" placeholder="Rechercher un produit…"
                  aria-label="Rechercher un produit"
-                 class="flex-1 bg-transparent border-0 p-0 outline-0 focus:ring-0 text-[#0a0c0a] dark:text-gray-200 placeholder:text-gray-400"/>
-          <span class="material-symbols-outlined text-gray-400">search</span>
+                 class="flex-1 bg-transparent border-0 p-0 outline-0 focus:ring-0 text-[15px] text-ink placeholder:text-muted"/>
+          <span class="material-symbols-rounded text-muted">search</span>
         </div>
-      </div>
 
-      <div class="rounded-2xl bg-white dark:bg-gray-800/40 border border-[#e8ede8] dark:border-gray-700 shadow-soft overflow-hidden">
-        <div class="overflow-x-auto">
-          <table data-cartes class="w-full text-left border-collapse">
-            <thead class="bg-background-light dark:bg-gray-900/40">
-              <tr>
-                <th data-carte="titre" class="px-4 py-3 text-xs font-semibold dark:text-gray-200">Nom du Produit</th>
-                <th class="px-4 py-3 text-xs font-semibold dark:text-gray-200">Cible</th>
-                <th class="px-4 py-3 text-xs font-semibold dark:text-gray-200">Objectif</th>
-                <th class="px-4 py-3 text-xs font-semibold dark:text-gray-200">Montants</th>
-                <th class="px-4 py-3 text-xs font-semibold dark:text-gray-200">Durée</th>
-                <th class="px-4 py-3 text-xs font-semibold dark:text-gray-200">Taux d'Intérêt</th>
-                <th class="px-4 py-3 text-xs font-semibold dark:text-gray-200">Typologie</th>
-                <th class="px-4 py-3 text-xs font-semibold dark:text-gray-200">Documents Requis</th>
-              </tr>
-            </thead>
-            <tbody id="corpsTableProduits" class="divide-y divide-[#e8ede8] dark:divide-gray-700"></tbody>
-          </table>
+        <div class="section-jour">
+          <div class="tableau-compact overflow-x-auto rounded-[22px] shadow-[inset_0_0_0_1px_#E7EBF0]">
+            <table data-cartes class="w-full text-left border-collapse">
+              <thead class="bg-soft text-[12.5px] font-semibold text-ink2">
+                <tr>
+                  <th data-carte="titre" class="px-5 py-3.5">Nom du Produit</th>
+                  <th class="px-5 py-3.5">Cible</th>
+                  <th class="px-5 py-3.5">Objectif</th>
+                  <th class="px-5 py-3.5">Montants</th>
+                  <th class="px-5 py-3.5">Durée</th>
+                  <th class="px-5 py-3.5">Taux d'Intérêt</th>
+                  <th class="px-5 py-3.5">Typologie</th>
+                  <th class="px-5 py-3.5">Documents Requis</th>
+                </tr>
+              </thead>
+              <tbody id="corpsTableProduits" class="divide-y divide-line"></tbody>
+            </table>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-
+    </div>
   </main>
 </div>
 
@@ -310,26 +328,26 @@ function afficherInstitutions() {
     const type = (institution.type || "").toLowerCase() === "banque" ? "Banque" : "Microfinance";
 
     return `
-      <div class="w-72 rounded-lg border border-black/10 dark:border-gray-700 bg-white dark:bg-gray-800/40 shadow-sm overflow-hidden hover:shadow-lg transition-shadow">
-        <div class="h-32 flex items-center justify-center bg-slate-50 dark:bg-gray-900/40">
+      <div class="rounded-[26px] bg-soft overflow-hidden">
+        <div class="h-32 flex items-center justify-center bg-white">
           ${institution.logoUrl
             ? `<img src="${echapper(institution.logoUrl)}" alt="${echapper(institution.name)}" class="max-h-24 max-w-[75%] object-contain" onerror="this.style.display='none'"/>`
             : '<div class="text-slate-400 text-sm">Logo non disponible</div>'}
         </div>
         <div class="p-4 space-y-2">
           <div class="flex items-start justify-between gap-2">
-            <h3 class="text-base font-bold text-slate-900 dark:text-white">${echapper(institution.name)}</h3>
+            <h3 class="text-[17px] font-semibold text-ink">${echapper(institution.name)}</h3>
           </div>
-          <p class="text-xs font-semibold text-[#006699]">${type}</p>
+          <p class="text-xs font-semibold text-cyan-ink">${type}</p>
           ${institution.mission ? `<p class="text-xs text-slate-600 dark:text-gray-400 line-clamp-2">${echapper(institution.mission)}</p>` : ""}
           <p class="text-xs text-slate-500 dark:text-gray-400">
             ${institution.nbProduits} crédit${institution.nbProduits > 1 ? "s" : ""} proposé${institution.nbProduits > 1 ? "s" : ""}
           </p>
           ${institution.website
-            ? `<a href="${echapper(institution.website)}" target="_blank" rel="noopener" class="inline-block text-xs font-medium text-[#006699] hover:underline">Visiter le site</a>`
+            ? `<a href="${echapper(institution.website)}" target="_blank" rel="noopener" class="inline-block text-xs font-medium text-cyan-ink hover:underline">Visiter le site</a>`
             : ""}
           <button type="button" data-institution="${institution.id}"
-                  class="block w-full mt-4 rounded-lg bg-[#0088CC] py-2 text-xs font-bold text-white hover:bg-[#006699] transition text-center">
+                  class="block w-full mt-4 rounded-full bg-primary py-2.5 text-sm font-semibold text-white hover:opacity-90 transition text-center">
             Sélectionner
           </button>
         </div>
@@ -356,8 +374,8 @@ function ouvrirInstitution(institutionId) {
 
   const type = (institutionChoisie.type || "").toLowerCase() === "banque" ? "Banque" : "Microfinance";
   document.getElementById("enteteInstitution").innerHTML = `
-    <h2 class="text-2xl font-bold dark:text-white">${echapper(institutionChoisie.name)}</h2>
-    <p class="text-sm font-semibold text-[#006699]">${type}</p>
+    <h2 class="text-[24px] font-semibold tracking-[-0.03em]">${echapper(institutionChoisie.name)}</h2>
+    <p class="text-sm font-semibold text-cyan-ink">${type}</p>
     ${institutionChoisie.mission ? `<p class="text-sm text-gray-600 dark:text-gray-400 mt-1">${echapper(institutionChoisie.mission)}</p>` : ""}
   `;
 

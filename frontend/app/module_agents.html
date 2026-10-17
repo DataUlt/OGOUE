@@ -6,43 +6,66 @@
     <!-- Encoding: UTF-8 with special French accents support -->
     <title>Gestion des Agents - OGOUE</title>
     <link rel="icon" type="image/png" href="O-removebg-preview.png">
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        primary: "#0088CC",
-                        "background-light": "#f6f8f6",
-                        "background-dark": "#111712",
-                        "card-dark": "#1a2622",
-                        "text-light": "#0a0c0a",
-                        "text-light-muted": "#5c6c60",
-                        secondary: "#1E3A5F",
-                    },
-                    fontFamily: {
-                        display: ["Manrope", "sans-serif"],
-                    },
-                    borderRadius: {
-                        DEFAULT: "1rem",
-                        lg: "2rem",
-                        xl: "3rem",
-                        full: "9999px",
-                    },
-                },
-            },
-        };
-    </script>
-
-    <style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            /* Palette OGOUE v2 — fond blanc, marine du logo, cyan de la vague, orange de la flèche */
+            "primary": "#0B2A5B",
+            "secondary": "#0B2A5B",
+            "ink": "#0B1F3F",
+            "ink2": "#4A5870",
+            "muted": "#7A869A",
+            "soft": "#F4F6F9",
+            "soft2": "#EBEFF4",
+            "line": "#E7EBF0",
+            "hero": "#0B2A5B",
+            "cyan": { DEFAULT: "#14B8D9", ink: "#007C96", soft: "#E2F6FA" },
+            "orange": { DEFAULT: "#F2A04B", ink: "#A65A0F", soft: "#FDF0E1" },
+            /* Noms conservés pour dashboard.js et les modules existants */
+            "background-light": "#FFFFFF",
+            "background-dark": "#0A111F",
+            "card-light": "#FFFFFF",
+            "card-dark": "#121B2D",
+            "text-light-primary": "#0B1F3F",
+            "text-dark-primary": "#F1F4F9",
+            "text-light-secondary": "#4A5870",
+            "text-dark-secondary": "#B2BDCF",
+            "border-light": "#E7EBF0",
+            "border-dark": "#1E2A41",
+            "success": "#007C96",
+            "danger": "#A65A0F"
+          },
+          fontFamily: { display: ["Geist", "system-ui", "sans-serif"] },
+          boxShadow: { soft: "0 1px 2px rgba(11,31,63,.06), 0 4px 14px -6px rgba(11,31,63,.14)" }
         }
-    </style>
+      }
+    };
+  </script>
+  <style>
+    .material-symbols-rounded { font-variation-settings: 'FILL' 0, 'wght' 450, 'GRAD' 0, 'opsz' 24; user-select: none; }
+    .icon-fill { font-variation-settings: 'FILL' 1, 'wght' 450, 'GRAD' 0, 'opsz' 24; }
+    .tabular { font-variant-numeric: tabular-nums; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
+    /* Tableau du jour : assez compact pour que toutes les colonnes restent visibles */
+    @media (min-width: 768px) { .section-jour { margin-left: -2.75rem; margin-right: -2.75rem; } }
+    .tableau-compact table { font-size: 13px; }
+    .tableau-compact th, .tableau-compact td { padding-left: .625rem; padding-right: .625rem; }
+    .tableau-compact .commentaire-complet { max-width: 14rem; }
+    .no-scrollbar { scrollbar-width: none; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
+  </style>
     <!-- Restriction d'acces : un agent est redirige vers ses propres pages -->
     <script src="js/role-guard.js"></script>
 </head>
@@ -90,66 +113,49 @@
             </div>
         </header>
 
-        <!-- MAIN CONTENT -->
-        <div class="max-w-7xl mx-auto px-6 lg:px-8 py-12">
-            <!-- Titre page -->
-            <div class="mb-12 flex items-center gap-4">
-                <button 
-                    onclick="history.back()" 
-                    class="flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 text-primary hover:bg-primary/30 transition-colors"
-                    title="Retour"
-                >
-                    <span class="material-symbols-outlined">arrow_back</span>
-                </button>
-                <div>
-                    <h1 class="text-3xl md:text-4xl font-black tracking-tight text-text-light dark:text-white mb-2">Gestion des Agents</h1>
-                    <p class="text-text-light-muted dark:text-gray-400">Cr&eacute;ez et g&eacute;rez les acc&egrave;s des agents &agrave; votre organisation</p>
-                </div>
-            </div>
+        <main class="flex-grow pb-14">
+      <div class="mx-auto flex w-full max-w-[1120px] flex-col gap-6 md:gap-8 px-[18px] pt-2 md:px-11 md:pt-10">
 
-            <!-- Section de cr&eacute;ation -->
-            <div class="bg-white dark:bg-card-dark rounded-xl shadow-sm p-8 mb-8">
-                <h2 class="text-xl font-bold text-text-light dark:text-white mb-6">Cr&eacute;er un nouvel agent</h2>
-
-                <form id="agentForm" class="space-y-4">
-                    <div>
-                        <label for="firstName" class="block text-sm font-semibold text-text-light dark:text-gray-200 mb-2">
-                            Pr&eacute;nom de l'agent
-                        </label>
-                        <input
-                            type="text"
-                            id="firstName"
-                            name="firstName"
-                            placeholder="Ex: Jean"
-                            class="w-full px-4 py-3 border border-black/10 dark:border-gray-600 rounded-lg bg-white dark:bg-background-dark text-text-light dark:text-white placeholder-text-light-muted/60 dark:placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
-                            required
-                        >
-                    </div>
-                    
-                    <button 
-                        type="submit" 
-                        class="w-full py-3 px-4 rounded-lg bg-primary text-background-light font-bold text-sm hover:bg-text-light transition-colors"
-                    >
-                        <span class="material-symbols-outlined inline mr-2" style="font-size: 18px; vertical-align: middle;">add</span>
-                        Cr&eacute;er l'agent
-                    </button>
-                </form>
-            </div>
-
-            <!-- Section de liste des agents -->
-            <div class="bg-white dark:bg-card-dark rounded-xl shadow-sm overflow-hidden">
-                <div class="p-8 border-b border-black/10 dark:border-gray-700">
-                    <h2 class="text-xl font-bold text-text-light dark:text-white">Mes agents</h2>
-                </div>
-
-                <div id="agentsList" class="divide-y divide-black/10 dark:divide-gray-700">
-                    <!-- Les agents seront affich&eacute;s ici -->
-                    <div class="p-8 text-center text-text-light-muted dark:text-gray-400">
-                        Chargement des agents...
-                    </div>
-                </div>
-            </div>
+        <div class="flex items-start gap-4">
+          <button type="button" onclick="history.back()" title="Retour" class="mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-soft text-ink dark:bg-card-dark dark:text-white">
+            <span class="material-symbols-rounded">arrow_back</span>
+          </button>
+          <div>
+            <h1 class="text-[30px] md:text-[40px] font-semibold leading-tight tracking-[-0.04em]">Gestion des Agents</h1>
+            <p class="mt-1.5 text-[15.5px] text-ink2 dark:text-text-dark-secondary">Créez et gérez les accès des agents à votre organisation</p>
+          </div>
         </div>
+
+        <div class="flex flex-col gap-6">
+
+          <!-- Liste (cartes générées par le script de la page) -->
+          <section class="order-2 flex flex-col gap-3">
+            <h2 class="text-[20px] font-semibold tracking-[-0.025em]">Mes agents</h2>
+            <div id="agentsList" class="flex flex-col gap-3">
+              <div class="rounded-[22px] bg-soft p-6 text-ink2 dark:bg-card-dark dark:text-text-dark-secondary">Chargement des agents...</div>
+            </div>
+          </section>
+
+          <!-- Création -->
+          <section class="order-1 flex flex-col gap-3">
+            <form id="agentForm" class="flex flex-col gap-4 rounded-[26px] bg-soft p-[22px] dark:bg-card-dark">
+              <h2 class="text-[17px] font-semibold tracking-[-0.01em]">Créer un nouvel agent</h2>
+              <label for="firstName" class="flex flex-col gap-2">
+                <span class="text-[14.5px] font-semibold">Prénom de l'agent</span>
+                <input type="text" id="firstName" name="firstName" placeholder="Ex: Jean" required
+                       class="h-14 w-full rounded-2xl border-0 bg-white px-[18px] text-base placeholder:text-muted focus:ring-2 focus:ring-cyan dark:bg-background-dark">
+              </label>
+              <button type="submit" class="flex h-[52px] items-center justify-center gap-2 rounded-full bg-primary text-[15.5px] font-semibold text-white">
+                <span class="material-symbols-rounded text-[21px]">add</span>Créer l'agent
+              </button>
+            </form>
+            <div class="flex items-start gap-3 rounded-[22px] px-1 text-[14px] text-ink2 dark:text-text-dark-secondary">
+              <span class="material-symbols-rounded text-[20px] text-cyan-ink">badge</span>
+              <p>Vos agents enregistrent les ventes et les dépenses de la journée avec leur propre code d'accès. Vous, vous voyez l'ensemble et vous décidez.</p>
+            </div>
+          </section>
+        </div>
+      </div>
     </main>
     </div>
 
@@ -174,11 +180,115 @@
                 .replace(/'/g, "&#39;");
         }
 
-        // Charger la liste des agents au chargement
+        // Jour courant au format AAAA-MM-JJ (heure locale)
+        function aujourdHuiIso() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+
+        function montant(valeur) {
+            return Math.round(valeur || 0).toLocaleString('fr-FR').replace(/[\u202f\u00a0]/g, ' ');
+        }
+
+        function heure(iso) {
+            return new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Activité d'un agent aujourd'hui : ventes et dépenses saisies sous son prénom
+        function activiteAgent(prenom, ventes, depenses) {
+            const v = ventes.filter((x) => x.created_by_name === prenom);
+            const d = depenses.filter((x) => x.created_by_name === prenom);
+            const encaisse = v.reduce((somme, x) => somme + (parseFloat(x.montant) || 0), 0);
+            const aJustifierVentes = v.filter((x) => !x.justificatif && !x.numeroRecu).length;
+            const aJustifierDepenses = d.filter((x) => !x.justificatif).length;
+            const decaisse = d.reduce((somme, x) => somme + (parseFloat(x.montant) || 0), 0);
+            const derniere = [
+                ...v.map((x) => ({ ...x, _type: 'vente' })),
+                ...d.map((x) => ({ ...x, _type: 'dépense' })),
+            ]
+                .filter((x) => x.created_at)
+                .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))[0];
+            return { ventes: v.length, encaisse, aJustifierVentes, depenses: d.length, decaisse, aJustifierDepenses, derniere };
+        }
+
+        // Initiales : prénom en une ou deux lettres
+        function initiales(prenom) {
+            const mots = String(prenom).trim().split(/\s+/);
+            const lettres = mots.length > 1 ? mots[0][0] + mots[1][0] : mots[0].slice(0, 2);
+            return lettres.toUpperCase();
+        }
+
+        function tuile(libelle, valeur) {
+            return `
+                <div class="rounded-[20px] bg-soft p-4">
+                    <p class="text-sm text-ink2">${libelle}</p>
+                    <p class="mt-1 text-[22px] font-semibold tabular text-ink">${valeur}</p>
+                </div>`;
+        }
+
+        function carteAgent(agent, activite) {
+            const code = String(agent.accessCode).replace(/-/g, ' ');
+            const statut = activite.derniere
+                ? `<span class="h-2 w-2 shrink-0 rounded-full bg-cyan"></span>Actif aujourd'hui · dernière ${activite.derniere._type} à ${heure(activite.derniere.created_at)}`
+                : `<span class="h-2 w-2 shrink-0 rounded-full bg-gray-300"></span>Aucune activité aujourd'hui`;
+            return `
+                <div class="rounded-[26px] border border-line bg-white p-6">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex min-w-0 items-center gap-4">
+                            <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-cyan-soft text-[17px] font-bold text-cyan-ink">${echapperHtml(initiales(agent.firstName))}</div>
+                            <div class="min-w-0">
+                                <h3 class="truncate text-[18px] font-semibold text-ink">${echapperHtml(agent.firstName)}</h3>
+                                <p class="mt-0.5 flex items-center gap-2 text-sm text-ink2">${statut}</p>
+                            </div>
+                        </div>
+                        <button
+                            type="button"
+                            onclick="if (confirm('Êtes-vous sûr de vouloir supprimer cet agent ?')) { deleteAgentHandler('${agent.id}'); }"
+                            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-soft text-ink2 hover:bg-red-50 hover:text-red-600 transition-colors"
+                            title="Supprimer l'agent"
+                        >
+                            <span class="material-symbols-outlined">delete</span>
+                        </button>
+                    </div>
+
+                    <div class="mt-5 grid grid-cols-3 gap-3">
+                        ${tuile('Ventes du jour', activite.ventes)}
+                        ${tuile('Encaissé', montant(activite.encaisse))}
+                        ${tuile('À justifier', activite.aJustifierVentes)}
+                    </div>
+                    <div class="mt-3 grid grid-cols-3 gap-3">
+                        ${tuile('Dépenses du jour', activite.depenses)}
+                        ${tuile('Décaissé', montant(activite.decaisse))}
+                        ${tuile('À justifier', activite.aJustifierDepenses)}
+                    </div>
+
+                    <div class="mt-5 flex items-center justify-between gap-4 border-t border-line pt-5">
+                        <div>
+                            <p class="text-sm text-ink2">Code d'accès</p>
+                            <p class="mt-1 font-mono text-[18px] font-bold tracking-[0.12em] text-ink">${echapperHtml(code)}</p>
+                        </div>
+                        <button
+                            type="button"
+                            onclick="navigator.clipboard.writeText('${agent.accessCode}').then(() => alert('Code copié !'))"
+                            class="inline-flex h-11 items-center gap-2 rounded-full bg-soft px-5 text-sm font-semibold text-ink hover:bg-soft2 transition-colors"
+                        >
+                            <span class="material-symbols-outlined text-[20px]">content_copy</span>
+                            Copier
+                        </button>
+                    </div>
+                </div>`;
+        }
+
+        // Charger la liste des agents et leur activité du jour
         async function loadAgents() {
             try {
-                const agents = await listAgents();
-                displayAgents(agents);
+                const jour = aujourdHuiIso();
+                const [agents, ventes, depenses] = await Promise.all([
+                    listAgents(),
+                    window.OGOUE.getVentesPourPlage(jour, jour),
+                    window.OGOUE.getDepensesPourPlage(jour, jour),
+                ]);
+                displayAgents(agents, ventes || [], depenses || []);
             } catch (error) {
                 console.error('Erreur chargement agents:', error);
                 document.getElementById('agentsList').innerHTML = `
@@ -190,54 +300,22 @@
         }
 
         // Afficher les agents dans le DOM
-        function displayAgents(agents) {
+        function displayAgents(agents, ventes, depenses) {
             const agentsList = document.getElementById('agentsList');
-            
+            agentsList.className = 'flex flex-col gap-4';
+
             if (agents.length === 0) {
                 agentsList.innerHTML = `
-                    <div class="p-8 text-center text-text-light-muted dark:text-gray-400">
+                    <div class="rounded-[26px] bg-soft p-8 text-center text-ink2">
                         <p>Aucun agent pour le moment</p>
                     </div>
                 `;
                 return;
             }
 
-            agentsList.innerHTML = agents.map((agent) => `
-                <div class="p-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                    <div class="flex items-center justify-between">
-                        <div class="flex-1">
-                            <h3 class="text-lg font-semibold text-text-light dark:text-white">${echapperHtml(agent.firstName)}</h3>
-                            <div class="mt-3 space-y-2">
-                                <div class="flex items-center gap-3">
-                                    <span class="text-sm text-text-light-muted dark:text-gray-400">Code d'acc&egrave;s :</span>
-                                    <code class="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded font-mono text-sm text-text-light dark:text-white">
-                                        ${agent.accessCode}
-                                    </code>
-                                    <button
-                                        type="button"
-                                        onclick="navigator.clipboard.writeText('${agent.accessCode}').then(() => alert('Code copi&eacute; !'))"
-                                        class="text-primary hover:text-text-light dark:hover:text-white text-sm font-medium transition-colors"
-                                    >
-                                        <span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle;">content_copy</span>
-                                        Copier
-                                    </button>
-                                </div>
-                                <div class="text-xs text-text-light-muted dark:text-gray-400">
-                                    Cr&eacute;&eacute; le : ${new Date(agent.createdAt).toLocaleDateString('fr-FR')}
-                                </div>
-                            </div>
-                        </div>
-                        <button
-                            type="button"
-                            onclick="if (confirm('&Ecirc;tes-vous s&ucirc;r de vouloir supprimer cet agent ?')) { deleteAgentHandler('${agent.id}'); }"
-                            class="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                            title="Supprimer l'agent"
-                        >
-                            <span class="material-symbols-outlined" style="font-size: 24px;">delete</span>
-                        </button>
-                    </div>
-                </div>
-            `).join('');
+            agentsList.innerHTML = agents
+                .map((agent) => carteAgent(agent, activiteAgent(agent.firstName, ventes, depenses)))
+                .join('');
         }
 
         // Gestionnaire de suppression

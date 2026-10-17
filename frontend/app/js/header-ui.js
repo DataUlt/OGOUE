@@ -369,7 +369,7 @@
 
   function createPopover(){
     const el = document.createElement('div');
-    el.className = 'ogo-popover fixed z-50 rounded-lg shadow-xl bg-white dark:bg-[#1E293B] border border-gray-300 dark:border-gray-600';
+    el.className = 'ogo-popover fixed z-50 rounded-[28px] shadow-xl bg-white dark:bg-[#1E293B] border border-gray-300 dark:border-gray-600';
     return el;
   }
 
@@ -462,7 +462,7 @@
     popover.innerHTML = '';
     
     const container = document.createElement('div');
-    container.className = 'w-80 bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden';
+    container.className = 'w-80 bg-white dark:bg-gray-800 rounded-[28px] shadow-lg overflow-hidden';
     
     // Header
     const header = document.createElement('div');
@@ -809,7 +809,7 @@
 
   function openEditModal(label, value, onSave) {
     const modal = document.createElement('div');
-    modal.className = 'fixed z-50 rounded-lg shadow-xl bg-white dark:bg-[#1E293B] border border-gray-300 dark:border-gray-600 w-80 p-5';
+    modal.className = 'fixed z-50 rounded-[28px] shadow-xl bg-white dark:bg-[#1E293B] border border-gray-300 dark:border-gray-600 w-80 p-5';
     modal.style.top = '50%';
     modal.style.left = '50%';
     modal.style.transform = 'translate(-50%, -50%)';
@@ -941,4 +941,11 @@
     initHeaderUI();
   }
 
+})();
+
+// Navigation du haut : même colonne que le contenu des pages (1120 px centrés, marge de 44 px)
+(function () {
+  const style = document.createElement('style');
+  style.textContent = '@media (min-width: 1536px) { header .gap-9 { position: absolute; left: calc(50% - 516px); top: 50%; transform: translateY(-50%); } }';
+  document.head.appendChild(style);
 })();

@@ -70,6 +70,23 @@ async function loadAndDisplayStats(startDateISO, endDateISO) {
 }
 
 // Charge et affiche les répartitions
+const COULEURS_REPARTITION = ["#0B2A5B", "#14B8D9", "#F2A04B", "#8FB0DA"];
+
+// Une ligne de répartition : libellé, montant, part du total, barre colorée
+function ligneRepartition(libelle, montant, total, couleur) {
+  const pct = total > 0 ? (montant / total) * 100 : 0;
+  return `
+    <div class="flex flex-col gap-2 py-3">
+      <div class="flex items-baseline justify-between gap-3">
+        <span class="truncate text-sm text-ink2">${libelle}</span>
+        <span class="whitespace-nowrap text-[14.5px] font-semibold tabular text-ink">${formatMontant(montant)} <span class="text-xs font-normal text-muted">· ${pct.toFixed(1)} %</span></span>
+      </div>
+      <div class="h-1.5 rounded-full bg-soft2">
+        <div class="h-full rounded-full" style="width:${pct.toFixed(1)}%;background:${couleur}"></div>
+      </div>
+    </div>`;
+}
+
 function loadRepartitions(ventes, depenses) {
   // Répartition des ventes par description (catégorie)
   const ventesParDesc = {};
@@ -87,17 +104,7 @@ function loadRepartitions(ventes, depenses) {
     const entries = Object.entries(ventesParDesc).sort((a, b) => b[1] - a[1]);
     entries.forEach(([ desc, montant ], idx) => {
       const percent = totalVentes > 0 ? ((montant / totalVentes) * 100) : 0;
-      const html = `
-        <div class="flex items-center gap-4 border-t border-gray-200 dark:border-gray-700/50 py-4">
-          <div class="flex flex-col gap-1 flex-1">
-            <p class="text-sm font-normal leading-normal text-gray-500 dark:text-gray-400">${desc}</p>
-            <p class="text-base font-semibold leading-normal text-gray-800 dark:text-gray-200">${formatMontant(montant)}</p>
-          </div>
-          <div class="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-xs font-bold text-gray-700 flex-shrink-0">
-            ${percent.toFixed(1)}%
-          </div>
-        </div>
-      `;
+      const html = ligneRepartition(desc, montant, entries.reduce((s, e) => s + e[1], 0), COULEURS_REPARTITION[idx % COULEURS_REPARTITION.length]);
       containerVentes.innerHTML += html;
     });
   }
@@ -116,19 +123,9 @@ function loadRepartitions(ventes, depenses) {
   if (containerPaiementVentes) {
     containerPaiementVentes.innerHTML = "";
     const entries = Object.entries(ventesParPaiement).sort((a, b) => b[1] - a[1]);
-    entries.forEach(([ paiement, montant ]) => {
+    entries.forEach(([ paiement, montant ], idx) => {
       const percent = totalVentes > 0 ? ((montant / totalVentes) * 100) : 0;
-      const html = `
-        <div class="flex items-center gap-4 py-4">
-          <div class="flex flex-col gap-1 flex-1">
-            <p class="text-sm font-normal leading-normal text-gray-500 dark:text-gray-400">Total encaissé en ${paiement}</p>
-            <p class="text-base font-semibold leading-normal text-gray-800 dark:text-gray-200">${formatMontant(montant)}</p>
-          </div>
-          <div class="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-xs font-bold text-gray-700 flex-shrink-0">
-            ${percent.toFixed(0)}%
-          </div>
-        </div>
-      `;
+      const html = ligneRepartition(paiement, montant, entries.reduce((s, e) => s + e[1], 0), COULEURS_REPARTITION[idx % COULEURS_REPARTITION.length]);
       containerPaiementVentes.innerHTML += html;
     });
   }
@@ -149,19 +146,9 @@ function loadRepartitions(ventes, depenses) {
   if (containerPaiementDepenses) {
     containerPaiementDepenses.innerHTML = "";
     const entries = Object.entries(depensesParPaiement).sort((a, b) => b[1] - a[1]);
-    entries.forEach(([ paiement, montant ]) => {
+    entries.forEach(([ paiement, montant ], idx) => {
       const percent = totalDepenses > 0 ? ((montant / totalDepenses) * 100) : 0;
-      const html = `
-        <div class="flex items-center gap-4 py-4">
-          <div class="flex flex-col gap-1 flex-1">
-            <p class="text-sm font-normal leading-normal text-gray-500 dark:text-gray-400">Total payé en ${paiement}</p>
-            <p class="text-base font-semibold leading-normal text-gray-800 dark:text-gray-200">${formatMontant(montant)}</p>
-          </div>
-          <div class="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-xs font-bold text-gray-700 flex-shrink-0">
-            ${percent.toFixed(0)}%
-          </div>
-        </div>
-      `;
+      const html = ligneRepartition(paiement, montant, entries.reduce((s, e) => s + e[1], 0), COULEURS_REPARTITION[idx % COULEURS_REPARTITION.length]);
       containerPaiementDepenses.innerHTML += html;
     });
   }
@@ -178,13 +165,8 @@ function loadRepartitions(ventes, depenses) {
   if (containerDepenses) {
     containerDepenses.innerHTML = "";
     const entries = Object.entries(depensesParCat).sort((a, b) => b[1] - a[1]);
-    entries.forEach(([ cat, montant ]) => {
-      const html = `
-        <div class="flex justify-between py-4 border-t border-gray-200 dark:border-gray-700/50">
-          <p class="text-sm font-normal text-gray-500 dark:text-gray-400">${cat}</p>
-          <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">${formatMontant(montant)}</p>
-        </div>
-      `;
+    entries.forEach(([ cat, montant ], idx) => {
+      const html = ligneRepartition(cat, montant, entries.reduce((s, e) => s + e[1], 0), COULEURS_REPARTITION[idx % COULEURS_REPARTITION.length]);
       containerDepenses.innerHTML += html;
     });
   }

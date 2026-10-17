@@ -1,139 +1,184 @@
 ﻿// js/dashboard.js
+// Tableau de bord : données réelles de la période choisie, présentées selon
+// la maquette « OGOUE Refonte ». Une requête par type couvre tout ce qu'il
+// faut (période, période précédente, mois en cours, aujourd'hui) ; le reste
+// se filtre dans le navigateur.
 
-// Variables globales pour les KPI
-let globalKPIData = {
-  totalVentes: 0,
-  totalDepenses: 0,
-  resultat: 0,
-  ventesCount: 0,
-  depensesCount: 0
+const EXCHANGE_RATES = { FCFA: 1, EUR: 0.00152, USD: 0.0017 };
+const SYMBOLES_DEVISE = { FCFA: "FCFA", EUR: "€", USD: "$" };
+
+// Icônes des catégories de dépenses (celles de la maquette)
+const ICONES_CATEGORIE = {
+  "Marchandises": "inventory_2",
+  "Transport": "local_taxi",
+  "Loyer": "storefront",
+  "Salaires": "badge",
+  "Électricité & eau": "bolt",
+  "Téléphone": "smartphone",
+  "Entretien": "build",
+  "Autre": "more_horiz"
 };
 
-// Variables globales pour les graphiques
-let globalChartData = {
-  evolutionChartData: [],
-  repartitionChartData: {}
-};
+// Couleurs des meilleures ventes, dans l'ordre de la maquette
+const COULEURS_MEILLEURES = ["var(--navyInk)", "var(--cyan)", "var(--orange)", "#8FB0DA"];
 
-// Constantes d'échange
-const EXCHANGE_RATES = {
-  'FCFA': 1,
-  'EUR': 0.00152,
-  'USD': 0.0017
-};
+// Géométrie de la courbe (identique à la maquette)
+const GRAPHIQUE = { W: 1000, H: 300, N: 28 };
 
-// Récupérer la devise depuis les préférences
+// ========== DEVISE ET MONTANTS ==========
+
 function getCurrency() {
   try {
-    const prefs = JSON.parse(localStorage.getItem('ogo_preferences') || '{}');
-    return prefs.currency || 'FCFA';
-  } catch(e) {
-    return 'FCFA';
+    const prefs = JSON.parse(localStorage.getItem("ogo_preferences") || "{}");
+    return prefs.currency || "FCFA";
+  } catch (e) {
+    return "FCFA";
   }
 }
 
-function formatMontant(montant) {
-  if (typeof montant !== "number" || isNaN(montant)) return "0 FCFA";
-  
-  const currency = getCurrency();
-  const rate = EXCHANGE_RATES[currency] || 1;
-  const convertedAmount = montant * rate;
-  
-  // Symboles des devises
-  const symbols = {
-    'FCFA': 'FCFA',
-    'EUR': '€',
-    'USD': '$'
-  };
-  const symbol = symbols[currency] || currency;
-  
-  return (
-    convertedAmount.toLocaleString("fr-FR", {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }) + " " + symbol
-  );
-}
-
-// Fonction pour mettre à jour l'affichage des KPI (sans re-fetcher les données)
-function updateKPIDisplay() {
-  const kpiChiffre = document.getElementById("kpi-chiffre-affaires");
-  const kpiDepenses = document.getElementById("kpi-depenses");
-  const kpiResultat = document.getElementById("kpi-resultat");
-
-  if (kpiChiffre) {
-    kpiChiffre.textContent = formatMontant(globalKPIData.totalVentes || 0);
-  }
-
-  if (kpiDepenses) {
-    kpiDepenses.textContent = formatMontant(globalKPIData.totalDepenses || 0);
-  }
-
-  if (kpiResultat) {
-    kpiResultat.textContent = formatMontant(globalKPIData.resultat || 0);
-  }
-
-  console.log("🔄 KPI display mis à jour avec devise:", getCurrency());
-}
-
-// Helpers
-function normalizeDate(iso) {
-  if (!iso) return null;
-  // Parser la date ISO complète (qui est en UTC)
-  const d = new Date(iso);
-  if (isNaN(d.getTime())) return null;
-  
-  // Créer une nouvelle date avec la date LOCALE (pas UTC)
-  // Si on reçoit "2025-12-21T23:00:00.000Z" (23h UTC du 21),
-  // c'est minuit le 22 en heure locale GMT+1, donc on doit retourner le 22
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
-}
-
-function parseLocalDateParts(dateStr) {
-  if (!dateStr) return null;
-  const d = new Date(dateStr);
-  if (!isNaN(d.getTime())) {
-    return { year: d.getFullYear(), month: d.getMonth() + 1, day: d.getDate() };
-  }
-  const parts = String(dateStr).split("-");
-  if (parts.length >= 3) {
-    const y = parseInt(parts[0], 10);
-    const m = parseInt(parts[1], 10);
-    const dd = parseInt(parts[2], 10);
-    return { year: y, month: m, day: dd };
-  }
-  return null;
-}
-
-function buildRangeChecker(startISO, endISO) {
-  const start = normalizeDate(startISO);
-  const end = normalizeDate(endISO || startISO);
-  return (iso) => {
-    if (!start) return true;
-    const d = normalizeDate(iso);
-    if (!d) return false;
-    return d >= start && d <= end;
+// Montant converti dans la devise choisie, en chiffre et en unité séparés
+function formatParts(montant) {
+  const devise = getCurrency();
+  const valeur = (Number(montant) || 0) * (EXCHANGE_RATES[devise] || 1);
+  return {
+    num: Math.round(valeur).toLocaleString("fr-FR").replace(/[  ]/g, " "),
+    unit: SYMBOLES_DEVISE[devise] || devise
   };
 }
 
-function groupByDay(ventes, mois, annee) {
-  const byDay = {};
-  ventes.forEach((vente) => {
-    const dateStr = vente.date || vente.sale_date || vente.saleDate;
-    const parsed = parseLocalDateParts(dateStr);
-    if (!parsed) return;
-
-    const { year: y, month: m, day: d } = parsed;
-    if (m === mois && y === annee) {
-      if (!byDay[d]) byDay[d] = [];
-      byDay[d].push({ ...vente, _localDateParts: parsed });
-    }
-  });
-  return byDay;
+// Montant dans une liste : l'unité n'apparaît que hors FCFA
+function montantCourt(montant) {
+  const p = formatParts(montant);
+  return p.unit === "FCFA" ? p.num : `${p.num} ${p.unit}`;
 }
 
-// ========== CHARGEMENT DES DONNÉES DE LA PÉRIODE (une seule fois, réutilisé par KPI + graphiques) ==========
-async function fetchPeriodData(startDateISO, endDateISO) {
+function echapper(texte) {
+  return String(texte ?? "").replace(/[&<>"']/g, (c) => (
+    { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
+  ));
+}
+
+// ========== DATES (heure locale, format AAAA-MM-JJ) ==========
+
+const pad2 = (n) => String(n).padStart(2, "0");
+
+function isoDe(d) {
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+
+function deIso(iso) {
+  const [y, m, j] = iso.split("-").map(Number);
+  return new Date(y, m - 1, j);
+}
+
+// Jour d'une opération, en AAAA-MM-JJ local
+function jourDe(op) {
+  const brut = op.date;
+  if (!brut) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(brut)) return brut;
+  const d = new Date(brut);
+  return isNaN(d.getTime()) ? null : isoDe(d);
+}
+
+function heureTexte(op) {
+  if (!op.created_at) return "";
+  const d = new Date(op.created_at);
+  return isNaN(d.getTime()) ? "" : `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+}
+
+function heureDe(op) {
+  if (!op.created_at) return null;
+  const d = new Date(op.created_at);
+  return isNaN(d.getTime()) ? null : d.getHours();
+}
+
+function joursEntre(debut, fin) {
+  const jours = [];
+  for (let d = deIso(debut); isoDe(d) <= fin; d.setDate(d.getDate() + 1)) {
+    jours.push(isoDe(d));
+  }
+  return jours;
+}
+
+function plageAujourdhui() {
+  return isoDe(new Date());
+}
+
+// Périodes rapides de la maquette : aujourd'hui, semaine (du lundi), mois
+function plagePreset(preset) {
+  const t = new Date();
+  t.setHours(0, 0, 0, 0);
+  if (preset === "jour") {
+    return { preset, debut: isoDe(t), fin: isoDe(t) };
+  }
+  if (preset === "semaine") {
+    const lundi = new Date(t);
+    lundi.setDate(t.getDate() - ((t.getDay() + 6) % 7));
+    return { preset, debut: isoDe(lundi), fin: isoDe(t) };
+  }
+  return {
+    preset: "mois",
+    debut: isoDe(new Date(t.getFullYear(), t.getMonth(), 1)),
+    fin: isoDe(t)
+  };
+}
+
+// La plage correspond-elle à une période rapide ? Sinon, plage personnalisée.
+function plageDepuis(debut, fin) {
+  const preset = ["jour", "semaine", "mois"].find((p) => {
+    const r = plagePreset(p);
+    return r.debut === debut && r.fin === fin;
+  }) || null;
+  return { debut, fin, preset };
+}
+
+// Période de comparaison : hier, la semaine précédente, le mois précédent,
+// ou, pour une plage personnalisée, la même durée juste avant.
+function periodePrecedente(debut, fin, preset) {
+  if (preset === "jour") {
+    const hier = deIso(debut);
+    hier.setDate(hier.getDate() - 1);
+    return { debut: isoDe(hier), fin: isoDe(hier) };
+  }
+  if (preset === "semaine") {
+    const dimanche = deIso(debut);
+    dimanche.setDate(dimanche.getDate() - 1);
+    const lundi = new Date(dimanche);
+    lundi.setDate(dimanche.getDate() - 6);
+    return { debut: isoDe(lundi), fin: isoDe(dimanche) };
+  }
+  if (preset === "mois") {
+    const m = deIso(debut);
+    return {
+      debut: isoDe(new Date(m.getFullYear(), m.getMonth() - 1, 1)),
+      fin: isoDe(new Date(m.getFullYear(), m.getMonth(), 0))
+    };
+  }
+  const n = joursEntre(debut, fin).length;
+  const fp = deIso(debut);
+  fp.setDate(fp.getDate() - 1);
+  const dp = new Date(fp);
+  dp.setDate(fp.getDate() - (n - 1));
+  return { debut: isoDe(dp), fin: isoDe(fp) };
+}
+
+function nomMois(iso) {
+  return deIso(iso).toLocaleDateString("fr-FR", { month: "long" });
+}
+
+function plusPetit(...dates) {
+  return dates.reduce((a, b) => (b < a ? b : a));
+}
+
+function plusGrand(...dates) {
+  return dates.reduce((a, b) => (b > a ? b : a));
+}
+
+// ========== CHARGEMENT ==========
+
+// Une seule requête par type, sur la plus grande plage utile : la période,
+// la période de comparaison, le mois en cours et aujourd'hui.
+async function chargerDonnees(plage) {
   if (
     !window.OGOUE ||
     typeof window.OGOUE.getVentesPourPlage !== "function" ||
@@ -143,460 +188,628 @@ async function fetchPeriodData(startDateISO, endDateISO) {
     return { ventes: [], depenses: [] };
   }
 
-  // Toute la plage est demandée en une seule requête par type. L'API sait
-  // filtrer sur startDate/endDate ; le découpage mois par mois qui précédait
-  // envoyait deux appels par mois couvert, soit 74 requêtes pour trois ans,
-  // que le navigateur ne traitait que six à la fois.
-  const [ventes, depenses] = await Promise.all([
-    window.OGOUE.getVentesPourPlage(startDateISO, endDateISO),
-    window.OGOUE.getDepensesPourPlage(startDateISO, endDateISO)
-  ]);
+  const auj = plageAujourdhui();
+  const prec = periodePrecedente(plage.debut, plage.fin, plage.preset);
+  const debut = plusPetit(prec.debut, plage.debut, plagePreset("mois").debut, auj);
+  const fin = plusGrand(plage.fin, auj);
 
-  console.log("📊 Total chargé - Ventes:", (ventes || []).length, "Dépenses:", (depenses || []).length);
+  const [ventes, depenses] = await Promise.all([
+    window.OGOUE.getVentesPourPlage(debut, fin),
+    window.OGOUE.getDepensesPourPlage(debut, fin)
+  ]);
   return { ventes: ventes || [], depenses: depenses || [] };
 }
 
-// ========== KPI LOADER ==========
-function loadAndDisplayKPI(startDateISO, endDateISO, ventes, depenses) {
-  try {
+// ========== CALCULS ==========
 
-    const inRange = buildRangeChecker(startDateISO, endDateISO);
-
-    const ventesFiltrees = ventes.filter((v) => inRange(v.date || v.saleDate || v.sale_date));
-    const depensesFiltrees = depenses.filter((d) => inRange(d.date || d.expenseDate || d.expense_date));
-
-    console.log("🔎 Après filtre - Ventes:", ventesFiltrees.length, "Dépenses:", depensesFiltrees.length);
-    if (ventesFiltrees.length > 0) {
-      console.log("  Première vente:", ventesFiltrees[0]);
-    }
-    if (depensesFiltrees.length > 0) {
-      console.log("  Première dépense:", depensesFiltrees[0]);
-    }
-    
-    // Debug: montrer les dates brutes des ventes
-    if (ventes.length > 0) {
-      console.log("🔴 DATES BRUTES des ventes (avant filtre):");
-      ventes.slice(0, 3).forEach((v, i) => {
-        console.log(`  Vente ${i+1}: date="${v.date || v.sale_date || v.saleDate}" montant="${v.montant || v.amount}"`);
-      });
-    }
-    
-    // Debug: montrer les dates brutes des dépenses
-    if (depenses.length > 0) {
-      console.log("🔴 DATES BRUTES des dépenses (avant filtre):");
-      depenses.slice(0, 3).forEach((d, i) => {
-        console.log(`  Dépense ${i+1}: date="${d.date || d.expense_date || d.expenseDate}" montant="${d.montant || d.amount}"`);
-      });
-    }
-    
-    console.log("📍 Plage de filtre demandée: " + startDateISO + " à " + endDateISO);
-
-    // Stocker dans les variables globales
-    globalKPIData.totalVentes = ventesFiltrees.reduce((sum, v) => sum + parseFloat(v.montant || v.amount || 0), 0);
-    globalKPIData.totalDepenses = depensesFiltrees.reduce((sum, d) => sum + parseFloat(d.montant || d.amount || 0), 0);
-    globalKPIData.resultat = globalKPIData.totalVentes - globalKPIData.totalDepenses;
-    globalKPIData.ventesCount = ventesFiltrees.length;
-    globalKPIData.depensesCount = depensesFiltrees.length;
-
-    // Appeler la fonction de mise à jour d'affichage
-    updateKPIDisplay();
-
-    const kpiCATrend = document.getElementById("kpi-ca-trend");
-    const kpiDepensesTrend = document.getElementById("kpi-depenses-trend");
-    const kpiResultatTrend = document.getElementById("kpi-resultat-trend");
-
-    if (kpiCATrend) {
-      kpiCATrend.innerHTML = `
-        <span class="material-symbols-outlined !text-base">trending_up</span>
-        <span>${globalKPIData.ventesCount || 0} vente(s)</span>
-      `;
-    }
-
-    if (kpiDepensesTrend) {
-      kpiDepensesTrend.innerHTML = `
-        <span class="material-symbols-outlined !text-base">trending_down</span>
-        <span>${globalKPIData.depensesCount || 0} dépense(s)</span>
-      `;
-    }
-
-    if (kpiResultatTrend) {
-      const text = globalKPIData.resultat >= 0 ? "Positif" : "Négatif";
-      kpiResultatTrend.innerHTML = `
-        <span class="material-symbols-outlined !text-base">${globalKPIData.resultat >= 0 ? "arrow_upward" : "arrow_downward"}</span>
-        <span>${text}</span>
-      `;
-    }
-
-    console.log("ƒo. KPI filtrés:", globalKPIData);
-  } catch (error) {
-    console.error("ƒ?O Erreur lors du chargement des KPI:", error);
-  }
+function somme(liste) {
+  return liste.reduce((t, x) => t + (Number(x.montant) || 0), 0);
 }
 
-// ========== GRAPHIQUES DYNAMIQUES ==========
-function loadAndDisplayChartEvolution(startDateISO, endDateISO, ventes) {
-  try {
-    const inRange = buildRangeChecker(startDateISO, endDateISO);
-    const ventesFiltrees = (ventes || []).filter((v) => inRange(v.date || v.saleDate || v.sale_date));
-
-    // Grouper par jour dans la période (tous les jours avec des ventes)
-    const ventesParJour = {};
-    ventesFiltrees.forEach((vente) => {
-      const dateStr = vente.date || vente.sale_date || vente.saleDate;
-      const d = normalizeDate(dateStr);
-      if (!d) return;
-      
-      // Utiliser la date LOCALE, pas UTC
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      const dateKey = `${year}-${month}-${day}`; // Format: YYYY-MM-DD en local
-      
-      if (!ventesParJour[dateKey]) {
-        ventesParJour[dateKey] = [];
-      }
-      ventesParJour[dateKey].push(vente);
-    });
-
-    // Créer un tableau de tous les jours de la plage, même sans ventes
-    const start = normalizeDate(startDateISO);
-    const end = normalizeDate(endDateISO || startDateISO);
-    const days = [];
-    
-    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-      // Utiliser la date LOCALE, pas toISOString() qui reconvertit en UTC
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      const dateKey = `${year}-${month}-${day}`;
-      days.push(dateKey);
-    }
-
-    const chartData = days.map((dateKey) => {
-      const ventes = ventesParJour[dateKey] || [];
-      const total = ventes.reduce((sum, v) => sum + parseFloat(v.montant || v.amount || 0), 0);
-      const d = new Date(dateKey);
-      return { 
-        dateKey, 
-        day: d.getDate(),
-        date: d,
-        total, 
-        ventes 
-      };
-    });
-
-    // Calculer maxValue mais avec une compression intelligente pour voir les petites valeurs
-    const allValues = chartData.map(d => d.total).filter(v => v > 0);
-    let maxValue = Math.max(...allValues, 1);
-    const maxValueOriginal = maxValue; // Garder la vraie valeur pour l'étiquette
-    
-    // Si on a une grosse différence entre min et max, appliquer une compression avec racine carrée
-    const minValue = Math.min(...allValues);
-    const ratio = maxValue / (minValue || 1);
-    
-    // Si le ratio est très grand (>100), utiliser une échelle compressée
-    if (ratio > 100 && minValue > 0) {
-      // Appliquer racine carrée pour compresser l'échelle
-      maxValue = Math.sqrt(maxValue);
-      chartData.forEach(d => {
-        if (d.total > 0) {
-          d.displayTotal = Math.sqrt(d.total);
-        } else {
-          d.displayTotal = 0;
-        }
-      });
-    } else {
-      // Sinon, utiliser l'échelle linéaire normale
-      chartData.forEach(d => {
-        d.displayTotal = d.total;
-      });
-    }
-
-    const width = 800;
-    const height = 250;
-    const padding = 50;
-    const graphWidth = width - padding * 2;
-    const graphHeight = height - padding;
-
-    function generatePoints(data) {
-      return data.map((item, idx) => {
-        const x = padding + (graphWidth / (data.length - 1 || 1)) * idx;
-        const y = height - (item.displayTotal / maxValue) * graphHeight;
-        return { ...item, x, y };
-      });
-    }
-
-    const points = generatePoints(chartData);
-
-    function generatePath(points) {
-      if (points.length === 0) return "";
-      let pathStr = `M${points[0].x} ${points[0].y}`;
-      for (let i = 1; i < points.length; i++) {
-        pathStr += ` L${points[i].x} ${points[i].y}`;
-      }
-      return pathStr;
-    }
-
-    const path = generatePath(points);
-
-    function formatChartMontant(val) {
-      // Convertir avec la devise actuelle
-      const currency = getCurrency();
-      const rate = EXCHANGE_RATES[currency] || 1;
-      const convertedAmount = val * rate;
-      
-      // Format compact avec K pour les milliers (sans symbole)
-      if (convertedAmount >= 1000) {
-        return (convertedAmount / 1000).toFixed(1) + "K";
-      } else {
-        return Math.round(convertedAmount).toString();
-      }
-    }
-
-    // Étiquettes Y (axe vertical) - afficher seulement le maximum (valeur réelle formatée avec devise)
-    const yLabels = [];
-    const yPos = height - graphHeight; // position du sommet
-    // Ici on utilise formatChartMontant pour garder le format "K", mais on POURRAIT utiliser formatMontant() si on veut
-    // Pour l'instant gardons le format compact avec K
-    yLabels.push(`<text x="40" y="${yPos + 5}" text-anchor="end" font-size="12" fill="#64748b">${formatChartMontant(maxValueOriginal)}</text>`);
-
-    // Étiquettes X (axe horizontal) - afficher chaque 5-7 jours
-    const xLabels = [];
-    const step = Math.ceil(chartData.length / 8); // environ 8 labels
-    for (let i = 0; i < chartData.length; i += step) {
-      const x = padding + (graphWidth / (chartData.length - 1 || 1)) * i;
-      xLabels.push(`<text x="${x}" y="${height + 25}" text-anchor="middle" font-size="11" fill="#64748b">${chartData[i].day}</text>`);
-    }
-
-    // Cercles pour interaction (hover)
-    let circlesHTML = "";
-    points.forEach((point) => {
-      circlesHTML += `
-        <circle class="chart-point" cx="${point.x}" cy="${point.y}" r="6" fill="#3b82f6" opacity="0" style="pointer-events: all; cursor: pointer;" data-datekey="${point.dateKey}" data-total="${point.total}"/>
-      `;
-    });
-
-    const svgHTML = `
-      <svg fill="none" preserveAspectRatio="none" viewBox="0 0 ${width} ${height + 50}" width="100%" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="gradientMain" x1="400" x2="400" y1="0" y2="${height}" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#3b82f6" stop-opacity="0.15"/>
-            <stop offset="1" stop-color="#3b82f6" stop-opacity="0"/>
-          </linearGradient>
-        </defs>
-        <!-- Axes -->
-        <line x1="45" y1="0" x2="45" y2="${height}" stroke="#e2e8f0" stroke-width="1.5"/>
-        <line x1="45" y1="${height}" x2="${width}" y2="${height}" stroke="#e2e8f0" stroke-width="1.5"/>
-        
-        <!-- Labels Y -->
-        ${yLabels.join("")}
-        
-        <!-- Labels X -->
-        ${xLabels.join("")}
-        
-        <!-- Courbe du CA -->
-        <path d="${path}" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-        
-        <!-- Zone sous la courbe -->
-        <path d="${path}L${width - padding} ${height}L45 ${height}Z" fill="url(#gradientMain)"/>
-        
-        <!-- Points interactifs -->
-        ${circlesHTML}
-      </svg>
-    `;
-
-    const svgContainer = document.getElementById("chart-evolution");
-
-    if (svgContainer) {
-      svgContainer.innerHTML = svgHTML;
-      svgContainer.style.position = "relative";
-      addChartInteractions(svgContainer, points, chartData);
-    } else {
-      console.warn("⚠️ Conteneur chart-evolution non trouvé");
-    }
-
-    console.log("📈 Graphique Évolution CA chargé:", chartData.length, "jours");
-  } catch (error) {
-    console.error("❌ Erreur graphique Évolution CA:", error);
-  }
+// Variation en pourcentage ; sans référence (période précédente à zéro), pas de pourcentage
+function variation(actuel, precedent) {
+  if (!precedent) return null;
+  return ((actuel - precedent) / Math.abs(precedent)) * 100;
 }
 
-function addChartInteractions(svgContainer, points, chartData) {
-  let tooltip = null;
-  const circles = svgContainer.querySelectorAll(".chart-point");
-
-  function pad(n) {
-    return String(n).padStart(2, "0");
+function etiquetteJour(iso, nombre) {
+  const d = deIso(iso);
+  if (nombre <= 7) {
+    const j = d.toLocaleDateString("fr-FR", { weekday: "short" });
+    return j.charAt(0).toUpperCase() + j.slice(1);
   }
+  return `${d.getDate()} ${d.toLocaleDateString("fr-FR", { month: "short" })}`;
+}
 
-  function createTooltip(data) {
-    if (tooltip) tooltip.remove();
-    tooltip = document.createElement("div");
-    tooltip.style.cssText = `
-      position: absolute;
-      background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-      color: white;
-      padding: 12px 16px;
-      border-radius: 8px;
-      font-size: 12px;
-      pointer-events: none;
-      z-index: 1000;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      border: 1px solid rgba(255,255,255,0.1);
-      max-width: 280px;
-      min-width: 180px;
-    `;
+// ========== SÉRIES DU GRAPHIQUE ==========
+// Chaque courbe passe exactement par des points réels : un point par jour
+// sur une période, un point à l'heure exacte de chaque opération sur une journée.
 
-    const d = new Date(data.dateKey);
-    const dateStr = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
-    const montantTotal = formatMontant(parseFloat(data.total) || 0);
+// Heure décimale d'une opération (12h30 → 12.5), ou null sans horodatage
+function heureDecimale(op) {
+  if (!op.created_at) return null;
+  const d = new Date(op.created_at);
+  return isNaN(d.getTime()) ? null : d.getHours() + d.getMinutes() / 60;
+}
 
-    const byDescription = {};
-    data.ventes.forEach((v) => {
-      const desc = v.description || "Sans description";
-      const montant = parseFloat(v.montant || v.amount || 0);
-      byDescription[desc] = (byDescription[desc] || 0) + montant;
-    });
+// Ajoute un point ; deux opérations au même instant ne font qu'un point
+function ajouterPoint(points, x, y) {
+  const dernier = points[points.length - 1];
+  if (dernier.x === x) dernier.y = y;
+  else points.push({ x, y });
+}
 
-    let ventesHTML = `
-      <div style="font-weight: 600; margin-bottom: 8px; color: #3b82f6;">
-        ${dateStr} - ${montantTotal}
-      </div>
-      <div style="font-size: 11px; opacity: 0.8; line-height: 1.4;">
-    `;
-
-    if (data.ventes.length === 0) {
-      ventesHTML += "Aucune vente ce jour";
-    } else {
-      Object.entries(byDescription).forEach(([desc, montant]) => {
-        const montantFormate = formatMontant(parseFloat(montant) || 0);
-        ventesHTML += `<div>• ${desc}: ${montantFormate}</div>`;
-      });
-    }
-    ventesHTML += `</div>`;
-
-    tooltip.innerHTML = ventesHTML;
-    svgContainer.appendChild(tooltip);
-  }
-
-  circles.forEach((circle) => {
-    const datekey = circle.dataset.datekey;
-    const data = chartData.find((d) => d.dateKey === datekey);
-
-    circle.addEventListener("mouseenter", () => {
-      circle.style.opacity = "1";
-      circle.style.r = "8";
-
-      const rect = circle.getBoundingClientRect();
-      const containerRect = svgContainer.getBoundingClientRect();
-
-      createTooltip(data);
-      tooltip.style.left = rect.left - containerRect.left + 20 + "px";
-      tooltip.style.top = rect.top - containerRect.top - 15 + "px";
-    });
-
-    circle.addEventListener("mouseleave", () => {
-      if (tooltip) tooltip.remove();
-      circle.style.opacity = "0";
-      circle.style.r = "6";
-      tooltip = null;
-    });
+// Courbe cumulée sur une journée (x entre 0 = 8h et 1 = 20h)
+function courbeHoraire(operations) {
+  const triees = operations
+    .map((o) => ({ o, t: heureDecimale(o) }))
+    .sort((a, b) => (a.t ?? -1) - (b.t ?? -1));
+  const points = [{ x: 0, y: 0 }];
+  let cumul = 0;
+  triees.forEach(({ o, t }) => {
+    cumul += Number(o.montant) || 0;
+    const x = t === null ? 0 : (Math.min(20, Math.max(8, t)) - 8) / 12;
+    ajouterPoint(points, x, cumul);
   });
+  ajouterPoint(points, 1, cumul);
+  return points;
 }
 
-// Répartition par catégorie
-function loadAndDisplayChartRepartition(startDateISO, endDateISO, ventes) {
-  try {
-    const inRange = buildRangeChecker(startDateISO, endDateISO);
-    const ventesFiltrees = (ventes || []).filter((v) => inRange(v.date || v.saleDate || v.sale_date));
-
-    const categories = {};
-    let totalCA = 0;
-
-    ventesFiltrees.forEach((vente) => {
-      const cat = vente.description || "Sans catégorie";
-      const montant = parseFloat(vente.amount || vente.montant || 0);
-      categories[cat] = (categories[cat] || 0) + montant;
-      totalCA += montant;
-    });
-
-    const top4 = Object.entries(categories)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 4)
-      .map(([cat, val]) => ({ cat, val, percent: (val / totalCA) * 100 || 0 }));
-
-    const colors = ["#a855f7", "#13ecc8", "#fb923c", "#3b82f6"];
-    let svgCircles = "";
-    let strokeDashoffset = 0;
-    const radius = 15.9155;
-    const circumference = 2 * Math.PI * radius;
-
-    top4.forEach((item, idx) => {
-      const dasharray = (item.percent / 100) * circumference;
-      const strokeColor = colors[idx];
-      svgCircles += `
-        <circle cx="18" cy="18" r="${radius}" fill="transparent" stroke="${strokeColor}" stroke-width="3.5" stroke-dasharray="${dasharray} ${circumference}" stroke-dashoffset="${-strokeDashoffset}"/>
-      `;
-      strokeDashoffset += dasharray;
-    });
-
-    function formatTotalForDisplay(total) {
-      // Convertir avec la devise actuelle
-      const currency = getCurrency();
-      const rate = EXCHANGE_RATES[currency] || 1;
-      const convertedAmount = total * rate;
-      
-      // Format compact avec M/K pour les grands nombres (sans symbole)
-      if (convertedAmount >= 1000000) {
-        return (convertedAmount / 1000000).toFixed(1) + "M";
-      } else if (convertedAmount >= 1000) {
-        return (convertedAmount / 1000).toFixed(1) + "K";
-      } else {
-        return convertedAmount.toFixed(0);
-      }
-    }
-
-    const repartitionContainer = document.getElementById("chart-repartition");
-    if (repartitionContainer) {
-      let badgesHTML = '<div class="flex flex-wrap gap-2">';
-      top4.forEach((item, idx) => {
-        badgesHTML += `
-          <span class="px-3 py-2 rounded-full text-sm font-semibold bg-cyan-100 text-cyan-700 dark:bg-cyan-900 dark:text-cyan-200">
-            ${item.cat}: ${item.percent.toFixed(1)}%
-          </span>
-        `;
-      });
-      badgesHTML += "</div>";
-
-      repartitionContainer.innerHTML = `
-        <div>
-          <p class="text-lg font-semibold mb-4">Répartition du CA par Catégorie</p>
-          ${badgesHTML}
-          <div class="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
-            <span class="text-sm text-text-muted-light dark:text-text-muted-dark">Total: </span>
-            <span class="text-lg font-bold">${formatTotalForDisplay(totalCA)}</span>
-          </div>
-        </div>
-      `;
-    }
-
-    console.log("ƒo. Graphique Répartition chargé (filtré)");
-  } catch (error) {
-    console.error("ƒ?O Erreur graphique Répartition:", error);
+// Séries cumulées (entrées, sorties) et opérations de chaque créneau
+function construireSerie(jours, ventes, depenses) {
+  if (jours.length === 0) {
+    return { entrees: [{ x: 0, y: 0 }], sorties: [{ x: 0, y: 0 }], etiquettes: [], seaux: [], heures: false, jours: 0 };
   }
+
+  if (jours.length === 1) {
+    const seaux = Array.from({ length: 12 }, (_, i) => ({ libelle: `${8 + i}h`, ventes: [], depenses: [] }));
+    const idx = (h) => Math.max(0, Math.min(11, Math.floor(h) - 8));
+    ventes.forEach((v) => { const h = heureDecimale(v); if (h !== null) seaux[idx(h)].ventes.push(v); });
+    depenses.forEach((d) => { const h = heureDecimale(d); if (h !== null) seaux[idx(h)].depenses.push(d); });
+    return {
+      entrees: courbeHoraire(ventes),
+      sorties: courbeHoraire(depenses),
+      etiquettes: ["8h", "10h", "12h", "14h", "16h", "18h", "20h"],
+      seaux,
+      heures: true,
+      jours: 1
+    };
+  }
+
+  const n = jours.length;
+  const position = new Map(jours.map((j, i) => [j, i]));
+  const seaux = jours.map((j) => ({
+    libelle: deIso(j).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }),
+    ventes: [],
+    depenses: []
+  }));
+
+  // Total du jour pour chaque créneau, et opérations rangées par jour
+  const parJour = (liste, cle) => {
+    const totaux = Array(n).fill(0);
+    liste.forEach((op) => {
+      const i = position.get(jourDe(op));
+      if (i !== undefined) {
+        totaux[i] += Number(op.montant) || 0;
+        seaux[i][cle].push(op);
+      }
+    });
+    return totaux;
+  };
+
+  // Un point à la fin de chaque jour, valeur cumulée à cet instant
+  const cumulParJour = (totaux) => {
+    const points = [{ x: 0, y: 0 }];
+    let cumul = 0;
+    totaux.forEach((t, i) => {
+      cumul += t;
+      points.push({ x: (i + 1) / n, y: cumul });
+    });
+    return points;
+  };
+
+  const k = Math.min(n, 6);
+  const etiquettes = Array.from({ length: k }, (_, j) => {
+    const i = k === 1 ? 0 : Math.round((j * (n - 1)) / (k - 1));
+    return etiquetteJour(jours[i], n);
+  });
+
+  return {
+    entrees: cumulParJour(parJour(ventes, "ventes")),
+    sorties: cumulParJour(parJour(depenses, "depenses")),
+    etiquettes,
+    seaux,
+    heures: false,
+    jours: n
+  };
+}
+
+// ========== GÉOMÉTRIE DU GRAPHIQUE ==========
+
+// Tracé lissé qui passe par chaque point sans jamais le dépasser
+// (interpolation monotone) : une courbe cumulée ne redescend pas.
+function tracerMonotone(pts) {
+  const n = pts.length;
+  let chemin = `M${pts[0].X.toFixed(1)},${pts[0].Y.toFixed(1)}`;
+  if (n === 1) return chemin;
+
+  const d = [];
+  for (let k = 0; k < n - 1; k++) {
+    const h = pts[k + 1].X - pts[k].X;
+    d.push(h > 0 ? (pts[k + 1].Y - pts[k].Y) / h : 0);
+  }
+  const m = [];
+  m[0] = d[0];
+  m[n - 1] = d[n - 2];
+  for (let k = 1; k < n - 1; k++) {
+    m[k] = d[k - 1] * d[k] > 0 ? (d[k - 1] + d[k]) / 2 : 0;
+  }
+  for (let k = 0; k < n - 1; k++) {
+    if (d[k] === 0) { m[k] = 0; m[k + 1] = 0; continue; }
+    const a = m[k] / d[k], b = m[k + 1] / d[k], s = a * a + b * b;
+    if (s > 9) {
+      const t = 3 / Math.sqrt(s);
+      m[k] = t * a * d[k];
+      m[k + 1] = t * b * d[k];
+    }
+  }
+
+  for (let k = 0; k < n - 1; k++) {
+    const h = pts[k + 1].X - pts[k].X;
+    const c1x = pts[k].X + h / 3, c1y = pts[k].Y + (m[k] * h) / 3;
+    const c2x = pts[k + 1].X - h / 3, c2y = pts[k + 1].Y - (m[k + 1] * h) / 3;
+    chemin += ` C${c1x.toFixed(1)},${c1y.toFixed(1)} ${c2x.toFixed(1)},${c2y.toFixed(1)} ${pts[k + 1].X.toFixed(1)},${pts[k + 1].Y.toFixed(1)}`;
+  }
+  return chemin;
+}
+
+function graphiqueSvg(entrees, sorties) {
+  const { W, H } = GRAPHIQUE;
+  const maxY = Math.max(1, ...entrees.map((p) => p.y), ...sorties.map((p) => p.y)) * 1.12;
+  const versPixels = (pts) => pts.map((p) => ({ X: p.x * W, Y: H - 4 - (p.y / maxY) * (H - 8) }));
+  const pa = versPixels(entrees), pb = versPixels(sorties);
+  const ligneA = tracerMonotone(pa), ligneB = tracerMonotone(pb);
+  const tr = "transition:d .8s cubic-bezier(.2,.8,.2,1)";
+
+  const svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;display:block">` +
+    `<defs><linearGradient id="gDash" x1="0" y1="0" x2="0" y2="1">` +
+    `<stop offset="0%" style="stop-color:var(--cyan);stop-opacity:.45"/>` +
+    `<stop offset="100%" style="stop-color:var(--cyan);stop-opacity:0"/></linearGradient></defs>` +
+    `<path d="${ligneA} L${W},${H} L0,${H} Z" fill="url(#gDash)" style="${tr}"/>` +
+    `<path d="${ligneB}" fill="none" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-dasharray="2 7" style="${tr};stroke:var(--orange);stroke-width:3"/>` +
+    `<path d="${ligneA}" fill="none" vector-effect="non-scaling-stroke" stroke-linecap="round" style="${tr};stroke:var(--cyan);stroke-width:3.5"/>` +
+    `</svg>`;
+
+  return { svg, finY: (pa[pa.length - 1].Y / H * 100).toFixed(2) + "%" };
+}
+
+// ========== AFFICHAGE ==========
+
+// Solde affiché : il glisse vers sa nouvelle valeur, comme dans la maquette
+let soldeAffiche = 0;
+let frameSolde = null;
+
+function afficherSolde(valeur) {
+  const p = formatParts(valeur);
+  document.getElementById("tdbSolde").textContent = p.num;
+  document.getElementById("tdbUnite").textContent = p.unit;
+}
+
+function animerSolde(cible) {
+  cancelAnimationFrame(frameSolde);
+  if (document.hidden) {
+    soldeAffiche = cible;
+    afficherSolde(cible);
+    return;
+  }
+  const depart = soldeAffiche, t0 = performance.now(), duree = 900;
+  const pas = (t) => {
+    const k = Math.min(1, (t - t0) / duree), e = 1 - Math.pow(1 - k, 4);
+    soldeAffiche = k < 1 ? Math.round((depart + (cible - depart) * e) / 100) * 100 : cible;
+    afficherSolde(soldeAffiche);
+    if (k < 1) frameSolde = requestAnimationFrame(pas);
+  };
+  frameSolde = requestAnimationFrame(pas);
+}
+
+// Données du graphe affiché, lues par l'info-bulle au survol
+let grapheCourant = null;
+
+function rendreGraphique(serie) {
+  const { svg, finY } = graphiqueSvg(serie.entrees, serie.sorties);
+  document.getElementById("tdbSvg").innerHTML = svg;
+  document.getElementById("tdbDot").style.top = finY;
+  document.getElementById("tdbXLabels").innerHTML =
+    serie.etiquettes.map((l) => `<span>${echapper(l)}</span>`).join("");
+
+  grapheCourant = serie;
+
+  const zone = document.getElementById("chart-evolution");
+  if (!zone.dataset.survol) {
+    zone.dataset.survol = "1";
+    zone.addEventListener("mousemove", (e) => survolerGraphe(e.clientX));
+    zone.addEventListener("touchmove", (e) => survolerGraphe(e.touches[0].clientX), { passive: true });
+    zone.addEventListener("mouseleave", masquerInfoGraphe);
+    zone.addEventListener("touchend", masquerInfoGraphe);
+  }
+}
+
+function masquerInfoGraphe() {
+  document.getElementById("tdbTip").hidden = true;
+}
+
+// Ligne d'une opération dans l'info-bulle
+function ligneInfo(titre, montant, couleur) {
+  return `<div class="tdb-tip-li"><span>${echapper(titre)}</span><b style="color:${couleur}">${montant}</b></div>`;
+}
+
+// Quatre opérations au plus, puis le nombre des autres
+function listeInfo(liste, titre, signe, couleur, vide) {
+  if (!liste.length) return `<div class="tdb-tip-vide">${vide}</div>`;
+  const haut = liste.slice(0, 4).map((o) => ligneInfo(titre(o), signe + montantCourt(o.montant), couleur)).join("");
+  const reste = liste.length - 4;
+  return haut + (reste > 0 ? `<div class="tdb-tip-vide">+ ${reste} autre${reste > 1 ? "s" : ""}</div>` : "");
+}
+
+// Valeur cumulée au point du curseur : celle du dernier point situé avant lui
+function valeurAu(points, fraction) {
+  let y = points[0].y;
+  for (const p of points) {
+    if (p.x <= fraction) y = p.y;
+    else break;
+  }
+  return y;
+}
+
+function survolerGraphe(clientX) {
+  if (!grapheCourant || !grapheCourant.seaux.length) return;
+  const zone = document.getElementById("chart-evolution");
+  const tip = document.getElementById("tdbTip");
+  const r = zone.getBoundingClientRect();
+  const fraction = Math.min(1, Math.max(0, (clientX - r.left) / r.width));
+
+  const { entrees, sorties, seaux, heures, jours } = grapheCourant;
+  let seau, entre, sortie;
+  if (heures) {
+    seau = seaux[Math.min(11, Math.floor(fraction * 12))];
+    entre = valeurAu(entrees, fraction);
+    sortie = valeurAu(sorties, fraction);
+  } else {
+    // Le jour survolé ; cumul à la fin de ce jour
+    const j = Math.min(jours - 1, Math.floor(fraction * jours));
+    seau = seaux[j];
+    entre = entrees[j + 1].y;
+    sortie = sorties[j + 1].y;
+  }
+
+  tip.innerHTML =
+    `<div class="tdb-tip-h">${echapper(seau.libelle)}</div>` +
+    `<div class="tdb-tip-cum">` +
+    `<span><i style="background:var(--cyan)"></i>Entré ${montantCourt(entre)}</span>` +
+    `<span><i style="background:var(--orange)"></i>Sorti ${montantCourt(sortie)}</span>` +
+    `</div>` +
+    `<div class="tdb-tip-sec">Ventes</div>` +
+    listeInfo(seau.ventes, (v) => v.description || "Vente", "+", "var(--cyanInk)", "Aucune vente") +
+    `<div class="tdb-tip-sec">Dépenses</div>` +
+    listeInfo(seau.depenses, (d) => d.categorie || "Dépense", "−", "var(--ink)", "Aucune dépense");
+
+  tip.hidden = false;
+  const x = fraction * r.width;
+  const largeur = tip.offsetWidth;
+  tip.style.left = (fraction > 0.5 ? x - largeur - 12 : x + 12) + "px";
+}
+
+function dateCourte(iso) {
+  return deIso(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+}
+
+// Titre de la liste selon la période choisie
+function titreOperations(plage) {
+  if (plage.preset === "jour") return "Aujourd'hui";
+  if (plage.preset === "semaine") return "Cette semaine";
+  if (plage.preset === "mois") {
+    const mois = nomMois(plage.fin);
+    return mois.charAt(0).toUpperCase() + mois.slice(1);
+  }
+  return "Sur la période";
+}
+
+// Ventes et dépenses les plus récentes de la période choisie
+function rendreOperations(ops, plage) {
+  const cont = document.getElementById("tdbToday");
+  document.getElementById("tdbOpsTitre").textContent = titreOperations(plage);
+  if (!ops.length) {
+    const quand = plage.preset === "jour" ? "aujourd'hui" : "sur la période";
+    cont.innerHTML = `<div class="tdb-empty">Aucune opération ${quand}.</div>`;
+    return;
+  }
+  const plusieursJours = plage.debut !== plage.fin;
+  cont.innerHTML = ops.map((op) => {
+    const vente = op._type === "vente";
+    const icone = vente ? "sell" : (ICONES_CATEGORIE[op.categorie] || "receipt_long");
+    const couleur = vente ? "var(--cyanInk)" : "var(--orangeInk)";
+    const fond = vente ? "var(--cyanSoft)" : "var(--orangeSoft)";
+    const titre = vente ? (op.description || "Vente") : (op.categorie || "Dépense");
+    const sansJustificatif = vente ? (!op.justificatif && !op.numeroRecu) : !op.justificatif;
+    const quand = plusieursJours ? dateCourte(jourDe(op)) : "";
+    const meta = [quand, heureTexte(op), op.moyen_paiement, op.created_by_name].filter(Boolean).map(echapper).join(" · ");
+    const montant = (vente ? "+" : "−") + montantCourt(op.montant);
+    return `<div class="tdb-op">` +
+      `<span class="material-symbols-rounded tdb-op-ic" style="background:${fond};color:${couleur}">${icone}</span>` +
+      `<div class="tdb-op-b"><div class="tdb-op-t">${echapper(titre)}</div>` +
+      `<div class="tdb-op-m">${meta}${sansJustificatif ? '<span class="tdb-miss" title="Justificatif manquant"></span>' : ""}</div></div>` +
+      `<div class="tdb-op-a" style="color:${vente ? "var(--cyanInk)" : "var(--ink)"}">${montant}</div>` +
+      `</div>`;
+  }).join("");
+}
+
+function rendreAFaire(items) {
+  document.getElementById("tdbTodos").innerHTML = items.map((t) => {
+    const contenu =
+      `<span class="material-symbols-rounded tdb-todo-ic" style="color:${t.couleur}">${t.icone}</span>` +
+      `<div class="tdb-todo-b"><div class="tdb-todo-t">${echapper(t.titre)}</div><div class="tdb-todo-s">${echapper(t.texte)}</div></div>` +
+      `<span class="material-symbols-rounded tdb-chev">chevron_right</span>`;
+    return t.action === "justificatifs"
+      ? `<button type="button" class="tdb-todo" data-ouvrir-justificatifs>${contenu}</button>`
+      : `<a class="tdb-todo" href="${t.lien}">${contenu}</a>`;
+  }).join("");
+}
+
+// ========== JUSTIFICATIFS MANQUANTS (fenêtre ouverte depuis « À faire ») ==========
+let dernierCalcul = null;
+let rechargerDashboard = () => {};
+
+function fenetreJustificatifs() {
+  return document.getElementById("modalJustificatifs");
+}
+
+function ouvrirFenetreJustificatifs() {
+  if (!dernierCalcul) return;
+  rendreJustificatifs(dernierCalcul);
+  fenetreJustificatifs().classList.add("is-open");
+}
+
+function fermerFenetreJustificatifs() {
+  fenetreJustificatifs().classList.remove("is-open");
+}
+
+function ligneJustificatif(op, type) {
+  const id = echapper(op.id);
+  const titre = type === "vente" ? (op.description || "Vente") : (op.categorie || "Dépense");
+  const j = jourDe(op);
+  const date = j ? deIso(j).toLocaleDateString("fr-FR") : "";
+  const p = formatParts(op.montant);
+  const boutonRecu = type === "vente"
+    ? `<button type="button" class="jm-btn jm-btn-recu" data-justif-action="recu" data-type="vente" data-id="${id}"><span class="jm-ic">receipt_long</span>Éditer le reçu</button>`
+    : "";
+  return `<div class="jm-row">
+    <div style="min-width:0">
+      <p class="jm-name">${echapper(titre)}</p>
+      <p class="jm-meta">${echapper(date)} • ${echapper(p.num)} ${echapper(p.unit)}</p>
+    </div>
+    <div class="jm-actions">${boutonRecu}<button type="button" class="jm-btn" data-justif-action="joindre" data-type="${type}" data-id="${id}"><span class="jm-ic">upload</span>Joindre un fichier</button></div>
+  </div>`;
+}
+
+function rendreJustificatifs(v) {
+  const ventes = v.listeVentesSansJustif || [];
+  const depenses = v.listeDepensesSansJustif || [];
+  document.getElementById("listeVentesSansJustif").innerHTML = ventes.length
+    ? ventes.map((o) => ligneJustificatif(o, "vente")).join("")
+    : '<p class="jm-empty">Aucune vente sans justificatif.</p>';
+  document.getElementById("listeDepensesSansJustif").innerHTML = depenses.length
+    ? depenses.map((o) => ligneJustificatif(o, "depense")).join("")
+    : '<p class="jm-empty">Aucune dépense sans justificatif.</p>';
+}
+
+// Éditer le reçu d'une vente : même route que la page Ventes
+async function ouvrirRecuVente(id) {
+  try {
+    const reponse = await fetch(`${API_BASE_URL}/api/sales/${id}/recu`, {
+      headers: { Authorization: `Bearer ${getToken()}` }
+    });
+    const data = await reponse.json();
+    if (!reponse.ok) throw new Error(data.error || "Reçu indisponible");
+    window.open(data.url, "_blank", "noopener");
+  } catch (erreur) {
+    alert("Le reçu n'a pas pu être ouvert : " + erreur.message);
+  }
+}
+
+// Joindre un fichier à une vente ou une dépense, puis recharger le tableau de bord
+function joindreFichier(type, id) {
+  const champ = document.createElement("input");
+  champ.type = "file";
+  champ.accept = ".pdf,.jpg,.jpeg,.png";
+  champ.style.display = "none";
+  document.body.appendChild(champ);
+  champ.addEventListener("change", async () => {
+    const fichier = champ.files[0];
+    document.body.removeChild(champ);
+    if (!fichier) return;
+    if (fichier.size > 5 * 1024 * 1024) {
+      alert("Fichier trop volumineux : 5 Mo maximum.");
+      return;
+    }
+    try {
+      const formData = new FormData();
+      formData.append("receipt", fichier);
+      formData.append("receiptName", fichier.name);
+      const url = type === "vente" ? `${API_BASE_URL}/api/sales/${id}` : `${API_BASE_URL}/api/expenses/${id}`;
+      const reponse = await fetch(url, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${getToken()}` },
+        body: formData
+      });
+      const data = await reponse.json();
+      if (!reponse.ok) throw new Error(data.error || "Envoi impossible");
+      await rechargerDashboard();
+    } catch (erreur) {
+      alert("Le justificatif n'a pas pu être joint : " + erreur.message);
+    }
+  });
+  champ.click();
+}
+
+document.getElementById("tdbTodos").addEventListener("click", (e) => {
+  if (e.target.closest("[data-ouvrir-justificatifs]")) ouvrirFenetreJustificatifs();
+});
+
+document.getElementById("btnFermerJustificatifs").addEventListener("click", fermerFenetreJustificatifs);
+document.getElementById("btnAnnulerJustificatifs").addEventListener("click", fermerFenetreJustificatifs);
+fenetreJustificatifs().addEventListener("click", (e) => {
+  if (e.target === fenetreJustificatifs()) fermerFenetreJustificatifs();
+  const bouton = e.target.closest("[data-justif-action]");
+  if (!bouton) return;
+  if (bouton.dataset.justifAction === "recu") ouvrirRecuVente(bouton.dataset.id);
+  else joindreFichier(bouton.dataset.type, bouton.dataset.id);
+});
+
+function rendreMeilleures(liste) {
+  const cont = document.getElementById("tdbBest");
+  if (!liste.length) {
+    cont.innerHTML = `<div class="tdb-empty">Pas encore de vente sur la période.</div>`;
+    return;
+  }
+  const max = liste[0][1] || 1;
+  cont.innerHTML = liste.map(([nom, v], i) =>
+    `<div class="tdb-best-row">` +
+    `<div class="tdb-best-top"><span>${echapper(nom)}</span><b>${montantCourt(v)}</b></div>` +
+    `<div class="tdb-bar"><i style="width:${(v / max * 100).toFixed(1)}%;background:${COULEURS_MEILLEURES[i]}"></i></div>` +
+    `</div>`
+  ).join("");
+}
+
+function libellePeriode(plage, precedente) {
+  if (plage.preset === "jour") return { phrase: "aujourd'hui", vs: "hier", court: "aujourd'hui" };
+  if (plage.preset === "semaine") return { phrase: "cette semaine", vs: "la semaine dernière", court: "cette semaine" };
+  if (plage.preset === "mois") {
+    const mois = nomMois(plage.fin);
+    return { phrase: `en ${mois}`, vs: nomMois(precedente.debut), court: mois };
+  }
+  return { phrase: "sur la période", vs: "la période précédente", court: "la période" };
+}
+
+// Calcule tout ce que la page affiche à partir des données chargées
+function calculer(donnees, plage) {
+  const prec = periodePrecedente(plage.debut, plage.fin, plage.preset);
+  const dans = (debut, fin) => (op) => {
+    const j = jourDe(op);
+    return j !== null && j >= debut && j <= fin;
+  };
+
+  const ventes = donnees.ventes.filter(dans(plage.debut, plage.fin));
+  const depenses = donnees.depenses.filter(dans(plage.debut, plage.fin));
+  const ventesPrec = donnees.ventes.filter(dans(prec.debut, prec.fin));
+  const depensesPrec = donnees.depenses.filter(dans(prec.debut, prec.fin));
+
+  const entrees = somme(ventes);
+  const sorties = somme(depenses);
+  const net = entrees - sorties;
+  const netPrecedent = somme(ventesPrec) - somme(depensesPrec);
+
+  const auj = plageAujourdhui();
+  const mois = plagePreset("mois");
+  const dansMois = (op) => {
+    const j = jourDe(op);
+    return j !== null && j >= mois.debut && j <= auj;
+  };
+
+  // Opérations de la période, les plus récentes d'abord
+  const cle = (op) => `${jourDe(op)} ${op.created_at || ""}`;
+  const operations = [
+    ...ventes.map((v) => ({ ...v, _type: "vente" })),
+    ...depenses.map((d) => ({ ...d, _type: "depense" }))
+  ].sort((a, b) => cle(b).localeCompare(cle(a))).slice(0, 7);
+
+  const parDescription = {};
+  ventes.forEach((v) => {
+    const nom = (v.description || "").trim() || "Sans description";
+    parDescription[nom] = (parDescription[nom] || 0) + (Number(v.montant) || 0);
+  });
+  const meilleures = Object.entries(parDescription).sort((a, b) => b[1] - a[1]).slice(0, 4);
+
+  const ventesSansJustif = donnees.ventes.filter((v) => dansMois(v) && !v.justificatif && !v.numeroRecu);
+  const depensesSansJustif = donnees.depenses.filter((d) => dansMois(d) && !d.justificatif);
+
+  return {
+    entrees,
+    sorties,
+    net,
+    netPrecedent,
+    variation: variation(net, netPrecedent),
+    serie: construireSerie(joursEntre(plage.debut, plage.fin), ventes, depenses),
+    operations,
+    meilleures,
+    depensesSansJustificatif: depensesSansJustif.length,
+    ventesSansJustificatif: ventesSansJustif.length,
+    listeDepensesSansJustif: depensesSansJustif,
+    listeVentesSansJustif: ventesSansJustif,
+    precedente: prec
+  };
+}
+
+function afficher(donnees, plage) {
+  const v = calculer(donnees, plage);
+  const lib = libellePeriode(plage, v.precedente);
+  dernierCalcul = v;
+  if (fenetreJustificatifs().classList.contains("is-open")) rendreJustificatifs(v);
+
+  document.getElementById("tdbPhrase").textContent = `Ce qui reste ${lib.phrase}`;
+  document.getElementById("tdbVs").textContent = lib.vs;
+  document.getElementById("tdbBestPeriode").textContent = `· ${lib.court}`;
+
+  document.querySelectorAll(".tdb-pill").forEach((b) => {
+    b.classList.toggle("is-on", b.dataset.preset === plage.preset);
+  });
+
+  const pct = v.variation;
+  document.getElementById("tdbTendance").textContent = pct === null
+    ? "—"
+    : `${pct >= 0 ? "+" : "−"}${Math.abs(pct).toFixed(1).replace(".", ",")} %`;
+
+  document.getElementById("kpi-chiffre-affaires").textContent = montantCourt(v.entrees);
+  document.getElementById("kpi-depenses").textContent = montantCourt(v.sorties);
+
+  animerSolde(v.net);
+  rendreGraphique(v.serie);
+  rendreOperations(v.operations, plage);
+
+  const todos = [];
+  todos.push(v.depensesSansJustificatif > 0
+    ? { icone: "photo_camera", titre: `${v.depensesSansJustificatif} dépense${v.depensesSansJustificatif > 1 ? "s" : ""} sans justificatif`, texte: "Ajoutez une photo de la facture", action: "justificatifs", lien: "module_depenses", couleur: "var(--orangeInk)" }
+    : { icone: "task_alt", titre: "Dépenses justifiées", texte: "Rien à compléter ce mois-ci", lien: "module_depenses", couleur: "var(--cyanInk)" });
+  todos.push(v.ventesSansJustificatif > 0
+    ? { icone: "receipt_long", titre: `${v.ventesSansJustificatif} vente${v.ventesSansJustificatif > 1 ? "s" : ""} sans justificatif`, texte: "Joignez un justificatif ou émettez le reçu", action: "justificatifs", lien: "module_ventes", couleur: "var(--orangeInk)" }
+    : { icone: "task_alt", titre: "Ventes justifiées", texte: "Rien à compléter ce mois-ci", lien: "module_ventes", couleur: "var(--cyanInk)" });
+  todos.push({ icone: "description", titre: "Compte de résultat et trésorerie", texte: "Voir les états financiers", lien: "module_etats_financiers", couleur: "var(--navyInk)" });
+  rendreAFaire(todos);
+
+  rendreMeilleures(v.meilleures);
+}
+
+function afficherDateEtBonjour() {
+  const date = new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+  document.getElementById("tdbDate").textContent = date.charAt(0).toUpperCase() + date.slice(1);
+
+  let prenom = "";
+  try {
+    const user = JSON.parse(localStorage.getItem("user") || "null");
+    prenom = user?.firstName || "";
+  } catch (e) {
+    prenom = "";
+  }
+  document.getElementById("tdbHello").textContent = prenom ? `Bonjour ${prenom}` : "Bonjour";
 }
 
 // ========== MÉMOIRE DU DERNIER AFFICHAGE ==========
 // Au rechargement, les chiffres de la dernière visite s'affichent tout de
-// suite, puis sont remplacés par ceux du serveur dès qu'ils arrivent :
-// l'écran n'attend plus le réseau pour montrer quelque chose de juste,
-// à quelques opérations près.
+// suite, puis sont remplacés par ceux du serveur dès qu'ils arrivent.
 //
 // La clé porte l'utilisateur et l'organisation : sur un appareil partagé,
 // personne ne voit les chiffres d'un autre. Seul le mois en cours est
 // conservé, réduit aux champs que le tableau de bord lit.
 // La déconnexion efface ces clés (ogoue-state.js, header-ui.js).
-
 const PREFIXE_MEMOIRE = "ogo_tdb_";
 
 function cleMemoire() {
@@ -616,113 +829,103 @@ function lireMemoire(debut) {
     const memoire = JSON.parse(localStorage.getItem(cle) || "null");
     // Un autre mois : ces chiffres ne correspondent plus à la période.
     if (!memoire || memoire.debut !== debut) return null;
-    return memoire;
+    return { ventes: memoire.ventes || [], depenses: memoire.depenses || [] };
   } catch (e) {
     return null;
   }
 }
 
-function ecrireMemoire(debut, ventes, depenses) {
+function ecrireMemoire(debut, donnees) {
   const cle = cleMemoire();
   if (!cle) return;
   try {
     localStorage.setItem(cle, JSON.stringify({
       debut,
-      ventes: ventes.map((v) => ({
-        date: v.date || v.sale_date || v.saleDate,
-        montant: v.montant ?? v.amount,
-        description: v.description
+      ventes: donnees.ventes.map((v) => ({
+        date: v.date,
+        montant: v.montant,
+        description: v.description,
+        created_at: v.created_at,
+        justificatif: v.justificatif,
+        numeroRecu: v.numeroRecu,
+        moyen_paiement: v.moyen_paiement,
+        created_by_name: v.created_by_name
       })),
-      depenses: depenses.map((d) => ({
-        date: d.date || d.expense_date || d.expenseDate,
-        montant: d.montant ?? d.amount
+      depenses: donnees.depenses.map((d) => ({
+        date: d.date,
+        montant: d.montant,
+        categorie: d.categorie,
+        created_at: d.created_at,
+        justificatif: d.justificatif,
+        moyen_paiement: d.moyen_paiement,
+        created_by_name: d.created_by_name
       }))
     }));
   } catch (e) {
-    // Espace du navigateur plein ou stockage interdit : on s'en passe,
-    // la page attendra simplement le serveur comme avant.
+    // Espace du navigateur plein ou stockage interdit : on s'en passe.
   }
 }
 
-// Charger les KPI et graphiques au lancement de la page + sur changement de filtre
+// ========== DÉMARRAGE ==========
+
 document.addEventListener("DOMContentLoaded", async function () {
-  // Initialiser avec la plage par défaut (mois courant jusqu'à aujourd'hui)
-  function getDefaultDateRange() {
-    const today = new Date();
-    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    return {
-      startDate: startOfMonth.toISOString().slice(0, 10),
-      endDate: today.toISOString().slice(0, 10)
-    };
+  let tentatives = 0;
+  while (!window.OGOUE && tentatives < 50) {
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    tentatives++;
   }
-
-  // ✅ Attendre que window.OGOUE soit disponible
-  let attempts = 0;
-  while (!window.OGOUE && attempts < 50) {
-    await new Promise(resolve => setTimeout(resolve, 100));
-    attempts++;
-  }
-
   if (!window.OGOUE) {
-    console.error("❌ window.OGOUE n'a pas pu être chargé");
+    console.error("window.OGOUE n'a pas pu être chargé");
     return;
   }
 
-  console.log("✅ window.OGOUE est disponible");
+  afficherDateEtBonjour();
 
-  const filterState = getDefaultDateRange();
-  const periodeParDefaut = getDefaultDateRange();
-  // Cache de la dernière période chargée, réutilisé par le changement de devise
-  // (évite de re-télécharger les ventes/dépenses juste pour changer l'affichage)
-  let cachedVentes = [];
-  let cachedDepenses = [];
+  let plage = plagePreset("mois");
+  let etat = null;
+  let jeton = 0;
 
-  function afficher(ventes, depenses) {
-    loadAndDisplayKPI(filterState.startDate, filterState.endDate, ventes, depenses);
-    loadAndDisplayChartEvolution(filterState.startDate, filterState.endDate, ventes);
-    loadAndDisplayChartRepartition(filterState.startDate, filterState.endDate, ventes);
+  function rendre() {
+    if (etat) afficher(etat.donnees, etat.plage);
   }
 
-  // Seule la période par défaut (le mois en cours) est mémorisée : c'est
-  // celle qu'on retrouve à chaque rechargement.
-  const surPeriodeParDefaut = () =>
-    filterState.startDate === periodeParDefaut.startDate
-    && filterState.endDate === periodeParDefaut.endDate;
+  rechargerDashboard = () => rafraichir(plage);
 
-  async function refreshDashboard() {
-    const { ventes, depenses } = await fetchPeriodData(filterState.startDate, filterState.endDate);
-    cachedVentes = ventes;
-    cachedDepenses = depenses;
-    afficher(ventes, depenses);
-    if (surPeriodeParDefaut()) ecrireMemoire(filterState.startDate, ventes, depenses);
+  async function rafraichir(nouvelle) {
+    const mon = ++jeton;
+    plage = nouvelle;
+    const donnees = await chargerDonnees(plage);
+    if (mon !== jeton) return;
+    etat = { plage, donnees };
+    rendre();
+    if (plage.preset === "mois") ecrireMemoire(plage.debut, donnees);
   }
 
-  // Écoute le filtre de date (événement dispatché par le datepicker du HTML)
-  document.addEventListener("dashboard:dateRangeChanged", async (e) => {
+  // Périodes rapides : le sélecteur de date du HTML fait le reste
+  document.querySelectorAll(".tdb-pill").forEach((b) => {
+    b.addEventListener("click", () => {
+      const p = plagePreset(b.dataset.preset);
+      document.dispatchEvent(new CustomEvent("dashboard:presetRange", {
+        detail: { startDate: p.debut, endDate: p.fin }
+      }));
+    });
+  });
+
+  // Filtre par date (calendrier ou périodes rapides)
+  document.addEventListener("dashboard:dateRangeChanged", (e) => {
     const { startDate, endDate } = e.detail || {};
-    filterState.startDate = startDate || null;
-    filterState.endDate = endDate || null;
-    await refreshDashboard();
+    if (!startDate) return;
+    rafraichir(plageDepuis(startDate, endDate || startDate));
   });
 
-  // Écoute le changement de devise depuis les préférences
-  document.addEventListener("currency:changed", (e) => {
-    console.log("🎯 EVENT currency:changed reçu!");
-    const { currency } = e.detail || {};
-    console.log("💱 Devise changée vers:", currency);
-    console.log("📊 Recharging charts with filterState:", filterState);
-    // Recharger uniquement l'affichage avec la nouvelle devise (données déjà en cache)
-    loadAndDisplayChartEvolution(filterState.startDate, filterState.endDate, cachedVentes);
-    loadAndDisplayChartRepartition(filterState.startDate, filterState.endDate, cachedVentes);
-  });
+  // Changement de devise : on réaffiche sans re-télécharger
+  document.addEventListener("currency:changed", () => rendre());
 
-  // Premier affichage (plage par défaut: mois en cours jusqu'à aujourd'hui).
-  // Les chiffres mémorisés d'abord, s'il y en a, puis ceux du serveur.
-  const memoire = lireMemoire(filterState.startDate);
+  // Premier affichage : la mémoire d'abord, puis le serveur
+  const memoire = lireMemoire(plage.debut);
   if (memoire) {
-    cachedVentes = memoire.ventes || [];
-    cachedDepenses = memoire.depenses || [];
-    afficher(cachedVentes, cachedDepenses);
+    etat = { plage, donnees: memoire };
+    rendre();
   }
-  await refreshDashboard();
+  await rafraichir(plage);
 });

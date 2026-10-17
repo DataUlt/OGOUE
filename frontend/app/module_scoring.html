@@ -8,11 +8,10 @@
 
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-
-  <!-- Fonts & icons -->
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 
   <script>
@@ -21,67 +20,53 @@
       theme: {
         extend: {
           colors: {
-            /* Palette OGOUE - Redesign */
-            "primary": "#0088CC",
-            "secondary": "#1E3A5F",
-            "background-light": "#f6f8f6",
-            "background-dark": "#111712",
+            /* Palette OGOUE v2 — fond blanc, marine du logo, cyan de la vague, orange de la flèche */
+            "primary": "#0B2A5B",
+            "secondary": "#0B2A5B",
+            "ink": "#0B1F3F",
+            "ink2": "#4A5870",
+            "muted": "#7A869A",
+            "soft": "#F4F6F9",
+            "soft2": "#EBEFF4",
+            "line": "#E7EBF0",
+            "hero": "#0B2A5B",
+            "cyan": { DEFAULT: "#14B8D9", ink: "#007C96", soft: "#E2F6FA" },
+            "orange": { DEFAULT: "#F2A04B", ink: "#A65A0F", soft: "#FDF0E1" },
+            /* Noms conservés pour dashboard.js et les modules existants */
+            "background-light": "#FFFFFF",
+            "background-dark": "#0A111F",
             "card-light": "#FFFFFF",
-            "card-dark": "#1a2622",
-            "text-light-primary": "#0a0c0a",
-            "text-dark-primary": "#f6f8f6",
-            "text-light-secondary": "#5c6c60",
-            "text-dark-secondary": "#9ca3a8",
-            "border-light": "#e8ede8",
-            "border-dark": "#2a3a32",
-            "success": "#27AE60",
-            "danger": "#E74C3C",
+            "card-dark": "#121B2D",
+            "text-light-primary": "#0B1F3F",
+            "text-dark-primary": "#F1F4F9",
+            "text-light-secondary": "#4A5870",
+            "text-dark-secondary": "#B2BDCF",
+            "border-light": "#E7EBF0",
+            "border-dark": "#1E2A41",
+            "success": "#007C96",
+            "danger": "#A65A0F"
           },
-          fontFamily: { "display": ["Manrope", "sans-serif"] },
-          borderRadius: {
-            "DEFAULT": "1rem",
-            "lg": "2rem",
-            "xl": "3rem",
-            "full": "9999px"
-          },
-          boxShadow: {
-            "soft": "0 8px 20px rgba(29, 226, 46, 0.08)"
-          }
-        },
-      },
-    }
+          fontFamily: { display: ["Geist", "system-ui", "sans-serif"] },
+          boxShadow: { soft: "0 1px 2px rgba(11,31,63,.06), 0 4px 14px -6px rgba(11,31,63,.14)" }
+        }
+      }
+    };
   </script>
-
   <style>
-    .material-symbols-outlined {
-      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
-    }
-    .circular-chart {
-      display: block;
-      margin: 0 auto;
-      max-width: 100%;
-      max-height: 250px;
-    }
-    .circle-bg {
-      fill: none;
-      stroke: #e7f3f1;
-      stroke-width: 2.5;
-    }
-    .circle {
-      fill: none;
-      stroke-width: 2.5;
-      stroke-linecap: round;
-      animation: progress 1s ease-out forwards;
-    }
-    @keyframes progress {
-      0% { stroke-dasharray: 0 100; }
-    }
-    .loading {
-      opacity: 0.5;
-      pointer-events: none;
-    }
+    .material-symbols-rounded { font-variation-settings: 'FILL' 0, 'wght' 450, 'GRAD' 0, 'opsz' 24; user-select: none; }
+    .icon-fill { font-variation-settings: 'FILL' 1, 'wght' 450, 'GRAD' 0, 'opsz' 24; }
+    .tabular { font-variant-numeric: tabular-nums; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
+    /* Tableau du jour : assez compact pour que toutes les colonnes restent visibles */
+    @media (min-width: 768px) { .section-jour { margin-left: -2.75rem; margin-right: -2.75rem; } }
+    .tableau-compact table { font-size: 13px; }
+    .tableau-compact th, .tableau-compact td { padding-left: .625rem; padding-right: .625rem; }
+    .tableau-compact .commentaire-complet { max-width: 14rem; }
+    .no-scrollbar { scrollbar-width: none; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
   </style>
-    <!-- Restriction d'acces : un agent est redirige vers ses propres pages -->
     <script src="js/role-guard.js"></script>
 </head>
 
@@ -135,177 +120,110 @@
   </header>
   <!-- ===== FIN HEADER ===== -->
 
-  <!-- MAIN -->
-  <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <!-- Page Heading -->
-    <div class="flex flex-col gap-2 mb-8">
-      <h1 class="text-[#0a0c0a] dark:text-white text-3xl sm:text-4xl font-black leading-tight tracking-[-0.033em]">
-        Parcours de financement
-      </h1>
-      <p class="text-gray-500 dark:text-gray-400 text-base sm:text-lg font-normal leading-normal max-w-3xl">
-        Découvrez votre score de traçabilité et préparez votre entreprise au financement.
-      </p>
-    </div>
-
-    <!-- ONGLETS -->
-    <div class="border-b border-gray-200 dark:border-gray-700 mb-8">
-      <nav class="flex gap-8 -mb-px overflow-x-auto">
-        <a href="module_scoring"
-           class="flex items-center gap-2 border-b-[3px] border-b-primary text-[#0a0c0a] dark:text-white pb-3 pt-4 px-2 whitespace-nowrap">
-          <span class="text-sm font-bold tracking-[0.015em]">Score de traçabilité</span>
-        </a>
-        <a href="module_depot_dossier"
-           class="flex items-center gap-2 border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 pb-3 pt-4 px-2 whitespace-nowrap">
-          <span class="text-sm font-bold tracking-[0.015em]">Nos partenaires</span>
-        </a>
-      </nav>
-    </div>
-
-    <!-- Content Grid -->
-    <div class="w-full flex flex-col lg:grid lg:grid-cols-12 gap-6">
-      <!-- Left Column: Main Score & Stats (8 cols) -->
-      <div class="lg:col-span-8 flex flex-col gap-6">
-        <!-- Hero Score Card -->
-        <div class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-[#e7f3f1] dark:border-[#1e3b36] p-6 sm:p-8 flex flex-col sm:flex-row items-center sm:items-start gap-8">
-          <!-- Circular Gauge -->
-          <div class="relative size-40 sm:size-48 flex-shrink-0">
-            <svg class="circular-chart text-primary w-full h-full transform -rotate-90" viewbox="0 0 36 36">
-              <path class="circle-bg stroke-gray-100 dark:stroke-gray-700" d="M18 2.0845
-                                  a 15.9155 15.9155 0 0 1 0 31.831
-                                  a 15.9155 15.9155 0 0 1 0 -31.831"></path>
-              <path id="globalScoreCircle" class="circle stroke-current" d="M18 2.0845
-                                  a 15.9155 15.9155 0 0 1 0 31.831
-                                  a 15.9155 15.9155 0 0 1 0 -31.831" stroke-dasharray="0, 100"></path>
+  <!-- MAIN (maquette) -->
+  <main class="flex-grow pb-14">
+    <div class="mx-auto flex w-full max-w-[1120px] flex-col gap-6 md:gap-8 px-[18px] pt-2 md:px-11 md:pt-10">
+      <div>
+        <h1 class="text-[30px] md:text-[40px] font-semibold leading-tight tracking-[-0.04em]">Financement</h1>
+        <p class="mt-1.5 text-[15.5px] text-ink2">Découvrez votre score de traçabilité et préparez votre entreprise au financement.</p>
+      </div>
+      <div class="border-b border-line">
+      <!-- ONGLETS -->
+      <div class="mb-8">
+        <nav class="flex gap-8 -mb-px overflow-x-auto">
+          <a href="module_scoring"
+             class="flex items-center gap-2 border-b-[3px] border-b-primary text-[#0a0c0a] dark:text-white pb-3 pt-4 px-2 whitespace-nowrap">
+            <span class="text-sm font-bold tracking-[0.015em]">Score de traçabilité</span>
+          </a>
+          <a href="module_depot_dossier"
+             class="flex items-center gap-2 border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 pb-3 pt-4 px-2 whitespace-nowrap">
+            <span class="text-sm font-bold tracking-[0.015em]">Nos partenaires</span>
+          </a>
+        </nav>
+      </div>
+      </div>
+      <!-- ===== SCORE (valeurs remplies par le script de la page) ===== -->
+        <section class="grid grid-cols-1 items-center gap-7 rounded-[28px] bg-hero p-[22px] text-white md:grid-cols-[auto_minmax(0,1fr)] md:gap-11 md:rounded-[34px] md:p-[34px]">
+          <div class="relative mx-auto size-[170px] md:mx-0 md:size-[210px]">
+            <svg viewBox="0 0 36 36" class="size-full">
+              <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="3.2"></path>
+              <path id="globalScoreCircle" class="circle stroke-current text-cyan" d="M18 2.0845
+                    a 15.9155 15.9155 0 0 1 0 31.831
+                    a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="3.2" stroke-linecap="round" stroke-dasharray="0, 100" style="transition: stroke-dasharray .8s ease"></path>
             </svg>
             <div class="absolute inset-0 flex flex-col items-center justify-center">
-              <span id="globalScoreValue" class="text-4xl font-black text-[#0a0c0a] dark:text-white tracking-tighter">—</span>
-              <span class="text-xs font-medium text-gray-400 uppercase tracking-widest mt-1">Global</span>
+              <span id="globalScoreValue" class="tabular text-[44px] md:text-[54px] font-semibold leading-none tracking-[-0.05em]">—</span>
+              <span class="mt-1.5 text-[12px] font-semibold uppercase tracking-[.12em] text-white/60">Global</span>
             </div>
           </div>
 
-          <!-- Description -->
-          <div class="flex flex-col gap-3 items-center sm:items-start text-center sm:text-left flex-1">
-            <div id="scoreBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
-              <span class="material-symbols-outlined text-sm font-bold">verified</span>
-              <span class="text-sm font-bold" id="scoreBadgeText">Excellent niveau de traçabilité</span>
+          <div class="flex flex-col gap-3.5">
+            <div id="scoreBadge" class="inline-flex h-[30px] items-center gap-1.5 self-start rounded-full bg-white/10 px-3">
+              <span class="material-symbols-rounded icon-fill text-[17px] text-cyan">verified</span>
+              <span id="scoreBadgeText" class="text-[13.5px] font-semibold">Niveau de traçabilité</span>
             </div>
-            <h3 class="text-xl font-bold text-[#0a0c0a] dark:text-white">Score de traçabilité</h3>
-            <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
-              Ce score mesure la part de vos ventes et dépenses associées à un justificatif valide. Un score élevé augmente vos chances d'obtenir un financement.
-            </p>
-            <!-- Mini Legend -->
-            <div class="mt-2 flex gap-2 text-xs text-gray-400">
-              <div class="flex items-center gap-1"><div class="size-2 rounded-full bg-red-400"></div>&lt;40%</div>
-              <div class="flex items-center gap-1"><div class="size-2 rounded-full bg-orange-400"></div>40-70%</div>
-              <div class="flex items-center gap-1"><div class="size-2 rounded-full bg-[#27AE60]"></div>&gt;70%</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Detailed Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Sales Card -->
-          <div class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-[#e7f3f1] dark:border-[#1e3b36] p-6 flex flex-col gap-4">
-            <div class="flex justify-between items-start">
-              <div class="bg-cyan-50 dark:bg-cyan-900/20 p-2 rounded-lg text-primary">
-                <span class="material-symbols-outlined">shopping_cart</span>
+            <h2 class="text-[24px] md:text-[26px] font-semibold tracking-[-0.03em]">Score de traçabilité</h2>
+            <p class="max-w-[540px] text-[15.5px] leading-relaxed text-white/80">Ce score mesure la part de vos ventes et dépenses associées à un justificatif valide. Un score élevé augmente vos chances d'obtenir un financement.</p>
+            <div class="mt-1.5 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+              <div class="flex flex-col gap-2.5 rounded-[20px] bg-white/[.07] p-4">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="flex items-center gap-2 text-[13.5px] text-white/75"><span class="material-symbols-rounded text-[19px]">shopping_cart</span>Ventes justifiées</span>
+                  <span id="salesBadge" class="rounded-full bg-white/[.12] px-2 py-0.5 text-[12px] font-bold text-white">—</span>
+                </div>
+                <div class="flex items-baseline gap-1.5">
+                  <span id="salesScore" class="tabular text-[24px] font-semibold tracking-[-0.03em]">—</span>
+                  <span id="salesTotalSpan" class="tabular text-[14px] text-white/60">/ —</span>
+                </div>
+                <div class="h-1.5 w-full overflow-hidden rounded-full bg-white/[.12]"><div id="salesProgress" class="h-full rounded-full" style="width: 0%; background-color: #14B8D9;"></div></div>
+                <p id="salesMessage" class="text-[12.5px] font-medium text-cyan">—</p>
               </div>
-              <span id="salesBadge" class="text-primary dark:text-cyan-400 font-bold text-sm bg-cyan-100 dark:bg-cyan-900/40 px-2 py-0.5 rounded">—</span>
-            </div>
-            <div>
-              <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Ventes justifiées</p>
-              <div class="flex items-baseline gap-2 mt-1">
-                <h4 id="salesScore" class="text-2xl font-bold text-[#0a0c0a] dark:text-white">—</h4>
-                <span class="text-sm text-gray-400 font-medium" id="salesTotalSpan">/ —</span>
-              </div>
-            </div>
-            <!-- Progress Bar -->
-            <div class="flex flex-col gap-2">
-              <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5">
-                <div id="salesProgress" class="h-2.5 rounded-full" style="width: 0%; background-color: #0088CC;"></div>
-              </div>
-              <p id="salesMessage" class="text-xs text-primary font-medium mt-1">—</p>
-            </div>
-          </div>
-
-          <!-- Expenses Card -->
-          <div class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-[#e7f3f1] dark:border-[#1e3b36] p-6 flex flex-col gap-4">
-            <div class="flex justify-between items-start">
-              <div class="bg-cyan-50 dark:bg-cyan-900/20 p-2 rounded-lg text-primary">
-                <span class="material-symbols-outlined">receipt_long</span>
-              </div>
-              <span id="expensesBadge" class="text-primary dark:text-cyan-400 font-bold text-sm bg-cyan-100 dark:bg-cyan-900/40 px-2 py-0.5 rounded">—</span>
-            </div>
-            <div>
-              <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Dépenses justifiées</p>
-              <div class="flex items-baseline gap-2 mt-1">
-                <h4 id="expensesScore" class="text-2xl font-bold text-[#0a0c0a] dark:text-white">—</h4>
-                <span class="text-sm text-gray-400 font-medium" id="expensesTotalSpan">/ —</span>
-              </div>
-            </div>
-            <!-- Progress Bar -->
-            <div class="flex flex-col gap-2">
-              <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5">
-                <div id="expensesProgress" class="h-2.5 rounded-full" style="width: 0%; background-color: #0088CC;"></div>
-              </div>
-              <p id="expensesMessage" class="text-xs text-primary font-medium mt-1">—</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Right Column: Education & Actions (4 cols) -->
-      <div class="lg:col-span-4 flex flex-col gap-6">
-        <!-- Education Block -->
-        <div class="bg-[#10221f] rounded-xl p-6 text-white relative overflow-hidden group">
-          <!-- Abstract Background pattern -->
-          <div class="absolute top-0 right-0 size-32 bg-primary/20 rounded-full blur-2xl group-hover:bg-primary/30 transition-all"></div>
-          <div class="relative z-10 flex flex-col gap-3">
-            <div class="flex items-center gap-2 mb-1 text-primary">
-              <span class="material-symbols-outlined">lightbulb</span>
-              <span class="text-xs font-bold uppercase tracking-wider">Info</span>
-            </div>
-            <h3 class="text-lg font-bold">Qu'est-ce que le score ?</h3>
-            <p class="text-gray-300 text-sm leading-relaxed">
-Un score est un indicateur synthétique qui résume une situation à partir de plusieurs données.
-Il permet d'évaluer rapidement un niveau, de comparer et de suivre une évolution dans le temps.            </p>
-          </div>
-        </div>
-
-        <!-- Action Checklist -->
-        <div class="bg-white dark:bg-card-dark rounded-xl border border-[#e7f3f1] dark:border-[#1e3b36] shadow-sm p-6 flex-1">
-          <h3 class="text-lg font-bold text-[#0a0c0a] dark:text-white mb-4">Comment améliorer mon score de traçabilité?</h3>
-          <div class="flex flex-col gap-4">
-            <!-- Action Item 1 -->
-            <div class="flex gap-3 items-start group">
-              <div class="mt-0.5 min-w-[20px]">
-                <span class="material-symbols-outlined text-primary text-xl">add_a_photo</span>
-              </div>
-              <div class="flex flex-col">
-                <p class="text-sm font-semibold text-[#0a0c0a] dark:text-gray-200 group-hover:text-primary transition-colors cursor-pointer">Ajouter les justificatifs manquants</p>
-                <p class="text-xs text-gray-500">Prenez en photo vos factures et reçus récents.</p>
-              </div>
-            </div>
-            <div class="h-px bg-gray-100 dark:bg-gray-800 w-full"></div>
-
-            <!-- Action Item 3 -->
-            <div class="flex gap-3 items-start group">
-              <div class="mt-0.5 min-w-[20px]">
-                <span class="material-symbols-outlined text-primary text-xl">update</span>
-              </div>
-              <div class="flex flex-col">
-                <p class="text-sm font-semibold text-[#0a0c0a] dark:text-gray-200 group-hover:text-primary transition-colors cursor-pointer">Mise à jour régulière</p>
-                <p class="text-xs text-gray-500">Connectez-vous chaque semaine pour valider vos comptes.</p>
+              <div class="flex flex-col gap-2.5 rounded-[20px] bg-white/[.07] p-4">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="flex items-center gap-2 text-[13.5px] text-white/75"><span class="material-symbols-rounded text-[19px]">receipt_long</span>Dépenses justifiées</span>
+                  <span id="expensesBadge" class="rounded-full bg-white/[.12] px-2 py-0.5 text-[12px] font-bold text-white">—</span>
+                </div>
+                <div class="flex items-baseline gap-1.5">
+                  <span id="expensesScore" class="tabular text-[24px] font-semibold tracking-[-0.03em]">—</span>
+                  <span id="expensesTotalSpan" class="tabular text-[14px] text-white/60">/ —</span>
+                </div>
+                <div class="h-1.5 w-full overflow-hidden rounded-full bg-white/[.12]"><div id="expensesProgress" class="h-full rounded-full" style="width: 0%; background-color: #14B8D9;"></div></div>
+                <p id="expensesMessage" class="text-[12.5px] font-medium text-cyan">—</p>
               </div>
             </div>
           </div>
+        </section>
 
-          <button class="mt-6 w-full py-2.5 rounded-lg bg-primary hover:bg-[#0fdaba] text-[#0a0c0a] font-bold text-sm transition-colors flex items-center justify-center gap-2" id="addDocumentBtn">
-            <span class="material-symbols-outlined text-lg">upload_file</span>
-            Ajouter un document
-          </button>
-        </div>
-      </div>
+        <section class="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1.55fr)_minmax(300px,1fr)]">
+          <div class="flex flex-col">
+            <h2 class="mb-1.5 text-[20px] font-semibold tracking-[-0.025em]">Comment améliorer mon score de traçabilité?</h2>
+            <div class="flex items-center gap-3.5 border-b border-line py-4 dark:border-border-dark">
+              <span class="material-symbols-rounded flex h-[46px] w-[46px] shrink-0 items-center justify-center rounded-[15px] bg-orange-soft text-[22px] text-orange-ink">add_a_photo</span>
+              <div class="min-w-0 flex-1">
+                <p class="text-[15px] font-semibold">Ajouter les justificatifs manquants</p>
+                <p class="text-[13.5px] text-ink2 dark:text-text-dark-secondary">Prenez en photo vos factures et reçus récents.</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3.5 border-b border-line py-4 dark:border-border-dark">
+              <span class="material-symbols-rounded flex h-[46px] w-[46px] shrink-0 items-center justify-center rounded-[15px] bg-cyan-soft text-[22px] text-cyan-ink dark:bg-cyan/10">update</span>
+              <div class="min-w-0 flex-1">
+                <p class="text-[15px] font-semibold">Mise à jour régulière</p>
+                <p class="text-[13.5px] text-ink2 dark:text-text-dark-secondary">Connectez-vous chaque semaine pour valider vos comptes.</p>
+              </div>
+            </div>
+            <button id="addDocumentBtn" type="button" class="mt-5 flex h-[56px] items-center justify-center gap-2 self-start rounded-full bg-primary px-6 text-[15.5px] font-semibold text-white shadow-[0_12px_28px_-14px_rgba(11,42,91,.6)]">
+              <span class="material-symbols-rounded text-[21px]">upload_file</span>Ajouter un document
+            </button>
+          </div>
+
+          <div class="flex flex-col gap-2.5 rounded-[26px] bg-soft p-[22px] dark:bg-card-dark">
+            <div class="flex items-center gap-2 text-cyan-ink">
+              <span class="material-symbols-rounded text-[20px]">lightbulb</span>
+              <span class="text-[12.5px] font-bold uppercase tracking-[.08em]">Info</span>
+            </div>
+            <h3 class="text-[17px] font-semibold">Qu'est-ce que le score ?</h3>
+            <p class="text-[14.5px] leading-relaxed text-ink2 dark:text-text-dark-secondary">Un score est un indicateur synthétique qui résume une situation à partir de plusieurs données. Il permet d'évaluer rapidement un niveau, de comparer et de suivre une évolution dans le temps.</p>
+          </div>
+        </section>
     </div>
   </main>
 
