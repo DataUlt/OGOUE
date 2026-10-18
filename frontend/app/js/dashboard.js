@@ -675,7 +675,6 @@ function rendreMeilleures(liste, totalCA) {
   cont.innerHTML = liste.map(([nom, v], i) =>
     `<div class="tdb-best-row">` +
     `<div class="tdb-best-top"><span>${echapper(nom)}</span><b>${montantCourt(v)} <span class="tdb-pct">· ${totalCA > 0 ? (v / totalCA * 100).toFixed(1).replace(".", ",") : "0,0"} %</span></b></div>` +
-    `<div class="tdb-bar"><i style="width:${(v / max * 100).toFixed(1)}%;background:${COULEURS_MEILLEURES[i]}"></i></div>` +
     `</div>`
   ).join("");
 }
