@@ -88,12 +88,12 @@ function loadRepartitions(ventes, depenses) {
     entries.forEach(([ desc, montant ], idx) => {
       const percent = totalVentes > 0 ? ((montant / totalVentes) * 100) : 0;
       const html = `
-        <div class="flex items-center gap-4 border-t border-gray-200 dark:border-gray-700/50 py-4">
+        <div class="flex items-center gap-4 border-t border-white/15 py-4">
           <div class="flex flex-col gap-1 flex-1">
-            <p class="text-sm font-normal leading-normal text-gray-500 dark:text-gray-400">${desc}</p>
-            <p class="text-base font-semibold leading-normal text-gray-800 dark:text-gray-200">${formatMontant(montant)}</p>
+            <p class="text-sm font-normal leading-normal text-white/75">${desc}</p>
+            <p class="text-base font-semibold leading-normal text-white">${formatMontant(montant)}</p>
           </div>
-          <div class="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-xs font-bold text-gray-700 flex-shrink-0">
+          <div class="w-12 h-12 rounded-full bg-white/15 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
             ${percent.toFixed(1)}%
           </div>
         </div>
@@ -121,10 +121,10 @@ function loadRepartitions(ventes, depenses) {
       const html = `
         <div class="flex items-center gap-4 py-4">
           <div class="flex flex-col gap-1 flex-1">
-            <p class="text-sm font-normal leading-normal text-gray-500 dark:text-gray-400">Total encaissé en ${paiement}</p>
-            <p class="text-base font-semibold leading-normal text-gray-800 dark:text-gray-200">${formatMontant(montant)}</p>
+            <p class="text-sm font-normal leading-normal text-white/75">Total encaissé en ${paiement}</p>
+            <p class="text-base font-semibold leading-normal text-white">${formatMontant(montant)}</p>
           </div>
-          <div class="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-xs font-bold text-gray-700 flex-shrink-0">
+          <div class="w-12 h-12 rounded-full bg-white/15 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
             ${percent.toFixed(0)}%
           </div>
         </div>
@@ -154,10 +154,10 @@ function loadRepartitions(ventes, depenses) {
       const html = `
         <div class="flex items-center gap-4 py-4">
           <div class="flex flex-col gap-1 flex-1">
-            <p class="text-sm font-normal leading-normal text-gray-500 dark:text-gray-400">Total payé en ${paiement}</p>
-            <p class="text-base font-semibold leading-normal text-gray-800 dark:text-gray-200">${formatMontant(montant)}</p>
+            <p class="text-sm font-normal leading-normal text-white/75">Total payé en ${paiement}</p>
+            <p class="text-base font-semibold leading-normal text-white">${formatMontant(montant)}</p>
           </div>
-          <div class="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-xs font-bold text-gray-700 flex-shrink-0">
+          <div class="w-12 h-12 rounded-full bg-white/15 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
             ${percent.toFixed(0)}%
           </div>
         </div>
@@ -180,9 +180,9 @@ function loadRepartitions(ventes, depenses) {
     const entries = Object.entries(depensesParCat).sort((a, b) => b[1] - a[1]);
     entries.forEach(([ cat, montant ]) => {
       const html = `
-        <div class="flex justify-between py-4 border-t border-gray-200 dark:border-gray-700/50">
-          <p class="text-sm font-normal text-gray-500 dark:text-gray-400">${cat}</p>
-          <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">${formatMontant(montant)}</p>
+        <div class="flex justify-between py-4 border-t border-white/15">
+          <p class="text-sm font-normal text-white/75">${cat}</p>
+          <p class="text-sm font-semibold text-white">${formatMontant(montant)}</p>
         </div>
       `;
       containerDepenses.innerHTML += html;
