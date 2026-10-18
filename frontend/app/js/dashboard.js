@@ -546,7 +546,7 @@ function rendreOperations(ops, plage) {
 function rendreAFaire(items) {
   document.getElementById("tdbTodos").innerHTML = items.map((t) => {
     const contenu =
-      `<span class="material-symbols-rounded tdb-todo-ic" style="color:${t.couleur}">${t.icone}</span>` +
+      `<span class="material-symbols-rounded tdb-todo-ic" style="color:var(--navyInk)">${t.icone}</span>` +
       `<div class="tdb-todo-b"><div class="tdb-todo-t">${echapper(t.titre)}</div><div class="tdb-todo-s">${echapper(t.texte)}</div></div>` +
       `<span class="material-symbols-rounded tdb-chev">chevron_right</span>`;
     return t.action === "justificatifs"
