@@ -22,7 +22,7 @@
                 extend: {
                     colors: {
                         /* Palette OGOUE - Redesign */
-                        "primary": "#0088CC",
+                        "primary": "#0B2A5B",
                         "secondary": "#1E3A5F",
                         "background-light": "#f6f8f6",
                         "background-dark": "#111712",
@@ -55,6 +55,212 @@
     <style>
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+    <!-- Tableau de bord : valeurs de la maquette « OGOUE Refonte », portées à la page -->
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,300..600,0..1,-25..200&display=swap" rel="stylesheet"/>
+    <style>
+        .tdb {
+            --bg: #FFFFFF; --soft: #F4F6F9; --soft2: #EBEFF4; --line: #E7EBF0;
+            --ink: #0B1F3F; --ink2: #4A5870; --muted: #7A869A;
+            --hero: #0B2A5B; --cyan: #14B8D9; --cyanInk: #007C96; --cyanSoft: #E2F6FA;
+            --orange: #F2A04B; --orangeInk: #A65A0F; --orangeSoft: #FDF0E1;
+            --navyInk: #0B2A5B;
+            min-height: 100vh;
+            background: #EEF1F5;
+            color: var(--ink);
+            font-family: 'Geist', system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .tdb a { color: var(--cyanInk); font-weight: 600; text-decoration: none; }
+        .tdb a:hover { text-decoration: underline; }
+        .tdb .tdb-qlink { color: var(--ink); }
+        .tdb .tdb-qbtn-exp { color: var(--orangeInk); }
+        .tdb .tdb-qbtn-sale { color: #06243A; }
+        .tdb .tdb-mbtn-sale { color: #06243A; }
+        .tdb .tdb-mbtn-exp { color: var(--orangeInk); }
+        .tdb .tdb-todo { color: var(--ink); }
+        .tdb button.tdb-todo { width: 100%; background: none; border: 0; border-top: 1px solid var(--line); text-align: left; font: inherit; cursor: pointer; }
+        #modalJustificatifs { display: none; position: fixed; inset: 0; z-index: 50; align-items: center; justify-content: center; padding: 16px; background: rgba(15,23,42,.45); font-family: 'Geist', system-ui, sans-serif; color: #111827; }
+        #modalJustificatifs.is-open { display: flex; }
+        .jm-ic { font-family: 'Material Symbols Rounded'; font-weight: normal; font-style: normal; font-size: 18px; line-height: 1; letter-spacing: normal; text-transform: none; display: inline-block; white-space: nowrap; direction: ltr; -webkit-font-smoothing: antialiased; font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20; user-select: none; }
+        .jm-panel { width: 100%; max-width: 740px; max-height: 92vh; display: flex; flex-direction: column; background: #fff; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,.2); overflow: hidden; }
+        .jm-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 24px 28px; border-bottom: 1px solid #EEF0F3; }
+        .jm-title { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; color: #0F172A; }
+        .jm-close { border: 0; background: none; color: #9CA3AF; cursor: pointer; padding: 4px; display: flex; }
+        .jm-close .jm-ic { font-size: 24px; }
+        .jm-body { flex: 1; overflow-y: auto; padding: 24px 28px; display: flex; flex-direction: column; gap: 28px; }
+        .jm-h { margin: 0 0 18px; font-size: 20px; font-weight: 600; color: #0F172A; }
+        .jm-list { display: flex; flex-direction: column; gap: 14px; }
+        .jm-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; border-radius: 12px; background: #F7F8FA; padding: 16px 20px; }
+        .jm-name { margin: 0; font-size: 16px; font-weight: 600; color: #0F172A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .jm-meta { margin: 4px 0 0; font-size: 14px; color: #6B7280; }
+        .jm-actions { display: flex; gap: 10px; flex-shrink: 0; }
+        .jm-btn { height: 38px; padding: 0 14px; border: 0; border-radius: 8px; background: #E5E7EB; color: #111827; font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+        .jm-btn-recu { background: #DCE4F0; color: #0B2A5B; }
+        .jm-btn:hover { filter: brightness(.97); }
+        .jm-empty { margin: 0; font-size: 14px; color: #6B7280; }
+        .jm-foot { border-top: 1px solid #EEF0F3; padding: 16px 28px; }
+        .jm-cancel { width: 100%; height: 48px; border: 0; border-radius: 12px; background: #F1F3F6; font-size: 16px; font-weight: 600; color: #111827; cursor: pointer; }
+        .tdb button, .tdb input, .tdb select { font-family: inherit; font-size: inherit; color: inherit; }
+        .tdb .material-symbols-rounded {
+            font-family: 'Material Symbols Rounded';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-smoothing: antialiased;
+            font-variation-settings: 'FILL' 0, 'wght' 450, 'GRAD' 0, 'opsz' 24;
+            user-select: none;
+        }
+
+        .tdb-wrap { max-width: 1120px; margin: 0 auto; padding: 40px 44px 56px; display: flex; flex-direction: column; gap: 32px; }
+
+        /* En-tête */
+        .tdb-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+        .tdb-date { font-size: 14.5px; color: var(--ink2); }
+        .tdb-h1 { margin: 4px 0 0; font-size: 40px; font-weight: 600; letter-spacing: -0.04em; line-height: 1.1; }
+        .tdb-quick { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .tdb-qlink { height: 42px; padding: 0 16px 0 14px; border-radius: 999px; background: var(--soft); color: var(--ink); display: inline-flex; align-items: center; gap: 8px; font-size: 14px; }
+        .tdb-qlink:hover { text-decoration: none; }
+        .tdb-qlink .material-symbols-rounded { font-size: 20px; color: var(--cyanInk); }
+        .tdb-qbtn { height: 48px; padding: 0 22px 0 16px; border-radius: 999px; display: inline-flex; align-items: center; gap: 8px; font-size: 15px; }
+        .tdb-qbtn:hover { text-decoration: none; }
+        .tdb-qbtn .material-symbols-rounded { font-size: 22px; }
+        .tdb-qbtn-exp { background: var(--orangeSoft); color: var(--orangeInk); }
+        .tdb-qbtn-sale { background: var(--cyan); color: #06243A; }
+
+        /* Carte héro */
+        .tdb-hero { background: var(--hero); color: #fff; border-radius: 34px; padding: 34px; display: flex; flex-direction: column; gap: 24px; position: relative; }
+        .tdb-hero-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .tdb-hero-phrase { font-size: 15px; color: rgba(255,255,255,.75); }
+        .tdb-tools { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .tdb-pills { display: flex; background: rgba(255,255,255,.09); border-radius: 999px; padding: 4px; gap: 2px; }
+        .tdb-pill { border: 0; background: transparent; color: rgba(255,255,255,.8); height: 34px; padding: 0 14px; border-radius: 999px; cursor: pointer; font-weight: 600; font-size: 13.5px; white-space: nowrap; }
+        .tdb-pill.is-on { background: #FFFFFF; color: #0B1F3F; }
+        .tdb-range { height: 42px; padding: 0 14px 0 16px; border-radius: 999px; border: 0; background: rgba(255,255,255,.09); color: #fff; display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+        .tdb-range .material-symbols-rounded { font-size: 19px; }
+        .tdb-picker { position: relative; }
+        .tdb-panel { position: absolute; right: 0; top: calc(100% + 8px); width: min(320px, calc(100vw - 2rem)); background: #fff; color: var(--ink); border: 1px solid var(--line); border-radius: 22px; box-shadow: 0 16px 40px rgba(11,31,63,.18); padding: 16px; z-index: 30; }
+        .tdb-panel.hidden { display: none; }
+        .tdb-icon-btn { padding: 6px; border-radius: 999px; border: 0; background: transparent; cursor: pointer; color: var(--ink2); }
+        .tdb-icon-btn:hover { background: var(--soft); }
+        .tdb-field { height: 36px; border-radius: 12px; border: 0; background: var(--soft); padding: 0 10px; font-size: 14px; color: var(--ink); }
+        .tdb-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 4px; }
+        .tdb-grid-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; font-size: 14px; }
+        .tdb-grid-days button { height: 38px; border-radius: 999px; border: 0; background: transparent; color: var(--ink); cursor: pointer; }
+        .tdb-grid-days button:hover { background: var(--cyanSoft); }
+        .tdb-grid-days button.is-in { background: var(--cyanSoft); }
+        .tdb-grid-days button.is-edge { background: var(--cyan); color: #06243A; font-weight: 600; }
+        .tdb-panel-foot { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; margin-top: 12px; border-top: 1px solid var(--line); }
+        .tdb-small-btn { font-size: 12.5px; padding: 6px 12px; border-radius: 999px; cursor: pointer; }
+        .tdb-small-btn-out { border: 1px solid var(--line); background: #fff; color: var(--ink2); }
+        .tdb-small-btn-navy { border: 0; background: var(--hero); color: #fff; }
+
+        .tdb-main-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px 32px; flex-wrap: wrap; }
+        .tdb-num-row { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+        .tdb-num { font-size: 96px; font-weight: 600; letter-spacing: -0.055em; line-height: .95; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .tdb-unit { font-size: 24px; font-weight: 500; color: rgba(255,255,255,.55); }
+        .tdb-trend { display: flex; align-items: center; gap: 10px; margin-top: 16px; font-size: 14px; color: rgba(255,255,255,.7); flex-wrap: wrap; }
+        .tdb-trend-pill { background: var(--cyan); color: #06243A; font-weight: 700; height: 26px; padding: 0 10px; border-radius: 999px; display: flex; align-items: center; gap: 3px; }
+        .tdb-trend-pill .material-symbols-rounded { font-size: 17px; }
+        .tdb-stats { display: flex; gap: 32px; }
+        .tdb-stat-l { display: flex; align-items: center; gap: 8px; font-size: 14px; color: rgba(255,255,255,.7); }
+        .tdb-tick { width: 10px; height: 3px; border-radius: 2px; display: inline-block; }
+        .tdb-nb { font-size: .6em; font-weight: 500; color: rgba(255,255,255,.6); margin-left: 2px; }
+        .tdb-stat-v { font-size: 24px; font-weight: 600; letter-spacing: -0.03em; margin-top: 4px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+        .tdb-chart { position: relative; height: 170px; }
+        .tdb-svg { position: absolute; inset: 0; }
+        .tdb-dot { position: absolute; right: 0; top: 50%; width: 14px; height: 14px; margin: -7px -7px 0 0; border-radius: 50%; background: var(--orange); box-shadow: 0 0 0 4px var(--hero), 0 0 0 12px rgba(242,160,75,.22); transition: top .8s cubic-bezier(.2,.8,.2,1); }
+        .tdb-tip { position: absolute; top: 0; width: 260px; background: #fff; color: var(--ink); border-radius: 16px; box-shadow: 0 12px 30px rgba(11,31,63,.25); padding: 14px 16px; font-size: 13px; z-index: 5; pointer-events: none; }
+        .tdb-tip[hidden] { display: none; }
+        .tdb-tip-h { font-weight: 600; font-size: 14px; margin-bottom: 8px; text-transform: capitalize; }
+        .tdb-tip-cum { display: flex; gap: 14px; color: var(--ink2); margin-bottom: 4px; font-variant-numeric: tabular-nums; }
+        .tdb-tip-cum i { display: inline-block; width: 10px; height: 3px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+        .tdb-tip-sec { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 10px 0 4px; }
+        .tdb-tip-li { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; font-variant-numeric: tabular-nums; }
+        .tdb-tip-li span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+        .tdb-tip-li b { white-space: nowrap; font-weight: 600; }
+        .tdb-tip-vide { color: var(--muted); padding: 3px 0; }
+        .tdb-xlabels { display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,.5); margin-top: 10px; }
+        .tdb-note { font-size: 13px; color: rgba(255,255,255,.65); border-top: 1px solid rgba(255,255,255,.12); padding-top: 14px; display: flex; align-items: center; gap: 8px; }
+        .tdb-note .material-symbols-rounded { font-size: 18px; }
+
+        /* Boutons du mobile */
+        .tdb-mobile-actions { display: none; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .tdb-mbtn { height: 64px; border-radius: 22px; font-weight: 600; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .tdb-mbtn:hover { text-decoration: none; }
+        .tdb-mbtn .material-symbols-rounded { font-size: 24px; }
+        .tdb-mbtn-sale { background: var(--cyan); color: #06243A; }
+        .tdb-mbtn-exp { background: var(--orangeSoft); color: var(--orangeInk); }
+
+        /* Bas de page */
+        .tdb-lower { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); gap: 32px; align-items: stretch; }
+        .tdb-lower > div:first-child { background: var(--soft); border-radius: 26px; padding: 20px; }
+        .tdb-sec { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+        .tdb-sec h2 { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: -0.025em; }
+        .tdb-side { display: flex; flex-direction: column; gap: 14px; }
+        .tdb-box { background: var(--soft); border-radius: 26px; padding: 6px 20px; }
+        .tdb-box-todo .tdb-box-t { font-size: 16px; font-weight: 600; padding: 16px 0 8px; }
+        .tdb-box-best { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+        .tdb-box-best .tdb-box-t { font-size: 16px; font-weight: 600; }
+        .tdb-sub { font-weight: 400; color: var(--ink2); }
+
+        .tdb-op { display: flex; align-items: center; gap: 14px; padding: 13px 12px; margin: 0 -12px; border-radius: 16px; }
+        .tdb-op-ic { width: 46px; height: 46px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+        .tdb-op-b { flex: 1; min-width: 0; }
+        .tdb-op-t { font-weight: 600; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .tdb-op-m { font-size: 13px; color: var(--ink2); display: flex; gap: 6px; align-items: center; white-space: nowrap; overflow: hidden; }
+        .tdb-op-a { font-weight: 600; font-size: 16px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .tdb-miss { width: 7px; height: 7px; border-radius: 50%; background: var(--orange); flex-shrink: 0; }
+        .tdb-empty { font-size: 14px; color: var(--muted); padding: 14px 0; }
+
+        .tdb-todo { display: flex; gap: 12px; align-items: center; padding: 13px 0; border-top: 1px solid var(--line); color: var(--ink); }
+        .tdb-todo:hover { text-decoration: none; }
+        .tdb-todo-ic { width: 40px; height: 40px; border-radius: 13px; background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 21px; flex-shrink: 0; }
+        .tdb-todo-b { flex: 1; min-width: 0; }
+        .tdb-todo-t { font-weight: 600; font-size: 14.5px; }
+        .tdb-todo-s { font-size: 13px; color: var(--ink2); }
+        .tdb-chev { color: var(--muted); }
+
+        .tdb-best { display: flex; flex-direction: column; gap: 16px; }
+        .tdb-best-row { display: flex; flex-direction: column; gap: 7px; }
+        .tdb-best-top { display: flex; justify-content: space-between; font-size: 14.5px; gap: 8px; }
+        .tdb-best-top b { font-weight: 600; font-variant-numeric: tabular-nums; }
+        .tdb-pct { font-weight: 400; color: var(--ink2); font-size: 12.5px; }
+        .tdb-bar { height: 6px; border-radius: 99px; background: var(--soft2); }
+        .tdb-bar i { display: block; height: 100%; border-radius: 99px; }
+
+        /* Emplacements de chargement, remplacés par dashboard.js */
+        .tdb-skel { display: inline-block; height: .9em; width: 7em; max-width: 100%; border-radius: 6px; background: var(--soft2); vertical-align: middle; animation: tdbPulse 1.4s ease-in-out infinite; }
+        .tdb-skel-hero { height: 1em; width: 260px; }
+        .tdb-skel-block { width: 100%; height: 100%; min-height: 110px; border-radius: 16px; background: rgba(255,255,255,.08); animation: tdbPulse 1.4s ease-in-out infinite; }
+        .tdb-skel-row { height: 46px; margin: 13px 0; border-radius: 15px; background: var(--soft); animation: tdbPulse 1.4s ease-in-out infinite; }
+        @keyframes tdbPulse { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
+
+        /* Mobile */
+        @media (max-width: 767px) {
+            .tdb-wrap { padding: 8px 18px 32px; gap: 22px; }
+            .tdb-h1 { font-size: 30px; }
+            .tdb-quick { display: none; }
+            .tdb-mobile-actions { display: grid; }
+            .tdb-hero { border-radius: 28px; padding: 22px; gap: 18px; }
+            .tdb-main-row { gap: 20px; }
+            .tdb-num { font-size: 52px; }
+            .tdb-unit { font-size: 17px; }
+            .tdb-stat-v { font-size: 19px; }
+            .tdb-stats { gap: 32px; }
+            .tdb-chart { height: 110px; }
+            .tdb-lower { grid-template-columns: 1fr; gap: 22px; }
+            .tdb-op:nth-child(n+6) { display: none; }
         }
     </style>
     <!-- Restriction d'acces : un agent est redirige vers ses propres pages -->
@@ -103,183 +309,166 @@
     </header>
     <!-- ===== FIN HEADER ===== -->
 
-    <!-- ===== CONTENU DU TABLEAU DE BORD ===== -->
-    <main class="flex-grow">
-        <div class="container mx-auto px-4 py-8">
-            <div class="layout-content-container flex flex-col w-full max-w-7xl mx-auto flex-1 gap-4">
+    <!-- ===== CONTENU DU TABLEAU DE BORD (maquette « OGOUE Refonte ») ===== -->
+    <main class="flex-grow tdb">
+        <div class="tdb-wrap">
 
-                <!-- Titre de page -->
-                <header class="flex flex-wrap justify-between items-center gap-3 px-4">
-                    <div class="flex flex-col gap-1">
-                        <p class="text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em]">
-                            Tableau de Bord Principal
-                        </p>
-                        <p class="text-text-light-secondary dark:text-text-dark-secondary text-sm md:text-base font-normal leading-normal">
-                            Synthèse de la performance de votre entreprise.
-                        </p>
-                    </div>
-                </header>
+            <!-- En-tête : date, prénom, raccourcis -->
+            <div class="tdb-head">
+                <div>
+                    <div class="tdb-date" id="tdbDate"></div>
+                    <h1 class="tdb-h1" id="tdbHello">Bonjour</h1>
+                </div>
+                <div class="tdb-quick">
+                    <a data-exige="etatsFinanciers" href="module_etats_financiers" class="tdb-qlink">
+                        <span class="material-symbols-rounded">description</span>Analyse financière
+                    </a>
+                    <a href="module_depenses" class="tdb-qbtn tdb-qbtn-exp"><span class="material-symbols-rounded">remove</span>Dépense</a>
+                    <a href="module_ventes" class="tdb-qbtn tdb-qbtn-sale"><span class="material-symbols-rounded">add</span>Vente</a>
+                </div>
+            </div>
 
-                <!-- Ligne avec bouton + filtre date -->
-                <div class="border-b border-border-light dark:border-border-dark">
-                    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 px-4 pb-3 pt-2">
+            <!-- Carte héro : solde de la période, entrées, sorties, courbes -->
+            <section class="tdb-hero">
+                <div class="tdb-hero-top">
+                    <span class="tdb-hero-phrase" id="tdbPhrase">Ce qui reste</span>
+                    <div class="tdb-tools">
+                        <div class="tdb-pills" role="group" aria-label="Période rapide">
+                            <button type="button" class="tdb-pill" data-preset="jour">Aujourd'hui</button>
+                            <button type="button" class="tdb-pill" data-preset="semaine">Semaine</button>
+                            <button type="button" class="tdb-pill" data-preset="mois">Mois</button>
+                        </div>
 
-                        <!-- ? Bouton États financiers (à l'endroit entouré) -->
-                        <a data-exige="etatsFinanciers" href="module_etats_financiers"
-                           class="w-full md:w-auto inline-flex items-center justify-center gap-2
-                                  h-11 px-5 rounded-xl
-                                  bg-white dark:bg-card-dark
-                                  border border-border-light dark:border-border-dark
-                                  shadow-soft hover:shadow
-                                  hover:border-primary/40 dark:hover:border-primary/40
-                                  transition">
-                            <span class="material-symbols-outlined text-primary">description</span>
-                            <span class="text-sm font-bold text-text-light-primary dark:text-text-dark-primary">
-                                Analyse financière
-                            </span>
-                            <span class="material-symbols-outlined text-text-light-secondary dark:text-text-dark-secondary">
-                                chevron_right
-                            </span>
-                        </a>
-
-                        <!-- Filtre par date -->
-                        <div class="relative rounded-lg border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark px-6 py-4 shadow-sm w-full md:w-[320px]">
-                            <p class="text-[10px] font-semibold uppercase tracking-wide text-text-light-secondary dark:text-text-dark-secondary mb-1">
-                                Filtrer par date
-                            </p>
-
-                            <button
-                                id="dateFilterButton"
-                                type="button"
-                                class="flex items-center justify-between gap-2 w-full h-10 rounded-md border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark px-3 text-sm font-normal text-text-light-primary dark:text-text-dark-primary focus:outline-none focus:ring-2 focus:ring-primary/40"
-                            >
-                                <span id="dateFilterLabel" class="truncate text-[13px]"></span>
-                                <span class="material-symbols-outlined text-lg text-gray-500 dark:text-gray-400">
-                                    calendar_month
-                                </span>
+                        <!-- Filtre par date personnalisé -->
+                        <div class="tdb-picker">
+                            <button id="dateFilterButton" type="button" class="tdb-range">
+                                <span id="dateFilterLabel"></span>
+                                <span class="material-symbols-rounded">calendar_month</span>
                             </button>
 
-                            <!-- Panel calendrier -->
-                            <div
-                                id="dateFilterPanel"
-                                class="absolute right-0 mt-2 w-[min(320px,calc(100vw-2rem))] rounded-xl border border-border-light dark:border-border-dark bg-white dark:bg-card-dark shadow-xl p-4 hidden z-20"
-                            >
-                                <!-- Header (mois + année éditable) -->
+                            <div id="dateFilterPanel" class="tdb-panel hidden">
                                 <div class="flex items-center justify-between gap-2 mb-3">
-                                    <button id="prevMonth" type="button" class="p-1.5 rounded-full hover:bg-background-light dark:hover:bg-background-dark">
-                                        <span class="material-symbols-outlined text-base text-gray-600 dark:text-gray-300">chevron_left</span>
+                                    <button id="prevMonth" type="button" class="tdb-icon-btn">
+                                        <span class="material-symbols-rounded">chevron_left</span>
                                     </button>
-
                                     <div class="flex items-center gap-2">
-                                        <select
-                                            id="monthSelect"
-                                            class="h-9 rounded-lg border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark px-2 text-sm text-text-light-primary dark:text-text-dark-primary focus:outline-none focus:ring-2 focus:ring-primary/40"
-                                        ></select>
-
-                                        <input
-                                            id="yearInput"
-                                            type="number"
-                                            inputmode="numeric"
-                                            min="1900"
-                                            max="2200"
-                                            class="h-9 w-[92px] rounded-lg border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark px-2 text-sm text-text-light-primary dark:text-text-dark-primary focus:outline-none focus:ring-2 focus:ring-primary/40"
-                                        />
+                                        <select id="monthSelect" class="tdb-field"></select>
+                                        <input id="yearInput" type="number" inputmode="numeric" min="1900" max="2200" class="tdb-field" style="width:92px" />
                                     </div>
-
-                                    <button id="nextMonth" type="button" class="p-1.5 rounded-full hover:bg-background-light dark:hover:bg-background-dark">
-                                        <span class="material-symbols-outlined text-base text-gray-600 dark:text-gray-300">chevron_right</span>
+                                    <button id="nextMonth" type="button" class="tdb-icon-btn">
+                                        <span class="material-symbols-rounded">chevron_right</span>
                                     </button>
                                 </div>
 
-                                <!-- Jours semaine -->
-                                <div class="grid grid-cols-7 text-center text-[11px] uppercase tracking-wide text-gray-400 dark:text-gray-500 mb-1">
+                                <div class="tdb-weekdays">
                                     <span>l</span><span>m</span><span>m</span><span>j</span><span>v</span><span>s</span><span>d</span>
                                 </div>
+                                <div id="calendarGrid" class="tdb-grid-days"></div>
 
-                                <!-- Grille -->
-                                <div id="calendarGrid" class="grid grid-cols-7 gap-1 text-sm"></div>
-
-                                <!-- Actions -->
-                                <div class="flex justify-between items-center pt-3 mt-3 border-t border-border-light dark:border-border-dark">
-                                    <button
-                                        id="resetRange"
-                                        type="button"
-                                        class="text-xs px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-background-light dark:hover:bg-background-dark"
-                                    >
-                                        Réinitialiser
-                                    </button>
-                                    <button
-                                        id="closeCalendar"
-                                        type="button"
-                                        class="text-xs px-3 py-1.5 rounded-lg bg-primary text-[#0a0c0a] hover:bg-primary/90"
-                                    >
-                                        Fermer
-                                    </button>
+                                <div class="tdb-panel-foot">
+                                    <button id="resetRange" type="button" class="tdb-small-btn tdb-small-btn-out">Réinitialiser</button>
+                                    <button id="closeCalendar" type="button" class="tdb-small-btn tdb-small-btn-navy">Fermer</button>
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
 
-                <!-- ===== SECTION KPI ===== -->
-                <section class="p-4">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-sm">
-                            <p class="text-base font-medium text-text-light-secondary dark:text-text-dark-secondary">Chiffre d'Affaires</p>
-                            <!-- Emplacements gris le temps du premier chargement : jamais
-                                 un tiret ni un chiffre fictif, qu'on pourrait prendre pour
-                                 une vraie valeur. dashboard.js les remplace. -->
-                            <p id="kpi-chiffre-affaires" class="tracking-tight text-2xl xl:text-3xl font-bold whitespace-nowrap"><span class="inline-block h-8 w-40 max-w-full rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse align-middle"></span></p>
-                            <p id="kpi-ca-trend" class="text-success text-sm font-semibold leading-normal flex items-center gap-1">
-                                <span class="inline-block h-4 w-24 rounded bg-gray-200 dark:bg-gray-700 animate-pulse"></span>
-                            </p>
+                <div class="tdb-main-row">
+                    <div>
+                        <div class="tdb-num-row">
+                            <span class="tdb-num" id="tdbSolde"><span class="tdb-skel tdb-skel-hero"></span></span>
+                            <span class="tdb-unit" id="tdbUnite">FCFA</span>
                         </div>
-
-                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-sm">
-                            <p class="text-base font-medium text-text-light-secondary dark:text-text-dark-secondary">Dépenses</p>
-                            <p id="kpi-depenses" class="tracking-tight text-2xl xl:text-3xl font-bold whitespace-nowrap"><span class="inline-block h-8 w-40 max-w-full rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse align-middle"></span></p>
-                            <p id="kpi-depenses-trend" class="text-danger text-sm font-semibold leading-normal flex items-center gap-1">
-                                <span class="inline-block h-4 w-24 rounded bg-gray-200 dark:bg-gray-700 animate-pulse"></span>
-                            </p>
-                        </div>
-
-                        <div class="flex flex-col gap-2 rounded-xl p-6 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-sm">
-                            <p class="text-base font-medium text-text-light-secondary dark:text-text-dark-secondary">Résultat Net</p>
-                            <p id="kpi-resultat" class="tracking-tight text-2xl xl:text-3xl font-bold whitespace-nowrap"><span class="inline-block h-8 w-40 max-w-full rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse align-middle"></span></p>
-                            <p id="kpi-resultat-trend" class="text-success text-sm font-semibold leading-normal flex items-center gap-1">
-                                <span class="inline-block h-4 w-24 rounded bg-gray-200 dark:bg-gray-700 animate-pulse"></span>
-                            </p>
+                        <div class="tdb-trend">
+                            <span class="tdb-trend-pill"><span class="material-symbols-rounded">trending_up</span><span id="tdbTendance">—</span></span>
+                            <span>par rapport à <span id="tdbVs">…</span></span>
                         </div>
                     </div>
-                </section>
-
-                <!-- ===== SECTION GRAPHIQUES ===== -->
-                <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 p-4">
-                    <div class="lg:col-span-2 flex flex-col gap-4 rounded-xl border border-border-light dark:border-border-dark p-6 bg-card-light dark:bg-card-dark shadow-sm">
-                        <p class="text-lg font-semibold">Évolution du Chiffre d'Affaires</p>
-                        <div id="chart-evolution" class="flex min-h-[220px] flex-1 flex-col justify-end">
-                            <!-- Emplacement le temps du chargement. La courbe dessinée
-                                 ici auparavant était fictive et passait pour de vraies
-                                 ventes. dashboard.js remplace ce bloc. -->
-                            <div class="flex-1 min-h-[220px] rounded-lg bg-gray-100 dark:bg-gray-800 animate-pulse"></div>
+                    <div class="tdb-stats">
+                        <div>
+                            <div class="tdb-stat-l"><span class="tdb-tick" style="background:var(--cyan)"></span>Entré</div>
+                            <div class="tdb-stat-v" id="kpi-chiffre-affaires"><span class="tdb-skel"></span></div>
+                        </div>
+                        <div>
+                            <div class="tdb-stat-l"><span class="tdb-tick" style="background:var(--orange)"></span>Sorti</div>
+                            <div class="tdb-stat-v" id="kpi-depenses"><span class="tdb-skel"></span></div>
                         </div>
                     </div>
+                </div>
 
-                    <div id="chart-repartition" class="lg:col-span-1 flex flex-col gap-4 rounded-xl border border-border-light dark:border-border-dark p-6 bg-card-light dark:bg-card-dark shadow-sm">
-                        <p class="text-lg font-semibold">Répartition du CA par Catégorie</p>
-                        <!-- Emplacement le temps du chargement, remplacé par dashboard.js.
-                             L'ancien anneau affichait un total et des catégories fictifs. -->
-                        <div class="flex-1 flex items-center justify-center min-h-[220px]">
-                            <div class="size-40 rounded-full border-[14px] border-gray-100 dark:border-gray-800 animate-pulse"></div>
-                        </div>
-                        <div class="h-4 w-2/3 rounded bg-gray-100 dark:bg-gray-800 animate-pulse"></div>
+                <div>
+                    <div class="tdb-chart" id="chart-evolution">
+                        <div id="tdbSvg" class="tdb-svg"><div class="tdb-skel-block"></div></div>
+                        <span class="tdb-dot" id="tdbDot"></span>
+                    <div id="tdbTip" class="tdb-tip" hidden></div>
                     </div>
-                </section>
+                    <div class="tdb-xlabels" id="tdbXLabels"></div>
+                </div>
 
+                <div class="tdb-note">
+                    <span class="material-symbols-rounded">info</span>L'écart entre les deux courbes, c'est ce qui vous reste.
+                </div>
+            </section>
+
+            <!-- Boutons du mobile (remplacent les raccourcis de l'en-tête) -->
+            <div class="tdb-mobile-actions">
+                <a href="module_ventes" class="tdb-mbtn tdb-mbtn-sale"><span class="material-symbols-rounded">add</span>J'ai vendu</a>
+                <a href="module_depenses" class="tdb-mbtn tdb-mbtn-exp"><span class="material-symbols-rounded">remove</span>J'ai dépensé</a>
             </div>
+
+            <!-- Opérations du jour, à faire, meilleures ventes -->
+            <div class="tdb-lower">
+                <div>
+                    <div class="tdb-sec">
+                        <h2 id="tdbOpsTitre">Aujourd'hui</h2>
+                        <a data-exige="etatsFinanciers" href="module_etats_financiers">Tout voir</a>
+                    </div>
+                    <div id="tdbToday">
+                        <div class="tdb-skel-row"></div>
+                        <div class="tdb-skel-row"></div>
+                        <div class="tdb-skel-row"></div>
+                    </div>
+                </div>
+
+                <div class="tdb-side">
+                    <div class="tdb-box tdb-box-best">
+                        <div class="tdb-box-t">Ce qui se vend le mieux <span class="tdb-sub" id="tdbBestPeriode"></span></div>
+                        <div id="tdbBest" class="tdb-best"></div>
+                    </div>
+                    <div class="tdb-box tdb-box-todo">
+                        <div class="tdb-box-t">À faire</div>
+                        <div id="tdbTodos"></div>
+                    </div>
+                    
+                </div>
+            </div>
+
         </div>
     </main>
+</div>
+
+<!-- Fenêtre : ajouter les justificatifs manquants (ouverte depuis « À faire ») -->
+<div id="modalJustificatifs" role="dialog" aria-modal="true" aria-labelledby="jmTitre">
+  <div class="jm-panel">
+    <div class="jm-head">
+      <h2 id="jmTitre" class="jm-title">Ajouter les justificatifs manquants</h2>
+      <button id="btnFermerJustificatifs" type="button" class="jm-close" aria-label="Fermer"><span class="jm-ic">close</span></button>
+    </div>
+    <div class="jm-body">
+      <section>
+        <h3 class="jm-h">Ventes sans justificatif</h3>
+        <div id="listeVentesSansJustif" class="jm-list"></div>
+      </section>
+      <section>
+        <h3 class="jm-h">Dépenses sans justificatif</h3>
+        <div id="listeDepensesSansJustif" class="jm-list"></div>
+      </section>
+    </div>
+    <div class="jm-foot">
+      <button id="btnAnnulerJustificatifs" type="button" class="jm-cancel">Annuler</button>
+    </div>
+  </div>
 </div>
 
 <!-- Store OGOUE -->
@@ -490,6 +679,17 @@
     resetBtn.addEventListener("click", () => {
         startDate = null;
         endDate = null;
+        updateLabel();
+        render();
+    });
+
+    document.addEventListener("dashboard:presetRange", (e) => {
+        const { startDate: debut, endDate: fin } = e.detail || {};
+        if (!debut) return;
+        const parse = (iso) => { const [y, m, j] = iso.split("-").map(Number); return new Date(y, m - 1, j); };
+        startDate = parse(debut);
+        endDate = parse(fin || debut);
+        view = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
         updateLabel();
         render();
     });
