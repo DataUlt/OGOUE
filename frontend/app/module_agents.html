@@ -189,21 +189,62 @@
             return new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
         }
 
-        // Activité d'un agent aujourd'hui : ventes et dépenses saisies sous son prénom
-        function activiteAgent(prenom, ventes, depenses) {
+        // Date locale AAAA-MM-JJ d'un horodatage ISO
+        function jourLocal(iso) {
+            const d = new Date(iso);
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+
+        // Date locale AAAA-MM-JJ, décalée de n jours en arrière
+        function jourIlYA(n) {
+            const d = new Date();
+            d.setDate(d.getDate() - n);
+            return jourLocal(d.toISOString());
+        }
+
+        // Dernière activité lisible : connexion, vente, dépense ou suppression
+        function libelleActivite(derniere, jour) {
+            if (!derniere) return { texte: 'Aucune activité enregistrée', couleur: '#D1D5DB' };
+            const quand = new Date(derniere.quand);
+            const heureTexte = quand.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+            const ceJour = jourLocal(derniere.quand) === jour;
+            const moment = ceJour ? `aujourd'hui à ${heureTexte}` : `le ${quand.toLocaleDateString('fr-FR')} à ${heureTexte}`;
+            const texte = derniere.libelle === 'connexion'
+                ? `Dernière connexion ${moment}`
+                : `Dernière ${derniere.libelle} ${moment}`;
+            return { texte, couleur: ceJour ? '#14B8D9' : '#9CA3AF' };
+        }
+
+        // Activité d'un agent : aujourd'hui (compteurs) et dernière activité (sur la période chargée)
+        function activiteAgent(prenom, jour, ventes, depenses, suppressions, lastLoginAt) {
             const v = ventes.filter((x) => x.created_by_name === prenom);
             const d = depenses.filter((x) => x.created_by_name === prenom);
-            const encaisse = v.reduce((somme, x) => somme + (parseFloat(x.montant) || 0), 0);
-            const decaisse = d.reduce((somme, x) => somme + (parseFloat(x.montant) || 0), 0);
-            const aJustifierVentes = v.filter((x) => !x.justificatif && !x.numeroRecu).length;
-            const aJustifierDepenses = d.filter((x) => !x.justificatif).length;
-            const derniere = [
-                ...v.map((x) => ({ ...x, _type: 'vente' })),
-                ...d.map((x) => ({ ...x, _type: 'dépense' })),
-            ]
-                .filter((x) => x.created_at)
-                .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))[0];
-            return { ventes: v.length, encaisse, depenses: d.length, decaisse, aJustifierVentes, aJustifierDepenses, derniere };
+            const vJour = v.filter((x) => x.date === jour);
+            const dJour = d.filter((x) => x.date === jour);
+            const encaisse = vJour.reduce((somme, x) => somme + (parseFloat(x.montant) || 0), 0);
+            const decaisse = dJour.reduce((somme, x) => somme + (parseFloat(x.montant) || 0), 0);
+            const aJustifierVentes = vJour.filter((x) => !x.justificatif && !x.numeroRecu).length;
+            const aJustifierDepenses = dJour.filter((x) => !x.justificatif).length;
+            const supp = suppressions === null ? null : suppressions.filter((s) => s.supprimePar && s.supprimePar.nom === prenom);
+
+            const evenements = [
+                ...v.filter((x) => x.created_at).map((x) => ({ quand: x.created_at, libelle: 'vente' })),
+                ...d.filter((x) => x.created_at).map((x) => ({ quand: x.created_at, libelle: 'dépense' })),
+                ...(supp || []).filter((s) => s.date).map((s) => ({ quand: s.date, libelle: 'suppression' })),
+                ...(lastLoginAt ? [{ quand: lastLoginAt, libelle: 'connexion' }] : []),
+            ];
+            const derniere = evenements.sort((a, b) => new Date(b.quand) - new Date(a.quand))[0] || null;
+
+            return {
+                ventes: vJour.length,
+                encaisse,
+                depenses: dJour.length,
+                decaisse,
+                aJustifierVentes,
+                aJustifierDepenses,
+                suppressionsMois: supp === null ? null : supp.length,
+                statut: libelleActivite(derniere, jour),
+            };
         }
 
         function statistique(libelle, valeur) {
@@ -215,13 +256,11 @@
         }
 
         function carteAgent(agent, activite) {
-            const statut = activite.derniere
-                ? `Actif aujourd'hui · dernière ${activite.derniere._type} à ${heure(activite.derniere.created_at)}`
-                : `Aucune activité aujourd'hui`;
-            const point = activite.derniere ? '#14B8D9' : '#D1D5DB';
+            const statut = activite.statut.texte;
+            const point = activite.statut.couleur;
             return `
                 <div class="p-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                    <div class="flex items-center justify-between">
+                    <div class="flex items-start justify-between">
                         <div class="flex-1">
                             <h3 class="text-lg font-semibold text-text-light dark:text-white">${echapperHtml(agent.firstName)}</h3>
                             <p class="mt-1 flex items-center gap-2 text-sm text-text-light-muted dark:text-gray-400"><span class="h-2 w-2 shrink-0 rounded-full" style="background:${point}"></span>${statut}</p>
@@ -250,6 +289,7 @@
                                     ${statistique('Dépenses du jour', activite.depenses)}
                                     ${statistique('Décaissé', montant(activite.decaisse))}
                                     ${statistique('À justifier', activite.aJustifierDepenses)}
+                                    <div class="col-span-3">${statistique('Suppressions du mois', activite.suppressionsMois === null ? '—' : activite.suppressionsMois)}</div>
                                 </div>
                             </div>
                         </div>
@@ -265,16 +305,34 @@
                 </div>`;
         }
 
-        // Charger la liste des agents et leur activité du jour
+        // Suppressions du mois en cours (null si indisponible)
+        async function chargerSuppressions() {
+            const maintenant = new Date();
+            const params = new URLSearchParams({ month: maintenant.getMonth() + 1, year: maintenant.getFullYear() });
+            try {
+                const reponse = await fetch(`${API_BASE_URL}/api/audit/deletions?${params}`, {
+                    headers: { Authorization: `Bearer ${getToken()}` }
+                });
+                if (!reponse.ok) return null;
+                const data = await reponse.json();
+                return data.history || [];
+            } catch (erreur) {
+                return null;
+            }
+        }
+
+        // Charger la liste des agents et leur activité
         async function loadAgents() {
             try {
                 const jour = aujourdHuiIso();
-                const [agents, ventes, depenses] = await Promise.all([
+                const depuis = jourIlYA(90);
+                const [agents, ventes, depenses, suppressions] = await Promise.all([
                     listAgents(),
-                    window.OGOUE.getVentesPourPlage(jour, jour),
-                    window.OGOUE.getDepensesPourPlage(jour, jour),
+                    window.OGOUE.getVentesPourPlage(depuis, jour),
+                    window.OGOUE.getDepensesPourPlage(depuis, jour),
+                    chargerSuppressions(),
                 ]);
-                displayAgents(agents, ventes || [], depenses || []);
+                displayAgents(agents, jour, ventes || [], depenses || [], suppressions);
             } catch (error) {
                 console.error('Erreur chargement agents:', error);
                 document.getElementById('agentsList').innerHTML = `
@@ -286,7 +344,7 @@
         }
 
         // Afficher les agents dans le DOM
-        function displayAgents(agents, ventes, depenses) {
+        function displayAgents(agents, jour, ventes, depenses, suppressions) {
             const agentsList = document.getElementById('agentsList');
 
             if (agents.length === 0) {
@@ -299,7 +357,7 @@
             }
 
             agentsList.innerHTML = agents
-                .map((agent) => carteAgent(agent, activiteAgent(agent.firstName, ventes, depenses)))
+                .map((agent) => carteAgent(agent, activiteAgent(agent.firstName, jour, ventes, depenses, suppressions, agent.lastLoginAt)))
                 .join('');
         }
 

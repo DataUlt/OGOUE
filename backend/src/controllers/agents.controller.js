@@ -128,7 +128,7 @@ export async function listAgents(req, res) {
 
     const { data: agents, error } = await supabase
       .from("agents")
-      .select("id, first_name, access_code, is_active, created_at")
+      .select("id, first_name, access_code, is_active, created_at, last_login_at")
       .eq("organization_id", organizationId)
       .order("created_at", { ascending: false });
 
@@ -143,6 +143,7 @@ export async function listAgents(req, res) {
       accessCode: agent.access_code,
       isActive: agent.is_active,
       createdAt: agent.created_at,
+      lastLoginAt: agent.last_login_at,
     }));
 
     return res.json(transformed);
@@ -218,6 +219,13 @@ export async function authenticateAgentByCode(req, res) {
     if (!agent.is_active) {
       return res.status(403).json({ error: "This agent account has been deactivated" });
     }
+
+    // Mémoriser la connexion : la page Agents affiche la dernière activité.
+    const { error: erreurConnexion } = await supabase
+      .from("agents")
+      .update({ last_login_at: new Date().toISOString() })
+      .eq("id", agent.id);
+    if (erreurConnexion) console.error("Connexion agent non mémorisée:", erreurConnexion.message);
 
     // Retourner les infos de l'agent
     return res.json({
