@@ -665,7 +665,7 @@ fenetreJustificatifs().addEventListener("click", (e) => {
   else joindreFichier(bouton.dataset.type, bouton.dataset.id);
 });
 
-function rendreMeilleures(liste) {
+function rendreMeilleures(liste, totalCA) {
   const cont = document.getElementById("tdbBest");
   if (!liste.length) {
     cont.innerHTML = `<div class="tdb-empty">Pas encore de vente sur la période.</div>`;
@@ -674,7 +674,7 @@ function rendreMeilleures(liste) {
   const max = liste[0][1] || 1;
   cont.innerHTML = liste.map(([nom, v], i) =>
     `<div class="tdb-best-row">` +
-    `<div class="tdb-best-top"><span>${echapper(nom)}</span><b>${montantCourt(v)}</b></div>` +
+    `<div class="tdb-best-top"><span>${echapper(nom)}</span><b>${montantCourt(v)} <span class="tdb-pct">· ${totalCA > 0 ? (v / totalCA * 100).toFixed(1).replace(".", ",") : "0,0"} %</span></b></div>` +
     `<div class="tdb-bar"><i style="width:${(v / max * 100).toFixed(1)}%;background:${COULEURS_MEILLEURES[i]}"></i></div>` +
     `</div>`
   ).join("");
@@ -735,6 +735,8 @@ function calculer(donnees, plage) {
   return {
     entrees,
     sorties,
+    nbVentes: ventes.length,
+    nbDepenses: depenses.length,
     net,
     netPrecedent,
     variation: variation(net, netPrecedent),
@@ -768,8 +770,8 @@ function afficher(donnees, plage) {
     ? "—"
     : `${pct >= 0 ? "+" : "−"}${Math.abs(pct).toFixed(1).replace(".", ",")} %`;
 
-  document.getElementById("kpi-chiffre-affaires").textContent = montantCourt(v.entrees);
-  document.getElementById("kpi-depenses").textContent = montantCourt(v.sorties);
+  document.getElementById("kpi-chiffre-affaires").innerHTML = `${montantCourt(v.entrees)} <span class="tdb-nb">(${v.nbVentes})</span>`;
+  document.getElementById("kpi-depenses").innerHTML = `${montantCourt(v.sorties)} <span class="tdb-nb">(${v.nbDepenses})</span>`;
 
   animerSolde(v.net);
   rendreGraphique(v.serie);
@@ -785,7 +787,7 @@ function afficher(donnees, plage) {
   todos.push({ icone: "description", titre: "Compte de résultat et trésorerie", texte: "Voir les états financiers", lien: "module_etats_financiers", couleur: "var(--navyInk)" });
   rendreAFaire(todos);
 
-  rendreMeilleures(v.meilleures);
+  rendreMeilleures(v.meilleures, v.entrees);
 }
 
 function afficherDateEtBonjour() {
