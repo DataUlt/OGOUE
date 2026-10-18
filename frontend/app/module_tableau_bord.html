@@ -259,7 +259,8 @@
             .tdb-stat-v { font-size: 19px; }
             .tdb-stats { gap: 32px; }
             .tdb-chart { height: 110px; }
-            .tdb-lower { grid-template-columns: 1fr; gap: 22px; }
+            .tdb-lower { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+            .tdb-lower > div, .tdb-side, .tdb-box { min-width: 0; }
             .tdb-op:nth-child(n+6) { display: none; }
         }
     </style>
