@@ -329,6 +329,36 @@
               </div>
             </div>
 
+            <!-- Canal d'acquisition : comment le client nous a connu -->
+            <div>
+              <label class="block text-sm font-medium text-text-light mb-2" for="acquisition">
+                Comment nous avez-vous connu ? <span class="text-red-500">*</span>
+              </label>
+              <select
+                id="acquisition"
+                name="acquisition"
+                required
+                onchange="document.getElementById('acquisition_autre').classList.toggle('hidden', this.value !== 'autre')"
+                class="w-full px-4 py-3 border border-black/10 rounded-lg bg-white text-text-light focus:ring-primary focus:border-primary">
+                <option value="">Choisir une réponse</option>
+                <option value="recommandation">Recommandation d'un proche</option>
+                <option value="facebook">Facebook</option>
+                <option value="instagram">Instagram</option>
+                <option value="tiktok">TikTok</option>
+                <option value="google">Google / moteur de recherche</option>
+                <option value="youtube">YouTube (tutoriels)</option>
+                <option value="publicite">Publicité</option>
+                <option value="evenement">Événement ou salon</option>
+                <option value="autre">Autre</option>
+              </select>
+              <input
+                id="acquisition_autre"
+                type="text"
+                maxlength="100"
+                placeholder="Précisez"
+                class="hidden mt-3 w-full px-4 py-3 border border-black/10 rounded-lg bg-white text-text-light focus:ring-primary focus:border-primary" />
+            </div>
+
             <!-- Conditions -->
             <div class="flex items-start gap-3 pt-2">
               <input
@@ -435,6 +465,8 @@
       const activity = document.getElementById('activity').value.trim();
       const activityNature = document.getElementById('activity_nature').value.trim();
       const terms = document.getElementById('terms').checked;
+      const acquisition = document.getElementById('acquisition').value;
+      const acquisitionAutre = document.getElementById('acquisition_autre').value.trim();
       
       const errorDiv = document.getElementById('errorMessage');
       const successDiv = document.getElementById('successMessage');
@@ -467,6 +499,11 @@
         return;
       }
 
+      if (!acquisition) {
+        showError('Dites-nous comment vous nous avez connus');
+        return;
+      }
+
       try {
         submitBtn.textContent = "Création en cours...";
         submitBtn.disabled = true;
@@ -485,7 +522,10 @@
             rccmNumber: rccm || null,
             nifNumber: nif || null,
             activity: activity,
-            activityDescription: activityNature
+            activityDescription: activityNature,
+            acquisitionSource: acquisition === 'autre' && acquisitionAutre
+              ? `autre : ${acquisitionAutre}`
+              : acquisition
           })
         });
         

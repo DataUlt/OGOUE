@@ -18,6 +18,7 @@ const registerSchema = z.object({
   nifNumber: z.string().optional().nullable(),
   activity: z.string().min(1).max(200),
   activityDescription: z.string().min(1).max(500),
+  acquisitionSource: z.string().max(120).optional().nullable(),
   role: z.enum(["manager", "agent"]).default("manager"),
 });
 
@@ -187,6 +188,7 @@ export async function register(req, res) {
         nif_number: parsed.nifNumber || null,
         activity: parsed.activity || null,
         activity_description: parsed.activityDescription || null,
+        acquisition_source: parsed.acquisitionSource || null,
       })
       .select("id, name, rccm_number, nif_number, activity, activity_description, created_at")
       .single();
