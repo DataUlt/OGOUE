@@ -890,3 +890,50 @@ export async function registerSecondary(req, res) {
     return res.status(500).json({ error: "Erreur lors de l'inscription" });
   }
 }
+
+/**
+ * POST /auth/change-password
+ * Changement volontaire du mot de passe par le gérant connecté.
+ * L'ancien mot de passe est vérifié avant tout changement.
+ */
+export async function changePassword(req, res) {
+  try {
+    const schema = z.object({
+      currentPassword: z.string().min(1).max(128),
+      newPassword: z.string().min(8).max(128),
+    });
+    const parsed = schema.parse(req.body);
+
+    if (!req.user?.email) {
+      return res.status(403).json({ error: "Ce compte n'a pas de mot de passe à changer." });
+    }
+    if (parsed.currentPassword === parsed.newPassword) {
+      return res.status(400).json({ error: "Le nouveau mot de passe doit être différent de l'ancien." });
+    }
+
+    // Vérifie l'ancien mot de passe (client dédié à la connexion)
+    const { error: erreurVerif } = await supabaseAuth.auth.signInWithPassword({
+      email: req.user.email,
+      password: parsed.currentPassword,
+    });
+    if (erreurVerif) {
+      return res.status(401).json({ error: "Mot de passe actuel incorrect" });
+    }
+
+    const { error } = await supabase.auth.admin.updateUserById(req.user.sub, {
+      password: parsed.newPassword,
+    });
+    if (error) {
+      console.error("Changement de mot de passe:", error);
+      return res.status(500).json({ error: "Changement impossible, réessayez." });
+    }
+
+    return res.json({ ok: true });
+  } catch (error) {
+    if (error?.name === "ZodError") {
+      return res.status(400).json({ error: "Le nouveau mot de passe doit contenir au moins 8 caractères." });
+    }
+    console.error("changePassword error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}

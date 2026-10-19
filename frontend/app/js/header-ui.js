@@ -771,6 +771,15 @@
     const logoutLink = document.createElement('div');
     logoutLink.className = 'text-sm text-red-600 dark:text-red-400 pt-2 border-t border-gray-200 dark:border-gray-600';
     logoutLink.innerHTML = '<button class="hover:text-red-700 dark:hover:text-red-300 font-medium flex items-center gap-2"><span class="material-symbols-outlined text-base">logout</span> Déconnexion</button>';
+    // Changer son mot de passe (comptes gérant uniquement)
+    const u = (() => { try { return JSON.parse(localStorage.getItem('user') || 'null'); } catch (e) { return null; } })();
+    if (u && u.role === 'manager') {
+      const changerMdp = document.createElement('div');
+      changerMdp.className = 'pt-2';
+      changerMdp.innerHTML = '<button type="button" class="text-sm text-primary hover:underline font-medium flex items-center gap-2"><span class="material-symbols-outlined text-base">lock</span>Changer le mot de passe</button>';
+      changerMdp.querySelector('button').addEventListener('click', () => ouvrirChangementMotDePasse());
+      content.appendChild(changerMdp);
+    }
     content.appendChild(logoutLink);
     
     container.appendChild(content);
@@ -1038,3 +1047,58 @@
 
   document.addEventListener('DOMContentLoaded', () => setTimeout(verifier, 800));
 })();
+
+// ===== Changement de mot de passe (gérant) =====
+function ouvrirChangementMotDePasse() {
+  const ancien = document.getElementById('ogo-mdp-fenetre');
+  if (ancien) ancien.remove();
+  const fond = document.createElement('div');
+  fond.id = 'ogo-mdp-fenetre';
+  fond.style.cssText = 'position:fixed;inset:0;z-index:110;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(15,23,42,.45)';
+  const champ = (id, libelle, auto) =>
+    '<label style="display:block;margin-top:14px;font-size:14px;font-weight:600;color:#0B1F3F">' + libelle +
+    '<input id="' + id + '" type="password" autocomplete="' + auto + '" style="display:block;width:100%;margin-top:6px;padding:12px 14px;border:1px solid #E7EBF0;border-radius:12px;font-size:15px;box-sizing:border-box" /></label>';
+  fond.innerHTML =
+    '<div style="width:100%;max-width:420px;background:#fff;border-radius:24px;padding:24px;color:#0B1F3F">' +
+    '<h2 style="margin:0;font-size:20px;font-weight:700">Changer le mot de passe</h2>' +
+    champ('mdp-actuel', 'Mot de passe actuel', 'current-password') +
+    champ('mdp-nouveau', 'Nouveau mot de passe (8 caractères minimum)', 'new-password') +
+    champ('mdp-confirm', 'Confirmer le nouveau mot de passe', 'new-password') +
+    '<p id="mdp-erreur" style="display:none;margin:12px 0 0;font-size:13px;color:#B91C1C"></p>' +
+    '<p id="mdp-ok" style="display:none;margin:12px 0 0;font-size:13px;color:#007C96"></p>' +
+    '<div style="display:flex;gap:10px;margin-top:20px">' +
+    '<button id="mdp-annuler" type="button" style="flex:1;height:46px;border:0;border-radius:999px;background:#F4F6F9;font-weight:600;color:#0B1F3F;cursor:pointer">Annuler</button>' +
+    '<button id="mdp-valider" type="button" style="flex:1;height:46px;border:0;border-radius:999px;background:#0B2A5B;font-weight:600;color:#fff;cursor:pointer">Enregistrer</button>' +
+    '</div></div>';
+  document.body.appendChild(fond);
+
+  const erreur = document.getElementById('mdp-erreur');
+  const ok = document.getElementById('mdp-ok');
+  const afficherErreur = (msg) => { ok.style.display = 'none'; erreur.textContent = msg; erreur.style.display = 'block'; };
+
+  document.getElementById('mdp-annuler').addEventListener('click', () => fond.remove());
+  document.getElementById('mdp-valider').addEventListener('click', async () => {
+    const actuel = document.getElementById('mdp-actuel').value;
+    const nouveau = document.getElementById('mdp-nouveau').value;
+    const confirm = document.getElementById('mdp-confirm').value;
+    if (!actuel || !nouveau) return afficherErreur('Remplissez les trois champs.');
+    if (nouveau.length < 8) return afficherErreur('Le nouveau mot de passe doit contenir au moins 8 caractères.');
+    if (nouveau !== confirm) return afficherErreur('La confirmation ne correspond pas.');
+    if (nouveau === actuel) return afficherErreur('Le nouveau mot de passe doit être différent de l\'ancien.');
+    try {
+      const reponse = await fetch(API_BASE_URL + '/api/auth/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+        body: JSON.stringify({ currentPassword: actuel, newPassword: nouveau })
+      });
+      const data = await reponse.json().catch(() => ({}));
+      if (!reponse.ok) return afficherErreur(data.error || 'Changement impossible.');
+      erreur.style.display = 'none';
+      ok.textContent = 'Mot de passe modifié.';
+      ok.style.display = 'block';
+      setTimeout(() => fond.remove(), 1500);
+    } catch (e) {
+      afficherErreur('Connexion impossible. Réessayez.');
+    }
+  });
+}

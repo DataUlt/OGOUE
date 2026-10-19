@@ -1,5 +1,5 @@
 ﻿import express from "express";
-import { register, login, getMe, registerAgent, loginAgent, forgotPassword, resetPassword, loginSecondary, registerSecondary } from "../controllers/auth.controller.js";
+import { register, login, getMe, registerAgent, loginAgent, forgotPassword, resetPassword, loginSecondary, registerSecondary, changePassword } from "../controllers/auth.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { limiterTentatives } from "../middleware/securite.middleware.js";
 
@@ -48,6 +48,8 @@ authRoutes.post("/reset-password", limiteConnexion, resetPassword);    // Valide
 
 // Routes protégées (nécessitent un JWT valide)
 authRoutes.get("/me", authMiddleware, getMe);
+// Changer son mot de passe (gérant connecté, ancien mot de passe exigé)
+authRoutes.post("/change-password", authMiddleware, limiteConnexion, changePassword);
 
 // ============================================
 // SECONDARY DATABASE ROUTES
