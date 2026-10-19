@@ -62,17 +62,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,300..600,0..1,-25..200&display=swap" rel="stylesheet"/>
     <style>
         .tdb {
+            --page: #EEF1F5; --panel: #FFFFFF;
             --bg: #FFFFFF; --soft: #F4F6F9; --soft2: #EBEFF4; --line: #E7EBF0;
             --ink: #0B1F3F; --ink2: #4A5870; --muted: #7A869A;
             --hero: #0B2A5B; --cyan: #14B8D9; --cyanInk: #007C96; --cyanSoft: #E2F6FA;
             --orange: #F2A04B; --orangeInk: #A65A0F; --orangeSoft: #FDF0E1;
             --navyInk: #0B2A5B;
             min-height: 100vh;
-            background: #EEF1F5;
+            background: var(--page);
             color: var(--ink);
             font-family: 'Geist', system-ui, sans-serif;
             -webkit-font-smoothing: antialiased;
         }
+        /* Mode sombre : mêmes couleurs que la page Ventes (fond #111712, cartes #1a2622) */
+        html.dark .tdb { --page: #111712; --panel: #1a2622; --bg: #1a2622; --soft: #1a2622; --soft2: #243530; --line: #2a3a32; --ink: #f6f8f6; --ink2: #9ca3a8; --muted: #7d8a85; --cyanSoft: #0e2d3a; --cyanInk: #62D7EC; --orangeSoft: #33230F; --orangeInk: #F8C186; --navyInk: #AFC3E8; }
+        html.dark .tdb-panel { background: #1a2622; color: #f6f8f6; border-color: #2a3a32; }
         .tdb a { color: var(--cyanInk); font-weight: 600; text-decoration: none; }
         .tdb a:hover { text-decoration: underline; }
         .tdb .tdb-qlink { color: var(--ink); }
