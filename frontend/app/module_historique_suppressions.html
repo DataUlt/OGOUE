@@ -52,7 +52,11 @@
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
         }
-    </style>
+        /* Tableaux : sur grand écran, toutes les colonnes restent visibles sans défilement */
+    @media (min-width: 1280px) { .ecran-large { margin-left: -2.75rem; margin-right: -2.75rem; } }
+    .ecran-large table { font-size: 13px; }
+    .ecran-large th, .ecran-large td { padding-left: .625rem; padding-right: .625rem; }
+  </style>
     <!-- Restriction d'acces : un agent est redirige vers ses propres pages -->
     <script src="js/role-guard.js"></script>
 </head>
@@ -150,7 +154,7 @@
 
                 <!-- TABLEAU DES SUPPRESSIONS -->
                 <div class="rounded-xl border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark shadow-sm overflow-hidden">
-                    <div class="overflow-x-auto">
+                    <div class="ecran-large overflow-x-auto">
                         <table data-cartes class="w-full text-sm">
                             <thead>
                                 <tr class="border-b border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark">

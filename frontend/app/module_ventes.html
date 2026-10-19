@@ -119,7 +119,11 @@
                 color-scheme: dark;
             }
         }
-    </style>
+        /* Tableaux : sur grand écran, toutes les colonnes restent visibles sans défilement */
+    @media (min-width: 1280px) { .ecran-large { margin-left: -2.75rem; margin-right: -2.75rem; } }
+    .ecran-large table { font-size: 13px; }
+    .ecran-large th, .ecran-large td { padding-left: .625rem; padding-right: .625rem; }
+  </style>
     <!-- Restriction d'acces : un agent est redirige vers ses propres pages -->
     <script src="js/role-guard.js"></script>
 </head>
@@ -563,7 +567,7 @@
                         </button>
                     </div>
 
-                    <div class="overflow-x-auto bg-white dark:bg-[#182c29] rounded-xl shadow-sm border border-[#cfe7e3]/70 dark:border-gray-700/70">
+                    <div class="ecran-large overflow-x-auto bg-white dark:bg-[#182c29] rounded-xl shadow-sm border border-[#cfe7e3]/70 dark:border-gray-700/70">
                         <table data-cartes class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                             <thead class="text-xs text-gray-700 dark:text-gray-300 uppercase bg-gray-50 dark:bg-gray-800/50">
                             <tr>
@@ -619,7 +623,7 @@
                 </button>
             </div>
 
-            <div class="px-6 pb-6 pt-3 overflow-x-auto overflow-y-auto">
+            <div class="ecran-large px-6 pb-6 pt-3 overflow-x-auto overflow-y-auto">
                 <table data-cartes class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                     <thead class="text-xs text-gray-700 dark:text-gray-300 uppercase bg-gray-50 dark:bg-gray-800/50">
                     <tr>

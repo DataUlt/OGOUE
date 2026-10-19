@@ -42,6 +42,10 @@
     .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 500,'GRAD' 0,'opsz' 24; }
     .fade-in { animation: fade .18s ease-out both; }
     @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+      /* Tableaux : sur grand écran, toutes les colonnes restent visibles sans défilement */
+    @media (min-width: 1280px) { .ecran-large { margin-left: -2.75rem; margin-right: -2.75rem; } }
+    .ecran-large table { font-size: 13px; }
+    .ecran-large th, .ecran-large td { padding-left: .625rem; padding-right: .625rem; }
   </style>
 
   <!-- Restriction d'acces : un agent est redirige vers ses propres pages -->
@@ -181,7 +185,7 @@
       </div>
 
       <div class="rounded-2xl bg-white dark:bg-gray-800/40 border border-[#e8ede8] dark:border-gray-700 shadow-soft overflow-hidden">
-        <div class="overflow-x-auto">
+        <div class="ecran-large overflow-x-auto">
           <table data-cartes class="w-full text-left border-collapse">
             <thead class="bg-background-light dark:bg-gray-900/40">
               <tr>
