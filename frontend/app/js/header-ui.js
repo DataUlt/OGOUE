@@ -337,6 +337,7 @@
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
+          name: org.name,
           rccm: org.rccm,
           nif: org.nif
         })
@@ -356,6 +357,7 @@
       // Update local org with server response
       const updatedOrg = {
         ...org,
+        name: data.organization.name,
         rccm: data.organization.rccmNumber,
         nif: data.organization.nifNumber
       };
@@ -647,8 +649,10 @@
       const orgDiv = document.createElement('div');
       orgDiv.className = 'text-sm text-gray-700 dark:text-gray-300';
       orgDiv.innerHTML = `
-        <span class="material-symbols-outlined text-base align-middle mr-2">business</span>
-        <span class="font-medium">${echapperHtmlEntete(org.name || org.id || 'Organisation')}</span>
+        <div class="flex items-center justify-between gap-2">
+          <span class="flex items-center min-w-0"><span class="material-symbols-outlined text-base align-middle mr-2">business</span><span class="font-medium truncate">${echapperHtmlEntete(org.name || org.id || 'Organisation')}</span></span>
+          <button class="shrink-0 text-teal-600 dark:text-teal-400 text-xs font-medium hover:text-teal-700 dark:hover:text-teal-300" data-edit-nom>Modifier</button>
+        </div>
       `;
       content.appendChild(orgDiv);
       
@@ -786,6 +790,11 @@
     popover.appendChild(container);
     
     // Event listeners
+    popover.querySelector('[data-edit-nom]')?.addEventListener('click', () => openEditModal('Nom de l\'organisation', org.name || '', async (val) => {
+      if (!val) throw new Error('Le nom de l\'organisation est obligatoire');
+      await saveOrgToServer(Object.assign({}, org, { name: val }));
+    }));
+
     popover.querySelector('[data-edit-rccm]')?.addEventListener('click', () => openEditModal('RCCM', org.rccm || '', async (val) => {
       const newOrg = Object.assign({}, org, { rccm: val });
       await saveOrgToServer(newOrg);
