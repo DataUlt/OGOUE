@@ -46,6 +46,7 @@ export async function updateOrganization(req, res) {
         activity_description: activityDescription || undefined,
         rccm_number: rccm || undefined,
         nif_number: nif || undefined,
+        updated_at: new Date().toISOString(),
       })
       .eq("id", organizationId)
       .select("id, name, rccm_number, nif_number, activity, activity_description, created_at")
