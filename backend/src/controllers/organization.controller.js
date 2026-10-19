@@ -7,7 +7,7 @@ export async function getOrganization(req, res) {
     console.log("➡️ Fetching organization id:", organizationId);
     const { data: orgData, error } = await supabase
       .from("organizations")
-      .select("id, name, rccm_number, nif_number, activity, activity_description, created_at")
+      .select("id, name, rccm_number, nif_number, activity, activity_description, created_at, acquisition_source")
       .eq("id", organizationId)
       .single();
 
@@ -24,6 +24,7 @@ export async function getOrganization(req, res) {
       activity: orgData.activity,
       activityDescription: orgData.activity_description,
       createdAt: orgData.created_at,
+      acquisitionSource: orgData.acquisition_source,
     });
   } catch (error) {
     console.error("GetOrganization error:", error);
@@ -68,6 +69,37 @@ export async function updateOrganization(req, res) {
     });
   } catch (error) {
     console.error("UpdateOrganization error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+// Canal d'acquisition : réponse unique. Une réponse déjà donnée n'est jamais écrasée.
+export async function enregistrerCanalAcquisition(req, res) {
+  try {
+    const organizationId = req.user.organizationId;
+    const source = String(req.body?.source || "").trim();
+    if (!source || source.length > 120) {
+      return res.status(400).json({ error: "Réponse invalide" });
+    }
+
+    const { data, error } = await supabase
+      .from("organizations")
+      .update({ acquisition_source: source })
+      .eq("id", organizationId)
+      .is("acquisition_source", null)
+      .select("id")
+      .maybeSingle();
+
+    if (error) {
+      console.error("Canal d'acquisition non enregistré:", error);
+      return res.status(500).json({ error: "Enregistrement impossible" });
+    }
+    if (!data) {
+      return res.status(409).json({ error: "Réponse déjà enregistrée" });
+    }
+    return res.json({ ok: true });
+  } catch (error) {
+    console.error("enregistrerCanalAcquisition error:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 }

@@ -369,7 +369,7 @@
 
   function createPopover(){
     const el = document.createElement('div');
-    el.className = 'ogo-popover fixed z-50 rounded-lg shadow-xl bg-white dark:bg-[#1E293B] border border-gray-300 dark:border-gray-600';
+    el.className = 'ogo-popover fixed z-50 rounded-[28px] shadow-xl bg-white dark:bg-[#1E293B] border border-gray-300 dark:border-gray-600';
     return el;
   }
 
@@ -462,7 +462,7 @@
     popover.innerHTML = '';
     
     const container = document.createElement('div');
-    container.className = 'w-80 bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden';
+    container.className = 'w-80 bg-white dark:bg-gray-800 rounded-[28px] shadow-lg overflow-hidden';
     
     // Header
     const header = document.createElement('div');
@@ -809,7 +809,7 @@
 
   function openEditModal(label, value, onSave) {
     const modal = document.createElement('div');
-    modal.className = 'fixed z-50 rounded-lg shadow-xl bg-white dark:bg-[#1E293B] border border-gray-300 dark:border-gray-600 w-80 p-5';
+    modal.className = 'fixed z-50 rounded-[28px] shadow-xl bg-white dark:bg-[#1E293B] border border-gray-300 dark:border-gray-600 w-80 p-5';
     modal.style.top = '50%';
     modal.style.left = '50%';
     modal.style.transform = 'translate(-50%, -50%)';
@@ -941,4 +941,100 @@
     initHeaderUI();
   }
 
+})();
+
+// Navigation du haut : même colonne que le contenu des pages (1120 px centrés, marge de 44 px)
+(function () {
+  const style = document.createElement('style');
+  style.textContent = '@media (min-width: 1536px) { header .gap-9 { position: absolute; left: calc(50% - 516px); top: 50%; transform: translateY(-50%); } }';
+  document.head.appendChild(style);
+})();
+
+// ===== Pop-up « Comment nous avez-vous connu ? » (comptes existants, une fois par session) =====
+(function () {
+  const CLE_VU = 'ogo_canal_pop_vu';
+  const CHOIX = [
+    ['recommandation', "Recommandation d'un proche"],
+    ['facebook', 'Facebook'],
+    ['instagram', 'Instagram'],
+    ['tiktok', 'TikTok'],
+    ['google', 'Google / moteur de recherche'],
+    ['youtube', 'YouTube (tutoriels)'],
+    ['publicite', 'Publicité'],
+    ['evenement', 'Événement ou salon'],
+    ['autre', 'Autre'],
+  ];
+
+  function utilisateur() {
+    try { return JSON.parse(localStorage.getItem('user') || 'null'); } catch (e) { return null; }
+  }
+
+  function afficher() {
+    const fond = document.createElement('div');
+    fond.id = 'pop-canal';
+    fond.style.cssText = 'position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(15,23,42,.45);font-family:inherit';
+    const options = CHOIX.map(([v, l]) => '<option value="' + v + '">' + l + '</option>').join('');
+    fond.innerHTML =
+      '<div style="width:100%;max-width:420px;background:#fff;border-radius:24px;padding:24px;color:#0B1F3F">' +
+      '<h2 style="margin:0 0 6px;font-size:20px;font-weight:700">Comment nous avez-vous connu ?</h2>' +
+      '<p style="margin:0 0 16px;font-size:14px;color:#4A5870">Ça nous aide à savoir où vous trouver. Une seule réponse à donner.</p>' +
+      '<select id="pop-canal-choix" style="width:100%;padding:12px 14px;border:1px solid #E7EBF0;border-radius:12px;background:#fff;font-size:15px">' +
+      '<option value="">Choisir une réponse</option>' + options + '</select>' +
+      '<input id="pop-canal-autre" type="text" maxlength="100" placeholder="Précisez" style="display:none;width:100%;margin-top:10px;padding:12px 14px;border:1px solid #E7EBF0;border-radius:12px;font-size:15px" />' +
+      '<p id="pop-canal-erreur" style="display:none;margin:10px 0 0;font-size:13px;color:#B91C1C"></p>' +
+      '<div style="display:flex;gap:10px;margin-top:18px">' +
+      '<button id="pop-canal-plus-tard" type="button" style="flex:1;height:46px;border:0;border-radius:999px;background:#F4F6F9;font-weight:600;color:#0B1F3F;cursor:pointer">Plus tard</button>' +
+      '<button id="pop-canal-valider" type="button" style="flex:1;height:46px;border:0;border-radius:999px;background:#0B2A5B;font-weight:600;color:#fff;cursor:pointer">Valider</button>' +
+      '</div></div>';
+    document.body.appendChild(fond);
+
+    const select = document.getElementById('pop-canal-choix');
+    const autre = document.getElementById('pop-canal-autre');
+    const erreur = document.getElementById('pop-canal-erreur');
+    select.addEventListener('change', () => { autre.style.display = select.value === 'autre' ? 'block' : 'none'; });
+
+    document.getElementById('pop-canal-plus-tard').addEventListener('click', () => {
+      sessionStorage.setItem(CLE_VU, '1');
+      fond.remove();
+    });
+
+    document.getElementById('pop-canal-valider').addEventListener('click', async () => {
+      const valeur = select.value;
+      const precision = autre.value.trim();
+      if (!valeur) { erreur.textContent = 'Choisissez une réponse.'; erreur.style.display = 'block'; return; }
+      if (valeur === 'autre' && !precision) { erreur.textContent = 'Précisez votre réponse.'; erreur.style.display = 'block'; return; }
+      const source = valeur === 'autre' ? 'autre : ' + precision : valeur;
+      try {
+        const reponse = await fetch(API_BASE_URL + '/api/organization/canal-acquisition', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+          body: JSON.stringify({ source })
+        });
+        // 409 : déjà répondu ailleurs, on ferme sans gêner
+        if (!reponse.ok && reponse.status !== 409) throw new Error('refus');
+        sessionStorage.setItem(CLE_VU, '1');
+        fond.remove();
+      } catch (e) {
+        erreur.textContent = "Impossible d'enregistrer votre réponse. Réessayez.";
+        erreur.style.display = 'block';
+      }
+    });
+  }
+
+  async function verifier() {
+    const u = utilisateur();
+    if (!u || u.role !== 'manager' || !getToken()) return;
+    if (sessionStorage.getItem(CLE_VU)) return;
+    try {
+      const reponse = await fetch(API_BASE_URL + '/api/organization', {
+        headers: { 'Authorization': 'Bearer ' + getToken() }
+      });
+      if (!reponse.ok) return;
+      const org = await reponse.json();
+      if (!org.acquisitionSource) afficher();
+      else sessionStorage.setItem(CLE_VU, '1');
+    } catch (e) { /* hors ligne : on ne dérange pas */ }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => setTimeout(verifier, 800));
 })();
