@@ -508,17 +508,17 @@
             <span class="material-symbols-outlined" style="font-size: 18px;">workspace_premium</span>
             Mon abonnement
           </span>
-          <span class="font-bold text-primary" data-formule-nom>…</span>
+          <span class="font-bold text-[#0B2A5B] dark:text-white" data-formule-nom>…</span>
         </a>`;
     const lienAgents = isAgent ? '' : `
-          <a href="module_agents.html" data-exige="agents" class="block w-full px-4 py-2 rounded-lg text-background-light bg-primary hover:bg-text-light font-medium text-sm text-center transition-colors inline-flex items-center justify-center gap-2">
+          <a href="module_agents.html" data-exige="agents" class="block w-full px-4 py-2 rounded-lg text-white bg-[#0B2A5B] hover:bg-[#0B2A5B]/90 font-medium text-sm text-center transition-colors inline-flex items-center justify-center gap-2">
             <span class="material-symbols-outlined" style="font-size: 18px;">group</span>
             Gérer les Agents
           </a>`;
     gestionDiv.innerHTML = `
       <div class="text-xs font-bold uppercase text-gray-500 dark:text-gray-400 mb-3">Gestion</div>
       <div class="space-y-2">${lienAbonnement}${lienAgents}
-        <a href="module_articles.html" class="block w-full px-4 py-2 rounded-lg text-background-light bg-primary hover:bg-text-light font-medium text-sm text-center transition-colors inline-flex items-center justify-center gap-2">
+        <a href="module_articles.html" class="block w-full px-4 py-2 rounded-lg text-white bg-[#0B2A5B] hover:bg-[#0B2A5B]/90 font-medium text-sm text-center transition-colors inline-flex items-center justify-center gap-2">
           <span class="material-symbols-outlined" style="font-size: 18px;">storefront</span>
           ${isAgent ? 'La boutique' : 'Ma boutique'}
         </a>
@@ -531,7 +531,7 @@
     // Footer button
     const footer = document.createElement('div');
     footer.className = 'px-5 py-4 border-t border-gray-200 dark:border-gray-600';
-    footer.innerHTML = '<button class="w-full px-4 py-2 rounded-lg text-background-light bg-primary hover:bg-text-light font-medium text-sm transition-colors" data-close>Fermer</button>';
+    footer.innerHTML = '<button class="w-full px-4 py-2 rounded-lg text-white bg-[#0B2A5B] hover:bg-[#0B2A5B]/90 font-medium text-sm transition-colors" data-close>Fermer</button>';
     container.appendChild(footer);
     
     popover.appendChild(container);
