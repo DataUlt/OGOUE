@@ -691,7 +691,7 @@
         </div>
         <div class="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded">
           <div class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-base text-primary">workspace_premium</span>
+            <span class="material-symbols-outlined text-base text-[#0B2A5B] dark:text-white">workspace_premium</span>
             <span class="font-semibold text-gray-900 dark:text-white" data-formule-nom>…</span>
           </div>
           <div class="hidden mt-2" data-formule-echeance>
@@ -699,7 +699,7 @@
               <span class="text-gray-600 dark:text-gray-400" data-echeance-texte></span>
             </div>
             <div class="w-full h-1.5 rounded-full bg-gray-200 dark:bg-gray-600 overflow-hidden">
-              <div class="h-full rounded-full bg-primary transition-all" style="width:0%" data-echeance-barre></div>
+              <div class="h-full rounded-full bg-[#0B2A5B] transition-all" style="width:0%" data-echeance-barre></div>
             </div>
           </div>
 
@@ -709,7 +709,7 @@
               <span class="text-gray-600 dark:text-gray-400" data-stockage-texte></span>
             </div>
             <div class="w-full h-1.5 rounded-full bg-gray-200 dark:bg-gray-600 overflow-hidden">
-              <div class="h-full rounded-full bg-primary transition-all" style="width:0%" data-stockage-barre></div>
+              <div class="h-full rounded-full bg-[#0B2A5B] transition-all" style="width:0%" data-stockage-barre></div>
             </div>
           </div>
         </div>
@@ -741,7 +741,7 @@
           // gerant croit la jauge cassee plutot que son espace intact.
           barreS.style.width = `${Math.max(pctS, utilise > 0 ? 2 : 0)}%`;
           barreS.classList.remove('bg-primary');
-          barreS.classList.add(pctS >= 90 ? 'bg-red-500' : (pctS >= 75 ? 'bg-orange-500' : 'bg-primary'));
+          barreS.classList.add(pctS >= 90 ? 'bg-red-500' : (pctS >= 75 ? 'bg-orange-500' : 'bg-[#0B2A5B]'));
 
           abonnementDiv.querySelector('[data-formule-stockage]').classList.remove('hidden');
         }
@@ -761,7 +761,7 @@
         const barre = abonnementDiv.querySelector('[data-echeance-barre]');
         barre.style.width = `${pct}%`;
         barre.classList.remove('bg-primary');
-        barre.classList.add(restants <= 7 ? 'bg-red-500' : (restants <= 15 ? 'bg-orange-500' : 'bg-primary'));
+        barre.classList.add(restants <= 7 ? 'bg-red-500' : (restants <= 15 ? 'bg-orange-500' : 'bg-[#0B2A5B]'));
 
         bloc.classList.remove('hidden');
       }).catch(() => {});
@@ -776,7 +776,7 @@
     if (u && u.role === 'manager') {
       const changerMdp = document.createElement('div');
       changerMdp.className = 'pt-2';
-      changerMdp.innerHTML = '<button type="button" class="text-sm text-primary hover:underline font-medium flex items-center gap-2"><span class="material-symbols-outlined text-base">lock</span>Changer le mot de passe</button>';
+      changerMdp.innerHTML = '<button type="button" class="text-sm text-[#0B1F3F] dark:text-white hover:underline font-medium flex items-center gap-2"><span class="material-symbols-outlined text-base">lock</span>Changer le mot de passe</button>';
       changerMdp.querySelector('button').addEventListener('click', () => ouvrirChangementMotDePasse());
       content.appendChild(changerMdp);
     }
