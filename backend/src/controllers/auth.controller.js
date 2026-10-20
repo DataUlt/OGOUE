@@ -19,6 +19,8 @@ const registerSchema = z.object({
   activity: z.string().min(1).max(200),
   activityDescription: z.string().min(1).max(500),
   acquisitionSource: z.string().max(120).optional().nullable(),
+  // Origine du site d'où vient l'inscription : le lien de confirmation y renvoie.
+  redirectOrigin: z.string().max(200).optional().nullable(),
   role: z.enum(["manager", "agent"]).default("manager"),
 });
 
@@ -168,7 +170,9 @@ export async function register(req, res) {
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email: parsed.email,
       password: parsed.password,
-      email_confirm: true, // Auto-confirmer l'email (optionnel)
+      // Le compte reste inactif tant que l'adresse n'est pas confirmée
+      // par le lien reçu par e-mail.
+      email_confirm: false,
     });
 
     if (authError || !authData.user) {
@@ -237,48 +241,65 @@ export async function register(req, res) {
       // Don't fail registration if sync fails - it can be retried later
     }
 
-    // 4️⃣ Créer une session en loggant avec l'email et password
-    // (client dédié : ne pas attacher de session au client admin)
-    const { data: sessionData, error: sessionError } = await supabaseAuth.auth.signInWithPassword({
-      email: parsed.email,
-      password: parsed.password
-    });
-
-    if (sessionError || !sessionData.session) {
-      console.error("Session error:", sessionError);
-      return res.status(500).json({ error: "Erreur lors de la création de la session" });
-    }
+    // 4️⃣ Envoyer le lien de confirmation. Aucune session n'est ouverte ici :
+    // le compte ne sert à rien tant que l'adresse n'a pas été confirmée.
+    await envoyerConfirmation(parsed.email, parsed.redirectOrigin);
 
     return res.status(201).json({
-      message: "Inscription réussie",
-      token: sessionData.session.access_token,
-      refreshToken: sessionData.session.refresh_token,
-      user: {
-        id: userData.id,
-        firstName: userData.first_name,
-        lastName: userData.last_name,
-        email: userData.email,
-        role: userData.role,
-        organizationId: userData.organization_id,
-      },
-      organization: {
-        id: orgData.id,
-        name: orgData.name,
-      },
+      message: "Inscription enregistrée. Un e-mail de confirmation vient de vous être envoyé.",
+      needsConfirmation: true,
+      email: parsed.email,
       sync: {
         primary: true,
         secondary: syncResult.success,
-        message: syncResult.success 
-          ? "User and organization created in both Supabase instances" 
+        message: syncResult.success
+          ? "User and organization created in both Supabase instances"
           : `Created in primary Supabase only. Secondary sync: ${syncResult.reason}`
       },
     });
+
   } catch (err) {
     console.error("Register error:", err?.message || err);
     if (err?.name === "ZodError") {
       return res.status(400).json({ error: "Validation error", details: err.issues });
     }
     return res.status(500).json({ error: err?.message || "Erreur lors de l'inscription" });
+  }
+}
+
+/**
+ * Envoie (ou renvoie) le lien de confirmation d'e-mail. Un compte créé par
+ * l'API admin ne reçoit rien automatiquement : on le demande ici.
+ * Une erreur d'envoi ne bloque pas l'inscription : la personne peut relancer.
+ */
+// Seules ces origines peuvent recevoir le lien de confirmation (le reste est ignoré).
+const ORIGINES_CONFIRMATION = ["http://127.0.0.1:8080", "http://localhost:8080", "https://www.ogoue.com"];
+
+async function envoyerConfirmation(email, origine) {
+  const emailRedirectTo = ORIGINES_CONFIRMATION.includes(origine) ? `${origine}/confirmation.html` : undefined;
+  const { error } = await supabaseAuth.auth.resend({ type: "signup", email, options: { emailRedirectTo } });
+  if (error) console.error("Envoi du lien de confirmation échoué:", error.message);
+  return !error;
+}
+
+/**
+ * POST /auth/resend-confirmation
+ * Renvoie le lien de confirmation. La réponse est la même que le compte
+ * existe ou non, pour ne pas révéler les adresses inscrites.
+ */
+export async function resendConfirmation(req, res) {
+  try {
+    const parsed = z.object({ email: z.string().email(), redirectOrigin: z.string().max(200).optional().nullable() }).parse(req.body);
+    await envoyerConfirmation(parsed.email, parsed.redirectOrigin);
+    return res.json({
+      message: "Si un compte en attente existe pour cette adresse, un nouveau lien de confirmation vient d'être envoyé.",
+    });
+  } catch (err) {
+    if (err?.name === "ZodError") {
+      return res.status(400).json({ error: "Adresse e-mail invalide" });
+    }
+    console.error("Resend error:", err?.message || err);
+    return res.status(500).json({ error: "Impossible d'envoyer le lien pour le moment" });
   }
 }
 
@@ -299,6 +320,16 @@ export async function login(req, res) {
 
     if (authError || !authData.session) {
       console.error("Auth error:", authError);
+
+      // Mot de passe bon mais e-mail pas encore confirmé : Supabase le signale
+      // seulement dans ce cas, on le dit donc clairement.
+      if (authError?.code === "email_not_confirmed" || /email not confirmed/i.test(authError?.message || "")) {
+        return res.status(403).json({
+          error: "Votre adresse e-mail n'est pas encore confirmée. Cliquez sur le lien reçu par e-mail, ou demandez un nouvel envoi.",
+          code: "EMAIL_NON_CONFIRME",
+          email: parsed.email,
+        });
+      }
 
       // Supabase renvoie volontairement la même erreur qu'un compte soit
       // inconnu ou que le mot de passe soit faux. Pour dire à la personne ce

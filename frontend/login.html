@@ -244,6 +244,7 @@
   </div>
 
   <script>
+    const SUITE = new URLSearchParams(location.search).get('suite') || '';
     const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
       ? 'http://localhost:3001'
       : 'https://api.ogoue.com';
@@ -285,6 +286,7 @@
         
         if (!response.ok) {
           showError(data.error || "Erreur de connexion");
+          if (data.code === 'EMAIL_NON_CONFIRME') ajouterRenvoiConfirmation(data.email);
           submitBtn.textContent = originalText;
           submitBtn.disabled = false;
           return;
@@ -316,7 +318,11 @@
           ? 'http://127.0.0.1:8080/app'
           : 'https://www.ogoue.com/app';
         setTimeout(() => {
-          window.location.href = `${APP_BASE}/module_tableau_bord.html`;
+          // Suite prévue à l'inscription (paiement ou onboarding), limitée à deux chemins connus
+          const destination = (SUITE.startsWith('/paiement.html?') || SUITE.startsWith('/app/module_articles.html'))
+            ? SUITE
+            : `${APP_BASE}/module_tableau_bord.html`;
+          window.location.href = destination;
         }, 1500);
         
       } catch (error) {
@@ -328,6 +334,31 @@
       }
     }
     
+    // Propose le renvoi du lien quand le compte existe mais que l'e-mail n'est pas confirmé
+    function ajouterRenvoiConfirmation(email) {
+      const bouton = document.createElement('button');
+      bouton.type = 'button';
+      bouton.className = 'mt-2 font-semibold underline';
+      bouton.textContent = 'Renvoyer le lien de confirmation';
+      bouton.addEventListener('click', async () => {
+        bouton.disabled = true;
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/auth/resend-confirmation`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email, redirectOrigin: window.location.origin })
+          });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || 'Envoi impossible');
+          document.getElementById('errorMessage').classList.add('hidden');
+          showSuccess(data.message);
+        } catch (error) {
+          showError(error.message);
+        }
+      });
+      document.getElementById('errorMessage').appendChild(bouton);
+    }
+
     function showError(message) {
       const errorDiv = document.getElementById('errorMessage');
       errorDiv.textContent = message;

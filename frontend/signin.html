@@ -123,8 +123,15 @@
 
           <div id="errorMessage" class="hidden p-4 mb-6 bg-red-100/80 border border-red-300 text-red-700 rounded-lg text-sm"></div>
           <div id="successMessage" class="hidden p-4 mb-6 bg-cyan-100/80 border border-cyan-300 text-cyan-700 rounded-lg text-sm"></div>
+          <div id="confirmationPanel" class="hidden text-center py-6">
+            <span class="material-symbols-outlined text-5xl text-[#0B2A5B] dark:text-white">mark_email_unread</span>
+            <h2 class="mt-4 text-xl font-bold text-text-light">Vérifiez votre e-mail</h2>
+            <p class="mt-2 text-sm text-text-light-muted">Nous avons envoyé un lien de confirmation à <strong id="confirmationEmail"></strong>. Cliquez dessus pour activer votre compte, puis connectez-vous.</p>
+            <button type="button" id="btnRenvoyer" onclick="renvoyerConfirmation()" class="mt-6 rounded-lg text-white bg-[#0B2A5B] hover:bg-[#0B2A5B]/90 font-semibold px-5 py-3 disabled:opacity-60">Renvoyer le lien</button>
+            <p class="mt-5 text-sm"><a id="lienConnexion" href="/login" class="text-primary font-bold hover:underline">Aller à la connexion</a></p>
+          </div>
 
-          <form class="space-y-5" onsubmit="handleSignup(event)">
+          <form id="signupForm" class="space-y-5" onsubmit="handleSignup(event)">
             <!-- Prénom & Nom -->
             <div class="grid grid-cols-2 gap-3">
               <div>
@@ -523,6 +530,7 @@
             nifNumber: nif || null,
             activity: activity,
             activityDescription: activityNature,
+            redirectOrigin: window.location.origin,
             acquisitionSource: acquisition === 'autre' && acquisitionAutre
               ? `autre : ${acquisitionAutre}`
               : acquisition
@@ -538,47 +546,23 @@
           return;
         }
         
-        localStorage.setItem('authToken', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        
-        try {
-          const orgResponse = await fetch(`${API_BASE_URL}/api/organization`, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${data.token}`
-            }
-          });
-          
-          if (orgResponse.ok) {
-            const orgData = await orgResponse.json();
-            localStorage.setItem('ogo_org', JSON.stringify(orgData));
-          }
-        } catch (orgError) {
-          console.error('Could not fetch organization:', orgError);
+        if (!data.needsConfirmation) {
+          showError("Réponse inattendue du serveur. Réessayez ou contactez-nous.");
+          submitBtn.textContent = originalText;
+          submitBtn.disabled = false;
+          return;
         }
-        
-        showSuccess("Compte créé avec succès ! Redirection...");
 
-        const APP_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
-          ? 'http://127.0.0.1:8080/app'
-          : 'https://www.ogoue.com/app';
-        setTimeout(() => {
-          // Formule payante : on passe d'abord par les instructions de
-          // versement. Le compte est deja utilisable, cette page ne bloque
-          // rien — elle explique comment regler et joindre la preuve.
-          if (PLAN_CHOISI && PLAN_CHOISI !== 'essentiel') {
-            window.location.href =
-              `/paiement.html?plan=${encodeURIComponent(PLAN_CHOISI)}&periode=${encodeURIComponent(PERIODE_CHOISIE)}`;
-            return;
-          }
-
-          // Etape de configuration du catalogue juste apres la creation du
-          // compte. Elle est passable : le bouton "Plus tard" mene au tableau
-          // de bord, et le catalogue reste modifiable ensuite.
-          window.location.href = APP_BASE + '/module_articles.html?onboarding=1';
-        }, 1500);
-        
+        // Le compte n'est actif qu'après clic sur le lien reçu par e-mail.
+        // Aucune session n'est ouverte : on attend la confirmation, puis on se connecte.
+        // La suite (paiement ou onboarding) est transmise à la connexion.
+        const suite = (PLAN_CHOISI && PLAN_CHOISI !== 'essentiel')
+          ? `/paiement.html?plan=${encodeURIComponent(PLAN_CHOISI)}&periode=${encodeURIComponent(PERIODE_CHOISIE)}`
+          : '/app/module_articles.html?onboarding=1';
+        afficherVerificationEmail(email, suite);
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+        return;
       } catch (error) {
         console.error('Error:', error);
         showError("Erreur réseau : " + error.message);
@@ -588,6 +572,41 @@
       }
     }
     
+    let emailEnAttente = '';
+
+    // Écran « Vérifiez votre e-mail » : remplace le formulaire après l'inscription
+    function afficherVerificationEmail(email, suite) {
+      emailEnAttente = email;
+      // La page de confirmation mène ensuite à cette suite (paiement ou onboarding)
+      try { localStorage.setItem('ogo_suite_apres_confirmation', suite); } catch (e) { /* navigation privée */ }
+      document.getElementById('confirmationEmail').textContent = email;
+      document.getElementById('lienConnexion').href = '/login?suite=' + encodeURIComponent(suite);
+      document.getElementById('errorMessage').classList.add('hidden');
+      document.getElementById('successMessage').classList.add('hidden');
+      document.getElementById('signupForm').classList.add('hidden');
+      document.getElementById('confirmationPanel').classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function renvoyerConfirmation() {
+      const bouton = document.getElementById('btnRenvoyer');
+      bouton.disabled = true;
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/auth/resend-confirmation`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: emailEnAttente, redirectOrigin: window.location.origin })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Envoi impossible');
+        showSuccess(data.message);
+      } catch (error) {
+        showError(error.message);
+      } finally {
+        bouton.disabled = false;
+      }
+    }
+
     function showError(message) {
       const errorDiv = document.getElementById('errorMessage');
       errorDiv.textContent = message;

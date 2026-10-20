@@ -1,5 +1,5 @@
 ﻿import express from "express";
-import { register, login, getMe, registerAgent, loginAgent, forgotPassword, resetPassword, loginSecondary, registerSecondary, changePassword } from "../controllers/auth.controller.js";
+import { register, login, getMe, registerAgent, loginAgent, forgotPassword, resetPassword, loginSecondary, registerSecondary, changePassword, resendConfirmation } from "../controllers/auth.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { limiterTentatives } from "../middleware/securite.middleware.js";
 
@@ -43,6 +43,7 @@ authRoutes.post("/register", limiteInscription, register);
 authRoutes.post("/login", limiteConnexion, login);
 authRoutes.post("/agent-register", limiteCodeAgent, registerAgent);    // Enregistrer un agent via code
 authRoutes.post("/agent-login", limiteCodeAgent, loginAgent);          // Vérifier code d'accès agent
+authRoutes.post("/resend-confirmation", limiteMotDePasseOublie, resendConfirmation);  // Renvoyer le lien de confirmation
 authRoutes.post("/forgot-password", limiteMotDePasseOublie, forgotPassword);  // Réinitialiser le mot de passe
 authRoutes.post("/reset-password", limiteConnexion, resetPassword);    // Valider la réinitialisation du mot de passe
 

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Confirmation - OGOUE</title>
+  <link rel="icon" type="image/png" href="app/O-removebg-preview.png">
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" crossorigin href="https://fonts.gstatic.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    body { font-family: Manrope, sans-serif; background-color: #f6f8f6; color: #0a0c0a; }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center px-4">
+  <main class="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 text-center">
+    <span id="icone" class="material-symbols-outlined text-5xl text-[#0B2A5B]">progress_activity</span>
+    <h1 id="titre" class="mt-4 text-xl font-bold">Confirmation de votre adresse…</h1>
+    <p id="message" class="mt-2 text-sm text-[#5c6c60]"></p>
+    <a id="lien" href="/login" class="hidden mt-6 inline-block rounded-lg text-white bg-[#0B2A5B] hover:bg-[#0B2A5B]/90 font-semibold px-5 py-3">Aller à la connexion</a>
+  </main>
+
+  <script>
+    const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://localhost:3001'
+      : 'https://api.ogoue.com';
+
+    // Le lien de confirmation arrive avec la session dans le fragment de l'URL
+    // (#access_token=...). On la lit, on efface le fragment, puis on ouvre la session.
+    function afficherErreur(titre, message) {
+      document.getElementById('icone').textContent = 'error';
+      document.getElementById('icone').classList.replace('text-[#0B2A5B]', 'text-red-600');
+      document.getElementById('titre').textContent = titre;
+      document.getElementById('message').textContent = message;
+      document.getElementById('lien').classList.remove('hidden');
+    }
+
+    async function ouvrirSession() {
+      const params = new URLSearchParams(location.hash.slice(1));
+      const accessToken = params.get('access_token');
+      const refreshToken = params.get('refresh_token');
+      const erreur = params.get('error_description') || params.get('error');
+      history.replaceState(null, '', location.pathname);
+
+      if (erreur || !accessToken) {
+        afficherErreur(
+          'Lien invalide ou expiré',
+          'Ce lien de confirmation n\'est plus valable. Connectez-vous : si votre adresse n\'est pas encore confirmée, la page vous proposera un nouvel envoi.'
+        );
+        return;
+      }
+
+      try {
+        const reponse = await fetch(`${API_BASE_URL}/api/auth/me`, {
+          headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+        if (!reponse.ok) throw new Error('profil introuvable');
+        const { user } = await reponse.json();
+
+        localStorage.setItem('authToken', accessToken);
+        localStorage.setItem('user', JSON.stringify(user));
+
+        try {
+          const orgReponse = await fetch(`${API_BASE_URL}/api/organization`, {
+            headers: { 'Authorization': `Bearer ${accessToken}` }
+          });
+          if (orgReponse.ok) localStorage.setItem('ogo_org', JSON.stringify(await orgReponse.json()));
+        } catch (e) {
+          console.error('Organisation non chargée :', e);
+        }
+      } catch (e) {
+        console.error(e);
+        afficherErreur(
+          'Adresse confirmée',
+          'Votre adresse est bien confirmée, mais la connexion automatique a échoué. Connectez-vous avec votre e-mail et votre mot de passe.'
+        );
+        return;
+      }
+
+      // Suite choisie à l'inscription (paiement ou onboarding), deux chemins connus seulement
+      let suite = '';
+      try {
+        suite = localStorage.getItem('ogo_suite_apres_confirmation') || '';
+        localStorage.removeItem('ogo_suite_apres_confirmation');
+      } catch (e) { /* stockage indisponible : tableau de bord par défaut */ }
+      const destination = (suite.startsWith('/paiement.html?') || suite.startsWith('/app/module_articles.html'))
+        ? suite
+        : '/app/module_tableau_bord.html';
+
+      document.getElementById('titre').textContent = 'Adresse confirmée';
+      document.getElementById('message').textContent = 'Bienvenue sur OGOUE. Redirection en cours…';
+      setTimeout(() => { window.location.href = destination; }, 1200);
+    }
+
+    ouvrirSession();
+  </script>
+</body>
+</html>
