@@ -880,7 +880,8 @@ document.addEventListener("DOMContentLoaded", function () {
             carte.after(zone);
         } else {
             zone.className = "mt-8 scroll-mt-24";
-            document.querySelector("main .container .max-w-7xl").appendChild(zone);
+            // Le conteneur « .container » a été remplacé par la colonne de 1120 px : on cherche le bloc de contenu
+            (document.querySelector("main .max-w-7xl") || document.querySelector("main")).appendChild(zone);
         }
 
         // Apres que l'appelant y a pose son contenu.
