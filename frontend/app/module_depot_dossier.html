@@ -185,18 +185,18 @@
       </div>
 
       <div class="rounded-2xl bg-white dark:bg-gray-800/40 border border-[#e8ede8] dark:border-gray-700 shadow-soft overflow-hidden">
-        <div class="ecran-large overflow-x-auto">
+        <div class="overflow-x-auto">
           <table data-cartes class="w-full text-left border-collapse">
             <thead class="bg-background-light dark:bg-gray-900/40">
               <tr>
-                <th data-carte="titre" class="px-4 py-3 text-xs font-semibold dark:text-gray-200">Nom du Produit</th>
-                <th class="px-4 py-3 text-xs font-semibold dark:text-gray-200">Cible</th>
-                <th class="px-4 py-3 text-xs font-semibold dark:text-gray-200">Objectif</th>
-                <th class="px-4 py-3 text-xs font-semibold dark:text-gray-200">Montants</th>
-                <th class="px-4 py-3 text-xs font-semibold dark:text-gray-200">Durée</th>
-                <th class="px-4 py-3 text-xs font-semibold dark:text-gray-200">Taux d'Intérêt</th>
-                <th class="px-4 py-3 text-xs font-semibold dark:text-gray-200">Typologie</th>
-                <th class="px-4 py-3 text-xs font-semibold dark:text-gray-200">Documents Requis</th>
+                <th data-carte="titre" class="px-3 py-3 text-xs font-semibold dark:text-gray-200">Nom du Produit</th>
+                <th class="px-3 py-3 text-xs font-semibold dark:text-gray-200">Cible</th>
+                <th class="px-3 py-3 text-xs font-semibold dark:text-gray-200">Objectif</th>
+                <th class="px-3 py-3 text-xs font-semibold dark:text-gray-200">Montants</th>
+                <th class="px-3 py-3 text-xs font-semibold dark:text-gray-200">Durée</th>
+                <th class="px-3 py-3 text-xs font-semibold dark:text-gray-200">Taux d'Intérêt</th>
+                <th class="px-3 py-3 text-xs font-semibold dark:text-gray-200">Typologie</th>
+                <th class="px-3 py-3 text-xs font-semibold dark:text-gray-200">Documents Requis</th>
               </tr>
             </thead>
             <tbody id="corpsTableProduits" class="divide-y divide-[#e8ede8] dark:divide-gray-700"></tbody>
@@ -397,14 +397,14 @@ function afficherProduits() {
 
     return `
       <tr class="hover:bg-background-light dark:hover:bg-gray-900/30 transition-colors">
-        <td class="px-4 py-3"><p class="font-semibold text-sm dark:text-gray-100">${echapper(produit.name)}</p></td>
-        <td class="px-4 py-3"><p class="text-sm text-gray-500 dark:text-gray-400">${echapper(produit.target || "N/A")}</p></td>
-        <td class="px-4 py-3"><p class="text-sm text-gray-500 dark:text-gray-400">${echapper(produit.objective || "N/A")}</p></td>
-        <td class="px-4 py-3"><p class="text-sm font-medium whitespace-nowrap dark:text-gray-200">${montants}</p></td>
-        <td class="px-4 py-3"><p class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">${duree}</p></td>
-        <td class="px-4 py-3"><p class="text-sm text-gray-500 dark:text-gray-400">${echapper(produit.interestType || "N/A")}</p></td>
-        <td class="px-4 py-3"><p class="text-sm text-gray-500 dark:text-gray-400">${echapper(produit.typology || "N/A")}</p></td>
-        <td class="px-4 py-3">
+        <td class="px-3 py-3"><p class="font-semibold text-sm dark:text-gray-100">${echapper(produit.name)}</p></td>
+        <td class="px-3 py-3"><p class="text-sm text-gray-500 dark:text-gray-400">${echapper(produit.target || "N/A")}</p></td>
+        <td class="px-3 py-3"><p class="text-sm text-gray-500 dark:text-gray-400">${echapper(produit.objective || "N/A")}</p></td>
+        <td class="px-3 py-3"><p class="text-sm font-medium dark:text-gray-200">${montants}</p></td>
+        <td class="px-3 py-3"><p class="text-sm text-gray-500 dark:text-gray-400">${duree}</p></td>
+        <td class="px-3 py-3"><p class="text-sm text-gray-500 dark:text-gray-400">${echapper(produit.interestType || "N/A")}</p></td>
+        <td class="px-3 py-3"><p class="text-sm text-gray-500 dark:text-gray-400">${echapper(produit.typology || "N/A")}</p></td>
+        <td class="px-3 py-3">
           <div class="flex flex-col gap-1.5">
             ${pieces.length > 0
               ? pieces.map((doc) => `
