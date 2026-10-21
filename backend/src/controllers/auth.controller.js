@@ -21,6 +21,11 @@ const registerSchema = z.object({
   acquisitionSource: z.string().max(120).optional().nullable(),
   // Origine du site d'où vient l'inscription : le lien de confirmation y renvoie.
   redirectOrigin: z.string().max(200).optional().nullable(),
+  // Numéro WhatsApp facultatif : espaces, points et tirets sont retirés avant contrôle
+  whatsapp: z.string().max(30).optional().nullable().refine(
+    (v) => !v || /^\+?\d{8,15}$/.test(v.replace(/[\s.\-]/g, "")),
+    { message: "Numéro WhatsApp invalide" }
+  ),
   role: z.enum(["manager", "agent"]).default("manager"),
 });
 
@@ -221,6 +226,7 @@ export async function register(req, res) {
         last_name: parsed.lastName,
         email: parsed.email,
         role: parsed.role,
+        whatsapp: parsed.whatsapp ? parsed.whatsapp.replace(/[\s.\-]/g, "") : null,
         organization_id: orgData.id,
       })
       .select("id, first_name, last_name, email, role, organization_id, created_at")
@@ -300,6 +306,59 @@ export async function resendConfirmation(req, res) {
     }
     console.error("Resend error:", err?.message || err);
     return res.status(500).json({ error: "Impossible d'envoyer le lien pour le moment" });
+  }
+}
+
+/**
+ * GET /auth/whatsapp
+ * Renvoie le numéro WhatsApp du gérant connecté (null s'il n'en a pas donné).
+ */
+export async function getWhatsapp(req, res) {
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .select("whatsapp")
+      .eq("auth_id", req.user.sub)
+      .maybeSingle();
+    if (error) throw error;
+    return res.json({ whatsapp: data?.whatsapp || null });
+  } catch (err) {
+    console.error("GetWhatsapp error:", err?.message || err);
+    return res.status(500).json({ error: "Impossible de lire le numéro WhatsApp" });
+  }
+}
+
+/**
+ * POST /auth/whatsapp
+ * Enregistre le numéro WhatsApp du gérant. Un numéro déjà renseigné n'est
+ * jamais écrasé : on répond 409.
+ */
+export async function enregistrerWhatsapp(req, res) {
+  try {
+    const parsed = z.object({
+      whatsapp: z.string().max(30).refine(
+        (v) => /^\+?\d{8,15}$/.test(v.replace(/[\s.\-]/g, "")),
+        { message: "Numéro WhatsApp invalide" }
+      ),
+    }).parse(req.body);
+    const numero = parsed.whatsapp.replace(/[\s.\-]/g, "");
+    const { data, error } = await supabase
+      .from("users")
+      .update({ whatsapp: numero })
+      .eq("auth_id", req.user.sub)
+      .is("whatsapp", null)
+      .select("id");
+    if (error) throw error;
+    if (!data || data.length === 0) {
+      return res.status(409).json({ error: "Un numéro WhatsApp est déjà enregistré" });
+    }
+    return res.json({ message: "Numéro WhatsApp enregistré", whatsapp: numero });
+  } catch (err) {
+    if (err?.name === "ZodError") {
+      return res.status(400).json({ error: err.issues[0]?.message || "Numéro invalide" });
+    }
+    console.error("SetWhatsapp error:", err?.message || err);
+    return res.status(500).json({ error: "Impossible d'enregistrer le numéro" });
   }
 }
 

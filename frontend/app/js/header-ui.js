@@ -1057,6 +1057,82 @@
   document.addEventListener('DOMContentLoaded', () => setTimeout(verifier, 800));
 })();
 
+// ===== Numéro WhatsApp (gérant déjà inscrit, une fois par session) =====
+(function popUpWhatsapp() {
+  const CLE_VU = 'ogo_whatsapp_pop_vu';
+
+  function utilisateur() {
+    try { return JSON.parse(localStorage.getItem('user') || 'null'); } catch (e) { return null; }
+  }
+
+  function afficher() {
+    const fond = document.createElement('div');
+    fond.id = 'pop-whatsapp';
+    fond.style.cssText = 'position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(15,23,42,.45);font-family:inherit';
+    fond.innerHTML =
+      '<div style="width:100%;max-width:420px;background:#fff;border-radius:24px;padding:24px;color:#0B1F3F">' +
+      '<h2 style="margin:0 0 6px;font-size:20px;font-weight:700">Ajoutez votre numéro WhatsApp</h2>' +
+      '<p style="margin:0 0 16px;font-size:14px;color:#4A5870">WhatsApp est l\'un des moyens les plus simples de nous joindre. En plus de l\'e-mail, nous vous y écrirons pour les informations importantes sur votre compte et pour vous aider. Facultatif, et jamais pour de la publicité.</p>' +
+      '<input id="pop-whatsapp-numero" type="tel" autocomplete="tel" placeholder="+241 06 00 00 00" style="width:100%;padding:12px 14px;border:1px solid #E7EBF0;border-radius:12px;font-size:15px" />' +
+      '<p id="pop-whatsapp-erreur" style="display:none;margin:10px 0 0;font-size:13px;color:#B91C1C"></p>' +
+      '<div style="display:flex;gap:10px;margin-top:18px">' +
+      '<button id="pop-whatsapp-plus-tard" type="button" style="flex:1;height:46px;border:0;border-radius:999px;background:#F4F6F9;font-weight:600;color:#0B1F3F;cursor:pointer">Plus tard</button>' +
+      '<button id="pop-whatsapp-valider" type="button" style="flex:1;height:46px;border:0;border-radius:999px;background:#0B2A5B;font-weight:600;color:#fff;cursor:pointer">Enregistrer</button>' +
+      '</div></div>';
+    document.body.appendChild(fond);
+
+    const champ = document.getElementById('pop-whatsapp-numero');
+    const erreur = document.getElementById('pop-whatsapp-erreur');
+
+    document.getElementById('pop-whatsapp-plus-tard').addEventListener('click', () => {
+      sessionStorage.setItem(CLE_VU, '1');
+      fond.remove();
+    });
+
+    document.getElementById('pop-whatsapp-valider').addEventListener('click', async () => {
+      const numero = champ.value.trim().replace(/[\s.\-]/g, '');
+      if (!/^\+?\d{8,15}$/.test(numero)) {
+        erreur.textContent = 'Indiquez le numéro avec son indicatif, par exemple +241 06 00 00 00.';
+        erreur.style.display = 'block';
+        return;
+      }
+      try {
+        const reponse = await fetch(API_BASE_URL + '/api/auth/whatsapp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+          body: JSON.stringify({ whatsapp: numero })
+        });
+        // 409 : numéro déjà enregistré ailleurs, on ferme sans gêner
+        if (!reponse.ok && reponse.status !== 409) throw new Error('refus');
+        sessionStorage.setItem(CLE_VU, '1');
+        fond.remove();
+      } catch (e) {
+        erreur.textContent = "Impossible d'enregistrer votre numéro. Réessayez.";
+        erreur.style.display = 'block';
+      }
+    });
+  }
+
+  async function verifier() {
+    const u = utilisateur();
+    if (!u || u.role !== 'manager' || !getToken()) return;
+    if (sessionStorage.getItem(CLE_VU)) return;
+    try {
+      const reponse = await fetch(API_BASE_URL + '/api/auth/whatsapp', {
+        headers: { 'Authorization': 'Bearer ' + getToken() }
+      });
+      // Colonne pas encore créée ou erreur serveur : on ne dérange pas
+      if (!reponse.ok) return;
+      const data = await reponse.json();
+      if (!data.whatsapp) afficher();
+      else sessionStorage.setItem(CLE_VU, '1');
+    } catch (e) { /* hors ligne : on ne dérange pas */ }
+  }
+
+  // Après le pop-up « Comment nous avez-vous connu ? », pour ne pas les superposer
+  document.addEventListener('DOMContentLoaded', () => setTimeout(verifier, 2000));
+})();
+
 // ===== Changement de mot de passe (gérant) =====
 function ouvrirChangementMotDePasse() {
   const ancien = document.getElementById('ogo-mdp-fenetre');
