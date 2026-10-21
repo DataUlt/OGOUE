@@ -1187,3 +1187,44 @@ function ouvrirChangementMotDePasse() {
     }
   });
 }
+
+// ===== Pastille « messages non lus » : icône profil et menu Financement =====
+(function pastillesNonLus() {
+  function pastille(parent) {
+    let p = parent.querySelector(':scope > .ogo-nonlus');
+    if (!p) {
+      p = document.createElement('span');
+      p.className = 'ogo-nonlus ml-1.5 inline-flex items-center justify-center align-middle text-[11px] font-bold text-white bg-red-500 rounded-full min-w-[18px] h-[18px] px-1';
+      parent.appendChild(p);
+    }
+    return p;
+  }
+
+  async function actualiser() {
+    if (!window.OGOUE || !getToken()) return;
+    try {
+      const non = await OGOUE.nonLusParDossier();
+      const total = Object.values(non).reduce((somme, n) => somme + n, 0);
+      const cibles = [...document.querySelectorAll('a[href="module_scoring"]')]
+        .filter((el) => !el.closest('main'));
+      cibles.forEach((el) => {
+        const p = pastille(el);
+        p.textContent = total;
+        p.style.display = total > 0 ? 'inline-flex' : 'none';
+      });
+      // Onglet « Mes dossiers » : nombre de dossiers avec du nouveau
+      const dossiersAvecNouveau = Object.values(non).filter((n) => n > 0).length;
+      document.querySelectorAll('a[href="module_mes_dossiers.html"]').forEach((el) => {
+        const p = pastille(el);
+        p.textContent = dossiersAvecNouveau;
+        p.style.display = dossiersAvecNouveau > 0 ? 'inline-flex' : 'none';
+      });
+    } catch (e) { /* hors ligne ou pas de dossier : rien a afficher */ }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(actualiser, 1000);
+    setInterval(actualiser, 60000);
+  });
+  window.addEventListener('storage', actualiser);
+})();

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html class="light" lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Demande de financement - OGOUE</title>
+  <link rel="icon" type="image/png" href="O-removebg-preview.png">
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <!-- Fonts & icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#0088CC",
+            "background-light": "#f6f8f6",
+            "background-dark": "#111712",
+            "text-light-primary": "#0a0c0a",
+            "text-light-secondary": "#4c9a8d",
+          },
+          fontFamily: { "display": ["Manrope", "sans-serif"] },
+          borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+          boxShadow: {
+            "soft": "0 10px 30px rgba(13,27,25,.08)",
+            "lift": "0 14px 40px rgba(13,27,25,.12)"
+          }
+        },
+      },
+    }
+  </script>
+
+  <style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 500,'GRAD' 0,'opsz' 24; }
+    .fade-in { animation: fade .18s ease-out both; }
+    @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+      /* Tableaux : sur grand écran, toutes les colonnes restent visibles sans défilement */
+    @media (min-width: 1280px) { .ecran-large { margin-left: -2.75rem; margin-right: -2.75rem; } }
+    .ecran-large table { font-size: 13px; }
+    .ecran-large th, .ecran-large td { padding-left: .625rem; padding-right: .625rem; }
+  </style>
+
+  <!-- Restriction d'acces : un agent est redirige vers ses propres pages -->
+  <script src="js/role-guard.js"></script>
+</head>
+
+<body class="font-display bg-background-light dark:bg-background-dark text-[#0a0c0a] dark:text-gray-100">
+<div class="relative flex min-h-screen w-full flex-col">
+
+  <!-- ===== HEADER OGOUE ===== -->
+  <header class="z-10 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-[#e8ede8] dark:border-gray-700">
+    <div class="container mx-auto px-4">
+      <div class="flex items-center justify-between gap-2 h-20">
+        <div class="flex items-center gap-4">
+          <a href="module_tableau_bord"><img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-28 w-auto"></a>
+        </div>
+        <div class="hidden md:flex items-center gap-9">
+          <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
+             href="module_tableau_bord">Tableau de Bord</a>
+          <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
+             href="module_ventes">Comptabilité</a>
+          <a class="text-primary text-sm font-bold leading-normal"
+             href="module_scoring">Financement</a>
+        </div>
+        <!-- Menu mobile -->
+        <div id="mobile-menu" class="md:hidden absolute top-full left-0 right-0 bg-background-light dark:bg-background-dark border-b border-[#e8ede8] dark:border-gray-700 hidden">
+          <div class="flex flex-col gap-2 p-4">
+            <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_tableau_bord">Tableau de Bord</a>
+            <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_ventes">Comptabilité</a>
+            <a class="text-primary text-sm font-bold leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_scoring">Financement</a>
+          </div>
+        </div>
+        <!-- Bouton menu mobile -->
+        <button id="menu-toggle" class="md:hidden flex items-center justify-center w-10 h-10 rounded-full bg-[#0B2A5B]/20 text-[#0a0c0a] dark:bg-[#0B2A5B]/30 dark:text-white">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+        <div class="flex items-center gap-2">
+          <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-[#0B2A5B]/20 text-[#0a0c0a] dark:bg-[#0B2A5B]/30 dark:text-white" data-action="settings">
+            <span class="material-symbols-outlined">settings</span>
+          </button>
+          <button id="profileBtn"
+                  class="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer bg-[#0B2A5B]/20 dark:bg-[#0B2A5B]/30 text-[#0a0c0a] dark:text-white hover:bg-[#0B2A5B]/30 dark:hover:bg-[#0B2A5B]/40 transition-colors"
+                  data-action="profile" title="Profil" type="button">
+            <span class="material-symbols-outlined text-2xl">account_circle</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <!-- ===== FIN HEADER ===== -->
+
+  <main class="flex-1 w-full mx-auto max-w-[1120px] px-[18px] md:px-11 py-8">
+
+    <a href="module_depot_dossier" class="inline-flex items-center gap-2 text-sm font-semibold text-[#006699] hover:underline mb-6">
+      <span class="material-symbols-outlined text-base">arrow_back</span> Nos partenaires
+    </a>
+
+    <div id="chargement" class="text-gray-500 dark:text-gray-400 py-10 text-center">Chargement de la demande…</div>
+    <div id="erreur" class="hidden rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 mb-6"></div>
+
+    <div id="contenu" class="hidden grid grid-cols-1 lg:grid-cols-5 gap-6">
+
+      <section class="lg:col-span-2 rounded-2xl bg-white dark:bg-gray-800/40 border border-[#e8ede8] dark:border-gray-700 p-6 h-fit">
+        <p id="institution" class="text-sm font-semibold text-[#006699]"></p>
+        <h1 id="titreProduit" class="text-2xl font-bold dark:text-white mt-1"></h1>
+        <p id="fourchetteMontant" class="text-sm text-gray-600 dark:text-gray-400 mt-4"></p>
+        <p id="fourchetteDuree" class="text-sm text-gray-600 dark:text-gray-400"></p>
+        <h2 class="text-sm font-bold dark:text-white mt-6 mb-2">Pièces à fournir</h2>
+        <ul id="listePieces" class="flex flex-col gap-2 text-sm"></ul>
+      </section>
+
+      <section class="lg:col-span-3 rounded-2xl bg-white dark:bg-gray-800/40 border border-[#e8ede8] dark:border-gray-700 p-6">
+        <form id="formulaire" class="flex flex-col gap-5">
+          <div>
+            <label for="montant" class="block text-sm font-semibold mb-2 dark:text-gray-200">Montant souhaité (FCFA)</label>
+            <input id="montant" type="number" min="0" step="1" required
+              class="w-full rounded-lg border border-black/10 bg-white dark:bg-gray-900 px-4 py-3 text-sm focus:outline-none focus:border-primary" />
+          </div>
+          <div>
+            <label for="duree" class="block text-sm font-semibold mb-2 dark:text-gray-200">Durée souhaitée (mois)</label>
+            <input id="duree" type="number" min="1" step="1" required
+              class="w-full rounded-lg border border-black/10 bg-white dark:bg-gray-900 px-4 py-3 text-sm focus:outline-none focus:border-primary" />
+          </div>
+          <div>
+            <label for="objet" class="block text-sm font-semibold mb-2 dark:text-gray-200">Objet du financement</label>
+            <textarea id="objet" rows="4" maxlength="2000" placeholder="À quoi servira ce financement ?"
+              class="w-full rounded-lg border border-black/10 bg-white dark:bg-gray-900 px-4 py-3 text-sm focus:outline-none focus:border-primary"></textarea>
+          </div>
+
+          <div>
+            <h2 class="text-sm font-semibold mb-2 dark:text-gray-200">Pièces justificatives</h2>
+            <div id="pieces" class="flex flex-col gap-3"></div>
+          </div>
+
+          <div id="manquants" class="hidden rounded-lg bg-orange-50 border border-orange-200 px-4 py-3 text-sm text-orange-800"></div>
+          <div id="message" class="hidden rounded-lg px-4 py-3 text-sm"></div>
+
+          <div class="flex flex-col sm:flex-row gap-3 pt-2">
+            <button id="btnBrouillon" type="button" class="flex-1 rounded-lg bg-gray-100 dark:bg-gray-700 text-[#0B1F3F] dark:text-white font-semibold text-sm px-5 py-3 hover:bg-gray-200 disabled:opacity-60">Enregistrer le brouillon</button>
+            <button id="btnDeposer" type="submit" class="flex-1 rounded-lg bg-[#0B2A5B] text-white font-semibold text-sm px-5 py-3 hover:bg-[#0B2A5B]/90 disabled:opacity-60">Déposer le dossier</button>
+          </div>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Le dossier n'est transmis à l'institution qu'une fois déposé. Tant que vous ne l'avez pas déposé, vous pouvez le modifier.</p>
+        </form>
+      </section>
+
+    </div>
+  </main>
+
+</div>
+
+<script src="js/ogoue-state.js"></script>
+<script src="js/plan-ui.js"></script>
+<script src="js/tableau-cartes.js"></script>
+<script src="js/header-ui.js"></script>
+<script src="js/aide.js"></script>
+<script src="js/mobile-menu.js"></script>
+<script>
+  const FCFA = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 });
+  const PARAMS = new URLSearchParams(location.search);
+  const PRODUIT_ID = PARAMS.get("produit");
+  let dossierId = PARAMS.get("id");
+  let produit = null;
+  let dossier = null;
+
+  function echapper(valeur) {
+    return String(valeur ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  function afficherMessage(texte, type = "succes") {
+    const zone = document.getElementById("message");
+    zone.textContent = texte;
+    zone.className = "rounded-lg px-4 py-3 text-sm " + (type === "erreur"
+      ? "bg-red-50 border border-red-200 text-red-700"
+      : "bg-emerald-50 border border-emerald-200 text-emerald-800");
+  }
+
+  // Une piece est fournie si le dossier contient un document rattache a cette exigence
+  function pieceFournie(piece) {
+    return (dossier?.documents || []).some((d) => d.requiredDocumentId === piece.id);
+  }
+
+  function afficherPieces() {
+    const pieces = produit.requiredDocuments || [];
+    document.getElementById("listePieces").innerHTML = pieces.length
+      ? pieces.map((p) => `<li class="flex items-center gap-2"><span class="material-symbols-outlined text-base ${pieceFournie(p) ? "text-emerald-600" : "text-gray-400"}">${pieceFournie(p) ? "check_circle" : "radio_button_unchecked"}</span>${echapper(p.name)}</li>`).join("")
+      : `<li class="text-gray-500">Aucune pièce exigée.</li>`;
+
+    document.getElementById("pieces").innerHTML = pieces.map((p) => `
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-lg border border-black/10 dark:border-gray-700 px-4 py-3">
+        <div class="text-sm dark:text-gray-200">${echapper(p.name)}
+          <span class="block text-xs ${pieceFournie(p) ? "text-emerald-700" : "text-gray-500"}">${pieceFournie(p) ? "Fournie" : "À fournir"}</span>
+        </div>
+        <input type="file" data-piece="${p.id}" accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx,.txt"
+          class="text-sm text-gray-600 dark:text-gray-400 file:mr-3 file:rounded-lg file:border-0 file:bg-gray-100 file:px-3 file:py-2 file:text-sm file:font-semibold dark:file:bg-gray-700" />
+      </div>`).join("") || `<p class="text-sm text-gray-500">Aucune pièce à joindre pour ce crédit.</p>`;
+  }
+
+  function remplirFormulaire() {
+    if (dossier) {
+      document.getElementById("montant").value = dossier.amountRequested ?? "";
+      document.getElementById("duree").value = dossier.durationMonths ?? "";
+      document.getElementById("objet").value = dossier.purpose ?? "";
+    }
+  }
+
+  function afficherProduit() {
+    document.getElementById("institution").textContent = produit.institution?.name || "";
+    document.getElementById("titreProduit").textContent = produit.name;
+    document.getElementById("fourchetteMontant").textContent = `Montant : de ${FCFA.format(produit.amountMin)} à ${FCFA.format(produit.amountMax)} FCFA`;
+    document.getElementById("fourchetteDuree").textContent = produit.durationMinMonths && produit.durationMaxMonths
+      ? `Durée : de ${produit.durationMinMonths} à ${produit.durationMaxMonths} mois`
+      : "Durée à définir avec l'institution";
+    afficherPieces();
+    remplirFormulaire();
+  }
+
+  // Donnees saisies, controlees avant tout envoi
+  function lireSaisie() {
+    const montant = Number(document.getElementById("montant").value);
+    const duree = Number(document.getElementById("duree").value);
+    const objet = document.getElementById("objet").value.trim();
+    if (!montant || montant <= 0) throw new Error("Indiquez le montant souhaité.");
+    if (montant < produit.amountMin || montant > produit.amountMax) {
+      throw new Error(`Le montant doit être compris entre ${FCFA.format(produit.amountMin)} et ${FCFA.format(produit.amountMax)} FCFA.`);
+    }
+    if (!duree || duree < 1) throw new Error("Indiquez la durée souhaitée.");
+    return { amountRequested: montant, durationMonths: duree, purpose: objet || null };
+  }
+
+  // Crée le brouillon au premier enregistrement, puis le met a jour
+  async function enregistrer() {
+    const saisie = lireSaisie();
+    if (!dossierId) {
+      const reponse = await OGOUE.createApplication({ creditProductId: produit.id, ...saisie });
+      if (!reponse.ok) throw new Error(reponse.error);
+      dossierId = reponse.application.id;
+      history.replaceState(null, "", `module_deposer_dossier.html?id=${dossierId}`);
+    } else {
+      const reponse = await OGOUE.updateApplication(dossierId, saisie);
+      if (!reponse.ok) throw new Error(reponse.error);
+    }
+    dossier = await OGOUE.getApplication(dossierId);
+  }
+
+  // Joint les fichiers choisis aux pieces exigees
+  async function joindreFichiers() {
+    const champs = [...document.querySelectorAll("input[data-piece]")].filter((c) => c.files.length > 0);
+    for (const champ of champs) {
+      const reponse = await OGOUE.uploadApplicationDocument(dossierId, champ.files[0], { requiredDocumentId: champ.dataset.piece });
+      if (!reponse.ok) throw new Error(reponse.error);
+      champ.value = "";
+    }
+    if (champs.length > 0) dossier = await OGOUE.getApplication(dossierId);
+  }
+
+  function activerBoutons(actif) {
+    document.getElementById("btnBrouillon").disabled = !actif;
+    document.getElementById("btnDeposer").disabled = !actif;
+  }
+
+  document.getElementById("btnBrouillon").addEventListener("click", async () => {
+    activerBoutons(false);
+    try {
+      await enregistrer();
+      await joindreFichiers();
+      afficherPieces();
+      afficherMessage("Brouillon enregistré. Vous pouvez le compléter avant de le déposer.");
+    } catch (erreur) {
+      afficherMessage(erreur.message, "erreur");
+    } finally {
+      activerBoutons(true);
+    }
+  });
+
+  document.getElementById("formulaire").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    activerBoutons(false);
+    try {
+      await enregistrer();
+      await joindreFichiers();
+      const reponse = await OGOUE.submitApplication(dossierId);
+      if (!reponse.ok) {
+        if (reponse.missing.length > 0) {
+          const manquants = document.getElementById("manquants");
+          manquants.innerHTML = `<strong>Pièces encore nécessaires :</strong> ${reponse.missing.map((m) => echapper(m.name)).join(", ")}`;
+          manquants.classList.remove("hidden");
+          afficherPieces();
+          throw new Error("Le dossier n'a pas pu être déposé : il manque des pièces.");
+        }
+        throw new Error(reponse.error);
+      }
+      afficherMessage("Votre dossier a été déposé. Vous pouvez suivre son avancement et échanger avec l'institution.");
+      setTimeout(() => { location.href = `module_dossier.html?id=${dossierId}`; }, 1500);
+    } catch (erreur) {
+      afficherMessage(erreur.message, "erreur");
+      activerBoutons(true);
+    }
+  });
+
+  async function demarrer() {
+    try {
+      if (dossierId) {
+        dossier = await OGOUE.getApplication(dossierId);
+        if (!dossier) throw new Error("Ce dossier est introuvable ou ne vous appartient pas.");
+        if (dossier.status !== "brouillon" && dossier.status !== "complement_requis") {
+          location.replace(`module_dossier.html?id=${dossierId}`);
+          return;
+        }
+        produit = await OGOUE.getCreditProduct(dossier.product.id);
+      } else {
+        if (!PRODUIT_ID) throw new Error("Aucun crédit sélectionné.");
+        produit = await OGOUE.getCreditProduct(PRODUIT_ID);
+        if (!produit) throw new Error("Ce crédit est introuvable.");
+        // Un brouillon existe deja pour ce credit : on le reprend au lieu d'en creer un autre
+        const existant = (await OGOUE.getApplications()).find((d) => d.status === "brouillon" && d.product?.id === PRODUIT_ID);
+        if (existant) {
+          location.replace(`module_deposer_dossier.html?id=${existant.id}`);
+          return;
+        }
+      }
+      document.getElementById("chargement").classList.add("hidden");
+      document.getElementById("contenu").classList.remove("hidden");
+      afficherProduit();
+    } catch (erreur) {
+      document.getElementById("chargement").classList.add("hidden");
+      const zone = document.getElementById("erreur");
+      zone.textContent = erreur.message;
+      zone.classList.remove("hidden");
+    }
+  }
+
+  demarrer();
+</script>

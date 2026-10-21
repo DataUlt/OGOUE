@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html class="light" lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Mes dossiers - OGOUE</title>
+  <link rel="icon" type="image/png" href="O-removebg-preview.png">
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <!-- Fonts & icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#0088CC",
+            "background-light": "#f6f8f6",
+            "background-dark": "#111712",
+            "text-light-primary": "#0a0c0a",
+            "text-light-secondary": "#4c9a8d",
+          },
+          fontFamily: { "display": ["Manrope", "sans-serif"] },
+          borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+          boxShadow: {
+            "soft": "0 10px 30px rgba(13,27,25,.08)",
+            "lift": "0 14px 40px rgba(13,27,25,.12)"
+          }
+        },
+      },
+    }
+  </script>
+
+  <style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 500,'GRAD' 0,'opsz' 24; }
+    .fade-in { animation: fade .18s ease-out both; }
+    @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+      /* Tableaux : sur grand écran, toutes les colonnes restent visibles sans défilement */
+    @media (min-width: 1280px) { .ecran-large { margin-left: -2.75rem; margin-right: -2.75rem; } }
+    .ecran-large table { font-size: 13px; }
+    .ecran-large th, .ecran-large td { padding-left: .625rem; padding-right: .625rem; }
+  </style>
+
+  <!-- Restriction d'acces : un agent est redirige vers ses propres pages -->
+  <script src="js/role-guard.js"></script>
+</head>
+
+<body class="font-display bg-background-light dark:bg-background-dark text-[#0a0c0a] dark:text-gray-100">
+<div class="relative flex min-h-screen w-full flex-col">
+
+  <!-- ===== HEADER OGOUE ===== -->
+  <header class="z-10 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-[#e8ede8] dark:border-gray-700">
+    <div class="container mx-auto px-4">
+      <div class="flex items-center justify-between gap-2 h-20">
+        <div class="flex items-center gap-4">
+          <a href="module_tableau_bord"><img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-28 w-auto"></a>
+        </div>
+        <div class="hidden md:flex items-center gap-9">
+          <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
+             href="module_tableau_bord">Tableau de Bord</a>
+          <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
+             href="module_ventes">Comptabilité</a>
+          <a class="text-primary text-sm font-bold leading-normal"
+             href="module_scoring">Financement</a>
+        </div>
+        <!-- Menu mobile -->
+        <div id="mobile-menu" class="md:hidden absolute top-full left-0 right-0 bg-background-light dark:bg-background-dark border-b border-[#e8ede8] dark:border-gray-700 hidden">
+          <div class="flex flex-col gap-2 p-4">
+            <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_tableau_bord">Tableau de Bord</a>
+            <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_ventes">Comptabilité</a>
+            <a class="text-primary text-sm font-bold leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_scoring">Financement</a>
+          </div>
+        </div>
+        <!-- Bouton menu mobile -->
+        <button id="menu-toggle" class="md:hidden flex items-center justify-center w-10 h-10 rounded-full bg-[#0B2A5B]/20 text-[#0a0c0a] dark:bg-[#0B2A5B]/30 dark:text-white">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+        <div class="flex items-center gap-2">
+          <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-[#0B2A5B]/20 text-[#0a0c0a] dark:bg-[#0B2A5B]/30 dark:text-white" data-action="settings">
+            <span class="material-symbols-outlined">settings</span>
+          </button>
+          <button id="profileBtn"
+                  class="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer bg-[#0B2A5B]/20 dark:bg-[#0B2A5B]/30 text-[#0a0c0a] dark:text-white hover:bg-[#0B2A5B]/30 dark:hover:bg-[#0B2A5B]/40 transition-colors"
+                  data-action="profile" title="Profil" type="button">
+            <span class="material-symbols-outlined text-2xl">account_circle</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <!-- ===== FIN HEADER ===== -->
+
+  <main class="flex-1 w-full mx-auto max-w-[1120px] px-[18px] md:px-11 py-8">
+
+    <div class="flex flex-col gap-2 mb-6">
+      <h1 class="text-3xl sm:text-4xl font-black leading-tight tracking-[-0.033em] dark:text-white">Financement</h1>
+      <p class="text-gray-600 dark:text-gray-400">Suivez l'avancement de vos demandes de financement.</p>
+    </div>
+
+    <div class="border-b border-gray-200 dark:border-gray-700 mb-8">
+      <nav class="flex gap-5 sm:gap-8 -mb-px overflow-x-auto">
+        <a href="module_scoring" class="flex items-center gap-2 border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 pb-3 pt-4 px-2 whitespace-nowrap">
+          <span class="text-sm font-bold tracking-[0.015em]">Score de traçabilité</span>
+        </a>
+        <a href="module_depot_dossier" class="flex items-center gap-2 border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 pb-3 pt-4 px-2 whitespace-nowrap">
+          <span class="text-sm font-bold tracking-[0.015em]">Nos partenaires</span>
+        </a>
+        <a href="module_mes_dossiers.html" class="flex items-center gap-2 border-b-[3px] border-b-primary text-[#0a0c0a] dark:text-white pb-3 pt-4 px-2 whitespace-nowrap">
+          <span class="text-sm font-bold tracking-[0.015em]">Mes dossiers</span>
+        </a>
+      </nav>
+    </div>
+
+    <div id="listeChargement" class="text-gray-500 dark:text-gray-400 py-10 text-center">Chargement de vos dossiers…</div>
+
+    <div id="listeVide" class="hidden rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 p-10 text-center bg-white dark:bg-gray-800/40">
+      <p class="text-gray-600 dark:text-gray-400 mb-4">Vous n'avez pas encore de demande de financement.</p>
+      <a href="module_depot_dossier" class="inline-flex items-center rounded-lg bg-[#0B2A5B] text-white font-semibold text-sm px-5 py-3 hover:bg-[#0B2A5B]/90">Découvrir les offres</a>
+    </div>
+
+    <div id="listeDossiers" class="flex flex-col gap-3"></div>
+
+  </main>
+
+</div>
+
+<script src="js/ogoue-state.js"></script>
+<script src="js/plan-ui.js"></script>
+<script src="js/tableau-cartes.js"></script>
+<script src="js/header-ui.js"></script>
+<script src="js/aide.js"></script>
+<script src="js/mobile-menu.js"></script>
+<script>
+  const FCFA = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 });
+  const STATUTS = {
+    brouillon: ["Brouillon", "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200"],
+    depose: ["Déposé", "bg-blue-100 text-blue-800"],
+    en_examen: ["En examen", "bg-amber-100 text-amber-800"],
+    complement_requis: ["Complément requis", "bg-orange-100 text-orange-800"],
+    accepte: ["Accepté", "bg-emerald-100 text-emerald-800"],
+    refuse: ["Refusé", "bg-red-100 text-red-800"],
+  };
+
+  function echapper(valeur) {
+    return String(valeur ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  function badge(statut) {
+    const [libelle, classes] = STATUTS[statut] || [statut, "bg-gray-100 text-gray-700"];
+    return `<span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${classes}">${libelle}</span>`;
+  }
+
+  function formatDate(valeur) {
+    return valeur ? new Date(valeur).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }) : "";
+  }
+
+  async function afficherDossiers() {
+    const dossiers = await OGOUE.getApplications();
+    document.getElementById("listeChargement").classList.add("hidden");
+
+    if (dossiers.length === 0) {
+      document.getElementById("listeVide").classList.remove("hidden");
+      return;
+    }
+
+    document.getElementById("listeDossiers").innerHTML = dossiers.map((dossier) => {
+      const produit = dossier.product ? echapper(dossier.product.name) : "Crédit";
+      const institution = dossier.institution ? echapper(dossier.institution.name) : "";
+      const montant = dossier.amountRequested ? `${FCFA.format(dossier.amountRequested)} FCFA` : "Montant à préciser";
+      const date = dossier.submittedAt ? `Déposé le ${formatDate(dossier.submittedAt)}` : `Créé le ${formatDate(dossier.createdAt)}`;
+      const lien = dossier.status === "brouillon"
+        ? `module_deposer_dossier.html?id=${dossier.id}`
+        : `module_dossier.html?id=${dossier.id}`;
+      return `
+        <a href="${lien}" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl bg-white dark:bg-gray-800/40 border border-[#e8ede8] dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
+          <div class="min-w-0">
+            <p class="font-bold text-base dark:text-gray-100">${produit}</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">${institution}</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">${montant} · ${date}</p>
+          </div>
+          <div class="shrink-0 flex items-center gap-2">${badge(dossier.status)}<span data-non-lu="${dossier.id}" class="hidden inline-flex items-center justify-center text-xs font-bold text-white bg-red-500 rounded-full min-w-[22px] h-[22px] px-1.5"></span></div>
+        </a>`;
+    }).join("");
+    const non = await OGOUE.nonLusParDossier().catch(() => ({}));
+    document.querySelectorAll("[data-non-lu]").forEach((el) => {
+      const n = non[el.dataset.nonLu] || 0;
+      if (n) { el.textContent = n; el.classList.remove("hidden"); }
+    });
+  }
+
+  afficherDossiers();
+</script>

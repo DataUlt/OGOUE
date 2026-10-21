@@ -122,6 +122,10 @@
            class="flex items-center gap-2 border-b-[3px] border-b-primary text-[#0a0c0a] dark:text-white pb-3 pt-4 px-2 whitespace-nowrap">
           <span class="text-sm font-bold tracking-[0.015em]">Nos partenaires</span>
         </a>
+        <a href="module_mes_dossiers.html"
+           class="flex items-center gap-2 border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 pb-3 pt-4 px-2 whitespace-nowrap">
+          <span class="text-sm font-bold tracking-[0.015em]">Mes dossiers</span>
+        </a>
       </nav>
     </div>
 
@@ -196,6 +200,7 @@
                 <th class="px-3 py-3 text-xs font-semibold dark:text-gray-200">Durée</th>
                 <th class="px-3 py-3 text-xs font-semibold dark:text-gray-200">Taux d'Intérêt</th>
                 <th class="px-3 py-3 text-xs font-semibold dark:text-gray-200">Typologie</th>
+                <th class="px-3 py-3 text-xs font-semibold dark:text-gray-200">Demande</th>
                 <th class="px-3 py-3 text-xs font-semibold dark:text-gray-200">Documents Requis</th>
               </tr>
             </thead>
@@ -382,7 +387,7 @@ function afficherProduits() {
 
   if (produits.length === 0) {
     corps.innerHTML = `
-      <tr><td colspan="8" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+      <tr><td colspan="9" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
         ${recherche ? "Aucun produit ne correspond à cette recherche." : "Cette institution ne propose aucun crédit pour le moment."}
       </td></tr>`;
     return;
@@ -414,6 +419,9 @@ function afficherProduits() {
                   </div>`).join("")
               : '<span class="text-sm text-gray-400 italic">Aucun document</span>'}
           </div>
+        </td>
+        <td class="px-3 py-3" data-carte="actions">
+          <a href="module_deposer_dossier.html?produit=${produit.id}" class="inline-flex items-center rounded-lg bg-[#0B2A5B] text-white font-semibold text-xs px-3 py-2 hover:bg-[#0B2A5B]/90 whitespace-nowrap">Déposer une demande</a>
         </td>
       </tr>
     `;

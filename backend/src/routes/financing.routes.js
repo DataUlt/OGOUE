@@ -7,6 +7,9 @@ import {
   createApplication,
   updateApplication,
   submitApplication,
+  listMessages,
+  postMessage,
+  getMessageAttachment,
   uploadApplicationDocument,
   deleteApplicationDocument,
   getApplicationDocumentUrl,
@@ -30,5 +33,10 @@ r.post("/applications/:id/submit", submitApplication);
 r.post("/applications/:id/documents", upload.single("file"), uploadApplicationDocument);
 r.get("/applications/:id/documents/:docId/url", getApplicationDocumentUrl);
 r.delete("/applications/:id/documents/:docId", deleteApplicationDocument);
+
+// Discussion du dossier : messages texte et piece jointe (champ « file », optionnel)
+r.get("/applications/:id/messages", listMessages);
+r.post("/applications/:id/messages", upload.single("file"), postMessage);
+r.get("/applications/:id/messages/:msgId/attachment", getMessageAttachment);
 
 export default r;

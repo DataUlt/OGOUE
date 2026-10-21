@@ -1,4 +1,4 @@
-import { supabaseSecondary } from "../db/supabase.js";
+import { supabaseSecondary, supabase as supabasePrincipale } from "../db/supabase.js";
 import { z } from "zod";
 import {
   uploadDossierFile,
@@ -30,15 +30,65 @@ function secondaryIndisponible(res) {
  * `users.id` est partage entre les deux bases, et `pmes.user_id`
  * pointe dessus.
  */
+/**
+ * Recopie les informations actuelles de l'entreprise (base principale) dans le
+ * profil PME de la base des dossiers. Ainsi le dossier deposé montre l'entreprise
+ * qui le depose, et non une copie figee a l'inscription.
+ */
+async function rafraichirProfilPme(req, pme) {
+  if (!req.user.organizationId) return pme;
+
+  const { data: org } = await supabasePrincipale
+    .from("organizations")
+    .select("name, rccm_number, nif_number, activity, activity_description")
+    .eq("id", req.user.organizationId)
+    .maybeSingle();
+  if (!org) return pme;
+
+  const { data } = await supabaseSecondary
+    .from("pmes")
+    .update({
+      company_name: org.name,
+      rccm_number: org.rccm_number || null,
+      nif_number: org.nif_number || null,
+      sector: org.activity || null,
+      activity_description: org.activity_description || null,
+    })
+    .eq("id", pme.id)
+    .select("id, company_name, rccm_number, nif_number, sector")
+    .maybeSingle();
+  return data || pme;
+}
+
 async function getPmeForUser(req) {
   const userId = req.user.userId || req.user.sub || req.user.id;
   if (!userId) return { pme: null, error: "Utilisateur non identifié" };
 
-  const { data, error } = await supabaseSecondary
+  const COLONNES_PME = "id, company_name, rccm_number, nif_number, sector";
+  let { data, error } = await supabaseSecondary
     .from("pmes")
-    .select("id, company_name, rccm_number, nif_number, sector")
+    .select(COLONNES_PME)
     .eq("user_id", userId)
     .maybeSingle();
+
+  // Repli : si l'identifiant ne correspond pas dans la base des dossiers (copie
+  // ancienne, compte recree), on retrouve l'utilisateur par son e-mail, unique
+  // dans les deux bases, puis son profil PME.
+  if (!error && !data && req.user.email) {
+    const motif = req.user.email.replace(/[%_\\]/g, (c) => `\\${c}`);
+    const { data: compte } = await supabaseSecondary
+      .from("users")
+      .select("id")
+      .ilike("email", motif)
+      .maybeSingle();
+    if (compte) {
+      ({ data, error } = await supabaseSecondary
+        .from("pmes")
+        .select(COLONNES_PME)
+        .eq("user_id", compte.id)
+        .maybeSingle());
+    }
+  }
 
   if (error) {
     console.error("Erreur getPmeForUser:", error);
@@ -199,6 +249,12 @@ const updateApplicationSchema = z.object({
   purpose: z.string().max(2000).optional(),
 });
 
+/** Les horodatages de l'historique n'ont pas de fuseau : on les marque UTC pour un affichage exact. */
+function versUtc(valeur) {
+  if (!valeur) return null;
+  return new Date(valeur.endsWith("Z") ? valeur : valeur + "Z").toISOString();
+}
+
 function transformApplication(row) {
   return {
     id: row.id,
@@ -308,7 +364,7 @@ export async function getApplication(req, res) {
         status: h.status,
         note: h.note,
         changedBy: h.changed_by,
-        at: h.created_at,
+        at: versUtc(h.created_at),
       })),
     });
   } catch (error) {
@@ -667,8 +723,9 @@ export async function submitApplication(req, res) {
     if (!supabaseSecondary) return secondaryIndisponible(res);
     const { id } = req.params;
 
-    const { pme, error: pmeError } = await getPmeForUser(req);
-    if (!pme) return res.status(404).json({ error: pmeError });
+    const { pme: pmeTrouvee, error: pmeError } = await getPmeForUser(req);
+    if (!pmeTrouvee) return res.status(404).json({ error: pmeError });
+    const pme = await rafraichirProfilPme(req, pmeTrouvee);
 
     const { data: application } = await supabaseSecondary
       .from("loan_applications")
@@ -731,6 +788,163 @@ export async function submitApplication(req, res) {
     return res.json(transformApplication(row));
   } catch (error) {
     console.error("Erreur submitApplication:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+// ───────────────────────────────────────────────────────
+// Discussion d'un dossier (PME et institution)
+// ───────────────────────────────────────────────────────
+
+const messageSchema = z.object({
+  body: z.string().trim().max(2000).optional(),
+});
+
+/** Un brouillon reste prive : la discussion ne s'ouvre qu'au depot. */
+const STATUTS_AVEC_DISCUSSION = ["depose", "en_examen", "complement_requis", "accepte", "refuse"];
+
+/** Forme renvoyee au front, sans chemin de stockage. */
+function messageVersApi(row) {
+  return {
+    id: row.id,
+    authorRole: row.author_role,
+    authorName: row.author_name,
+    body: row.body,
+    attachment: row.attachment_name ? { name: row.attachment_name, size: row.attachment_size } : null,
+    createdAt: row.created_at,
+  };
+}
+
+/** Dossier de la PME, s'il lui appartient. */
+async function dossierDeLaPme(applicationId, pmeId) {
+  const { data } = await supabaseSecondary
+    .from("loan_applications")
+    .select("id, status")
+    .eq("id", applicationId)
+    .eq("pme_id", pmeId)
+    .maybeSingle();
+  return data;
+}
+
+const COLONNES_MESSAGE = "id, author_role, author_name, body, attachment_name, attachment_size, created_at";
+
+/** GET /api/financing/applications/:id/messages */
+export async function listMessages(req, res) {
+  try {
+    if (!supabaseSecondary) return secondaryIndisponible(res);
+    const { pme, error: pmeError } = await getPmeForUser(req);
+    if (!pme) return res.status(404).json({ error: pmeError });
+
+    const dossier = await dossierDeLaPme(req.params.id, pme.id);
+    if (!dossier) return res.status(404).json({ error: "Dossier introuvable" });
+
+    const { data, error } = await supabaseSecondary
+      .from("application_messages")
+      .select(COLONNES_MESSAGE)
+      .eq("application_id", dossier.id)
+      .order("created_at", { ascending: true });
+    if (error) throw error;
+
+    return res.json({ messages: (data || []).map(messageVersApi) });
+  } catch (error) {
+    console.error("Erreur listMessages:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+/** POST /api/financing/applications/:id/messages (texte et/ou champ « file ») */
+export async function postMessage(req, res) {
+  try {
+    if (!supabaseSecondary) return secondaryIndisponible(res);
+    const parsed = messageSchema.safeParse(req.body || {});
+    if (!parsed.success) return res.status(400).json({ error: "Message trop long (2000 caractères maximum)" });
+    const texte = parsed.data.body || "";
+    const fichier = req.file;
+    if (!texte && !fichier) {
+      return res.status(400).json({ error: "Écrivez un message ou joignez un fichier" });
+    }
+
+    const { pme, error: pmeError } = await getPmeForUser(req);
+    if (!pme) return res.status(404).json({ error: pmeError });
+
+    const dossier = await dossierDeLaPme(req.params.id, pme.id);
+    if (!dossier) return res.status(404).json({ error: "Dossier introuvable" });
+    if (!STATUTS_AVEC_DISCUSSION.includes(dossier.status)) {
+      return res.status(409).json({ error: "La discussion s'ouvre une fois le dossier déposé" });
+    }
+
+    let piece = null;
+    if (fichier) {
+      try {
+        piece = await uploadDossierFile(fichier.buffer, fichier.originalname, pme.id);
+      } catch (erreurUpload) {
+        return res.status(400).json({ error: erreurUpload.message });
+      }
+    }
+
+    const { data, error } = await supabaseSecondary
+      .from("application_messages")
+      .insert({
+        application_id: dossier.id,
+        author_role: "pme",
+        author_name: pme.company_name,
+        body: texte || null,
+        attachment_name: piece ? piece.fileName : null,
+        attachment_path: piece ? piece.storagePath : null,
+        attachment_size: piece ? piece.fileSize : null,
+      })
+      .select(COLONNES_MESSAGE)
+      .single();
+
+    if (error) {
+      // Pas de fichier orphelin dans le bucket si l'enregistrement échoue
+      if (piece) await deleteDossierFile(piece.storagePath);
+      throw error;
+    }
+
+    // Une reponse de la PME a une demande de complement remet le dossier en examen
+    if (dossier.status === "complement_requis") {
+      await supabaseSecondary
+        .from("loan_applications")
+        .update({ status: "en_examen", updated_at: new Date().toISOString() })
+        .eq("id", dossier.id);
+      await supabaseSecondary.from("application_status_history").insert({
+        application_id: dossier.id,
+        status: "en_examen",
+        note: "Réponse de la PME à la demande de complément",
+        changed_by: "pme",
+      });
+    }
+    return res.status(201).json({ message: messageVersApi(data) });
+  } catch (error) {
+    console.error("Erreur postMessage:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+/** GET /api/financing/applications/:id/messages/:msgId/attachment */
+export async function getMessageAttachment(req, res) {
+  try {
+    if (!supabaseSecondary) return secondaryIndisponible(res);
+    const { pme, error: pmeError } = await getPmeForUser(req);
+    if (!pme) return res.status(404).json({ error: pmeError });
+
+    const dossier = await dossierDeLaPme(req.params.id, pme.id);
+    if (!dossier) return res.status(404).json({ error: "Dossier introuvable" });
+
+    const { data: message } = await supabaseSecondary
+      .from("application_messages")
+      .select("attachment_name, attachment_path")
+      .eq("id", req.params.msgId)
+      .eq("application_id", dossier.id)
+      .maybeSingle();
+    if (!message || !message.attachment_path) return res.status(404).json({ error: "Pièce jointe introuvable" });
+
+    const url = await createDossierSignedUrl(message.attachment_path);
+    if (!url) return res.status(500).json({ error: "Lien de téléchargement indisponible" });
+    return res.json({ url, name: message.attachment_name });
+  } catch (error) {
+    console.error("Erreur getMessageAttachment:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 }

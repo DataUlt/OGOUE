@@ -40,6 +40,39 @@ const loginSchema = z.object({
  * - PRIMARY: users (first_name, last_name, email, auth_id) → SECONDARY: users (full_name, email, auth_id, role)
  * - PRIMARY: organizations → SECONDARY: pmes (linked via user_id)
  */
+/**
+ * Un compte de meme e-mail existe deja dans la base des dossiers : on le reprend
+ * au lieu de creer un doublon (qui echouait et laissait un profil desaligne).
+ * Le profil PME est cree seulement s'il manque.
+ */
+async function rattacherCompteExistant(userIdSecondaire, orgData) {
+  const { data: pmeExistante } = await supabaseSecondary
+    .from("pmes")
+    .select("id")
+    .eq("user_id", userIdSecondaire)
+    .maybeSingle();
+
+  if (pmeExistante) {
+    console.log("✅ Compte et PME déjà présents dans la base des dossiers :", userIdSecondaire);
+    return { success: true, reprise: true };
+  }
+
+  const { error: pmeError } = await supabaseSecondary.from("pmes").insert({
+    user_id: userIdSecondaire,
+    company_name: orgData.name,
+    rccm_number: orgData.rccm_number || null,
+    nif_number: orgData.nif_number || null,
+    sector: orgData.activity || null,
+    activity_description: orgData.activity_description || null,
+    created_at: orgData.created_at,
+  });
+  if (pmeError) {
+    console.error("❌ Rattachement PME existante :", pmeError.message);
+    return { success: false, reason: "PME sync failed", error: pmeError };
+  }
+  return { success: true, reprise: true };
+}
+
 async function syncToSecondarySupabase(email, password, orgData, userData) {
   if (!supabaseSecondary) {
     console.warn("⚠️  Secondary Supabase not configured, skipping sync");
@@ -49,6 +82,17 @@ async function syncToSecondarySupabase(email, password, orgData, userData) {
   try {
     console.log("🔄 Syncing to secondary Supabase...");
     
+    // 0️⃣ Compte deja present dans la base des dossiers (meme e-mail) : on le reprend
+    const motifEmail = email.replace(/[%_\\]/g, (c) => `\\${c}`);
+    const { data: dejaPresent } = await supabaseSecondary
+      .from("users")
+      .select("id")
+      .ilike("email", motifEmail)
+      .maybeSingle();
+    if (dejaPresent) {
+      return await rattacherCompteExistant(dejaPresent.id, orgData);
+    }
+
     // 1️⃣ Create user in secondary Supabase Auth
     console.log("➡️ Creating auth user in secondary database...");
     const { data: secondaryAuthData, error: secondaryAuthError } = await supabaseSecondary.auth.admin.createUser({

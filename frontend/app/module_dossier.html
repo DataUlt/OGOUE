@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html class="light" lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Dossier de financement - OGOUE</title>
+  <link rel="icon" type="image/png" href="O-removebg-preview.png">
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <!-- Fonts & icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#0088CC",
+            "background-light": "#f6f8f6",
+            "background-dark": "#111712",
+            "text-light-primary": "#0a0c0a",
+            "text-light-secondary": "#4c9a8d",
+          },
+          fontFamily: { "display": ["Manrope", "sans-serif"] },
+          borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+          boxShadow: {
+            "soft": "0 10px 30px rgba(13,27,25,.08)",
+            "lift": "0 14px 40px rgba(13,27,25,.12)"
+          }
+        },
+      },
+    }
+  </script>
+
+  <style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 500,'GRAD' 0,'opsz' 24; }
+    .fade-in { animation: fade .18s ease-out both; }
+    @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+      /* Tableaux : sur grand écran, toutes les colonnes restent visibles sans défilement */
+    @media (min-width: 1280px) { .ecran-large { margin-left: -2.75rem; margin-right: -2.75rem; } }
+    .ecran-large table { font-size: 13px; }
+    .ecran-large th, .ecran-large td { padding-left: .625rem; padding-right: .625rem; }
+  </style>
+
+  <!-- Restriction d'acces : un agent est redirige vers ses propres pages -->
+  <script src="js/role-guard.js"></script>
+</head>
+
+<body class="font-display bg-background-light dark:bg-background-dark text-[#0a0c0a] dark:text-gray-100">
+<div class="relative flex min-h-screen w-full flex-col">
+
+  <!-- ===== HEADER OGOUE ===== -->
+  <header class="z-10 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-[#e8ede8] dark:border-gray-700">
+    <div class="container mx-auto px-4">
+      <div class="flex items-center justify-between gap-2 h-20">
+        <div class="flex items-center gap-4">
+          <a href="module_tableau_bord"><img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-28 w-auto"></a>
+        </div>
+        <div class="hidden md:flex items-center gap-9">
+          <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
+             href="module_tableau_bord">Tableau de Bord</a>
+          <a class="text-[#0a0c0a] dark:text-gray-300 dark:hover:text-white text-sm font-medium leading-normal"
+             href="module_ventes">Comptabilité</a>
+          <a class="text-primary text-sm font-bold leading-normal"
+             href="module_scoring">Financement</a>
+        </div>
+        <!-- Menu mobile -->
+        <div id="mobile-menu" class="md:hidden absolute top-full left-0 right-0 bg-background-light dark:bg-background-dark border-b border-[#e8ede8] dark:border-gray-700 hidden">
+          <div class="flex flex-col gap-2 p-4">
+            <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_tableau_bord">Tableau de Bord</a>
+            <a class="text-[#0a0c0a] dark:text-gray-300 text-sm font-medium leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_ventes">Comptabilité</a>
+            <a class="text-primary text-sm font-bold leading-normal py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-800" href="module_scoring">Financement</a>
+          </div>
+        </div>
+        <!-- Bouton menu mobile -->
+        <button id="menu-toggle" class="md:hidden flex items-center justify-center w-10 h-10 rounded-full bg-[#0B2A5B]/20 text-[#0a0c0a] dark:bg-[#0B2A5B]/30 dark:text-white">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+        <div class="flex items-center gap-2">
+          <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-[#0B2A5B]/20 text-[#0a0c0a] dark:bg-[#0B2A5B]/30 dark:text-white" data-action="settings">
+            <span class="material-symbols-outlined">settings</span>
+          </button>
+          <button id="profileBtn"
+                  class="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer bg-[#0B2A5B]/20 dark:bg-[#0B2A5B]/30 text-[#0a0c0a] dark:text-white hover:bg-[#0B2A5B]/30 dark:hover:bg-[#0B2A5B]/40 transition-colors"
+                  data-action="profile" title="Profil" type="button">
+            <span class="material-symbols-outlined text-2xl">account_circle</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <!-- ===== FIN HEADER ===== -->
+
+  <main class="flex-1 w-full mx-auto max-w-[1120px] px-[18px] md:px-11 py-8">
+
+    <a href="module_mes_dossiers.html" class="inline-flex items-center gap-2 text-sm font-semibold text-[#006699] hover:underline mb-6">
+      <span class="material-symbols-outlined text-base">arrow_back</span> Mes dossiers
+    </a>
+
+    <div id="chargement" class="text-gray-500 dark:text-gray-400 py-10 text-center">Chargement du dossier…</div>
+    <div id="erreur" class="hidden rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 mb-6"></div>
+
+    <div id="contenu" class="hidden flex flex-col gap-6">
+
+      <section class="rounded-2xl bg-white dark:bg-gray-800/40 border border-[#e8ede8] dark:border-gray-700 p-6">
+        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+          <div class="min-w-0">
+            <h1 id="titreProduit" class="text-2xl font-bold dark:text-white"></h1>
+            <p id="institution" class="text-sm font-semibold text-[#006699]"></p>
+          </div>
+          <div id="statut"></div>
+        </div>
+        <dl class="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-6 text-sm">
+          <div><dt class="text-gray-500 dark:text-gray-400">Montant demandé</dt><dd id="montant" class="font-semibold dark:text-gray-100"></dd></div>
+          <div><dt class="text-gray-500 dark:text-gray-400">Durée</dt><dd id="duree" class="font-semibold dark:text-gray-100"></dd></div>
+          <div><dt class="text-gray-500 dark:text-gray-400">Déposé le</dt><dd id="depot" class="font-semibold dark:text-gray-100"></dd></div>
+        </dl>
+      </section>
+
+      <section class="rounded-2xl bg-white dark:bg-gray-800/40 border border-[#e8ede8] dark:border-gray-700 p-6">
+        <h2 class="text-lg font-bold dark:text-white mb-4">Suivi du dossier</h2>
+        <ol id="historique" class="flex flex-col gap-3"></ol>
+      </section>
+
+      <section class="rounded-2xl bg-white dark:bg-gray-800/40 border border-[#e8ede8] dark:border-gray-700 p-6">
+        <h2 class="text-lg font-bold dark:text-white mb-4">Pièces du dossier</h2>
+        <ul id="pieces" class="flex flex-col gap-2 text-sm"></ul>
+      </section>
+
+      <section id="blocComplement" class="hidden rounded-2xl bg-orange-50 border border-orange-200 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-bold text-orange-900">Votre institution demande un complément</h2>
+          <p class="text-sm text-orange-800 mt-1">Envoyez les pièces demandées puis redéposez le dossier : c'est le dépôt qui relance l'examen. Un message seul ne suffit pas.</p>
+        </div>
+        <button id="btnComplement" type="button" class="shrink-0 inline-flex items-center rounded-lg bg-[#0B2A5B] text-white font-semibold text-sm px-5 py-3 hover:bg-[#0B2A5B]/90">Compléter et redéposer</button>
+      </section>
+      <div id="modalComplement" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div id="fondComplement" class="absolute inset-0 bg-black/40"></div>
+        <div class="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-xl">
+          <div class="flex items-start justify-between gap-4 mb-4">
+            <h2 class="text-lg font-bold dark:text-white">Demande de complément</h2>
+            <button id="btnFermerComplement" type="button" aria-label="Fermer" class="p-1 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+          <p class="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">Message de l'institution</p>
+          <div id="demandeComplement" class="rounded-lg bg-orange-50 border border-orange-200 p-4 text-sm text-orange-900 whitespace-pre-wrap mb-5"></div>
+
+                    <form id="formComplement" class="flex flex-col gap-3">
+            <label for="champComplement" class="text-sm font-semibold dark:text-gray-200">Votre réponse</label>
+            <textarea id="champComplement" rows="4" maxlength="2000" placeholder="Expliquez ce que vous envoyez ou ce qui a changé…"
+              class="w-full rounded-lg border border-black/10 bg-white dark:bg-gray-900 px-4 py-3 text-sm focus:outline-none focus:border-primary"></textarea>
+            <label class="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
+              <span class="material-symbols-outlined text-base">attach_file</span>
+              <span id="nomFichierComplement">Joindre une pièce (10 Mo max)</span>
+              <input id="champFichierComplement" type="file" class="hidden"
+                accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx,.txt" />
+            </label>
+            <p id="erreurComplement" class="hidden text-sm text-red-600"></p>
+            <p id="confirmationComplement" class="hidden text-sm text-emerald-700 font-semibold"></p>
+            <button id="btnEnvoyerComplement" type="submit" class="w-full rounded-lg bg-[#0B2A5B] text-white font-semibold text-sm px-5 py-3 hover:bg-[#0B2A5B]/90 disabled:opacity-60">Envoyer ma réponse</button>
+          </form>
+        </div>
+      </div>
+
+      <section id="blocBrouillon" class="hidden rounded-2xl bg-white dark:bg-gray-800/40 border border-[#e8ede8] dark:border-gray-700 p-6 text-sm text-gray-600 dark:text-gray-400">
+        Le dossier n'est pas encore déposé.
+        <a id="lienBrouillon" href="#" class="font-semibold text-[#006699] hover:underline">Reprendre et déposer le dossier</a>
+      </section>
+
+    </div>
+  </main>
+
+</div>
+
+<script src="js/ogoue-state.js"></script>
+<script src="js/plan-ui.js"></script>
+<script src="js/tableau-cartes.js"></script>
+<script src="js/header-ui.js"></script>
+<script src="js/aide.js"></script>
+<script src="js/mobile-menu.js"></script>
+<script>
+  const FCFA = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 });
+  const STATUTS = {
+    brouillon: ["Brouillon", "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200"],
+    depose: ["Déposé", "bg-blue-100 text-blue-800"],
+    en_examen: ["En examen", "bg-amber-100 text-amber-800"],
+    complement_requis: ["Complément requis", "bg-orange-100 text-orange-800"],
+    accepte: ["Accepté", "bg-emerald-100 text-emerald-800"],
+    refuse: ["Refusé", "bg-red-100 text-red-800"],
+  };
+  const ID = new URLSearchParams(location.search).get("id");
+  const INTERVALLE_ACTUALISATION = 30000;
+  let dossier = null;
+  let fichierChoisi = null;
+
+  function echapper(valeur) {
+    return String(valeur ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+  function badge(statut) {
+    const [libelle, classes] = STATUTS[statut] || [statut, "bg-gray-100 text-gray-700"];
+    return `<span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${classes}">${libelle}</span>`;
+  }
+  function formatDate(valeur, avecHeure = false) {
+    if (!valeur) return "";
+    const options = { day: "2-digit", month: "short", year: "numeric" };
+    if (avecHeure) Object.assign(options, { hour: "2-digit", minute: "2-digit" });
+    return new Date(valeur).toLocaleString("fr-FR", options);
+  }
+  function tailleLisible(octets) {
+    if (!octets) return "";
+    return octets > 1024 * 1024 ? `${(octets / 1024 / 1024).toFixed(1)} Mo` : `${Math.round(octets / 1024)} Ko`;
+  }
+
+  // Chaque etape affiche sa note, puis les messages echanges depuis l'etape precedente
+  // (demande de l'institution, reponse de la PME, pieces jointes).
+  let messagesDossier = [];
+
+  function bulleMessage(message) {
+    const aDroite = message.authorRole === "institution";
+    const piece = message.attachment
+      ? `<button type="button" data-message="${message.id}" class="mt-1 inline-flex max-w-full min-w-0 items-center gap-1 font-semibold underline break-all text-left">
+           <span class="material-symbols-outlined text-base">description</span>${echapper(message.attachment.name)}
+           <span class="text-xs font-normal opacity-80">${tailleLisible(message.attachment.size)}</span>
+         </button>`
+      : "";
+    return `
+      <div class="flex ${aDroite ? "justify-end" : "justify-start"}"><div class="max-w-[85%] rounded-lg px-3 py-2 text-sm ${aDroite ? "bg-[#0B2A5B] text-white" : "bg-background-light dark:bg-gray-900/60 dark:text-gray-100"}">
+        <p class="text-xs font-semibold opacity-80">${aDroite ? echapper(message.authorName || "Institution") : "Vous"} · ${formatDate(message.createdAt, true)}</p>
+        ${message.body ? `<p class="mt-1 whitespace-pre-wrap">${echapper(message.body)}</p>` : ""}
+        ${piece}
+      </div></div>`;
+  }
+
+  function afficherHistorique() {
+    const etapes = dossier.history || [];
+    const liste = document.getElementById("historique");
+    if (etapes.length === 0) {
+      liste.innerHTML = `<li class="text-sm text-gray-500">Aucune étape pour le moment.</li>`;
+      return;
+    }
+    const nomInstitution = dossier.institution ? dossier.institution.name : "Institution";
+    liste.innerHTML = etapes.map((etape, i) => {
+      const debut = i > 0 ? new Date(etapes[i - 1].at) : new Date(0);
+      const fin = new Date(etape.at);
+      const echanges = messagesDossier.filter((m) => {
+        const date = new Date(m.createdAt);
+        return date > debut && date <= fin;
+      });
+      // La demande ou la décision de l'institution est un message de l'institution : il s'affiche à gauche
+      const parInstitution = etape.changedBy === "institution";
+      if (parInstitution && etape.note) {
+        echanges.push({ id: null, authorRole: "institution", authorName: nomInstitution, body: etape.note, createdAt: etape.at, attachment: null });
+      }
+      echanges.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      const noteSeule = !parInstitution && etape.note
+        ? `<p class="text-sm text-gray-600 dark:text-gray-400 mt-1">${echapper(etape.note)}</p>`
+        : "";
+      return `
+        <li class="flex items-start gap-3">
+          ${parInstitution ? "" : `<span class="mt-1 size-2.5 rounded-full bg-[#006699] shrink-0"></span>`}
+          <div class="min-w-0 flex-1 flex flex-col ${parInstitution ? "items-end" : "items-start"}">
+            <div class="flex flex-wrap items-center gap-2 ${parInstitution ? "justify-end" : ""}">${badge(etape.status)}<span class="text-xs text-gray-500">${formatDate(etape.at, true)}</span></div>
+            ${noteSeule}
+            ${echanges.length ? `<div class="mt-3 flex flex-col gap-2">${echanges.map(bulleMessage).join("")}</div>` : ""}
+          </div>
+          ${parInstitution ? `<span class="mt-1 size-2.5 rounded-full bg-[#006699] shrink-0"></span>` : ""}
+        </li>`;
+    }).join("");
+  }
+
+  document.getElementById("historique").addEventListener("click", async (e) => {
+    const bouton = e.target.closest("[data-message]");
+    if (!bouton) return;
+    const url = await OGOUE.getMessageAttachmentUrl(ID, bouton.dataset.message);
+    if (url) window.open(url, "_blank", "noopener");
+  });
+
+  function afficherDossier() {
+    document.getElementById("titreProduit").textContent = dossier.product?.name || "Demande de financement";
+    document.getElementById("institution").textContent = dossier.institution?.name || "";
+    document.getElementById("statut").innerHTML = badge(dossier.status);
+    document.getElementById("montant").textContent = dossier.amountRequested ? `${FCFA.format(dossier.amountRequested)} FCFA` : "À préciser";
+    document.getElementById("duree").textContent = dossier.durationMonths ? `${dossier.durationMonths} mois` : "À préciser";
+    document.getElementById("depot").textContent = dossier.submittedAt ? formatDate(dossier.submittedAt) : "Non déposé";
+
+
+    afficherHistorique();
+
+    document.getElementById("pieces").innerHTML = (dossier.documents || []).map((piece) => `
+      <li class="flex items-center justify-between gap-3">
+        <span class="dark:text-gray-200">${echapper(piece.name)}</span>
+        <button type="button" data-piece="${piece.id}" class="text-[#006699] font-semibold hover:underline">Ouvrir</button>
+      </li>`).join("") || `<li class="text-gray-500">Aucune pièce jointe au dossier.</li>`;
+
+    const brouillon = dossier.status === "brouillon";
+    document.getElementById("blocBrouillon").classList.toggle("hidden", !brouillon);
+    document.getElementById("lienBrouillon").href = `module_deposer_dossier.html?id=${dossier.id}`;
+    const complement = dossier.status === "complement_requis";
+    document.getElementById("blocComplement").classList.toggle("hidden", !complement);
+  }
+
+  async function chargerDossier() {
+    if (!ID) return afficherErreur("Dossier introuvable.");
+    const reponse = await OGOUE.getApplication(ID);
+    if (!reponse) return afficherErreur("Ce dossier est introuvable ou ne vous appartient pas.");
+    dossier = reponse;
+    marquerDossierLu(ID);
+    messagesDossier = await OGOUE.getApplicationMessages(ID);
+    afficherDossier();
+    document.getElementById("chargement").classList.add("hidden");
+    document.getElementById("contenu").classList.remove("hidden");
+  }
+
+  function afficherErreur(message) {
+    document.getElementById("chargement").classList.add("hidden");
+    const erreur = document.getElementById("erreur");
+    erreur.textContent = message;
+    erreur.classList.remove("hidden");
+  }
+
+  document.getElementById("pieces").addEventListener("click", async (e) => {
+    const bouton = e.target.closest("[data-piece]");
+    if (!bouton) return;
+    const url = await OGOUE.getApplicationDocumentUrl(ID, bouton.dataset.piece);
+    if (url) window.open(url, "_blank", "noopener");
+  });
+
+  // Fenetre « Demande de complement » : lecture de la demande et lien de redepot
+  const modalComplement = document.getElementById("modalComplement");
+
+  function ouvrirComplement() {
+    document.getElementById("demandeComplement").textContent = dossier.decisionNote || "L'institution demande un complément de dossier.";
+    document.getElementById("erreurComplement").classList.add("hidden");
+    document.getElementById("confirmationComplement").classList.add("hidden");
+    modalComplement.classList.remove("hidden");
+  }
+
+  function fermerComplement() {
+    modalComplement.classList.add("hidden");
+  }
+
+  document.getElementById("btnComplement").addEventListener("click", ouvrirComplement);
+  document.getElementById("btnFermerComplement").addEventListener("click", fermerComplement);
+  document.getElementById("fondComplement").addEventListener("click", fermerComplement);
+
+  // Reponse a la demande de complement : texte et/ou piece jointe, envoyes dans la discussion
+  let fichierComplement = null;
+  document.getElementById("champFichierComplement").addEventListener("change", (e) => {
+    fichierComplement = e.target.files[0] || null;
+    document.getElementById("nomFichierComplement").textContent = fichierComplement ? fichierComplement.name : "Joindre une pièce (10 Mo max)";
+  });
+
+  document.getElementById("formComplement").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const champ = document.getElementById("champComplement");
+    const bouton = document.getElementById("btnEnvoyerComplement");
+    const erreur = document.getElementById("erreurComplement");
+    const confirmation = document.getElementById("confirmationComplement");
+    erreur.classList.add("hidden");
+    confirmation.classList.add("hidden");
+
+    const texte = champ.value.trim();
+    if (!texte && !fichierComplement) {
+      erreur.textContent = "Écrivez votre réponse ou joignez une pièce.";
+      erreur.classList.remove("hidden");
+      return;
+    }
+    if (fichierComplement && fichierComplement.size > 10 * 1024 * 1024) {
+      erreur.textContent = "Le fichier dépasse 10 Mo.";
+      erreur.classList.remove("hidden");
+      return;
+    }
+
+    bouton.disabled = true;
+    const reponse = await OGOUE.postApplicationMessage(ID, { body: texte, file: fichierComplement });
+    bouton.disabled = false;
+
+    if (!reponse.ok) {
+      erreur.textContent = reponse.error;
+      erreur.classList.remove("hidden");
+      return;
+    }
+
+    champ.value = "";
+    fichierComplement = null;
+    document.getElementById("champFichierComplement").value = "";
+    document.getElementById("nomFichierComplement").textContent = "Joindre une pièce (10 Mo max)";
+    confirmation.textContent = "Votre réponse a bien été envoyée à l'institution.";
+    confirmation.classList.remove("hidden");
+    await chargerDossier();
+    setTimeout(fermerComplement, 1500);
+  });
+
+  chargerDossier();
+</script>
