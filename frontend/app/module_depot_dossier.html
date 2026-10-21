@@ -46,6 +46,13 @@
     @media (min-width: 1280px) { .ecran-large { margin-left: -2.75rem; margin-right: -2.75rem; } }
     .ecran-large table { font-size: 13px; }
     .ecran-large th, .ecran-large td { padding-left: .625rem; padding-right: .625rem; }
+    /* Mobile : les pièces requises restent sur la ligne libellé / valeur, la liste alignée à droite ;
+       le bouton de dépôt occupe toute la largeur en bas de la carte */
+    @media (max-width: 767.98px) {
+      table[data-cartes] tbody tr td[data-carte="detail"] > div { display: grid !important; justify-items: start !important; width: max-content; max-width: 100%; margin-left: auto; gap: 6px !important; }
+      table[data-cartes] tbody tr td[data-carte="actions"] { flex: 0 0 100% !important; order: 6 !important; }
+      table[data-cartes] tbody tr td[data-carte="actions"] a { display: block; width: 100%; text-align: center; }
+    }
   </style>
 
   <!-- Restriction d'acces : un agent est redirige vers ses propres pages -->
@@ -200,8 +207,8 @@
                 <th class="px-3 py-3 text-xs font-semibold dark:text-gray-200">Durée</th>
                 <th class="px-3 py-3 text-xs font-semibold dark:text-gray-200">Taux d'Intérêt</th>
                 <th class="px-3 py-3 text-xs font-semibold dark:text-gray-200">Typologie</th>
-                <th data-carte="actions" class="px-3 py-3 text-xs font-semibold dark:text-gray-200">Demande</th>
                 <th class="px-3 py-3 text-xs font-semibold dark:text-gray-200">Documents Requis</th>
+                <th data-carte="actions" class="px-3 py-3 text-xs font-semibold dark:text-gray-200">Demande</th>
               </tr>
             </thead>
             <tbody id="corpsTableProduits" class="divide-y divide-[#e8ede8] dark:divide-gray-700"></tbody>
