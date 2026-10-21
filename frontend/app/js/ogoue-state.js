@@ -940,39 +940,18 @@ async function getMessageAttachmentUrl(applicationId, messageId) {
 }
 
 // ─────────────────────────────────────────────────
-// Messages non lus (suivi local, par navigateur)
-// Un message ou une étape décidée par l'institution est « non lu » tant que la PME
-// n'a pas ouvert le dossier. La date d'ouverture est gardée dans le navigateur.
+// Messages non lus : enregistrés sur le serveur, donc partagés entre appareils
 // ─────────────────────────────────────────────────
-const CLE_LU_PME = 'ogo_fin_lu';
 
-function lirePointsLusPme() {
-  try { return JSON.parse(localStorage.getItem(CLE_LU_PME) || '{}'); } catch (e) { return {}; }
-}
-
-function marquerDossierLu(applicationId) {
-  try {
-    const points = lirePointsLusPme();
-    points[applicationId] = new Date().toISOString();
-    localStorage.setItem(CLE_LU_PME, JSON.stringify(points));
-  } catch (e) { /* stockage indisponible : pas de suivi */ }
+/** Marque le dossier comme consulté par la PME */
+async function marquerDossierLu(applicationId) {
+  await financingRequest(`/applications/${applicationId}/seen`, { method: "POST" });
 }
 
 /** Nombre d'éléments non lus par dossier (messages et décisions de l'institution) */
 async function nonLusParDossier() {
-  const dossiers = (await getApplications()).filter((d) => d.status !== 'brouillon');
-  const lus = lirePointsLusPme();
-  const resultat = {};
-  await Promise.all(dossiers.map(async (d) => {
-    const [detail, messages] = await Promise.all([getApplication(d.id), getApplicationMessages(d.id)]);
-    const depuis = lus[d.id] ? new Date(lus[d.id]) : null;
-    const apres = (date) => !depuis || new Date(date) > depuis;
-    const messagesInstitution = messages.filter((m) => m.authorRole === 'institution' && apres(m.createdAt)).length;
-    const decisionsInstitution = ((detail && detail.history) || [])
-      .filter((h) => h.changedBy === 'institution' && h.note && apres(h.at)).length;
-    resultat[d.id] = messagesInstitution + decisionsInstitution;
-  }));
-  return resultat;
+  const { ok, data } = await financingRequest("/unread");
+  return ok && data && data.parDossier ? data.parDossier : {};
 }
 
 window.OGOUE = {

@@ -3,6 +3,8 @@ import {
   listProducts,
   getProduct,
   listApplications,
+  getUnread,
+  markSeen,
   getApplication,
   createApplication,
   updateApplication,
@@ -23,7 +25,9 @@ r.get("/products", listProducts);
 r.get("/products/:id", getProduct);
 
 // Dossiers de la PME connectee
+r.get("/unread", getUnread);
 r.get("/applications", listApplications);
+r.post("/applications/:id/seen", markSeen);
 r.post("/applications", createApplication);
 r.get("/applications/:id", getApplication);
 r.put("/applications/:id", updateApplication);

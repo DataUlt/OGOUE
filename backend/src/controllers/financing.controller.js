@@ -948,3 +948,78 @@ export async function getMessageAttachment(req, res) {
     return res.status(500).json({ error: "Internal server error" });
   }
 }
+
+// ───────────────────────────────────────────────────────
+// Suivi des éléments non lus (côté PME)
+// ───────────────────────────────────────────────────────
+
+/** Date d'un horodatage : sans fuseau, on la lit en UTC */
+function dateUtc(valeur) {
+  if (!valeur) return null;
+  return new Date(/([zZ]|[+-]\d{2}:?\d{2})$/.test(valeur) ? valeur : valeur + "Z");
+}
+
+/** Nombre d'éléments postérieurs à la dernière consultation, par dossier */
+function compterNonLus(ids, vus, evenements) {
+  const vuLe = new Map((vus || []).map((v) => [v.application_id, new Date(v.vu_le)]));
+  const parDossier = Object.fromEntries(ids.map((id) => [id, 0]));
+  for (const e of evenements) {
+    const seuil = vuLe.get(e.application_id);
+    if (!seuil || dateUtc(e.date) > seuil) parDossier[e.application_id] += 1;
+  }
+  return parDossier;
+}
+
+/** GET /api/financing/unread : éléments non lus par dossier de la PME */
+export async function getUnread(req, res) {
+  try {
+    if (!supabaseSecondary) return secondaryIndisponible(res);
+    const { pme, error: pmeError } = await getPmeForUser(req);
+    if (!pme) return res.status(404).json({ error: pmeError });
+
+    const { data: dossiers, error } = await supabaseSecondary
+      .from("loan_applications")
+      .select("id")
+      .eq("pme_id", pme.id)
+      .neq("status", "brouillon");
+    if (error) throw error;
+
+    const ids = (dossiers || []).map((d) => d.id);
+    if (ids.length === 0) return res.json({ parDossier: {} });
+
+    const [{ data: vus }, { data: messages }, { data: historique }] = await Promise.all([
+      supabaseSecondary.from("application_reads").select("application_id, vu_le").eq("cote", "pme").in("application_id", ids),
+      supabaseSecondary.from("application_messages").select("application_id, created_at").eq("author_role", "institution").in("application_id", ids),
+      supabaseSecondary.from("application_status_history").select("application_id, created_at").eq("changed_by", "institution").in("application_id", ids),
+    ]);
+    const evenements = [
+      ...(messages || []).map((m) => ({ application_id: m.application_id, date: m.created_at })),
+      ...(historique || []).map((h) => ({ application_id: h.application_id, date: h.created_at })),
+    ];
+    return res.json({ parDossier: compterNonLus(ids, vus, evenements) });
+  } catch (error) {
+    console.error("Erreur getUnread:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+/** POST /api/financing/applications/:id/seen : la PME a consulté le dossier */
+export async function markSeen(req, res) {
+  try {
+    if (!supabaseSecondary) return secondaryIndisponible(res);
+    const { pme, error: pmeError } = await getPmeForUser(req);
+    if (!pme) return res.status(404).json({ error: pmeError });
+
+    const dossier = await dossierDeLaPme(req.params.id, pme.id);
+    if (!dossier) return res.status(404).json({ error: "Dossier introuvable" });
+
+    const { error } = await supabaseSecondary
+      .from("application_reads")
+      .upsert({ cote: "pme", application_id: dossier.id, vu_le: new Date().toISOString() }, { onConflict: "cote,application_id" });
+    if (error) throw error;
+    return res.json({ ok: true });
+  } catch (error) {
+    console.error("Erreur markSeen:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
