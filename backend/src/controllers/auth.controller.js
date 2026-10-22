@@ -207,6 +207,58 @@ async function syncToSecondarySupabase(email, password, orgData, userData) {
   }
 }
 
+// Crée organisation et utilisateur à partir des métadonnées du compte, une seule fois,
+// à la première connexion (donc après confirmation). Le mot de passe sert ensuite
+// à la synchronisation avec la base des dossiers.
+async function creerProfilPmeSiAbsent(authUser, password) {
+  const meta = authUser?.user_metadata || {};
+  if (!meta.organization) return; // compte d'un autre parcours
+
+  const { data: existant } = await supabase.from("users").select("id").eq("auth_id", authUser.id).maybeSingle();
+  if (existant) return;
+
+  const org = meta.organization;
+  const { data: orgData, error: orgError } = await supabase
+    .from("organizations")
+    .insert({
+      name: org.name,
+      rccm_number: org.rccm_number || null,
+      nif_number: org.nif_number || null,
+      activity: org.activity || null,
+      activity_description: org.activity_description || null,
+      acquisition_source: org.acquisition_source || null,
+    })
+    .select("id, name, rccm_number, nif_number, activity, activity_description, created_at")
+    .single();
+  if (orgError || !orgData) {
+    console.error("❌ Organization error:", orgError);
+    throw new Error("Erreur lors de la création de l'organisation");
+  }
+
+  const { data: userData, error: userError } = await supabase
+    .from("users")
+    .insert({
+      auth_id: authUser.id,
+      first_name: meta.firstName,
+      last_name: meta.lastName,
+      email: authUser.email,
+      role: meta.pme_role || "manager",
+      whatsapp: meta.whatsapp || null,
+      organization_id: orgData.id,
+    })
+    .select("id, first_name, last_name, email, role, organization_id, created_at")
+    .single();
+  if (userError || !userData) {
+    console.error("User record error:", userError);
+    await supabase.from("organizations").delete().eq("id", orgData.id);
+    throw new Error("Erreur lors de la création du profil utilisateur");
+  }
+
+  // Base des dossiers : non bloquant, comme à l'inscription avant
+  const sync = await syncToSecondarySupabase(authUser.email, password, orgData, userData);
+  if (!sync.success) console.warn("⚠️  Sync failed at first login:", sync.reason);
+}
+
 /**
  * POST /auth/register
  * Crée une nouvelle organisation, un utilisateur Supabase Auth et un record dans users
@@ -215,97 +267,58 @@ export async function register(req, res) {
   try {
     const parsed = registerSchema.parse(req.body);
 
-    // 1️⃣ Créer l'utilisateur dans Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+    // Une même adresse ne peut pas être à la fois une PME et une institution :
+    // le projet financement (base des dossiers) est partagé, on le consulte d'abord.
+    if (supabaseSecondary) {
+      const motifEmail = parsed.email.replace(/[%_\\]/g, (c) => `\\${c}`);
+      const { data: compteInstitution } = await supabaseSecondary
+        .from("users")
+        .select("id")
+        .ilike("email", motifEmail)
+        .eq("role", "institution")
+        .maybeSingle();
+      if (compteInstitution) {
+        return res.status(409).json({
+          error: "Cette adresse e-mail est déjà utilisée par un compte institution financière. Utilisez une autre adresse.",
+        });
+      }
+    }
+
+    // Rien n'est écrit dans les tables tant que l'adresse n'est pas confirmée :
+    // les données de l'entreprise restent dans les métadonnées du compte et sont
+    // créées à la première connexion (voir creerProfilPmeSiAbsent).
+    const { error: authError } = await supabase.auth.admin.createUser({
       email: parsed.email,
       password: parsed.password,
-      // Le compte reste inactif tant que l'adresse n'est pas confirmée
-      // par le lien reçu par e-mail.
       email_confirm: false,
+      user_metadata: {
+        pme_role: parsed.role,
+        firstName: parsed.firstName,
+        lastName: parsed.lastName,
+        whatsapp: parsed.whatsapp ? parsed.whatsapp.replace(/[\s.\-]/g, "") : null,
+        organization: {
+          name: parsed.organizationName,
+          rccm_number: parsed.rccmNumber || null,
+          nif_number: parsed.nifNumber || null,
+          activity: parsed.activity || null,
+          activity_description: parsed.activityDescription || null,
+          acquisition_source: parsed.acquisitionSource || null,
+        },
+      },
     });
 
-    if (authError || !authData.user) {
+    if (authError) {
       console.error("Auth error:", authError);
-      return res.status(400).json({ error: authError?.message || "Erreur lors de la création du compte" });
+      return res.status(400).json({ error: authError.message || "Erreur lors de la création du compte" });
     }
 
-    const authUserId = authData.user.id;
-
-    // 2️⃣ Créer l'organisation
-    console.log("➡️ Attempting to insert organization into table 'organizations':", parsed.organizationName);
-    const { data: orgData, error: orgError } = await supabase
-      .from("organizations")
-      .insert({
-        name: parsed.organizationName,
-        rccm_number: parsed.rccmNumber || null,
-        nif_number: parsed.nifNumber || null,
-        activity: parsed.activity || null,
-        activity_description: parsed.activityDescription || null,
-        acquisition_source: parsed.acquisitionSource || null,
-      })
-      .select("id, name, rccm_number, nif_number, activity, activity_description, created_at")
-      .single();
-
-    if (orgError || !orgData) {
-      console.error("❌ Organization error:", {
-        message: orgError?.message,
-        code: orgError?.code,
-        details: orgError?.details,
-        hint: orgError?.hint
-      });
-      // Supprimer l'utilisateur Auth si la création de l'organisation échoue
-      await supabase.auth.admin.deleteUser(authUserId);
-      return res.status(500).json({ 
-        error: "Erreur lors de la création de l'organisation",
-        details: orgError?.message 
-      });
-    }
-
-    // 3️⃣ Créer le record utilisateur dans users
-    const { data: userData, error: userError } = await supabase
-      .from("users")
-      .insert({
-        auth_id: authUserId,
-        first_name: parsed.firstName,
-        last_name: parsed.lastName,
-        email: parsed.email,
-        role: parsed.role,
-        whatsapp: parsed.whatsapp ? parsed.whatsapp.replace(/[\s.\-]/g, "") : null,
-        organization_id: orgData.id,
-      })
-      .select("id, first_name, last_name, email, role, organization_id, created_at")
-      .single();
-
-    if (userError || !userData) {
-      console.error("User record error:", userError);
-      // Supprimer l'utilisateur Auth et l'organisation si ça échoue
-      await supabase.auth.admin.deleteUser(authUserId);
-      await supabase.from("organizations").delete().eq("id", orgData.id);
-      return res.status(500).json({ error: "Erreur lors de la création du profil utilisateur" });
-    }
-
-    // 3️⃣ Sync to secondary Supabase (optional, non-blocking)
-    const syncResult = await syncToSecondarySupabase(parsed.email, parsed.password, orgData, userData);
-    if (!syncResult.success) {
-      console.warn("⚠️  Sync failed but continuing:", syncResult.reason);
-      // Don't fail registration if sync fails - it can be retried later
-    }
-
-    // 4️⃣ Envoyer le lien de confirmation. Aucune session n'est ouverte ici :
-    // le compte ne sert à rien tant que l'adresse n'a pas été confirmée.
+    // Seul le lien de confirmation part ici ; aucune session n'est ouverte.
     await envoyerConfirmation(parsed.email, parsed.redirectOrigin);
 
     return res.status(201).json({
       message: "Inscription enregistrée. Un e-mail de confirmation vient de vous être envoyé.",
       needsConfirmation: true,
       email: parsed.email,
-      sync: {
-        primary: true,
-        secondary: syncResult.success,
-        message: syncResult.success
-          ? "User and organization created in both Supabase instances"
-          : `Created in primary Supabase only. Secondary sync: ${syncResult.reason}`
-      },
     });
 
   } catch (err) {
@@ -457,6 +470,16 @@ export async function login(req, res) {
       }
 
       return res.status(401).json({ error: "Mot de passe incorrect" });
+    }
+
+    // Première connexion après confirmation : on crée le profil
+    try {
+      await creerProfilPmeSiAbsent(authData.user, parsed.password);
+    } catch (profilErreur) {
+      console.error("Création du profil à la connexion :", profilErreur?.message);
+      return res.status(500).json({
+        error: "Oups ! Votre inscription n'a pas été finalisée. Contactez-nous pour activer votre accès.",
+      });
     }
 
     // Récupérer les infos utilisateur depuis users
