@@ -2,6 +2,7 @@ import PDFDocument from "pdfkit";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import { supabase } from "../db/supabase.js";
+import { verifierQuota } from "./quota-stockage.js";
 
 // ============================================================
 // Reçus de vente émis par OGOUE
@@ -249,11 +250,26 @@ export function composerRecuPdf({ numero, vente, organisation, emisPar }) {
 
 /**
  * Produit le reçu et le depose dans le bucket prive.
- * @returns {Promise<{numero: string, chemin: string}|null>} null si l'operation echoue
+ *
+ * Le reçu compte dans le stockage de la formule. Quand la formule a un
+ * plafond, on vérifie AVANT d'attribuer le numéro : un refus ne doit pas
+ * laisser de trou dans la numérotation des reçus.
+ *
+ * @param {number} [quotaGo] - plafond de stockage de la formule (0 = pas de plafond appliqué ici)
+ * @returns {Promise<{numero: string, chemin: string, taille: number}|{refus: string}|null>}
+ *   null si l'operation echoue, { refus } si le stockage est plein
  */
-export async function emettreRecu({ vente, organisation, emisPar }) {
+export async function emettreRecu({ vente, organisation, emisPar, quotaGo = 0 }) {
   try {
     const annee = new Date(vente.sale_date || Date.now()).getFullYear();
+
+    if (quotaGo) {
+      // PDF témoin de même longueur : seul le numéro change, donc la taille est la même à quelques octets près
+      const temoin = await composerRecuPdf({ numero: `REC-${annee}-000000`, vente, organisation, emisPar });
+      const controle = await verifierQuota(organisation.id, temoin.length, quotaGo);
+      if (!controle.ok) return { refus: controle.message };
+    }
+
     const numero = await attribuerNumeroRecu(organisation.id, annee);
     if (!numero) return null;
 
@@ -270,7 +286,7 @@ export async function emettreRecu({ vente, organisation, emisPar }) {
     }
 
     console.log(`✅ Reçu ${numero} émis (${pdf.length} octets)`);
-    return { numero, chemin };
+    return { numero, chemin, taille: pdf.length };
   } catch (error) {
     console.error("❌ Émission du reçu impossible:", error?.message);
     return null;

@@ -208,7 +208,9 @@ export async function getSaleRecuUrl(req, res) {
     // l'utilisateur ne pourrait pas résoudre. Le numéro attribué suit la
     // séquence courante : il ne reflète donc pas la date de la vente.
     if (!chemin) {
+      if (req.droits?.recus === false) return reponseFormuleSansRecus(res);
       const recu = await emettreRecuPourVente(vente, organizationId, req);
+      if (recu?.refus) return res.status(402).json({ error: recu.refus, code: "QUOTA_STOCKAGE" });
       if (!recu) {
         return res.status(500).json({ error: "Le reçu n'a pas pu être établi" });
       }
@@ -296,6 +298,8 @@ export async function etablirSaleRecu(req, res) {
       return res.json({ url, numero: vente.receipt_number });
     }
 
+    if (req.droits?.recus === false) return reponseFormuleSansRecus(res);
+
     // Mémoriser le client AVANT d'imprimer : le document doit pouvoir
     // être régénéré à l'identique plus tard.
     const client = {
@@ -319,6 +323,7 @@ export async function etablirSaleRecu(req, res) {
     }
 
     const recu = await emettreRecuPourVente(vente, organizationId, req);
+    if (recu?.refus) return res.status(402).json({ error: recu.refus, code: "QUOTA_STOCKAGE" });
     if (!recu) return res.status(500).json({ error: "Le reçu n'a pas pu être établi" });
 
     const url = await urlSigneeRecu(recu.chemin);
@@ -337,6 +342,14 @@ export async function etablirSaleRecu(req, res) {
  * Ne propage aucune erreur : l'echec du document ne doit jamais
  * invalider une vente deja enregistree. Le reçu pourra etre reemis.
  */
+/** Les reçus numérotés sont réservés aux formules payantes : la formule gratuite n'en émet pas. */
+function reponseFormuleSansRecus(res) {
+  return res.status(403).json({
+    error: "Les reçus numérotés sont disponibles avec la formule Pro. Vos ventes et dépenses restent enregistrées normalement.",
+    code: "FORMULE_SANS_RECUS",
+  });
+}
+
 async function emettreRecuPourVente(row, organizationId, req) {
   try {
     const { data: organisation } = await supabase
@@ -354,12 +367,14 @@ async function emettreRecuPourVente(row, organizationId, req) {
       vente: row,
       organisation,
       emisPar: req.user.role === "agent" ? "Agent" : "Gérant",
+      quotaGo: req.droits?.stockageGo,
     });
-    if (!recu) return null;
+    if (!recu || recu.refus) return recu || null;
 
+    // Le reçu occupe du stockage : sa taille est comptée dans stockage_utilise
     const { error } = await supabase
       .from("sales")
-      .update({ receipt_number: recu.numero, receipt_doc_path: recu.chemin })
+      .update({ receipt_number: recu.numero, receipt_doc_path: recu.chemin, receipt_size_bytes: recu.taille })
       .eq("id", row.id);
 
     if (error) {
