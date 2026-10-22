@@ -32,6 +32,9 @@
         source: /tarifs
         destination: /tarifs.html
       - type: rewrite
+        source: /partenaires
+        destination: /partenaires.html
+      - type: rewrite
         source: /paiement
         destination: /paiement.html
       - type: rewrite

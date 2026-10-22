@@ -1,1005 +1,661 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-  <title>OGOUE - Gestion simple pour les entrepreneurs et les PME</title>
-  <link rel="icon" type="image/png" href="app/O-removebg-preview.png">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="app/O-removebg-preview.png">
+<title>OGOUE — Accueil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body { margin: 0; background: #faf9f5; font-family: Manrope, system-ui, sans-serif; }
 
-  <!-- Tailwind -->
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggqxSuXd.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggOxSuXd.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggSxSuXd.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggixSuXd.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggmxSuXd.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
 
-  <!-- Fonts & Icons -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" crossorigin href="https://fonts.gstatic.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggqxSuXd.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggOxSuXd.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggSxSuXd.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggixSuXd.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggmxSuXd.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
 
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: "#0088CC",
-            "background-light": "#f6f8f6",
-            "background-dark": "#111712",
-            "text-light": "#0a0c0a",
-            "text-light-muted": "#5c6c60",
-            secondary: "#1E3A5F",
-          },
-          fontFamily: {
-            display: ["Manrope", "sans-serif"],
-          },
-          borderRadius: {
-            DEFAULT: "1rem",
-            lg: "2rem",
-            xl: "3rem",
-            full: "9999px",
-          },
-        },
-      },
-    };
-  </script>
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggqxSuXd.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggOxSuXd.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggSxSuXd.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggixSuXd.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggmxSuXd.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
 
-  <style>
-    .material-symbols-outlined {
-      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
-    }
-    /* Accordéon FAQ sans JavaScript */
-    details > summary { list-style: none; cursor: pointer; }
-    details > summary::-webkit-details-marker { display: none; }
-    details[open] summary .chevron { transform: rotate(180deg); }
-    .chevron { transition: transform .2s ease; }
-  </style>
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggqxSuXd.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggOxSuXd.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggSxSuXd.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggixSuXd.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggmxSuXd.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggqxSuXd.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggOxSuXd.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggSxSuXd.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggixSuXd.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggmxSuXd.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+
+
+
+body{margin:0;background:#F5F6F3;font-family:'Manrope',system-ui,sans-serif;color:#0E1B24}
+a{color:#006FA3}a:hover{color:#00547C}
+summary{cursor:pointer}
+
+</style>
 </head>
+<body>
+<header style="background: #FFFFFF; border-bottom: 1px solid #E3E6E1">
+<nav style="max-width: 1200px; margin: 0 auto; padding: 18px 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<a href="/" style="font-size: 24px; font-weight: 800; letter-spacing: 0.04em; color: #0E1B24; text-decoration: none">OGOUE</a>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 24px; font-size: 15px; font-weight: 600">
+<a href="#accompagnement" style="color: #0E1B24; text-decoration: none">Notre accompagnement</a>
+<a href="#financement" style="color: #0E1B24; text-decoration: none">Financement</a>
+<a href="#tarifs" style="color: #0E1B24; text-decoration: none">Tarifs</a>
+<a href="/partenaires" style="color: #0E1B24; text-decoration: none">Partenaires</a>
+<a href="#apropos" style="color: #0E1B24; text-decoration: none">À propos</a>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px">
+<a href="/login" style="font-size: 15px; font-weight: 600; color: #0E1B24; text-decoration: none; padding: 12px 8px">Se connecter</a>
+<a href="#tarifs" style="font-size: 15px; font-weight: 700; color: #FFFFFF; background: #006FA3; text-decoration: none; padding: 12px 20px; border-radius: 999px">Créer mon compte</a>
+</div>
+</nav>
+</header>
+
+<section style="background: #FFFFFF; padding: 72px 24px 88px">
+<div style="max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 56px">
+<div style="flex: 1 1 460px; min-width: 0; display: flex; flex-direction: column; gap: 24px">
+<p style="margin: 0; font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #006FA3">De la petite activité à la PME structurée</p>
+<h1 style="margin: 0; font-size: clamp(38px, 5.2vw, 64px); line-height: 1.06; font-weight: 800; letter-spacing: -0.02em">Mieux gérer aujourd'hui.<br><span style="color: #17734A">Préparer le financement de demain.</span></h1>
+<p style="margin: 0; font-size: 19px; line-height: 1.6; color: #3E4A55; max-width: 580px">OGOUE ne se limite pas à simplifier votre comptabilité. Nous structurons votre gestion financière au quotidien, et nous vous préparons aux opportunités de financement qui se présenteront à mesure que votre activité se développe.</p>
+<div style="display: flex; flex-wrap: wrap; gap: 12px">
+<a href="#accompagnement" style="font-size: 16px; font-weight: 700; color: #FFFFFF; background: #006FA3; text-decoration: none; padding: 16px 26px; border-radius: 999px">Mieux gérer mon activité</a>
+<a href="#financement" style="font-size: 16px; font-weight: 700; color: #17734A; background: #FFFFFF; border: 2px solid #17734A; text-decoration: none; padding: 14px 24px; border-radius: 999px">Préparer mon financement</a>
+</div>
+<p style="margin: 0; font-size: 14px; color: #4A5662">Gratuit pour commencer · Sans carte bancaire · Cash et Mobile Money</p>
+</div>
+
+<div style="flex: 1 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+<div style="background: #F5F6F3; border: 1px solid #E3E6E1; border-radius: 24px; padding: 24px; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap">
+<span style="font-size: 15px; font-weight: 700">Mon activité</span>
+<span style="font-size: 13px; color: #4A5662; background: #FFFFFF; border: 1px solid #E3E6E1; padding: 6px 12px; border-radius: 999px">01/08/2026 – 25/08/2026</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px">
+<div style="background: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 13px; color: #4A5662">Ventes</span>
+<span style="font-size: 22px; font-weight: 800">486 000 F</span>
+</div>
+<div style="background: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 13px; color: #4A5662">Dépenses</span>
+<span style="font-size: 22px; font-weight: 800">212 000 F</span>
+</div>
+<div style="background: #E7F3EC; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 13px; color: #17734A; font-weight: 600">Solde</span>
+<span style="font-size: 22px; font-weight: 800; color: #12603D">274 000 F</span>
+</div>
+</div>
+<div style="background: #FFFFFF; border-radius: 16px; padding: 8px 16px">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid #EEF0EC; font-size: 14px">
+<span>Article 1 <span style="color: #4A5662">· 17:37 · Cash</span></span>
+<span style="font-weight: 700">12 500 FCFA</span>
+</div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid #EEF0EC; font-size: 14px">
+<span>Article 2 <span style="color: #4A5662">· 15:02 · Mobile Money</span></span>
+<span style="font-weight: 700">85 000 FCFA</span>
+</div>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; font-size: 14px">
+<span>Service 1 <span style="color: #4A5662">· 11:20 · Cash</span></span>
+<span style="font-weight: 700">31 000 FCFA</span>
+</div>
+</div>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 16px">
+<div style="flex: 1 1 180px; background: #0E2A3A; color: #FFFFFF; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 13px; color: #B9C9D3">Score de traçabilité</span>
+<span style="font-size: 34px; font-weight: 800">83 %</span>
+<div style="height: 8px; background: #29485A; border-radius: 999px"><div style="width: 83%; height: 8px; background: #4CC38A; border-radius: 999px"></div></div>
+</div>
+<div style="flex: 1 1 180px; background: #FFFFFF; border: 1px solid #E3E6E1; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 13px; color: #4A5662">Compte de résultat</span>
+<span style="font-size: 17px; font-weight: 700">Rempli à partir de vos saisies</span>
+<span style="font-size: 13px; font-weight: 700; color: #17734A">Prêt à présenter à un financeur</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<section id="parcours" style="padding: 96px 24px">
+<div style="max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 48px">
+<div style="display: flex; flex-direction: column; gap: 16px; max-width: 760px">
+<p style="margin: 0; font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #006FA3">Entreprendre au Gabon</p>
+<h2 style="margin: 0; font-size: clamp(30px, 3.6vw, 44px); line-height: 1.15; font-weight: 800">Créer son activité, c'est un début. La faire grandir, c'est le projet.</h2>
+<p style="margin: 0; font-size: 18px; line-height: 1.6; color: #3E4A55">Au Gabon, l'entrepreneuriat est encouragé comme une voie vers l'autonomie, notamment pour les jeunes. L'ambition : passer d'une petite activité à une entreprise structurée, puis à une PME capable de se développer. OGOUE vous accompagne à chaque étape.</p>
+</div>
+<ol style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px">
+<li style="background: #FFFFFF; border: 1px solid #E3E6E1; border-radius: 24px; padding: 28px; display: flex; flex-direction: column; gap: 12px">
+<span style="width: 44px; height: 44px; border-radius: 999px; background: #E6F1F7; color: #006FA3; font-weight: 800; font-size: 18px; display: flex; align-items: center; justify-content: center">1</span>
+<h3 style="margin: 0; font-size: 22px; font-weight: 800">Une petite activité</h3>
+<p style="margin: 0; font-size: 16px; line-height: 1.55; color: #3E4A55">Vous notez vos ventes et vos dépenses au fil de la journée. Vos totaux se calculent seuls : vous savez enfin où vous en êtes.</p>
+</li>
+<li style="background: #FFFFFF; border: 1px solid #E3E6E1; border-radius: 24px; padding: 28px; display: flex; flex-direction: column; gap: 12px">
+<span style="width: 44px; height: 44px; border-radius: 999px; background: #E6F1F7; color: #006FA3; font-weight: 800; font-size: 18px; display: flex; align-items: center; justify-content: center">2</span>
+<h3 style="margin: 0; font-size: 22px; font-weight: 800">Une entreprise structurée</h3>
+<p style="margin: 0; font-size: 16px; line-height: 1.55; color: #3E4A55">Votre comptabilité est suivie, vos justificatifs conservés, votre compte de résultat et votre trésorerie à jour.</p>
+</li>
+<li style="background: #FFFFFF; border: 2px solid #17734A; border-radius: 24px; padding: 27px; display: flex; flex-direction: column; gap: 12px">
+<span style="width: 44px; height: 44px; border-radius: 999px; background: #17734A; color: #FFFFFF; font-weight: 800; font-size: 18px; display: flex; align-items: center; justify-content: center">3</span>
+<h3 style="margin: 0; font-size: 22px; font-weight: 800">Une PME qui se développe</h3>
+<p style="margin: 0; font-size: 16px; line-height: 1.55; color: #3E4A55">Vous présentez une situation claire aux financeurs, et vous pouvez rechercher les ressources qui financeront votre croissance.</p>
+</li>
+</ol>
+</div>
+</section>
+
+<section style="background: #FFFFFF; padding: 96px 24px">
+<div style="max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 48px; align-items: flex-start">
+<div style="flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+<h2 style="margin: 0; font-size: clamp(28px, 3.2vw, 40px); line-height: 1.15; font-weight: 800">Grandir demande des ressources.</h2>
+<p style="margin: 0; font-size: 18px; line-height: 1.6; color: #3E4A55">À un moment, chaque entrepreneur a besoin de moyens supplémentaires pour franchir un cap. La question du financement devient alors essentielle.</p>
+<p style="margin: 0; font-size: 18px; line-height: 1.6; font-weight: 700">Mais pour l'obtenir, un projet ambitieux ne suffit pas.</p>
+</div>
+<div style="flex: 1 1 520px; min-width: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px">
+<div style="border: 1px solid #E3E6E1; border-radius: 20px; padding: 22px">
+<h3 style="margin: 0; font-size: 18px; font-weight: 700">Augmenter son capital</h3>
+</div>
+<div style="border: 1px solid #E3E6E1; border-radius: 20px; padding: 22px">
+<h3 style="margin: 0; font-size: 18px; font-weight: 700">Acquérir du matériel</h3>
+</div>
+<div style="border: 1px solid #E3E6E1; border-radius: 20px; padding: 22px">
+<h3 style="margin: 0; font-size: 18px; font-weight: 700">Accroître sa capacité de production</h3>
+</div>
+<div style="border: 1px solid #E3E6E1; border-radius: 20px; padding: 22px">
+<h3 style="margin: 0; font-size: 18px; font-weight: 700">Recruter</h3>
+</div>
+<div style="border: 1px solid #E3E6E1; border-radius: 20px; padding: 22px">
+<h3 style="margin: 0; font-size: 18px; font-weight: 700">S'implanter sur de nouveaux marchés</h3>
+</div>
+</div>
+</div>
+</section>
+
+<section id="financement" style="background: #0E2A3A; color: #FFFFFF; padding: 104px 24px">
+<div style="max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 56px; align-items: center">
+<div style="flex: 1 1 440px; min-width: 0; display: flex; flex-direction: column; gap: 20px">
+<p style="margin: 0; font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #7FD3A8">Là où OGOUE fait la différence</p>
+<h2 style="margin: 0; font-size: clamp(32px, 4vw, 48px); line-height: 1.1; font-weight: 800">Ce qu'un financeur attend, vous apprenez à le montrer.</h2>
+<p style="margin: 0; font-size: 18px; line-height: 1.6; color: #C9D6DD">Banque, microfinance ou autre organisme : tous vous demanderont des preuves. En structurant et en suivant votre comptabilité, OGOUE vous donne une meilleure visibilité sur votre activité, des données financières plus fiables et des éléments concrets pour présenter votre situation.</p>
+<div style="display: flex; flex-wrap: wrap; gap: 12px">
+<a href="#tarifs" style="font-size: 16px; font-weight: 700; color: #0E2A3A; background: #7FD3A8; text-decoration: none; padding: 16px 26px; border-radius: 999px">Préparer mon financement</a>
+<a href="/partenaires" style="font-size: 16px; font-weight: 700; color: #FFFFFF; border: 2px solid #5E7C8C; text-decoration: none; padding: 14px 24px; border-radius: 999px">Voir nos partenaires</a>
+</div>
+<p style="margin: 0; font-size: 14px; line-height: 1.6; color: #A9BBC5">OGOUE ne prête pas d'argent et ne décide pas à la place d'un financeur. Nous vous préparons ; la décision appartient à l'organisme sollicité.</p>
+</div>
+<div style="flex: 1 1 460px; min-width: 0; background: #FFFFFF; color: #0E1B24; border-radius: 24px; padding: 28px; display: flex; flex-direction: column; gap: 4px">
+<h3 style="margin: 0 0 12px; font-size: 18px; font-weight: 800">Ce que le financeur vous demande · Ce qu'OGOUE vous apporte</h3>
+<div style="display: flex; flex-direction: column; gap: 6px; padding: 16px 0; border-top: 1px solid #EEF0EC">
+<span style="font-size: 16px; font-weight: 700">Démontrer la viabilité de votre activité</span>
+<span style="font-size: 14px; font-weight: 600; color: #17734A">L'historique daté de vos ventes, de vos dépenses et de vos résultats</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px; padding: 16px 0; border-top: 1px solid #EEF0EC">
+<span style="font-size: 16px; font-weight: 700">Présenter des données financières cohérentes</span>
+<span style="font-size: 14px; font-weight: 600; color: #17734A">Un compte de résultat et un tableau de trésorerie remplis à partir de vos saisies</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px; padding: 16px 0; border-top: 1px solid #EEF0EC">
+<span style="font-size: 16px; font-weight: 700">Justifier votre capacité à gérer les fonds</span>
+<span style="font-size: 14px; font-weight: 600; color: #17734A">Un suivi régulier, des justificatifs conservés, un score qui signale ce qui manque</span>
+</div>
+</div>
+</div>
+</section>
+
+<section id="accompagnement" style="padding: 96px 24px">
+<div style="max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px">
+<div style="display: flex; flex-direction: column; gap: 16px; max-width: 760px">
+<p style="margin: 0; font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #006FA3">Notre accompagnement</p>
+<h2 style="margin: 0; font-size: clamp(28px, 3.4vw, 42px); line-height: 1.15; font-weight: 800">Une double valeur ajoutée.</h2>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px">
+<div style="background: #FFFFFF; border: 1px solid #E3E6E1; border-radius: 24px; padding: 32px; display: flex; flex-direction: column; gap: 16px">
+<span style="font-size: 14px; font-weight: 800; color: #006FA3">01 · Aujourd'hui</span>
+<h3 style="margin: 0; font-size: 24px; font-weight: 800">Simplifier et structurer votre gestion financière</h3>
+<ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 10px; font-size: 16px; line-height: 1.5; color: #3E4A55">
+<li>Vos ventes et vos dépenses notées au fil de la journée, en cash ou en Mobile Money</li>
+<li>Vos totaux calculés automatiquement, par jour, par mois, par année</li>
+<li>Votre compte de résultat et votre tableau de trésorerie remplis à partir de vos saisies</li>
+<li>Vos agents saisissent avec leur propre code, vous gardez la vue d'ensemble</li>
+</ul>
+</div>
+<div style="background: #FFFFFF; border: 2px solid #17734A; border-radius: 24px; padding: 31px; display: flex; flex-direction: column; gap: 16px">
+<span style="font-size: 14px; font-weight: 800; color: #17734A">02 · Demain</span>
+<h3 style="margin: 0; font-size: 24px; font-weight: 800">Vous préparer à la recherche de financement</h3>
+<ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; font-size: 16px; line-height: 1.5; color: #3E4A55">
+<li style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap"><span>Découvrir les solutions de financement disponibles</span><span style="font-size: 12px; font-weight: 700; color: #12603D; background: #E7F3EC; padding: 4px 10px; border-radius: 999px">Disponible</span></li>
+<li style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap"><span>Comparer les conditions des différentes institutions</span><span style="font-size: 12px; font-weight: 700; color: #4A5662; background: #EEF0EC; padding: 4px 10px; border-radius: 999px">Bientôt</span></li>
+<li style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap"><span>Mieux comprendre les critères d'éligibilité</span><span style="font-size: 12px; font-weight: 700; color: #4A5662; background: #EEF0EC; padding: 4px 10px; border-radius: 999px">Bientôt</span></li>
+<li style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap"><span>Constituer un dossier solide, adapté à chaque organisme</span><span style="font-size: 12px; font-weight: 700; color: #4A5662; background: #EEF0EC; padding: 4px 10px; border-radius: 999px">Bientôt</span></li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+
+<section style="background: #FFFFFF; padding: 96px 24px">
+<div style="max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px">
+<h2 style="margin: 0; font-size: clamp(28px, 3.2vw, 40px); line-height: 1.15; font-weight: 800; max-width: 720px">OGOUE est fait pour vous si…</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px">
+<div style="background: #F5F6F3; border: 1px solid #E3E6E1; border-radius: 24px; padding: 28px; display: flex; flex-direction: column; gap: 10px">
+<h3 style="margin: 0; font-size: 20px; font-weight: 800">Vous voulez mieux gérer votre activité au quotidien</h3>
+<p style="margin: 0; font-size: 15px; line-height: 1.55; color: #3E4A55">Commerçant, artisan ou prestataire : vous voulez savoir ce que vous vendez, ce que vous dépensez et ce qu'il vous reste, sans calculs le soir.</p>
+</div>
+<div style="background: #F5F6F3; border: 1px solid #E3E6E1; border-radius: 24px; padding: 28px; display: flex; flex-direction: column; gap: 10px">
+<h3 style="margin: 0; font-size: 20px; font-weight: 800">Vous ambitionnez de développer votre entreprise</h3>
+<p style="margin: 0; font-size: 15px; line-height: 1.55; color: #3E4A55">Vous préparez une étape : du matériel, une embauche, un nouveau marché. Vous aurez besoin de chiffres solides pour la financer.</p>
+</div>
+<div style="background: #E6F1F7; border: 1px solid #C5DEEB; border-radius: 24px; padding: 28px; display: flex; flex-direction: column; gap: 10px">
+<h3 style="margin: 0; font-size: 20px; font-weight: 800">Vous êtes un organisme de financement</h3>
+<p style="margin: 0; font-size: 15px; line-height: 1.55; color: #3E4A55">Banque, microfinance ou autre financeur : rencontrez des entreprises qui savent présenter leur situation.</p>
+<a href="/partenaires#contact" style="font-size: 15px; font-weight: 700; color: #00547C">Devenir partenaire →</a>
+</div>
+</div>
+</div>
+</section>
+
+<section style="padding: 96px 24px">
+<div style="max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px">
+<h2 style="margin: 0; font-size: clamp(28px, 3.2vw, 40px); line-height: 1.15; font-weight: 800">Ils structurent leur activité avec OGOUE</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px">
+<figure style="margin: 0; background: #FFFFFF; border: 1px solid #E3E6E1; border-radius: 24px; overflow: hidden; display: flex; flex-direction: column">
+<div style="aspect-ratio: 16 / 9; background: #E9ECE7; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: #4A5662">[Vidéo témoignage — client 1]</div>
+<figcaption style="padding: 20px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 16px; line-height: 1.5">« [Citation courte du client] »</span>
+<span style="font-size: 14px; color: #4A5662">[Prénom, activité, ville]</span>
+</figcaption>
+</figure>
+<figure style="margin: 0; background: #FFFFFF; border: 1px solid #E3E6E1; border-radius: 24px; overflow: hidden; display: flex; flex-direction: column">
+<div style="aspect-ratio: 16 / 9; background: #E9ECE7; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: #4A5662">[Vidéo témoignage — client 2]</div>
+<figcaption style="padding: 20px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 16px; line-height: 1.5">« [Citation courte du client] »</span>
+<span style="font-size: 14px; color: #4A5662">[Prénom, activité, ville]</span>
+</figcaption>
+</figure>
+<figure style="margin: 0; background: #FFFFFF; border: 1px solid #E3E6E1; border-radius: 24px; overflow: hidden; display: flex; flex-direction: column">
+<div style="aspect-ratio: 16 / 9; background: #E9ECE7; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: #4A5662">[Vidéo témoignage — client 3]</div>
+<figcaption style="padding: 20px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 16px; line-height: 1.5">« [Citation courte du client] »</span>
+<span style="font-size: 14px; color: #4A5662">[Prénom, activité, ville]</span>
+</figcaption>
+</figure>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding-top: 24px; border-top: 1px solid #E3E6E1">
+<span style="font-size: 14px; font-weight: 700; color: #4A5662; margin-right: 8px">Nos partenaires financiers</span>
+<span style="flex: 1 1 140px; height: 56px; border: 1px dashed #C9CEC6; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #4A5662">[Logo partenaire]</span>
+<span style="flex: 1 1 140px; height: 56px; border: 1px dashed #C9CEC6; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #4A5662">[Logo partenaire]</span>
+<span style="flex: 1 1 140px; height: 56px; border: 1px dashed #C9CEC6; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #4A5662">[Logo partenaire]</span>
+</div>
+</div>
+</section>
+
+<section id="tarifs" style="background: #FFFFFF; padding: 96px 24px">
+<div style="max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 36px">
+<div style="display: flex; flex-direction: column; gap: 14px; max-width: 720px">
+<h2 style="margin: 0; font-size: clamp(28px, 3.2vw, 40px); line-height: 1.15; font-weight: 800">Commencez gratuitement. Payez quand ça vous rapporte.</h2>
+</div>
+<div style="background: #E7F3EC; border-radius: 16px; padding: 16px 20px; font-size: 16px; font-weight: 600; color: #12603D">L'accès aux offres de financement de nos partenaires est inclus dans toutes les formules, même gratuite.</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 20px">
+<div style="background: #FFFFFF; border: 1px solid #E3E6E1; border-radius: 24px; padding: 32px; display: flex; flex-direction: column; gap: 14px">
+<h3 style="margin: 0; font-size: 22px; font-weight: 800">Essentiel</h3>
+<p style="margin: 0; font-size: 15px; color: #3E4A55">Je mets de l'ordre dans ma gestion.</p>
+<p style="margin: 0; font-size: 32px; font-weight: 800">Gratuit</p>
+<p style="margin: 0; font-size: 14px; color: #4A5662">Pour toujours, sans carte bancaire.</p>
+<ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 8px; font-size: 15px; line-height: 1.5">
+<li>Ventes et dépenses illimitées</li>
+<li>Catalogue d'articles et de prix</li>
+<li>Tableau de bord et tableau de flux</li>
+<li>3 mois d'historique · 1 utilisateur</li>
+</ul>
+<a href="/tarifs" style="margin-top: auto; text-align: center; font-size: 16px; font-weight: 700; color: #006FA3; border: 2px solid #006FA3; text-decoration: none; padding: 14px 20px; border-radius: 999px">Créer mon compte</a>
+</div>
+<div style="background: #FFFFFF; border: 2px solid #006FA3; border-radius: 24px; padding: 31px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap">
+<h3 style="margin: 0; font-size: 22px; font-weight: 800">Pro</h3>
+<span style="font-size: 12px; font-weight: 700; color: #FFFFFF; background: #006FA3; padding: 6px 12px; border-radius: 999px">Le plus choisi</span>
+</div>
+<p style="margin: 0; font-size: 15px; color: #3E4A55">Je structure mes comptes pour me développer.</p>
+<p style="margin: 0; font-size: 32px; font-weight: 800">10 000 FCFA <span style="font-size: 16px; font-weight: 600; color: #4A5662">/ mois</span></p>
+<p style="margin: 0; font-size: 14px; color: #4A5662">Soit environ 330 FCFA par jour.</p>
+<ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 8px; font-size: 15px; line-height: 1.5">
+<li>Tout l'Essentiel, plus :</li>
+<li>Reçus numérotés à votre nom</li>
+<li>Compte de résultat, export Excel</li>
+<li>Justificatifs conservés (2 Go)</li>
+<li>Historique illimité · 3 agents</li>
+</ul>
+<a href="/tarifs" style="margin-top: auto; text-align: center; font-size: 16px; font-weight: 700; color: #FFFFFF; background: #006FA3; text-decoration: none; padding: 16px 20px; border-radius: 999px">Choisir Pro</a>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #E3E6E1; border-radius: 24px; padding: 32px; display: flex; flex-direction: column; gap: 14px">
+<h3 style="margin: 0; font-size: 22px; font-weight: 800">Équipe</h3>
+<p style="margin: 0; font-size: 15px; color: #3E4A55">Nous préparons la croissance de l'entreprise.</p>
+<p style="margin: 0; font-size: 32px; font-weight: 800">25 000 FCFA <span style="font-size: 16px; font-weight: 600; color: #4A5662">/ mois</span></p>
+<p style="margin: 0; font-size: 14px; color: #4A5662">Pour les entreprises gérées à plusieurs.</p>
+<ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 8px; font-size: 15px; line-height: 1.5">
+<li>Tout Pro, plus :</li>
+<li>Agents illimités</li>
+<li>Score de traçabilité</li>
+<li>Justificatifs conservés (10 Go)</li>
+<li>Historique des suppressions · Support prioritaire</li>
+</ul>
+<a href="/tarifs" style="margin-top: auto; text-align: center; font-size: 16px; font-weight: 700; color: #006FA3; border: 2px solid #006FA3; text-decoration: none; padding: 14px 20px; border-radius: 999px">Choisir Équipe</a>
+</div>
+</div>
+</div>
+</section>
+
+<section style="padding: 96px 24px">
+<div style="max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px">
+<h2 style="margin: 0; font-size: clamp(28px, 3.2vw, 40px); line-height: 1.15; font-weight: 800; max-width: 760px">Vos comptes sont importants. Votre confiance aussi.</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h3 style="margin: 0; font-size: 18px; font-weight: 700">Un accès personnel</h3>
+<p style="margin: 0; font-size: 15px; line-height: 1.55; color: #3E4A55">Votre espace est protégé par votre mot de passe, chaque agent a son propre code.</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h3 style="margin: 0; font-size: 18px; font-weight: 700">Vos données en ligne</h3>
+<p style="margin: 0; font-size: 15px; line-height: 1.55; color: #3E4A55">Elles ne disparaissent pas si votre téléphone est perdu ou cassé.</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h3 style="margin: 0; font-size: 18px; font-weight: 700">Rien sans votre accord</h3>
+<p style="margin: 0; font-size: 15px; line-height: 1.55; color: #3E4A55">Vos chiffres vous appartiennent. Aucun financeur ne les voit sans votre autorisation.</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h3 style="margin: 0; font-size: 18px; font-weight: 700">Une équipe joignable</h3>
+<p style="margin: 0; font-size: 15px; line-height: 1.55; color: #3E4A55">Une question sur votre espace ? Écrivez-nous, nous vous répondons.</p>
+</div>
+</div>
+</div>
+</section>
+
+<section id="apropos" style="background: #FFFFFF; padding: 96px 24px">
+<div style="max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 48px">
+<div style="flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+<p style="margin: 0; font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #006FA3">Qui nous sommes</p>
+<h2 style="margin: 0; font-size: clamp(28px, 3.2vw, 40px); line-height: 1.15; font-weight: 800">Pas seulement un outil de gestion comptable.</h2>
+<p style="margin: 0; font-size: 17px; line-height: 1.65; color: #3E4A55">OGOUE est une solution d'accompagnement au développement des entreprises : de leur structuration financière jusqu'à la préparation de leurs projets de financement.</p>
+<p style="margin: 0; font-size: 17px; line-height: 1.65; color: #3E4A55">Notre ambition : faciliter la rencontre entre les entrepreneurs et les institutions capables de les financer, banques, établissements de microfinance et autres organismes.</p>
+</div>
+<div style="flex: 1 1 480px; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+<h3 style="margin: 0 0 12px; font-size: 18px; font-weight: 800">Questions fréquentes</h3>
+<details style="border-top: 1px solid #DCE0D9; padding: 18px 0">
+<summary style="font-size: 16px; font-weight: 700">Faut-il être expert en comptabilité ?</summary>
+<p style="margin: 12px 0 0; font-size: 15px; line-height: 1.6; color: #3E4A55">Non. Si vous savez noter une vente sur un cahier, vous savez utiliser OGOUE. Les documents comptables sont remplis par la plateforme à partir de vos saisies.</p>
+</details>
+<details style="border-top: 1px solid #DCE0D9; padding: 18px 0">
+<summary style="font-size: 16px; font-weight: 700">Je ne cherche pas de crédit. OGOUE est-il pour moi ?</summary>
+<p style="margin: 12px 0 0; font-size: 15px; line-height: 1.6; color: #3E4A55">Oui. Une gestion structurée vous sert dès aujourd'hui pour mieux suivre votre activité. Le financement reste une possibilité pour plus tard, jamais une obligation.</p>
+</details>
+<details style="border-top: 1px solid #DCE0D9; padding: 18px 0">
+<summary style="font-size: 16px; font-weight: 700">Est-ce qu'OGOUE me donne un financement ?</summary>
+<p style="margin: 12px 0 0; font-size: 15px; line-height: 1.6; color: #3E4A55">Non. OGOUE ne prête pas d'argent. Nous vous aidons à préparer votre situation et à identifier les offres de nos partenaires ; la décision appartient toujours à l'organisme financeur.</p>
+</details>
+<details style="border-top: 1px solid #DCE0D9; border-bottom: 1px solid #DCE0D9; padding: 18px 0">
+<summary style="font-size: 16px; font-weight: 700">Comment commencer ?</summary>
+<p style="margin: 12px 0 0; font-size: 15px; line-height: 1.6; color: #3E4A55">Créez votre compte avec votre e-mail, renseignez le nom de votre entreprise, puis enregistrez votre première vente. C'est gratuit et cela prend deux minutes.</p>
+</details>
+</div>
+</div>
+</section>
+
+<section style="padding: 96px 24px">
+<div style="max-width: 1200px; margin: 0 auto; background: #006FA3; color: #FFFFFF; border-radius: 32px; padding: 64px 32px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 20px">
+<h2 style="margin: 0; font-size: clamp(30px, 3.8vw, 46px); line-height: 1.1; font-weight: 800">Mieux gérer aujourd'hui. Préparer le financement de demain.</h2>
+<p style="margin: 0; font-size: 18px; line-height: 1.6; color: #E1EEF5; max-width: 640px">De la structuration de votre gestion à la préparation de vos projets de financement, OGOUE vous accompagne.</p>
+<a href="#tarifs" style="font-size: 17px; font-weight: 700; color: #00547C; background: #FFFFFF; text-decoration: none; padding: 16px 28px; border-radius: 999px">Créer mon compte gratuitement</a>
+</div>
+</section>
+
+<footer style="background: #0E1B24; color: #FFFFFF; padding: 64px 24px 40px">
+<div style="max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px">
+<div style="display: flex; flex-wrap: wrap; gap: 40px; justify-content: space-between">
+<div style="flex: 1 1 260px; display: flex; flex-direction: column; gap: 10px">
+<span style="font-size: 24px; font-weight: 800; letter-spacing: 0.04em">OGOUE</span>
+<span style="font-size: 16px; color: #B7C2C9">Mieux gérer aujourd'hui. Préparer le financement de demain.</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px; font-size: 15px">
+<span style="font-weight: 700">OGOUE</span>
+<a href="#accompagnement" style="color: #B7C2C9; text-decoration: none">Notre accompagnement</a>
+<a href="#financement" style="color: #B7C2C9; text-decoration: none">Financement</a>
+<a href="#apropos" style="color: #B7C2C9; text-decoration: none">À propos</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px; font-size: 15px">
+<span style="font-weight: 700">Votre espace</span>
+<a href="#tarifs" style="color: #B7C2C9; text-decoration: none">Créer un compte</a>
+<a href="/login" style="color: #B7C2C9; text-decoration: none">Se connecter</a>
+<a href="/conditions-utilisation" style="color: #B7C2C9; text-decoration: none">Conditions d'utilisation</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px; font-size: 15px">
+<span style="font-weight: 700">Financeurs</span>
+<a href="/partenaires#contact" style="color: #B7C2C9; text-decoration: none">Devenir partenaire</a>
+<a href="https://financement.ogoue.com/institution-login" style="color: #B7C2C9; text-decoration: none">Espace institution</a>
+</div>
+</div>
+<p style="margin: 0; font-size: 13px; color: #8E9BA4; border-top: 1px solid #23323C; padding-top: 24px">© 2026 OGOUE. Tous droits réservés.</p>
+</div>
+</footer>
+
+</div>
 
-<body class="bg-background-light font-display text-text-light antialiased flex flex-col min-h-screen">
-  <div class="relative w-full overflow-x-hidden flex flex-col flex-1">
-
-    <!-- HEADER -->
-    <header class="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md">
-      <div class="max-w-7xl mx-auto px-6 lg:px-8">
-        <div class="flex items-center justify-between h-20 border-b border-black/10">
-          <div class="flex items-center gap-4">
-            <a href="/" class="flex items-center gap-2">
-              <img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-28 w-auto">
-            </a>
-          </div>
-
-          <nav class="hidden md:flex items-center gap-8">
-            <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/">Accueil</a>
-            <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/index.html#features">Fonctionnalités</a>
-            <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/index.html#comment">Comment ça marche</a>
-            <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/index.html#faq">Questions</a>
-            <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/tarifs">Tarifs</a>
-            <a class="text-text-light-muted hover:text-text-light text-sm font-medium transition-colors" href="/apropos">À propos</a>
-          </nav>
-
-          <div class="hidden md:flex items-center gap-3">
-            <a href="/login" class="text-text-light-muted hover:text-text-light text-sm font-semibold transition-colors">Se connecter</a>
-            <a href="/tarifs"
-               class="flex min-w-[84px] items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-primary text-background-dark text-sm font-bold tracking-wide hover:bg-primary/90 transition-colors">
-              <span class="truncate">Commencer</span>
-            </a>
-          </div>
-
-          <!-- Mobile -->
-          <button id="mobileBtn" class="md:hidden inline-flex items-center justify-center rounded-full h-10 w-10 border border-black/10 bg-white hover:bg-white/60 transition"
-                  aria-label="Ouvrir le menu">
-            <span class="material-symbols-outlined">menu</span>
-          </button>
-        </div>
-
-        <div id="mobileMenu" class="hidden md:hidden py-4 border-b border-black/10">
-          <div class="flex flex-col gap-2">
-            <a class="rounded-xl px-4 py-3 text-sm font-medium text-text-light-muted hover:text-text-light hover:bg-white/60 transition" href="/">Accueil</a>
-            <a class="rounded-xl px-4 py-3 text-sm font-medium text-text-light-muted hover:text-text-light hover:bg-white/60 transition" href="/index.html#features">Fonctionnalités</a>
-            <a class="rounded-xl px-4 py-3 text-sm font-medium text-text-light-muted hover:text-text-light hover:bg-white/60 transition" href="/index.html#comment">Comment ça marche</a>
-            <a class="rounded-xl px-4 py-3 text-sm font-medium text-text-light-muted hover:text-text-light hover:bg-white/60 transition" href="/index.html#faq">Questions</a>
-            <a class="rounded-xl px-4 py-3 text-sm font-medium text-text-light-muted hover:text-text-light hover:bg-white/60 transition" href="/tarifs">Tarifs</a>
-            <a class="rounded-xl px-4 py-3 text-sm font-medium text-text-light-muted hover:text-text-light hover:bg-white/60 transition" href="/apropos">À propos</a>
-            <div class="pt-2 flex flex-col gap-2">
-              <a href="/login" class="rounded-full h-11 px-6 inline-flex items-center justify-center border border-black/10 bg-white hover:bg-white/60 text-sm font-bold transition">Se connecter</a>
-              <a href="/tarifs" class="rounded-full h-11 px-6 inline-flex items-center justify-center bg-primary text-background-dark text-sm font-bold hover:bg-primary/90 transition">Créer un compte</a>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </header>
-
-    <main class="flex-1">
-
-      <!-- ============================================================
-           1. LE PREMIER ÉCRAN
-           ============================================================ -->
-      <section class="pt-16 pb-24 sm:pt-20 sm:pb-32 bg-white">
-        <div class="max-w-7xl mx-auto px-6 lg:px-8">
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-
-            <div>
-              <p class="text-base sm:text-lg font-bold tracking-tight text-primary">
-                Chers entrepreneurs, petites et moyennes entreprises
-              </p>
-
-              <h1 class="mt-3 text-4xl sm:text-5xl lg:text-6xl font-black tracking-tighter text-text-light leading-[1.05]">
-                Fini les calculs compliqués à la fin de la journée,
-                <span class="text-primary">OGOUE</span> est là !
-              </h1>
-
-              <p class="mt-6 text-lg text-text-light-muted max-w-xl">
-                Le cahier, la feuille Excel, les messages WhatsApp : vos chiffres sont
-                éparpillés, et c'est le soir qu'il faut les rassembler. OGOUE les tient
-                à jour pendant que vous travaillez.
-              </p>
-
-              <div class="mt-10 flex flex-col sm:flex-row gap-4">
-                <a href="/tarifs"
-                   class="rounded-full h-12 px-8 inline-flex items-center justify-center bg-primary text-background-dark text-base font-bold hover:bg-primary/90 transition w-full sm:w-auto">
-                  Créer mon compte
-                </a>
-                <a href="#comment"
-                   class="rounded-full h-12 px-8 inline-flex items-center justify-center border border-black/10 bg-white hover:bg-white/60 text-base font-bold transition w-full sm:w-auto">
-                  Voir comment ça marche
-                </a>
-              </div>
-
-              <p class="mt-8 text-sm font-semibold text-text-light">
-                Vos ventes. Vos dépenses. Vos comptes. Au même endroit.
-              </p>
-            </div>
-
-            <!-- Reproduction de l'écran de résumé, construite en HTML
-                 à partir de l'application réelle. -->
-            <div class="rounded-xl border border-black/10 bg-white shadow-xl overflow-hidden">
-              <div class="flex items-center gap-1.5 px-4 py-3 border-b border-black/10 bg-background-light">
-                <span class="size-2.5 rounded-full bg-black/15"></span>
-                <span class="size-2.5 rounded-full bg-black/15"></span>
-                <span class="size-2.5 rounded-full bg-black/15"></span>
-                <div class="ml-3 flex items-center gap-1.5 rounded-full border border-black/10 bg-white px-3 py-1">
-                  <span class="material-symbols-outlined text-[13px] text-text-light-muted">calendar_month</span>
-                  <span class="text-[11px] text-text-light-muted">01/08/2026 - 25/08/2026</span>
-                </div>
-              </div>
-
-              <div class="p-5">
-                <div class="grid grid-cols-3 gap-3">
-                  <div class="rounded-lg border border-black/10 bg-background-light p-3">
-                    <div class="flex items-center gap-1">
-                      <span class="material-symbols-outlined text-sm text-primary">trending_up</span>
-                      <span class="text-[10px] font-semibold text-text-light-muted">Total des ventes</span>
-                    </div>
-                    <p class="mt-1 text-base sm:text-lg font-black tracking-tight">486 000 F</p>
-                  </div>
-                  <div class="rounded-lg border border-black/10 bg-background-light p-3">
-                    <div class="flex items-center gap-1">
-                      <span class="material-symbols-outlined text-sm text-text-light-muted">trending_down</span>
-                      <span class="text-[10px] font-semibold text-text-light-muted">Total des dépenses</span>
-                    </div>
-                    <p class="mt-1 text-base sm:text-lg font-black tracking-tight">212 000 F</p>
-                  </div>
-                  <div class="rounded-lg border-2 border-primary bg-primary/5 p-3">
-                    <div class="flex items-center gap-1">
-                      <span class="material-symbols-outlined text-sm text-primary">account_balance_wallet</span>
-                      <span class="text-[10px] font-semibold text-text-light-muted">Solde</span>
-                    </div>
-                    <p class="mt-1 text-base sm:text-lg font-black tracking-tight text-primary">274 000 F</p>
-                  </div>
-                </div>
-
-                <p class="mt-5 text-xs font-bold text-text-light">Ventes récentes d'aujourd'hui</p>
-
-                <div class="mt-2">
-                  <div class="grid grid-cols-[1fr_auto] gap-3 items-center py-2 border-b border-black/5">
-                    <div>
-                      <p class="text-xs font-medium leading-tight">Article 1</p>
-                      <p class="text-[10px] text-text-light-muted">17:37 · Cash</p>
-                    </div>
-                    <div class="text-right">
-                      <p class="text-xs font-semibold">12 500 FCFA</p>
-                      <p class="text-[10px] font-medium text-primary">REC-2026-000004</p>
-                    </div>
-                  </div>
-                  <div class="grid grid-cols-[1fr_auto] gap-3 items-center py-2 border-b border-black/5">
-                    <div>
-                      <p class="text-xs font-medium leading-tight">Article 2</p>
-                      <p class="text-[10px] text-text-light-muted">15:02 · Mobile Money</p>
-                    </div>
-                    <div class="text-right">
-                      <p class="text-xs font-semibold">85 000 FCFA</p>
-                      <p class="text-[10px] font-medium text-primary">REC-2026-000003</p>
-                    </div>
-                  </div>
-                  <div class="grid grid-cols-[1fr_auto] gap-3 items-center py-2 border-b border-black/5">
-                    <div>
-                      <p class="text-xs font-medium leading-tight">Service 1</p>
-                      <p class="text-[10px] text-text-light-muted">11:20 · Cash</p>
-                    </div>
-                    <div class="text-right">
-                      <p class="text-xs font-semibold">31 000 FCFA</p>
-                      <p class="text-[10px] font-medium text-primary">facture.pdf</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="mt-4 rounded-lg border border-black/10 p-3">
-                  <p class="text-[10px] font-semibold text-text-light-muted">Score de traçabilité</p>
-                  <div class="mt-2 flex items-center gap-2">
-                    <div class="h-2 flex-1 overflow-hidden rounded-full bg-black/10">
-                      <div class="h-full w-5/6 rounded-full bg-primary"></div>
-                    </div>
-                    <span class="text-xs font-bold">83%</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      <!-- ============================================================
-           2. LE PROBLÈME
-           ============================================================ -->
-      <section id="probleme" class="py-24 sm:py-32 bg-white">
-        <div class="max-w-5xl mx-auto px-6 lg:px-8">
-          <h2 class="text-3xl sm:text-5xl font-bold tracking-tighter text-text-light">
-            Vous aussi, vous faites vos comptes comme ça ?
-          </h2>
-
-          <div class="mt-8 space-y-5 text-lg text-text-light-muted max-w-3xl">
-            <p>
-              Toute la journée, vous faites tourner votre activité. Vous vendez des
-              produits ou des services, vous faites des achats, vous payez vos dépenses
-              et vous notez vos opérations au fur et à mesure.
-            </p>
-            <p>
-              Vos notes sont parfois dans un cahier, sur une feuille Excel ou dans des
-              messages WhatsApp.
-            </p>
-            <p class="text-text-light font-semibold">
-              Puis, à la fin de la journée, il faut encore s'asseoir pour faire les comptes :
-            </p>
-          </div>
-
-          <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl">
-            <div class="flex items-start gap-3 rounded-xl border border-black/10 bg-background-light p-4">
-              <span class="material-symbols-outlined text-primary shrink-0">help</span>
-              <p class="text-sm font-medium">Combien ai-je vendu aujourd'hui ?</p>
-            </div>
-            <div class="flex items-start gap-3 rounded-xl border border-black/10 bg-background-light p-4">
-              <span class="material-symbols-outlined text-primary shrink-0">help</span>
-              <p class="text-sm font-medium">Combien ai-je dépensé ?</p>
-            </div>
-            <div class="flex items-start gap-3 rounded-xl border border-black/10 bg-background-light p-4">
-              <span class="material-symbols-outlined text-primary shrink-0">help</span>
-              <p class="text-sm font-medium">Combien me reste-t-il ?</p>
-            </div>
-            <div class="flex items-start gap-3 rounded-xl border border-black/10 bg-background-light p-4">
-              <span class="material-symbols-outlined text-primary shrink-0">help</span>
-              <p class="text-sm font-medium">Ai-je bien noté toutes mes opérations ?</p>
-            </div>
-            <div class="flex items-start gap-3 rounded-xl border border-black/10 bg-background-light p-4 sm:col-span-2">
-              <span class="material-symbols-outlined text-primary shrink-0">help</span>
-              <p class="text-sm font-medium">Où est cette information que je cherche ?</p>
-            </div>
-          </div>
-
-          <p class="mt-8 text-lg text-text-light-muted max-w-3xl">
-            Et si le cahier se perd ou s'abîme, si l'ordinateur où se trouve le fichier
-            Excel tombe en panne, ou si les notes WhatsApp se mélangent aux autres
-            messages, retrouver ses informations devient encore plus difficile.
-          </p>
-
-          <p class="mt-10 text-2xl sm:text-3xl font-bold tracking-tight text-text-light max-w-3xl">
-            Vous avez assez de choses à gérer. Vos comptes ne devraient pas vous
-            compliquer la vie.
-          </p>
-        </div>
-      </section>
-
-      <!-- ============================================================
-           3. LA SOLUTION
-           ============================================================ -->
-      <section class="py-24 sm:py-32">
-        <div class="max-w-5xl mx-auto px-6 lg:px-8">
-          <h2 class="text-3xl sm:text-5xl font-bold tracking-tighter text-text-light">
-            Le travail du soir, fait dans la journée.
-          </h2>
-
-          <div class="mt-8 space-y-5 text-lg text-text-light-muted max-w-3xl">
-            <p>
-              Vous notez une vente quand elle arrive, une dépense quand vous la payez.
-              Trente secondes, et vous retournez à vos clients.
-            </p>
-            <p class="text-text-light font-semibold">
-              À la fermeture, il n'y a rien à recalculer. Vous lisez vos totaux et vous
-              rentrez chez vous.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <!-- ============================================================
-           4. LES FONCTIONNALITÉS
-           ============================================================ -->
-      <section id="features" class="py-24 sm:py-32 bg-white">
-        <div class="max-w-7xl mx-auto px-6 lg:px-8">
-          <div class="max-w-3xl">
-            <h2 class="text-3xl sm:text-5xl font-bold tracking-tighter text-text-light">
-              Ce que vous pouvez faire avec OGOUE
-            </h2>
-            <p class="mt-4 text-lg text-text-light-muted">
-              Des actions simples, que vous faites déjà tous les jours. Mais au même
-              endroit, et sans avoir à tout recommencer le soir.
-            </p>
-          </div>
-
-          <div class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-
-            <div class="rounded-xl border border-black/10 bg-background-light p-8">
-              <div class="flex items-center justify-center size-12 rounded-lg bg-primary/10 text-primary">
-                <span class="material-symbols-outlined text-3xl">shopping_cart</span>
-              </div>
-              <h3 class="mt-6 text-xl font-bold">Notez vos ventes</h3>
-              <p class="mt-3 text-sm text-text-light-muted">
-                Enregistrez ce que vous vendez au fur et à mesure de la journée. OGOUE
-                établit un reçu numéroté pour chaque vente, ou vous joignez votre propre
-                justificatif.
-              </p>
-            </div>
-
-            <div class="rounded-xl border border-black/10 bg-background-light p-8">
-              <div class="flex items-center justify-center size-12 rounded-lg bg-primary/10 text-primary">
-                <span class="material-symbols-outlined text-3xl">receipt_long</span>
-              </div>
-              <h3 class="mt-6 text-xl font-bold">Notez vos dépenses</h3>
-              <p class="mt-3 text-sm text-text-light-muted">
-                Gardez une trace de vos achats, de vos charges et des dépenses liées à
-                votre activité, avec leur justificatif. Sachez où va votre argent.
-              </p>
-            </div>
-
-            <div class="rounded-xl border border-black/10 bg-background-light p-8">
-              <div class="flex items-center justify-center size-12 rounded-lg bg-primary/10 text-primary">
-                <span class="material-symbols-outlined text-3xl">search</span>
-              </div>
-              <h3 class="mt-6 text-xl font-bold">Retrouvez vos chiffres</h3>
-              <p class="mt-3 text-sm text-text-light-muted">
-                Vos ventes et vos dépenses sont réunies au même endroit, avec la date, le
-                montant et le moyen de paiement. Choisissez une période pour retrouver ce
-                que vous cherchez.
-              </p>
-            </div>
-
-            <div class="rounded-xl border border-black/10 bg-background-light p-8">
-              <div class="flex items-center justify-center size-12 rounded-lg bg-primary/10 text-primary">
-                <span class="material-symbols-outlined text-3xl">insights</span>
-              </div>
-              <h3 class="mt-6 text-xl font-bold">Suivez votre activité</h3>
-              <p class="mt-3 text-sm text-text-light-muted">
-                Vos totaux se calculent tout seuls : ce qui entre, ce qui sort, ce qui
-                reste. Par jour, par mois et par année. L'addition du soir est déjà faite.
-              </p>
-            </div>
-
-            <div class="rounded-xl border border-black/10 bg-background-light p-8">
-              <div class="flex items-center justify-center size-12 rounded-lg bg-primary/10 text-primary">
-                <span class="material-symbols-outlined text-3xl">folder_open</span>
-              </div>
-              <h3 class="mt-6 text-xl font-bold">Gardez vos comptes organisés</h3>
-              <p class="mt-3 text-sm text-text-light-muted">
-                Votre compte de résultat et votre tableau de trésorerie sont remplis à
-                partir de vos saisies, et s'exportent en Excel. Un score vous signale les
-                justificatifs qui manquent.
-              </p>
-            </div>
-
-            <div class="rounded-xl border border-black/10 bg-background-light p-8">
-              <div class="flex items-center justify-center size-12 rounded-lg bg-primary/10 text-primary">
-                <span class="material-symbols-outlined text-3xl">group</span>
-              </div>
-              <h3 class="mt-6 text-xl font-bold">Travaillez avec votre équipe</h3>
-              <p class="mt-3 text-sm text-text-light-muted">
-                Vos agents enregistrent les ventes et les dépenses de la journée avec leur
-                propre code d'accès. Vous, vous voyez l'ensemble et vous décidez.
-              </p>
-            </div>
-
-          </div>
-
-          <!-- Réserve déplacée depuis la section « Avant / Avec OGOUE »,
-               supprimée. Sa place est ici : elle tempère la liste de ce
-               que l'application fait, juste après l'avoir énoncée. -->
-          <p class="mt-8 text-sm text-text-light-muted text-center max-w-2xl mx-auto">
-            OGOUE ne remplace pas la saisie des opérations : la qualité de vos chiffres
-            dépend aussi de la régularité et de l'exactitude de vos enregistrements.
-          </p>
-        </div>
-      </section>
-
-      <!-- ============================================================
-           6. COMMENT ÇA MARCHE
-           ============================================================ -->
-      <section id="comment" class="py-24 sm:py-32 bg-white">
-        <div class="max-w-7xl mx-auto px-6 lg:px-8">
-          <div class="text-center max-w-3xl mx-auto">
-            <h2 class="text-3xl sm:text-5xl font-bold tracking-tighter text-text-light">
-              Commencer avec OGOUE, c'est simple.
-            </h2>
-            <p class="mt-4 text-lg text-text-light-muted">
-              Quelques minutes de vidéo pour prendre l'outil en main, étape par étape.
-            </p>
-          </div>
-
-          <!-- Tutoriels vidéo. Pour en ajouter un : copier un <article>,
-               changer le numéro, le titre et l'identifiant YouTube (data-video
-               et l'image). La vidéo ne se charge qu'au clic : la page reste
-               légère, y compris sur une connexion mobile. -->
-          <div class="mt-16 grid grid-cols-1 md:grid-cols-2 gap-10 max-w-5xl mx-auto">
-
-            <article class="flex flex-col">
-              <div class="flex items-center gap-3">
-                <div class="flex items-center justify-center size-10 shrink-0 rounded-full bg-primary text-background-dark font-bold">1</div>
-                <h3 class="text-lg font-bold">Créez votre compte</h3>
-              </div>
-              <p class="mt-2 text-sm text-text-light-muted">Inscrivez votre entreprise et accédez à votre espace de gestion en quelques minutes.</p>
-              <div class="mt-5 relative aspect-video overflow-hidden rounded-xl border border-black/10 bg-background-dark shadow-sm" data-video="E2xaClDDy1k" data-titre="Créez votre compte">
-                <button type="button" class="group absolute inset-0 w-full h-full" aria-label="Lire la vidéo : Créez votre compte">
-                  <img src="https://i.ytimg.com/vi/E2xaClDDy1k/hqdefault.jpg" alt="" loading="lazy"
-                       class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]">
-                  <span class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></span>
-                  <span class="absolute inset-0 flex items-center justify-center">
-                    <span class="flex items-center justify-center size-16 rounded-full bg-primary text-white shadow-xl transition-transform group-hover:scale-110">
-                      <span class="material-symbols-outlined text-4xl" style="font-variation-settings:'FILL' 1">play_arrow</span>
-                    </span>
-                  </span>
-                </button>
-              </div>
-            </article>
-
-            <article class="flex flex-col">
-              <div class="flex items-center gap-3">
-                <div class="flex items-center justify-center size-10 shrink-0 rounded-full bg-primary text-background-dark font-bold">2</div>
-                <h3 class="text-lg font-bold">Remplissez votre catalogue</h3>
-              </div>
-              <p class="mt-2 text-sm text-text-light-muted">Enregistrez une fois vos articles et vos services, avec leurs prix, pour saisir vos ventes plus vite.</p>
-              <div class="mt-5 relative aspect-video overflow-hidden rounded-xl border border-black/10 bg-background-dark shadow-sm" data-video="dtjZvHN8Emo" data-titre="Remplissez votre catalogue">
-                <button type="button" class="group absolute inset-0 w-full h-full" aria-label="Lire la vidéo : Remplissez votre catalogue">
-                  <img src="https://i.ytimg.com/vi/dtjZvHN8Emo/hqdefault.jpg" alt="" loading="lazy"
-                       class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]">
-                  <span class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></span>
-                  <span class="absolute inset-0 flex items-center justify-center">
-                    <span class="flex items-center justify-center size-16 rounded-full bg-primary text-white shadow-xl transition-transform group-hover:scale-110">
-                      <span class="material-symbols-outlined text-4xl" style="font-variation-settings:'FILL' 1">play_arrow</span>
-                    </span>
-                  </span>
-                </button>
-              </div>
-            </article>
-
-            <article class="flex flex-col">
-              <div class="flex items-center gap-3">
-                <div class="flex items-center justify-center size-10 shrink-0 rounded-full bg-primary text-background-dark font-bold">3</div>
-                <h3 class="text-lg font-bold">Faites le tour d'OGOUE</h3>
-              </div>
-              <p class="mt-2 text-sm text-text-light-muted">Un parcours de A à Z de la solution, sans entrer dans les détails, pour voir tout ce qu'elle vous apporte.</p>
-              <div class="mt-5 relative aspect-video overflow-hidden rounded-xl border border-black/10 bg-background-dark shadow-sm" data-video="nO7nZ8Mj7gk" data-titre="Faites le tour d'OGOUE">
-                <button type="button" class="group absolute inset-0 w-full h-full" aria-label="Lire la vidéo : Faites le tour d'OGOUE">
-                  <img src="https://i.ytimg.com/vi/nO7nZ8Mj7gk/hqdefault.jpg" alt="" loading="lazy"
-                       class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]">
-                  <span class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></span>
-                  <span class="absolute inset-0 flex items-center justify-center">
-                    <span class="flex items-center justify-center size-16 rounded-full bg-primary text-white shadow-xl transition-transform group-hover:scale-110">
-                      <span class="material-symbols-outlined text-4xl" style="font-variation-settings:'FILL' 1">play_arrow</span>
-                    </span>
-                  </span>
-                </button>
-              </div>
-            </article>
-
-            <article class="flex flex-col">
-              <div class="flex items-center gap-3">
-                <div class="flex items-center justify-center size-10 shrink-0 rounded-full bg-primary text-background-dark font-bold">4</div>
-                <h3 class="text-lg font-bold">Enregistrez une vente</h3>
-              </div>
-              <p class="mt-2 text-sm text-text-light-muted">Saisissez une vente en quelques secondes, à partir de votre catalogue, et gardez-en la trace.</p>
-              <div class="mt-5 relative aspect-video overflow-hidden rounded-xl border border-black/10 bg-background-dark shadow-sm" data-video="a3UVDdkE484" data-titre="Enregistrez une vente">
-                <button type="button" class="group absolute inset-0 w-full h-full" aria-label="Lire la vidéo : Enregistrez une vente">
-                  <img src="https://i.ytimg.com/vi/a3UVDdkE484/hqdefault.jpg" alt="" loading="lazy"
-                       class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]">
-                  <span class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></span>
-                  <span class="absolute inset-0 flex items-center justify-center">
-                    <span class="flex items-center justify-center size-16 rounded-full bg-primary text-white shadow-xl transition-transform group-hover:scale-110">
-                      <span class="material-symbols-outlined text-4xl" style="font-variation-settings:'FILL' 1">play_arrow</span>
-                    </span>
-                  </span>
-                </button>
-              </div>
-            </article>
-
-          </div>
-
-          <p class="mt-12 text-center text-xl font-bold text-text-light">
-            Commencez simplement. Améliorez votre gestion au quotidien.
-          </p>
-        </div>
-      </section>
-
-      <!-- ============================================================
-           8. LE FINANCEMENT, COMME CONSÉQUENCE
-           ============================================================ -->
-      <section id="financement" class="py-24 sm:py-32 bg-white">
-        <div class="max-w-5xl mx-auto px-6 lg:px-8">
-          <h2 class="text-3xl sm:text-5xl font-bold tracking-tighter text-text-light">
-            Et si votre entreprise avait besoin de financement demain ?
-          </h2>
-
-          <div class="mt-8 space-y-5 text-lg text-text-light-muted max-w-3xl">
-            <p>
-              Pour développer une activité, acheter du stock ou investir, il peut être
-              utile de rechercher un financement.
-            </p>
-            <p class="text-text-light font-semibold">
-              Mais avant de faire une demande, il faut pouvoir répondre à des questions
-              simples :
-            </p>
-          </div>
-
-          <ul class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-3xl">
-            <li class="flex items-center gap-3 text-sm font-medium">
-              <span class="size-2 rounded-full bg-primary shrink-0"></span>
-              Combien mon entreprise vend-elle ?
-            </li>
-            <li class="flex items-center gap-3 text-sm font-medium">
-              <span class="size-2 rounded-full bg-primary shrink-0"></span>
-              Quelles sont ses dépenses ?
-            </li>
-            <li class="flex items-center gap-3 text-sm font-medium">
-              <span class="size-2 rounded-full bg-primary shrink-0"></span>
-              Comment évoluent ses résultats ?
-            </li>
-            <li class="flex items-center gap-3 text-sm font-medium">
-              <span class="size-2 rounded-full bg-primary shrink-0"></span>
-              Quels sont les chiffres de mon activité ?
-            </li>
-            <li class="flex items-start gap-3 text-sm font-medium sm:col-span-2">
-              <span class="size-2 rounded-full bg-primary shrink-0 mt-1.5"></span>
-              <span>
-                Suis-je en capacité, si on me le demande, de fournir une version
-                simplifiée d'un compte de résultat, un tableau de flux de trésorerie, ou
-                l'historique daté de mes ventes et de mes dépenses ?
-              </span>
-            </li>
-          </ul>
-
-          <p class="mt-8 text-lg text-text-light-muted max-w-3xl">
-            Ces documents, OGOUE les remplit à partir de vos saisies, et vous les exportez
-            en Excel. Avec une gestion plus claire et des informations mieux organisées,
-            vous connaissez mieux votre entreprise et vous préparez plus facilement vos
-            démarches.
-          </p>
-
-          <p class="mt-8 text-2xl sm:text-3xl font-bold tracking-tight text-text-light max-w-3xl">
-            OGOUE vous aide à mieux gérer aujourd'hui, pour être mieux préparé demain.
-          </p>
-
-          <p class="mt-8 text-sm text-text-light-muted max-w-3xl border-t border-black/10 pt-6">
-            Le financement peut être une conséquence possible d'une meilleure gestion.
-            OGOUE ne garantit pas l'obtention d'un crédit et ne remplace pas la décision
-            d'un financeur.
-          </p>
-        </div>
-      </section>
-
-      <!-- ============================================================
-           9. POUR QUI
-           ============================================================ -->
-      <section class="py-24 sm:py-32">
-        <div class="max-w-7xl mx-auto px-6 lg:px-8">
-          <div class="text-center max-w-3xl mx-auto">
-            <h2 class="text-3xl sm:text-5xl font-bold tracking-tighter text-text-light">
-              Pour qui est fait OGOUE ?
-            </h2>
-          </div>
-
-          <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
-
-            <div class="rounded-xl border border-black/10 bg-white p-8">
-              <div class="flex items-center justify-center size-12 rounded-lg bg-primary/10 text-primary">
-                <span class="material-symbols-outlined text-3xl">storefront</span>
-              </div>
-              <h3 class="mt-6 text-xl font-bold">Commerçants et détaillants</h3>
-              <p class="mt-3 text-sm text-text-light-muted">
-                Vous faites des ventes tous les jours et vous voulez garder une trace de
-                vos recettes et de vos dépenses.
-              </p>
-            </div>
-
-            <div class="rounded-xl border border-black/10 bg-white p-8">
-              <div class="flex items-center justify-center size-12 rounded-lg bg-primary/10 text-primary">
-                <span class="material-symbols-outlined text-3xl">rocket_launch</span>
-              </div>
-              <h3 class="mt-6 text-xl font-bold">Entrepreneurs et petites entreprises</h3>
-              <p class="mt-3 text-sm text-text-light-muted">
-                Vous développez votre activité et vous cherchez une manière plus simple de
-                suivre vos comptes.
-              </p>
-            </div>
-
-            <div class="rounded-xl border border-black/10 bg-white p-8">
-              <div class="flex items-center justify-center size-12 rounded-lg bg-primary/10 text-primary">
-                <span class="material-symbols-outlined text-3xl">badge</span>
-              </div>
-              <h3 class="mt-6 text-xl font-bold">Gérants et responsables d'équipe</h3>
-              <p class="mt-3 text-sm text-text-light-muted">
-                Vous souhaitez mieux suivre les opérations de votre entreprise et disposer
-                d'informations plus organisées.
-              </p>
-            </div>
-
-          </div>
-
-          <p class="mt-12 text-center text-lg text-text-light-muted max-w-3xl mx-auto">
-            Que vous gériez un commerce, une petite entreprise ou une activité en pleine
-            croissance, OGOUE vous aide à garder vos comptes plus clairs et à mieux suivre
-            votre quotidien.
-          </p>
-        </div>
-      </section>
-
-      <!-- ============================================================
-           10. LA CONFIANCE
-           ============================================================ -->
-      <section class="py-24 sm:py-32 bg-white">
-        <div class="max-w-5xl mx-auto px-6 lg:px-8">
-          <h2 class="text-3xl sm:text-5xl font-bold tracking-tighter text-text-light">
-            Vos comptes sont importants. Votre confiance aussi.
-          </h2>
-
-          <div class="mt-8 space-y-5 text-lg text-text-light-muted max-w-3xl">
-            <p>
-              OGOUE est conçu pour vous aider à mieux organiser la gestion de votre
-              activité, même si vous n'êtes pas un expert en comptabilité.
-            </p>
-            <p>
-              Vous n'avez pas besoin de commencer par maîtriser des termes compliqués.
-              L'essentiel est de pouvoir enregistrer vos opérations, retrouver vos
-              informations et comprendre vos chiffres.
-            </p>
-            <p class="text-text-light font-semibold">
-              Commencez à votre rythme, avec une gestion adaptée à votre quotidien.
-            </p>
-          </div>
-
-          <div class="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-primary shrink-0">lock</span>
-              <div>
-                <p class="font-bold text-sm">Un accès personnel</p>
-                <p class="mt-1 text-sm text-text-light-muted">
-                  Votre espace est protégé par votre mot de passe, et chaque agent dispose
-                  de son propre code d'accès.
-                </p>
-              </div>
-            </div>
-            <div class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-primary shrink-0">cloud_done</span>
-              <div>
-                <p class="font-bold text-sm">Vos données en ligne</p>
-                <p class="mt-1 text-sm text-text-light-muted">
-                  Vos opérations sont enregistrées sur nos serveurs : elles ne disparaissent
-                  pas si votre téléphone est perdu ou cassé.
-                </p>
-              </div>
-            </div>
-            <div class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-primary shrink-0">support_agent</span>
-              <div>
-                <p class="font-bold text-sm">Une équipe joignable</p>
-                <p class="mt-1 text-sm text-text-light-muted">
-                  Une question sur votre espace ? Écrivez-nous, nous vous répondons.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ============================================================
-           11. LES QUESTIONS FRÉQUENTES
-           ============================================================ -->
-      <section id="faq" class="py-24 sm:py-32">
-        <div class="max-w-3xl mx-auto px-6 lg:px-8">
-          <h2 class="text-3xl sm:text-5xl font-bold tracking-tighter text-text-light text-center">
-            Les questions fréquentes
-          </h2>
-
-          <div class="mt-16 space-y-4">
-
-            <details class="rounded-xl border border-black/10 bg-white p-6">
-              <summary class="flex items-center justify-between gap-4">
-                <span class="font-bold">Faut-il être un expert en comptabilité pour utiliser OGOUE ?</span>
-                <span class="material-symbols-outlined chevron text-text-light-muted shrink-0">expand_more</span>
-              </summary>
-              <p class="mt-4 text-text-light-muted">
-                Non. Si vous savez noter une vente sur un cahier, vous savez utiliser
-                OGOUE. Vous saisissez ce que vous connaissez déjà : la date, ce que vous
-                avez vendu, le montant, le moyen de paiement. Il n'y a aucune écriture
-                comptable à passer, et les documents comptables sont remplis par la
-                plateforme à partir de vos saisies.
-              </p>
-            </details>
-
-            <details class="rounded-xl border border-black/10 bg-white p-6">
-              <summary class="flex items-center justify-between gap-4">
-                <span class="font-bold">Est-ce que je peux quitter mon cahier ?</span>
-                <span class="material-symbols-outlined chevron text-text-light-muted shrink-0">expand_more</span>
-              </summary>
-              <p class="mt-4 text-text-light-muted">
-                À votre rythme. Le plus simple est de tenir les deux en parallèle pendant
-                une semaine ou deux : notez sur OGOUE ce que vous notiez sur le cahier.
-                Quand vous constaterez que tout s'y retrouve, le cahier deviendra inutile
-                de lui-même.
-              </p>
-            </details>
-
-            <details class="rounded-xl border border-black/10 bg-white p-6">
-              <summary class="flex items-center justify-between gap-4">
-                <span class="font-bold">Pourquoi utiliser OGOUE si je travaille déjà avec Excel ou WhatsApp ?</span>
-                <span class="material-symbols-outlined chevron text-text-light-muted shrink-0">expand_more</span>
-              </summary>
-              <p class="mt-4 text-text-light-muted">
-                Excel et WhatsApp servent à noter des informations, mais rien n'y est
-                rassemblé : il faut ouvrir plusieurs fichiers, remonter des conversations et
-                additionner soi-même. OGOUE est un espace dédié au suivi de votre activité :
-                vos ventes et vos dépenses y sont réunies, et vos totaux sont déjà calculés.
-              </p>
-            </details>
-
-            <details class="rounded-xl border border-black/10 bg-white p-6">
-              <summary class="flex items-center justify-between gap-4">
-                <span class="font-bold">Est-ce qu'OGOUE calcule automatiquement mes comptes ?</span>
-                <span class="material-symbols-outlined chevron text-text-light-muted shrink-0">expand_more</span>
-              </summary>
-              <p class="mt-4 text-text-light-muted">
-                Oui. Dès que vous enregistrez une vente ou une dépense, vos totaux se
-                mettent à jour : ce que vous avez encaissé, ce que vous avez payé et ce
-                qu'il vous reste, par jour, par mois et par année. OGOUE remplit aussi votre
-                compte de résultat et votre tableau de trésorerie, que vous pouvez exporter
-                en Excel. Les calculs portent sur ce que vous avez saisi : leur exactitude
-                dépend de la régularité de vos enregistrements.
-              </p>
-            </details>
-
-            <details class="rounded-xl border border-black/10 bg-white p-6">
-              <summary class="flex items-center justify-between gap-4">
-                <span class="font-bold">Est-ce qu'OGOUE me donne un financement ?</span>
-                <span class="material-symbols-outlined chevron text-text-light-muted shrink-0">expand_more</span>
-              </summary>
-              <p class="mt-4 text-text-light-muted">
-                Non. OGOUE ne prête pas d'argent et ne décide à la place d'aucune banque.
-                Vous pouvez consulter les offres de nos établissements partenaires depuis
-                votre espace. L'avantage est ailleurs : vos comptes étant déjà tenus, vous
-                n'avez rien à reconstituer dans l'urgence au moment de préparer un dossier.
-              </p>
-            </details>
-
-            <details class="rounded-xl border border-black/10 bg-white p-6">
-              <summary class="flex items-center justify-between gap-4">
-                <span class="font-bold">Comment puis-je commencer ?</span>
-                <span class="material-symbols-outlined chevron text-text-light-muted shrink-0">expand_more</span>
-              </summary>
-              <p class="mt-4 text-text-light-muted">
-                Créez votre compte avec votre adresse e-mail, renseignez le nom de votre
-                entreprise, puis enregistrez votre première vente. L'inscription est
-                gratuite et prend deux minutes.
-              </p>
-            </details>
-
-          </div>
-        </div>
-      </section>
-
-      <!-- ============================================================
-           PME & INSTITUTIONS + PARTENAIRES
-           ============================================================ -->
-      <section id="partners" class="py-24 sm:py-32 bg-white">
-        <div class="max-w-7xl mx-auto px-6 lg:px-8">
-          <div class="text-center">
-            <h2 class="text-3xl font-bold tracking-tighter text-text-light sm:text-5xl">
-              Ce qu'une banque demande, vous l'avez déjà
-            </h2>
-            <p class="mt-4 text-lg text-text-light-muted max-w-3xl mx-auto">
-              Chaque banque garde ses propres règles. OGOUE vous montre où en sont vos
-              comptes et ce qu'il vous manque encore : les justificatifs, surtout.
-            </p>
-          </div>
-
-          <div class="mt-16 grid grid-cols-1 gap-8 md:grid-cols-2 max-w-5xl mx-auto">
-            <div class="rounded-xl border border-black/10 bg-background-light p-8 relative overflow-hidden">
-              <div class="absolute -top-10 -right-10 size-40 rounded-full bg-primary/10 blur-2xl"></div>
-              <div class="flex items-center gap-3">
-                <div class="flex items-center justify-center size-12 rounded-lg bg-primary/10 text-primary">
-                  <span class="material-symbols-outlined text-3xl">store</span>
-                </div>
-                <h3 class="text-xl font-bold">Pour les PME</h3>
-              </div>
-              <ul class="mt-6 space-y-3 text-sm text-text-light-muted">
-                <li class="flex items-center gap-2"><span class="size-2 rounded-full bg-primary shrink-0"></span> Vos ventes et vos dépenses notées tous les jours</li>
-                <li class="flex items-center gap-2"><span class="size-2 rounded-full bg-primary shrink-0"></span> Les offres de crédit de nos partenaires, visibles depuis l'application</li>
-                <li class="flex items-center gap-2"><span class="size-2 rounded-full bg-primary shrink-0"></span> Un score qui vous dit quels justificatifs il vous manque</li>
-              </ul>
-              <a href="/login"
-                class="mt-8 inline-flex w-full items-center justify-center rounded-full h-11 px-6 border border-black/10 bg-white hover:bg-white/60 text-sm font-bold transition">
-                Je suis une PME
-              </a>
-            </div>
-
-            <div class="rounded-xl bg-background-dark p-8 relative overflow-hidden text-white ring-1 ring-black/10">
-              <div class="absolute -top-10 -right-10 size-40 rounded-full bg-primary/20 blur-2xl"></div>
-              <div class="flex items-center gap-3">
-                <div class="flex items-center justify-center size-12 rounded-lg bg-white/10 text-primary">
-                  <span class="material-symbols-outlined text-3xl">account_balance</span>
-                </div>
-                <h3 class="text-xl font-bold">Pour les Institutions Financières</h3>
-              </div>
-              <ul class="mt-6 space-y-3 text-sm text-white/80">
-                <li class="flex items-center gap-2"><span class="size-2 rounded-full bg-primary shrink-0"></span> Présenter vos produits (objectifs, montants, durées indicatives)</li>
-                <li class="flex items-center gap-2"><span class="size-2 rounded-full bg-primary shrink-0"></span> Rendre vos offres visibles auprès des PME de la plateforme</li>
-                <li class="flex items-center gap-2"><span class="size-2 rounded-full bg-primary shrink-0"></span> Mettre à jour vos conditions à tout moment depuis votre espace</li>
-              </ul>
-              <a href="https://financement.ogoue.com/institution-login"
-                class="mt-8 inline-flex w-full items-center justify-center rounded-full h-11 px-6 bg-primary text-background-dark hover:bg-primary/90 text-sm font-bold transition">
-                Je suis une Institution
-              </a>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      <!-- ============================================================
-           12. L'APPEL À L'ACTION FINAL
-           ============================================================ -->
-      <section class="py-24 sm:py-32">
-        <div class="max-w-5xl mx-auto px-6 lg:px-8">
-          <div class="rounded-3xl p-10 sm:p-14 bg-background-dark text-center relative overflow-hidden shadow-2xl ring-1 ring-black/10">
-            <div class="absolute top-0 left-0 -ml-10 -mt-10 w-40 h-40 bg-white/5 rounded-full blur-2xl"></div>
-            <div class="absolute bottom-0 right-0 -mr-10 -mb-10 w-40 h-40 bg-primary/20 rounded-full blur-2xl"></div>
-
-            <h2 class="text-3xl sm:text-5xl font-black tracking-tighter text-white relative z-10">
-              Commencez à mieux gérer votre activité dès aujourd'hui.
-            </h2>
-            <p class="mt-4 text-white/80 text-lg max-w-2xl mx-auto relative z-10">
-              Ne laissez plus vos ventes et vos dépenses se perdre dans plusieurs cahiers,
-              fichiers ou conversations. Découvrez une façon plus simple de suivre vos
-              comptes avec OGOUE.
-            </p>
-
-            <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4 relative z-10">
-              <a href="/tarifs"
-                class="rounded-full h-12 px-8 inline-flex items-center justify-center bg-primary text-background-dark text-base font-bold hover:bg-primary/90 transition w-full sm:w-auto">
-                Créer mon compte
-              </a>
-              <a href="#faq"
-                class="rounded-full h-12 px-8 inline-flex items-center justify-center bg-white/90 text-text-light text-base font-bold hover:bg-white transition w-full sm:w-auto">
-                Besoin d'aide ?
-              </a>
-            </div>
-
-            <p class="mt-8 text-white/70 text-sm relative z-10">
-              Une gestion plus simple, pour une activité mieux suivie.
-            </p>
-          </div>
-        </div>
-      </section>
-
-    </main>
-
-    <!-- ============================================================
-         FOOTER
-         Ne contient que des liens vers des pages qui existent.
-         À compléter quand Tarifs, Contact, Aide, Confidentialité et
-         Mentions légales auront été créées.
-         ============================================================ -->
-    <footer class="flex-shrink-0 w-full bg-white border-t border-black/10">
-      <div class="max-w-7xl mx-auto px-6 lg:px-8 py-12">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-
-          <div class="lg:col-span-2">
-            <a href="/" class="inline-flex items-center">
-              <img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-20 w-auto">
-            </a>
-            <p class="mt-2 font-bold">La gestion de votre activité, simplement.</p>
-            <p class="mt-2 text-sm text-text-light-muted max-w-sm">
-              OGOUE aide les entrepreneurs et les petites entreprises à mieux suivre leurs
-              ventes, leurs dépenses et leurs comptes au quotidien.
-            </p>
-          </div>
-
-          <div>
-            <p class="text-sm font-bold uppercase tracking-widest text-text-light">OGOUE</p>
-            <ul class="mt-4 space-y-2 text-sm">
-              <li><a class="text-text-light-muted hover:text-text-light transition-colors" href="/">Accueil</a></li>
-              <li><a class="text-text-light-muted hover:text-text-light transition-colors" href="/index.html#features">Fonctionnalités</a></li>
-              <li><a class="text-text-light-muted hover:text-text-light transition-colors" href="/index.html#comment">Comment ça marche</a></li>
-              <li><a class="text-text-light-muted hover:text-text-light transition-colors" href="/apropos">À propos</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <p class="text-sm font-bold uppercase tracking-widest text-text-light">Votre espace</p>
-            <ul class="mt-4 space-y-2 text-sm">
-              <li><a class="text-text-light-muted hover:text-text-light transition-colors" href="/tarifs">Créer un compte</a></li>
-              <li><a class="text-text-light-muted hover:text-text-light transition-colors" href="/login">Se connecter</a></li>
-              <li><a class="text-text-light-muted hover:text-text-light transition-colors" href="/index.html#faq">Questions fréquentes</a></li>
-              <li><a class="text-text-light-muted hover:text-text-light transition-colors" href="/conditions-utilisation">Conditions d'utilisation</a></li>
-            </ul>
-          </div>
-
-        </div>
-
-        <div class="mt-12 pt-6 border-t border-black/10">
-          <p class="text-sm text-text-light-muted">© 2026 OGOUE. Tous droits réservés.</p>
-        </div>
-      </div>
-    </footer>
-
-  </div>
-
-  <script>
-    // Tutoriels : la vignette laisse place au lecteur YouTube au clic.
-    // youtube-nocookie : pas de cookie de suivi tant que la vidéo n'est
-    // pas lancée.
-    document.querySelectorAll('[data-video]').forEach(function (cadre) {
-      cadre.querySelector('button')?.addEventListener('click', function () {
-        const iframe = document.createElement('iframe');
-        iframe.src = 'https://www.youtube-nocookie.com/embed/' + cadre.dataset.video + '?autoplay=1&rel=0';
-        iframe.title = cadre.dataset.titre || 'Tutoriel OGOUE';
-        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
-        iframe.allowFullscreen = true;
-        iframe.referrerPolicy = 'strict-origin-when-cross-origin';
-        iframe.className = 'absolute inset-0 w-full h-full';
-        cadre.replaceChildren(iframe);
-      });
-    });
-
-    // Mobile menu
-    const btn = document.getElementById("mobileBtn");
-    const menu = document.getElementById("mobileMenu");
-    btn?.addEventListener("click", () => {
-      menu.classList.toggle("hidden");
-    });
-
-    // Smooth scroll with header offset
-    document.addEventListener('DOMContentLoaded', function () {
-      const offset = 88; // header height
-
-      function scrollToHash(hash) {
-        const el = document.querySelector(hash);
-        if (!el) return;
-        const y = el.getBoundingClientRect().top + window.pageYOffset - offset;
-        window.scrollTo({ top: y, behavior: 'smooth' });
-      }
-
-      if (location.hash) scrollToHash(location.hash);
-
-      document.querySelectorAll('a[href^="#"], a[href*="#"]').forEach(function (a) {
-        a.addEventListener('click', function (e) {
-          const href = this.getAttribute('href') || '';
-          const idx = href.indexOf('#');
-          if (idx === -1) return;
-          const hash = href.slice(idx);
-          const target = document.querySelector(hash);
-          if (!target) return;
-          e.preventDefault();
-          scrollToHash(hash);
-          history.pushState(null, '', hash);
-          if (!menu.classList.contains('hidden')) menu.classList.add('hidden');
-        });
-      });
-    });
-  </script>
 </body>
 </html>
