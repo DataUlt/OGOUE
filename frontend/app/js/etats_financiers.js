@@ -1492,6 +1492,144 @@ document.addEventListener("DOMContentLoaded", function () {
         
     }
 
+    /**
+     * Bouton "Générer l'aperçu" - Inventaire du stock
+     * Deux documents : l'état des stocks, et la liste de réapprovisionnement.
+     */
+    async function handleGenerateStock() {
+        if (!window.OGOUE || typeof window.OGOUE.getRapportStock !== "function") {
+            console.error("OGOUE state non chargé");
+            return;
+        }
+
+        const aujourdHui = getLocalDateString(new Date());
+        const plage = plagePeriode();
+        const debut = plage ? plage.startDate : aujourdHui.slice(0, 8) + "01";
+        const fin = plage ? plage.endDate : aujourdHui;
+
+        try {
+            const rapport = await window.OGOUE.getRapportStock(debut, fin);
+            if (!rapport.ok) throw new Error(rapport.error || "Rapport indisponible");
+
+            const articles = rapport.articles;
+            const fcfa = (n) => `${Math.round(Number(n) || 0).toLocaleString("fr-FR")} FCFA`;
+            const nombre = (n) => Number(n || 0).toLocaleString("fr-FR", { maximumFractionDigits: 2 });
+            const jours = (n) => (n === null || n === undefined ? "—" : `${n} jour${n > 1 ? "s" : ""}`);
+            const statutHtml = {
+                "OK": '<span class="text-green-700">✅ OK</span>',
+                "À commander": '<span class="text-amber-600 font-semibold">⚠️ À commander</span>',
+                "Stock dormant": '<span class="text-blue-700">🔵 Stock dormant</span>',
+                "Rupture": '<span class="text-red-600 font-semibold">🔴 Rupture</span>',
+                "Vide": '<span class="text-gray-500">Vide</span>',
+            };
+
+            const libelleFr = new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
+            const titrePeriode = `du ${libelleFr.format(new Date(debut + "T12:00:00"))} au ${libelleFr.format(new Date(fin + "T12:00:00"))}`;
+
+            if (articles.length === 0) {
+                const vide = `<p class="text-text-light-secondary dark:text-text-dark-secondary">Aucun article n'est suivi en stock. Renseignez une quantité disponible dans votre catalogue pour voir l'inventaire.</p>`;
+                conteneurResultats("generateStockBtn").innerHTML = `<div class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm p-5">${vide}</div>`;
+                panel.classList.add("hidden");
+                return;
+            }
+
+            // 1. État des stocks
+            const valeurTotale = articles.reduce((s, a) => s + a.valeur, 0);
+            const lignesEtat = articles.map((a) => `<tr class="border-b border-gray-100 dark:border-gray-700">
+                    <td class="py-3 pr-4 font-medium">${echapperHtml(a.name)}</td>
+                    <td class="py-3 pr-4 text-right">${nombre(a.stockDepart)}</td>
+                    <td class="py-3 pr-4 text-right font-semibold">${nombre(a.stock)}</td>
+                    <td class="py-3 pr-4 text-right">${a.coutAchat === null ? "—" : fcfa(a.coutAchat)}</td>
+                    <td class="py-3 pr-4 text-right">${fcfa(a.valeur)}</td>
+                    <td class="py-3 pr-4 text-right">${nombre(a.ventes)}</td>
+                    <td class="py-3 pr-4 text-right">${jours(a.couvertureJours)}</td>
+                    <td class="py-3">${statutHtml[a.statut] || echapperHtml(a.statut)}</td>
+                </tr>`).join("");
+
+            const documentEtat = `<div class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm p-5">
+                    <h3 class="text-lg font-bold">1. État des stocks</h3>
+                    <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary mb-4">${titrePeriode}.</p>
+                    <div class="rounded-lg bg-background-light dark:bg-background-dark p-4 mb-4 text-sm">
+                        <p class="font-semibold mb-1">Qu'est-ce que la couverture ?</p>
+                        <p class="mb-2">La couverture répond à une seule question : avec le rythme de vente actuel, pendant combien de jours ce stock va-t-il tenir ?</p>
+                        <p class="mb-1"><span class="font-semibold">Le calcul :</span> on mesure le rythme (unités vendues par jour), puis on divise le stock par ce rythme.</p>
+                        <p class="mb-2"><span class="font-semibold">Exemple :</span> stock de 14 robes, 1 vendue sur 24 jours. Rythme : 1 ÷ 24. Couverture : 14 × 24 = 336 jours. Ce résultat repose sur une seule vente : une vente de plus ou de moins change tout.</p>
+                        <p><span class="font-semibold">Pourquoi c'est utile :</span> 2 unités par jour avec 14 en stock donne 7 jours, il faut commander vite. 1 unité par mois avec 14 en stock donne 14 mois : du stock qui dort, de l'argent immobilisé.</p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead>
+                                <tr class="border-b border-black/10">
+                                    <th class="py-2 pr-4 font-medium">Article</th>
+                                    <th class="py-2 pr-4 font-medium text-right">Stock de départ</th>
+                                    <th class="py-2 pr-4 font-medium text-right">Stock</th>
+                                    <th class="py-2 pr-4 font-medium text-right">Coût d'achat unitaire</th>
+                                    <th class="py-2 pr-4 font-medium text-right">Valeur du stock</th>
+                                    <th class="py-2 pr-4 font-medium text-right">Ventes sur période</th>
+                                    <th class="py-2 pr-4 font-medium text-right">Couverture</th>
+                                    <th class="py-2 font-medium">Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody>${lignesEtat}</tbody>
+                            <tfoot>
+                                <tr class="font-bold">
+                                    <td class="pt-3 pr-4" colspan="4">Total</td>
+                                    <td class="pt-3 pr-4 text-right">${fcfa(valeurTotale)}</td>
+                                    <td colspan="3"></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>`;
+
+            // 2. Liste de réapprovisionnement : seulement ce qui manque
+            const aCommander = articles.filter((a) => a.aCommander > 0);
+            const totalCommande = aCommander.reduce((s, a) => s + (a.coutEstime || 0), 0);
+            const lignesReappro = aCommander.map((a) => `<tr class="border-b border-gray-100 dark:border-gray-700">
+                    <td class="py-3 pr-4 font-medium">${echapperHtml(a.name)}</td>
+                    <td class="py-3 pr-4 text-right">${nombre(a.stock)}</td>
+                    <td class="py-3 pr-4 text-right">${nombre(a.besoin30Jours)}</td>
+                    <td class="py-3 pr-4 text-right font-semibold">${nombre(a.aCommander)}</td>
+                    <td class="py-3 pr-4 text-right">${a.coutEstime === null ? "Coût inconnu" : fcfa(a.coutEstime)}</td>
+                </tr>`).join("");
+
+            const documentReappro = `<div class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm p-5">
+                    <h3 class="text-lg font-bold">2. Liste de réapprovisionnement</h3>
+                    <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary mb-4">Besoin pour 30 jours, au rythme des ventes de la période. Prête à envoyer à votre fournisseur.</p>
+                    ${aCommander.length === 0
+                        ? `<p class="text-text-light-secondary dark:text-text-dark-secondary">Rien à commander : vos stocks couvrent les 30 prochains jours.</p>`
+                        : `<div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead>
+                                    <tr class="border-b border-black/10">
+                                        <th class="py-2 pr-4 font-medium">Article</th>
+                                        <th class="py-2 pr-4 font-medium text-right">Stock actuel</th>
+                                        <th class="py-2 pr-4 font-medium text-right">Besoin pour 30 jours</th>
+                                        <th class="py-2 pr-4 font-medium text-right">À commander</th>
+                                        <th class="py-2 pr-4 font-medium text-right">Coût estimé</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${lignesReappro}</tbody>
+                                <tfoot>
+                                    <tr class="font-bold">
+                                        <td class="pt-3 pr-4" colspan="4">Total estimé</td>
+                                        <td class="pt-3 pr-4 text-right">${fcfa(totalCommande)}</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>`}
+                </div>`;
+
+            const resultsContainer = conteneurResultats("generateStockBtn");
+            resultsContainer.innerHTML = `<div class="flex flex-col gap-6">${documentEtat}${documentReappro}</div>`;
+            panel.classList.add("hidden");
+        } catch (error) {
+            console.error("Erreur lors de la génération de l'inventaire:", error);
+            const resultsContainer = conteneurResultats("generateStockBtn");
+            resultsContainer.innerHTML = `<div class="bg-card-light text-red-700 rounded-xl shadow-sm p-5">Erreur: ${error && error.message ? error.message : error}</div>`;
+        }
+    }
+
     // Attacher les événements aux boutons via IDs
     const generateCompteBtn = document.getElementById("generateCompteBtn");
     const generateFluxBtn = document.getElementById("generateFluxBtn");
@@ -1514,6 +1652,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (generateDepensesBtn) {
         generateDepensesBtn.addEventListener("click", handleGenerateDepenses);
+    }
+
+    const generateStockBtn = document.getElementById("generateStockBtn");
+    if (generateStockBtn) {
+        generateStockBtn.addEventListener("click", handleGenerateStock);
     }
 
     if (exportPdfBtn) {

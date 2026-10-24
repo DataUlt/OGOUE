@@ -7,6 +7,7 @@ import {
   cheminDepuisUrlPublique,
 } from "../utils/supabase-storage.js";
 import { emettreRecu, urlSigneeRecu } from "../utils/recu-vente.js";
+import { enregistrerMouvement } from "../utils/mouvements-stock.js";
 import { logDeletion } from "../utils/deletion-audit.js";
 import { lireToutesLesLignes } from "../utils/pagination.js";
 import { appliquerFenetre } from "../config/fenetre-historique.js";
@@ -40,6 +41,11 @@ const createSchema = z.object({
   // Commentaire libre du gérant, facultatif. Ex. : avance versée, solde
   // à percevoir. Plafonné pour rester un pense-bête et non un journal.
   note: z.string().max(1000).optional().nullable(),
+  // Article du catalogue, pour décrémenter son stock. Vide ou absent : vente hors catalogue.
+  articleId: z.preprocess(
+    (v) => (v === "" || v === null || v === undefined ? null : v),
+    z.string().uuid().nullable()
+  ).optional(),
 });
 
 /** Une chaîne vide venue du formulaire vaut absence d'information. */
@@ -409,6 +415,32 @@ export async function createSale(req, res) {
       });
     }
 
+    // Stock : seul un article suivi en stock (stock non nul) est contrôlé.
+    // Le contrôle a lieu avant tout dépôt de fichier.
+    let articleSuivi = null;
+    if (data.articleId) {
+      const { data: article } = await supabase
+        .from("articles")
+        .select("id, stock")
+        .eq("id", data.articleId)
+        .eq("organization_id", organizationId)
+        .eq("is_active", true)
+        .maybeSingle();
+      if (!article) {
+        return res.status(400).json({ error: "Cet article n'existe plus dans votre catalogue." });
+      }
+      if (article.stock !== null) {
+        if (Number(article.stock) < data.quantity) {
+          return res.status(409).json({
+            error: `Stock insuffisant : il reste ${Number(article.stock)} en stock pour cet article.`,
+            code: "STOCK_INSUFFISANT",
+            stockDisponible: Number(article.stock),
+          });
+        }
+        articleSuivi = article;
+      }
+    }
+
     // Enregistrer une vente n'est pas bridé au-delà de ce volume ; y
     // joindre un document l'est. Le contrôle porte donc sur la pièce
     // jointe, pas sur la route : une formule gratuite doit pouvoir saisir
@@ -478,6 +510,7 @@ export async function createSale(req, res) {
         client_phone: videEnNull(data.clientPhone),
         client_email: videEnNull(data.clientEmail),
         note: videEnNull(data.note),
+        article_id: articleSuivi ? articleSuivi.id : null,
         created_by: req.user.userId || req.user.sub || req.user.id,
       })
       .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, receipt_url, receipt_storage_path, client_name, client_phone, client_email, note, created_at")
@@ -490,6 +523,32 @@ export async function createSale(req, res) {
         await deleteFileFromSupabase(receiptStoragePath);
       }
       return res.status(500).json({ error: "Internal server error" });
+    }
+
+    // Décrémenter le stock de l'article. La condition sur l'ancienne valeur
+    // évite que deux ventes simultanées ne décomptent deux fois la même unité :
+    // si la valeur a bougé entre-temps, la vente est annulée plutôt que fausser le stock.
+    if (articleSuivi) {
+      const { data: decompte } = await supabase
+        .from("articles")
+        .update({ stock: Number(articleSuivi.stock) - data.quantity, updated_at: new Date().toISOString() })
+        .eq("id", articleSuivi.id)
+        .eq("stock", articleSuivi.stock)
+        .select("id")
+        .maybeSingle();
+      if (!decompte) {
+        await supabase.from("sales").delete().eq("id", row.id);
+        if (receiptStoragePath) await deleteFileFromSupabase(receiptStoragePath);
+        return res.status(409).json({
+          error: "Le stock de cet article vient de changer. Vérifiez la quantité et réessayez.",
+          code: "STOCK_CONCURRENT",
+        });
+      }
+    }
+
+    // Trace de la sortie de stock, rattachée à la vente (supprimée avec elle)
+    if (articleSuivi) {
+      await enregistrerMouvement({ organizationId, articleId: articleSuivi.id, delta: -Number(data.quantity), motif: "vente", saleId: row.id });
     }
 
     // Émettre le reçu, mais seulement si le gérant l'a demandé et qu'il
@@ -736,6 +795,22 @@ export async function deleteSale(req, res) {
     if (deleteError) {
       console.error("Erreur deleteSale:", deleteError);
       return res.status(500).json({ error: "Internal server error" });
+    }
+
+    // Vente supprimée : on rend la quantité au stock de l'article, s'il est suivi
+    if (sale.article_id) {
+      const { data: article } = await supabase
+        .from("articles")
+        .select("id, stock")
+        .eq("id", sale.article_id)
+        .maybeSingle();
+      if (article && article.stock !== null) {
+        const { error: stockError } = await supabase
+          .from("articles")
+          .update({ stock: Number(article.stock) + Number(sale.quantity), updated_at: new Date().toISOString() })
+          .eq("id", article.id);
+        if (stockError) console.error("⚠️  Stock non restitué après suppression:", stockError.message);
+      }
     }
 
     return res.json({ message: "Sale deleted successfully" });

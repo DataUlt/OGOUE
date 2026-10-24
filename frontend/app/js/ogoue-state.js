@@ -135,6 +135,8 @@ async function addVente(vente, onProgress) {
     formData.append("clientEmail", vente.client_email || "");
     // Commentaire libre du gérant sur cette vente (facultatif)
     formData.append("note", vente.note || "");
+    // Article du catalogue : permet de décompter son stock (vide = hors catalogue)
+    formData.append("articleId", vente.article_id || "");
 
 
     // Ajouter le fichier s'il existe
@@ -223,6 +225,8 @@ async function addVente(vente, onProgress) {
     }
   } catch (error) {
     console.error("❌ Erreur lors de l'ajout de vente:", error);
+    // Raison du refus, à afficher dans le formulaire (stock, quota, etc.)
+    window.OGOUE_DERNIERE_ERREUR_VENTE = error.message;
     if (!signalerQuotaOperations(error)) {
       alert(`Erreur lors de l'ajout de vente: ${error.message}`);
     }
@@ -665,14 +669,29 @@ async function getArticles() {
 }
 
 /**
+ * Rapport de stock d'une période : état des stocks et réapprovisionnement
+ * @returns {Promise<{ok: boolean, articles: Array, error: string|null}>}
+ */
+async function getRapportStock(debut, fin) {
+  try {
+    const { ok, data } = await articlesRequest(`/rapport?debut=${encodeURIComponent(debut)}&fin=${encodeURIComponent(fin)}`);
+    if (!ok) return { ok: false, articles: [], error: data?.error || "Rapport indisponible" };
+    return { ok: true, articles: Array.isArray(data?.articles) ? data.articles : [], error: null };
+  } catch (error) {
+    console.error("❌ Erreur lors du rapport de stock:", error);
+    return { ok: false, articles: [], error: "Rapport indisponible" };
+  }
+}
+
+/**
  * Ajoute un article au catalogue
  * @returns {Promise<{ok: boolean, status: number, article: Object|null, error: string|null}>}
  */
-async function addArticle({ name, type = "produits", unitPrice = 0 }) {
+async function addArticle({ name, type = "produits", unitPrice = 0, stock = null, costPrice = null }) {
   try {
     const { ok, status, data } = await articlesRequest("", {
       method: "POST",
-      body: JSON.stringify({ name, type, unitPrice })
+      body: JSON.stringify({ name, type, unitPrice, stock, costPrice })
     });
     return {
       ok,
@@ -968,6 +987,7 @@ window.OGOUE = {
   getDepensesPourPlage,
   getResumeMensuel,
   getArticles,
+  getRapportStock,
   addArticle,
   addArticlesBulk,
   updateArticle,

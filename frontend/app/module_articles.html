@@ -143,6 +143,24 @@
                         <input id="article-price" name="unitPrice" type="number" min="0" step="1" value="0"
                                class="form-input rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-background-dark text-text-light dark:text-white h-12 px-4 text-base">
                     </div>
+
+                    <div class="flex flex-col">
+                        <label class="text-sm font-medium pb-2" for="article-stock">
+                            Stock disponible <span class="text-text-light-muted dark:text-gray-400 font-normal">(facultatif)</span>
+                        </label>
+                        <input id="article-stock" name="stock" type="number" min="0" step="any"
+                               placeholder="Vide : pas de suivi"
+                               class="form-input rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-background-dark text-text-light dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 h-12 px-4 text-base">
+                    </div>
+
+                    <div class="flex flex-col">
+                        <label class="text-sm font-medium pb-2" for="article-cost">
+                            Coût d'achat unitaire (FCFA) <span class="text-text-light-muted dark:text-gray-400 font-normal">(facultatif)</span>
+                        </label>
+                        <input id="article-cost" name="costPrice" type="number" min="0" step="any"
+                               placeholder="Ce que vous payez"
+                               class="form-input rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-background-dark text-text-light dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 h-12 px-4 text-base">
+                    </div>
                 </div>
 
                 <div id="form-message" class="hidden mt-4 rounded-md p-3 text-sm"></div>
@@ -175,6 +193,8 @@
                                 <th data-carte="titre" class="py-3 pr-4 font-medium">Nom</th>
                                 <th data-carte="meta" class="py-3 pr-4 font-medium">Type</th>
                                 <th data-carte="montant" class="py-3 pr-4 font-medium text-right">Prix unitaire</th>
+                                <th class="py-3 pr-4 font-medium text-right">Stock</th>
+                                <th class="py-3 pr-4 font-medium text-right">Coût d'achat</th>
                                 <th data-carte="actions" class="py-3 font-medium text-right">Actions</th>
                             </tr>
                         </thead>
@@ -210,6 +230,8 @@
             const nameInput = document.getElementById("article-name");
             const typeInput = document.getElementById("article-type");
             const priceInput = document.getElementById("article-price");
+            const stockInput = document.getElementById("article-stock");
+            const costInput = document.getElementById("article-cost");
             const submitBtn = document.getElementById("article-submit");
             const messageBox = document.getElementById("form-message");
 
@@ -304,14 +326,63 @@
                     tdPrice.className = "py-3 pr-4 text-right";
                     tdPrice.textContent = formatPrice(a.unitPrice);
 
+                    const tdStock = document.createElement("td");
+                    tdStock.className = "py-3 pr-4 text-right";
+                    if (a.stock === null || a.stock === undefined) {
+                        tdStock.className += " text-text-light-muted dark:text-gray-400";
+                        tdStock.textContent = "Non suivi";
+                    } else {
+                        // Rupture = 0, à signaler en rouge
+                        tdStock.className += a.stock <= 0 ? " text-red-600 font-semibold" : "";
+                        tdStock.textContent = String(a.stock);
+                    }
+
                     const tdActions = document.createElement("td");
                     tdActions.className = "py-3 text-right whitespace-nowrap";
 
-                    const editBtn = document.createElement("button");
-                    editBtn.type = "button";
-                    editBtn.className = "text-primary hover:underline text-sm font-medium mr-4";
-                    editBtn.textContent = "Modifier le prix";
-                    editBtn.addEventListener("click", function () { onEditPrice(a); });
+                    // Un seul bouton « Modifier » : un menu propose ce qu'on change
+                    const menuWrap = document.createElement("div");
+                    menuWrap.className = "relative inline-block mr-4 text-left";
+
+                    const menuBtn = document.createElement("button");
+                    menuBtn.type = "button";
+                    menuBtn.className = "text-primary hover:underline text-sm font-medium";
+                    menuBtn.textContent = "Modifier";
+                    menuBtn.setAttribute("aria-haspopup", "menu");
+
+                    const menu = document.createElement("div");
+                    menu.className = "hidden absolute right-0 z-20 mt-2 w-48 rounded-lg bg-white dark:bg-card-dark shadow-lg border border-gray-200 dark:border-gray-700 py-1";
+                    menu.setAttribute("role", "menu");
+
+                    const options = [
+                        { libelle: "Prix unitaire", action: onEditPrice },
+                        { libelle: "Coût d'achat", action: onEditCost },
+                        { libelle: "Stock", action: onEditStock }
+                    ];
+                    options.forEach(function (opt) {
+                        const item = document.createElement("button");
+                        item.type = "button";
+                        item.setAttribute("role", "menuitem");
+                        item.className = "block w-full text-left px-4 py-2 text-sm hover:bg-background-light dark:hover:bg-background-dark";
+                        item.textContent = opt.libelle;
+                        item.addEventListener("click", function () {
+                            menu.classList.add("hidden");
+                            opt.action(a);
+                        });
+                        menu.appendChild(item);
+                    });
+
+                    menuBtn.addEventListener("click", function (e) {
+                        e.stopPropagation();
+                        document.querySelectorAll(".article-menu").forEach(function (m) {
+                            if (m !== menu) m.classList.add("hidden");
+                        });
+                        menu.classList.toggle("hidden");
+                    });
+                    menu.classList.add("article-menu");
+
+                    menuWrap.appendChild(menuBtn);
+                    menuWrap.appendChild(menu);
 
                     const delBtn = document.createElement("button");
                     delBtn.type = "button";
@@ -319,12 +390,23 @@
                     delBtn.textContent = "Retirer";
                     delBtn.addEventListener("click", function () { onDelete(a); });
 
-                    tdActions.appendChild(editBtn);
+                    tdActions.appendChild(menuWrap);
                     tdActions.appendChild(delBtn);
 
                     tr.appendChild(tdName);
                     tr.appendChild(tdType);
                     tr.appendChild(tdPrice);
+                    tr.appendChild(tdStock);
+
+                    const tdCout = document.createElement("td");
+                    tdCout.className = "py-3 pr-4 text-right";
+                    if (a.costPrice === null || a.costPrice === undefined) {
+                        tdCout.className += " text-text-light-muted dark:text-gray-400";
+                        tdCout.textContent = "Non renseigné";
+                    } else {
+                        tdCout.textContent = formatPrice(a.costPrice);
+                    }
+                    tr.appendChild(tdCout);
                     tr.appendChild(tdActions);
                     tbody.appendChild(tr);
                 });
@@ -349,6 +431,60 @@
                 }
 
                 const res = await window.OGOUE.updateArticle(article.id, { unitPrice: valeur });
+                if (!res.ok) {
+                    showMessage(res.error, "error");
+                    return;
+                }
+                hideMessage();
+                await refresh();
+            }
+
+            /** Coût d'achat unitaire : sert à valoriser le stock. Vide = non renseigné. */
+            async function onEditCost(article) {
+                const actuel = article.costPrice === null || article.costPrice === undefined ? "" : String(article.costPrice);
+                const saisie = window.prompt(
+                    `Coût d'achat unitaire pour "${article.name}" (FCFA, laisser vide si inconnu) :`,
+                    actuel
+                );
+                if (saisie === null) return;
+
+                let valeur = null;
+                if (saisie.trim() !== "") {
+                    valeur = Number(String(saisie).replace(",", "."));
+                    if (!isFinite(valeur) || valeur < 0) {
+                        showMessage("Coût invalide : saisissez un nombre positif, ou laissez vide.", "error");
+                        return;
+                    }
+                }
+
+                const res = await window.OGOUE.updateArticle(article.id, { costPrice: valeur });
+                if (!res.ok) {
+                    showMessage(res.error, "error");
+                    return;
+                }
+                hideMessage();
+                await refresh();
+            }
+
+            /** Stock : saisir une quantité, ou laisser vide pour ne plus suivre cet article */
+            async function onEditStock(article) {
+                const actuel = article.stock === null || article.stock === undefined ? "" : String(article.stock);
+                const saisie = window.prompt(
+                    `Stock disponible pour "${article.name}" (laisser vide si vous ne suivez pas le stock) :`,
+                    actuel
+                );
+                if (saisie === null) return;
+
+                let valeur = null;
+                if (saisie.trim() !== "") {
+                    valeur = Number(String(saisie).replace(",", "."));
+                    if (!isFinite(valeur) || valeur < 0) {
+                        showMessage("Quantité invalide : saisissez un nombre positif, ou laissez vide.", "error");
+                        return;
+                    }
+                }
+
+                const res = await window.OGOUE.updateArticle(article.id, { stock: valeur });
                 if (!res.ok) {
                     showMessage(res.error, "error");
                     return;
@@ -383,11 +519,28 @@
                     return;
                 }
 
+                // Stock vide = article non suivi en stock
+                const stockValue = stockInput.value.trim();
+                const stock = stockValue === "" ? null : Number(stockValue);
+                if (stock !== null && (!isFinite(stock) || stock < 0)) {
+                    showMessage("Stock invalide : saisissez un nombre positif, ou laissez vide.", "error");
+                    return;
+                }
+
+                const costValue = costInput.value.trim();
+                const costPrice = costValue === "" ? null : Number(costValue);
+                if (costPrice !== null && (!isFinite(costPrice) || costPrice < 0)) {
+                    showMessage("Coût d'achat invalide : saisissez un nombre positif, ou laissez vide.", "error");
+                    return;
+                }
+
                 submitBtn.disabled = true;
                 const res = await window.OGOUE.addArticle({
                     name: name,
                     type: typeInput.value,
-                    unitPrice: Number(priceInput.value || 0)
+                    unitPrice: Number(priceInput.value || 0),
+                    stock: stock,
+                    costPrice: costPrice
                 });
                 submitBtn.disabled = false;
 
@@ -399,8 +552,15 @@
                 showMessage(`"${name}" a été ajouté à votre catalogue.`, "success");
                 nameInput.value = "";
                 priceInput.value = "0";
+                stockInput.value = "";
+                costInput.value = "";
                 nameInput.focus();
                 await refresh();
+            });
+
+            // Clic ailleurs : on referme les menus « Modifier » ouverts
+            document.addEventListener("click", function () {
+                document.querySelectorAll(".article-menu").forEach(function (m) { m.classList.add("hidden"); });
             });
 
             refresh();

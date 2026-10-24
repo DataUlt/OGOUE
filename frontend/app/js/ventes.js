@@ -264,7 +264,16 @@
       opt.value = article.name;
       // Seul le nom est affiché ; le prix reste porté par l'option et
       // sert à remplir automatiquement le champ Prix Total.
-      opt.textContent = article.name;
+      // Article suivi en stock : la quantité disponible s'affiche, et une rupture
+      // rend le choix impossible.
+      const suivi = article.stock !== null && article.stock !== undefined;
+      const rupture = suivi && Number(article.stock) <= 0;
+      opt.textContent = rupture
+        ? `${article.name} (rupture de stock)`
+        : suivi
+          ? `${article.name} (stock : ${Number(article.stock)})`
+          : article.name;
+      opt.disabled = rupture;
       opt.dataset.unitPrice = String(article.unitPrice || 0);
       opt.dataset.type = article.type || "";
       articleSelect.appendChild(opt);
@@ -547,6 +556,8 @@
       id: generateId(),
       date,
       description,
+      // Article du catalogue (vide si hors catalogue) : sert à décompter le stock
+      article_id: (findArticleByName(description) || {}).id || "",
       moyen_paiement: moyenPaiement,
       type_vente: typeVente,
       quantite: isNaN(quantite) ? 0 : quantite,
@@ -1253,6 +1264,20 @@
       return;
     }
 
+    // ✅ Stock épuisé : on n'envoie pas la vente, on le dit clairement
+    const articleCatalogue = findArticleByName(data.description);
+    if (articleCatalogue && articleCatalogue.stock !== null && articleCatalogue.stock !== undefined) {
+      const dispo = Number(articleCatalogue.stock);
+      if (dispo <= 0) {
+        alert(`Vente impossible : "${articleCatalogue.name}" n'est plus en stock (stock à 0).\n\nRéapprovisionnez-le depuis votre catalogue pour pouvoir le vendre.`);
+        return;
+      }
+      if (dispo < Number(data.quantite || 0)) {
+        alert(`Vente impossible : il ne reste que ${dispo} unité(s) de "${articleCatalogue.name}" en stock.\n\nDiminuez la quantité ou réapprovisionnez votre stock.`);
+        return;
+      }
+    }
+
     // ✅ Propose d'ajouter l'article au catalogue s'il n'y est pas encore
     await persistArticleIfNeeded(data.description);
 
@@ -1269,8 +1294,10 @@
     const result = await addVente(data, onProgress);
     
     if (!result) {
-      // Afficher la zone d'erreur
-      showUploadZoneError("Erreur lors de l'enregistrement de la vente");
+      // Afficher la zone d'erreur, avec la raison renvoyée par le serveur si elle existe
+      window.OGOUE_DERNIERE_ERREUR_VENTE = window.OGOUE_DERNIERE_ERREUR_VENTE || null;
+      showUploadZoneError(window.OGOUE_DERNIERE_ERREUR_VENTE || "Erreur lors de l'enregistrement de la vente");
+      window.OGOUE_DERNIERE_ERREUR_VENTE = null;
       return;
     }
 
