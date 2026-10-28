@@ -1291,15 +1291,22 @@
       updateProgressBar(percent);
     };
 
+    const bouton = form.querySelector('button[type="submit"]');
+    window.OGOUE_FEEDBACK?.debut(bouton, "Enregistrement de la vente…");
+
     const result = await addVente(data, onProgress);
-    
+
     if (!result) {
+      window.OGOUE_FEEDBACK?.fin(bouton);
       // Afficher la zone d'erreur, avec la raison renvoyée par le serveur si elle existe
       window.OGOUE_DERNIERE_ERREUR_VENTE = window.OGOUE_DERNIERE_ERREUR_VENTE || null;
       showUploadZoneError(window.OGOUE_DERNIERE_ERREUR_VENTE || "Erreur lors de l'enregistrement de la vente");
       window.OGOUE_DERNIERE_ERREUR_VENTE = null;
       return;
     }
+
+    window.OGOUE_FEEDBACK?.fin(bouton);
+    window.OGOUE_FEEDBACK?.succes("Vente enregistrée avec succès");
 
     // ✅ Afficher la zone de succès si fichier
     if (data.file) {

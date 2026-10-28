@@ -901,13 +901,20 @@
       updateProgressBar(percent);
     };
 
+    const bouton = form.querySelector('button[type="submit"]');
+    window.OGOUE_FEEDBACK?.debut(bouton, "Enregistrement de la dépense…");
+
     const result = await addDepense(data, onProgress);
-    
+
     if (!result) {
+      window.OGOUE_FEEDBACK?.fin(bouton);
       // Afficher la zone d'erreur
       showUploadZoneError("Erreur lors de l'enregistrement de la dépense");
       return;
     }
+
+    window.OGOUE_FEEDBACK?.fin(bouton);
+    window.OGOUE_FEEDBACK?.succes("Dépense enregistrée avec succès");
 
     // ✅ Afficher la zone de succès si fichier
     if (data.file) {
