@@ -25,7 +25,7 @@
 
     const fond = document.createElement('div');
     fond.id = 'ogo-modal-commentaire';
-    fond.className = 'fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/50 p-4';
+    fond.className = 'fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4';
     fond.innerHTML = `
       <div role="dialog" aria-modal="true" aria-labelledby="ogo-commentaire-titre" tabindex="-1"
            class="w-full max-w-md rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-2xl outline-none">
