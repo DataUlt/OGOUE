@@ -216,6 +216,14 @@
         }
 
         // Activité d'un agent : aujourd'hui (compteurs) et dernière activité (sur la période chargée)
+        // Opérations modifiées ce mois-ci par cet agent (toutes opérations de l'organisation)
+        function modificationsDuMois(ventes, depenses, prenom) {
+            const debutMois = new Date();
+            debutMois.setDate(1);
+            debutMois.setHours(0, 0, 0, 0);
+            return [...ventes, ...depenses].filter((x) => x.modified_at && x.modified_by_name === prenom && new Date(x.modified_at) >= debutMois).length;
+        }
+
         function activiteAgent(prenom, jour, ventes, depenses, suppressions, lastLoginAt) {
             const v = ventes.filter((x) => x.created_by_name === prenom);
             const d = depenses.filter((x) => x.created_by_name === prenom);
@@ -243,6 +251,7 @@
                 aJustifierVentes,
                 aJustifierDepenses,
                 suppressionsMois: supp === null ? null : supp.length,
+                modificationsMois: modificationsDuMois(ventes, depenses, prenom),
                 statut: libelleActivite(derniere, jour),
             };
         }
@@ -290,6 +299,7 @@
                                     ${statistique('Décaissé', montant(activite.decaisse))}
                                     ${statistique('À justifier', activite.aJustifierDepenses)}
                                     <div class="col-span-3">${statistique('Suppressions du mois', activite.suppressionsMois === null ? '—' : activite.suppressionsMois)}</div>
+                                    <div class="col-span-3">${statistique('Modifications du mois', activite.modificationsMois)}</div>
                                 </div>
                             </div>
                         </div>

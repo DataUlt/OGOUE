@@ -66,7 +66,17 @@
     <main class="flex-grow">
         <div class="mx-auto max-w-[1120px] px-[18px] md:px-11 py-8">
 
-            <h1 class="text-3xl font-bold mb-2">Mon abonnement</h1>
+            <div class="mb-4 flex items-center gap-4">
+                <button
+                    type="button"
+                    onclick="history.back()"
+                    class="flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 text-primary hover:bg-primary/30 transition-colors"
+                    title="Retour"
+                >
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </button>
+                <h1 class="text-3xl font-bold">Mon abonnement</h1>
+            </div>
             <p class="text-text-light-secondary dark:text-text-dark-secondary mb-8">
                 Votre formule actuelle et les options disponibles pour
                 <strong id="nomEntreprise" class="text-text-light-primary dark:text-text-dark-primary">votre entreprise</strong>.

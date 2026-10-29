@@ -91,7 +91,7 @@ export async function listSales(req, res) {
     const construireRequete = () => {
       let query = supabase
         .from("sales")
-        .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, receipt_url, receipt_number, note, created_at, modified_at, created_by, article_id")
+        .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, receipt_url, receipt_number, note, created_at, modified_at, modified_by_name, created_by, article_id")
         .eq("organization_id", organizationId);
 
       // Bornes indépendantes : la fenêtre de la formule gratuite pose un
@@ -174,6 +174,7 @@ export async function listSales(req, res) {
       numeroRecu: row.receipt_number,
       article_id: row.article_id,
       modified_at: row.modified_at,
+      modified_by_name: row.modified_by_name,
       note: row.note,
       created_at: row.created_at,
       created_by_name: row.created_by_name
@@ -975,6 +976,7 @@ export async function updateSale(req, res) {
     }
     champs.modified_at = new Date().toISOString();
     champs.modified_reason = data.reason;
+    champs.modified_by_name = await nomAuteur(req);
 
     const { error: updateError } = await supabase
       .from("sales")
@@ -994,4 +996,16 @@ export async function updateSale(req, res) {
     console.error("Erreur updateSale:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
+}
+
+/** Prénom de l'auteur (agent ou gérant), tel qu'il apparaît dans les listes. */
+async function nomAuteur(req) {
+  if (req.user.role === "agent" && req.user.agentId) {
+    const { data } = await supabase.from("agents").select("first_name").eq("id", req.user.agentId).maybeSingle();
+    return data?.first_name || null;
+  }
+  const userId = req.user.userId || req.user.sub;
+  if (!userId) return null;
+  const { data } = await supabase.from("users").select("first_name").eq("id", userId).maybeSingle();
+  return data?.first_name || null;
 }

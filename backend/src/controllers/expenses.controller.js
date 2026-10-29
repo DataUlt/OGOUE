@@ -72,7 +72,7 @@ export async function listExpenses(req, res) {
     const construireRequete = () => {
       let query = supabase
         .from("expenses")
-        .select("id, expense_date, category, payment_method, amount, receipt_name, receipt_url, note, created_at, modified_at, created_by")
+        .select("id, expense_date, category, payment_method, amount, receipt_name, receipt_url, note, created_at, modified_at, modified_by_name, created_by")
         .eq("organization_id", organizationId);
 
       // Bornes indépendantes : la fenêtre de la formule gratuite pose un
@@ -151,6 +151,7 @@ export async function listExpenses(req, res) {
       note: row.note,
       created_at: row.created_at,
       modified_at: row.modified_at,
+      modified_by_name: row.modified_by_name,
       created_by_name: row.created_by_name
     }));
 
@@ -579,6 +580,7 @@ export async function updateExpense(req, res) {
     }
     champs.modified_at = new Date().toISOString();
     champs.modified_reason = data.reason;
+    champs.modified_by_name = await nomAuteur(req);
 
     const { error: updateError } = await supabase
       .from("expenses")
@@ -598,4 +600,16 @@ export async function updateExpense(req, res) {
     console.error("Erreur updateExpense:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
+}
+
+/** Prénom de l'auteur (agent ou gérant), tel qu'il apparaît dans les listes. */
+async function nomAuteur(req) {
+  if (req.user.role === "agent" && req.user.agentId) {
+    const { data } = await supabase.from("agents").select("first_name").eq("id", req.user.agentId).maybeSingle();
+    return data?.first_name || null;
+  }
+  const userId = req.user.userId || req.user.sub;
+  if (!userId) return null;
+  const { data } = await supabase.from("users").select("first_name").eq("id", userId).maybeSingle();
+  return data?.first_name || null;
 }
