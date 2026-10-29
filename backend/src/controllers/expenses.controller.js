@@ -11,6 +11,7 @@ import { lireToutesLesLignes } from "../utils/pagination.js";
 import { appliquerFenetre } from "../config/fenetre-historique.js";
 import { verifierQuota } from "../utils/quota-stockage.js";
 import { verifierQuotaOperations } from "../utils/quota-operations.js";
+import { dansFenetreModification, MESSAGE_FENETRE_DEPASSEE } from "../utils/fenetre-modification.js";
 
 const listSchema = z.object({
   month: z.coerce.number().int().min(1).max(12).optional(),
@@ -71,7 +72,7 @@ export async function listExpenses(req, res) {
     const construireRequete = () => {
       let query = supabase
         .from("expenses")
-        .select("id, expense_date, category, payment_method, amount, receipt_name, receipt_url, note, created_at, created_by")
+        .select("id, expense_date, category, payment_method, amount, receipt_name, receipt_url, note, created_at, modified_at, created_by")
         .eq("organization_id", organizationId);
 
       // Bornes indépendantes : la fenêtre de la formule gratuite pose un
@@ -149,6 +150,7 @@ export async function listExpenses(req, res) {
       justificatif: row.receipt_name,
       note: row.note,
       created_at: row.created_at,
+      modified_at: row.modified_at,
       created_by_name: row.created_by_name
     }));
 
@@ -529,6 +531,71 @@ export async function getExpenseJustificatifUrl(req, res) {
     return res.json({ url, nom: depense.receipt_name || null });
   } catch (error) {
     console.error("Erreur getExpenseJustificatifUrl:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Modification d'une dépense (24 h après l'enregistrement).
+// Le justificatif joint n'est pas modifié ici : il se remplace par sa route dédiée.
+// ---------------------------------------------------------------------------
+const updateExpenseSchema = z.object({
+  // Raison courte de la modification (obligatoire, 6 à 120 caractères)
+  reason: z.string().trim().min(6, "Indiquez la raison de la modification (6 caractères minimum).").max(120, "La raison ne doit pas dépasser 120 caractères."),
+  expenseDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  category: z.string().min(1).max(100).optional(),
+  paymentMethod: z.string().max(50).optional().nullable(),
+  amount: z.coerce.number().min(0).optional(),
+  note: z.string().max(1000).optional().nullable(),
+});
+
+export async function updateExpense(req, res) {
+  try {
+    const data = updateExpenseSchema.parse(req.body);
+    const organizationId = req.user.organizationId;
+
+    const { data: row, error } = await supabase
+      .from("expenses")
+      .select("id, created_at")
+      .eq("id", req.params.id)
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+    if (error || !row) {
+      return res.status(404).json({ error: "Expense not found" });
+    }
+
+    if (!dansFenetreModification(row.created_at)) {
+      return res.status(403).json({ error: MESSAGE_FENETRE_DEPASSEE, code: "fenetre_depassee" });
+    }
+
+    const champs = {};
+    if (data.expenseDate !== undefined) champs.expense_date = data.expenseDate;
+    if (data.category !== undefined) champs.category = data.category;
+    if (data.paymentMethod !== undefined) champs.payment_method = videEnNull(data.paymentMethod);
+    if (data.amount !== undefined) champs.amount = data.amount;
+    if (data.note !== undefined) champs.note = videEnNull(data.note);
+    if (Object.keys(champs).length === 0) {
+      return res.status(400).json({ error: "Aucune modification à enregistrer." });
+    }
+    champs.modified_at = new Date().toISOString();
+    champs.modified_reason = data.reason;
+
+    const { error: updateError } = await supabase
+      .from("expenses")
+      .update(champs)
+      .eq("id", row.id)
+      .eq("organization_id", organizationId);
+    if (updateError) {
+      console.error("Erreur updateExpense:", updateError);
+      return res.status(500).json({ error: "Impossible de modifier la dépense" });
+    }
+
+    return res.json({ message: "Expense updated successfully" });
+  } catch (error) {
+    if (error?.name === "ZodError") {
+      return res.status(400).json({ error: error.issues?.[0]?.message || "Validation error", details: error.issues });
+    }
+    console.error("Erreur updateExpense:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 }

@@ -13,6 +13,7 @@ import { lireToutesLesLignes } from "../utils/pagination.js";
 import { appliquerFenetre } from "../config/fenetre-historique.js";
 import { verifierQuota } from "../utils/quota-stockage.js";
 import { verifierQuotaOperations } from "../utils/quota-operations.js";
+import { dansFenetreModification, MESSAGE_FENETRE_DEPASSEE } from "../utils/fenetre-modification.js";
 
 const listSchema = z.object({
   month: z.coerce.number().int().min(1).max(12).optional(),
@@ -90,7 +91,7 @@ export async function listSales(req, res) {
     const construireRequete = () => {
       let query = supabase
         .from("sales")
-        .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, receipt_url, receipt_number, note, created_at, created_by")
+        .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, receipt_url, receipt_number, note, created_at, modified_at, created_by, article_id")
         .eq("organization_id", organizationId);
 
       // Bornes indépendantes : la fenêtre de la formule gratuite pose un
@@ -171,6 +172,8 @@ export async function listSales(req, res) {
       // Le reçu émis par OGOUE : on n'expose que son numéro, le PDF
       // se demande à la pièce via /sales/:id/recu (lien signé).
       numeroRecu: row.receipt_number,
+      article_id: row.article_id,
+      modified_at: row.modified_at,
       note: row.note,
       created_at: row.created_at,
       created_by_name: row.created_by_name
@@ -816,6 +819,179 @@ export async function deleteSale(req, res) {
     return res.json({ message: "Sale deleted successfully" });
   } catch (error) {
     console.error("Erreur deleteSale:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Modification d'une vente (24 h après l'enregistrement).
+// Ne touchent jamais au stock, au quota ni au reçu : le produit, la quantité,
+// l'article et le client restent figés. Si un reçu numéroté existe, la date et
+// le montant aussi, pour que le reçu reste conforme à la vente.
+// ---------------------------------------------------------------------------
+// Bloc de remplacement pour updateSale (article, quantité, stock)
+const updateSaleSchema = z.object({
+  // Raison courte de la modification (obligatoire, 6 à 120 caractères)
+  reason: z.string().trim().min(6, "Indiquez la raison de la modification (6 caractères minimum).").max(120, "La raison ne doit pas dépasser 120 caractères."),
+  saleDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  articleId: z.preprocess(
+    (v) => (v === "" || v === null || v === undefined ? null : v),
+    z.string().uuid().nullable()
+  ).optional(),
+  description: z.string().min(1).max(200).optional(),
+  quantity: z.coerce.number().positive().optional(),
+  paymentMethod: z.string().max(50).optional().nullable(),
+  amount: z.coerce.number().min(0).optional(),
+  note: z.string().max(1000).optional().nullable(),
+});
+
+export async function updateSale(req, res) {
+  try {
+    const data = updateSaleSchema.parse(req.body);
+    const organizationId = req.user.organizationId;
+
+    const { data: row, error } = await supabase
+      .from("sales")
+      .select("id, created_at, receipt_number, article_id, quantity, description")
+      .eq("id", req.params.id)
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+    if (error || !row) {
+      return res.status(404).json({ error: "Sale not found" });
+    }
+
+    if (!dansFenetreModification(row.created_at)) {
+      return res.status(403).json({ error: MESSAGE_FENETRE_DEPASSEE, code: "fenetre_depassee" });
+    }
+
+    const touchePrixOuDate = data.amount !== undefined || data.saleDate !== undefined;
+    const toucheVente = data.articleId !== undefined || data.quantity !== undefined || data.description !== undefined;
+    if (row.receipt_number && (touchePrixOuDate || toucheVente)) {
+      return res.status(409).json({
+        error: "Un reçu numéroté a déjà été émis pour cette vente : seuls le moyen de paiement et le commentaire peuvent être modifiés.",
+        code: "recu_emis",
+      });
+    }
+
+    // ----- Article et quantité : recalcul du stock -----
+    const ancienArticleId = row.article_id || null;
+    const ancienneQte = Number(row.quantity);
+    const nouvelArticleId = data.articleId !== undefined ? data.articleId : ancienArticleId;
+    const nouvelleQte = data.quantity !== undefined ? Number(data.quantity) : ancienneQte;
+    const changeArticle = nouvelArticleId !== ancienArticleId;
+    const changeQte = nouvelleQte !== ancienneQte;
+
+    let articleNouveau = null;
+    let descriptionFinale = data.description !== undefined ? data.description : row.description;
+    if (nouvelArticleId) {
+      const { data: art } = await supabase
+        .from("articles")
+        .select("id, name, stock")
+        .eq("id", nouvelArticleId)
+        .eq("organization_id", organizationId)
+        .eq("is_active", true)
+        .maybeSingle();
+      if (!art) {
+        return res.status(400).json({ error: "Cet article n'existe plus dans votre catalogue." });
+      }
+      articleNouveau = art;
+      descriptionFinale = art.name;
+    }
+
+    let ancienArticle = null;
+    if (ancienArticleId && changeArticle) {
+      const { data: a } = await supabase.from("articles").select("id, stock").eq("id", ancienArticleId).maybeSingle();
+      ancienArticle = a || null;
+    }
+
+    if (articleNouveau && articleNouveau.stock !== null && (changeArticle || changeQte)) {
+      // Même article : son stock est déjà décompté de l'ancienne quantité, on la récupère
+      const dispo = Number(articleNouveau.stock) + (!changeArticle ? ancienneQte : 0);
+      if (dispo < nouvelleQte) {
+        return res.status(409).json({
+          error: "Stock insuffisant : il reste " + dispo + " en stock pour cet article.",
+          code: "STOCK_INSUFFISANT",
+          stockDisponible: dispo,
+        });
+      }
+    }
+
+    if (changeArticle) {
+      // 1. Retirer la quantité du nouvel article (condition sur la valeur lue)
+      if (articleNouveau && articleNouveau.stock !== null) {
+        const { data: retrait } = await supabase
+          .from("articles")
+          .update({ stock: Number(articleNouveau.stock) - nouvelleQte, updated_at: new Date().toISOString() })
+          .eq("id", articleNouveau.id)
+          .eq("stock", articleNouveau.stock)
+          .select("id")
+          .maybeSingle();
+        if (!retrait) {
+          return res.status(409).json({ error: "Le stock vient de changer. Réessayez.", code: "STOCK_CONCURRENT" });
+        }
+        await enregistrerMouvement({ organizationId, articleId: articleNouveau.id, delta: -nouvelleQte, motif: "modification", saleId: row.id });
+      }
+      // 2. Rendre la quantité à l'ancien article
+      if (ancienArticle && ancienArticle.stock !== null) {
+        const { data: rendu } = await supabase
+          .from("articles")
+          .update({ stock: Number(ancienArticle.stock) + ancienneQte, updated_at: new Date().toISOString() })
+          .eq("id", ancienArticle.id)
+          .eq("stock", ancienArticle.stock)
+          .select("id")
+          .maybeSingle();
+        if (!rendu) console.error("⚠️  Stock de l'ancien article non restitué (modification de vente)");
+        else await enregistrerMouvement({ organizationId, articleId: ancienArticle.id, delta: ancienneQte, motif: "modification", saleId: row.id });
+      }
+    } else if (changeQte && articleNouveau && articleNouveau.stock !== null) {
+      // Même article, quantité différente : on applique l'écart net
+      const ecart = ancienneQte - nouvelleQte; // positif = on rend du stock
+      const { data: maj } = await supabase
+        .from("articles")
+        .update({ stock: Number(articleNouveau.stock) + ecart, updated_at: new Date().toISOString() })
+        .eq("id", articleNouveau.id)
+        .eq("stock", articleNouveau.stock)
+        .select("id")
+        .maybeSingle();
+      if (!maj) {
+        return res.status(409).json({ error: "Le stock vient de changer. Réessayez.", code: "STOCK_CONCURRENT" });
+      }
+      await enregistrerMouvement({ organizationId, articleId: articleNouveau.id, delta: ecart, motif: "modification", saleId: row.id });
+    }
+
+    // ----- Mise à jour de la vente -----
+    const champs = {};
+    if (data.saleDate !== undefined) champs.sale_date = data.saleDate;
+    if (data.paymentMethod !== undefined) champs.payment_method = videEnNull(data.paymentMethod);
+    if (data.amount !== undefined) champs.amount = data.amount;
+    if (data.note !== undefined) champs.note = videEnNull(data.note);
+    if (changeArticle || changeQte || data.description !== undefined) {
+      champs.article_id = nouvelArticleId;
+      champs.quantity = nouvelleQte;
+      champs.description = descriptionFinale;
+    }
+    if (Object.keys(champs).length === 0) {
+      return res.status(400).json({ error: "Aucune modification à enregistrer." });
+    }
+    champs.modified_at = new Date().toISOString();
+    champs.modified_reason = data.reason;
+
+    const { error: updateError } = await supabase
+      .from("sales")
+      .update(champs)
+      .eq("id", row.id)
+      .eq("organization_id", organizationId);
+    if (updateError) {
+      console.error("Erreur updateSale:", updateError);
+      return res.status(500).json({ error: "Impossible de modifier la vente" });
+    }
+
+    return res.json({ message: "Sale updated successfully" });
+  } catch (error) {
+    if (error?.name === "ZodError") {
+      return res.status(400).json({ error: error.issues?.[0]?.message || "Validation error", details: error.issues });
+    }
+    console.error("Erreur updateSale:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 }

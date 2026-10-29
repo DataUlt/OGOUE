@@ -597,6 +597,20 @@
     return d.toLocaleDateString("fr-FR");
   }
 
+  // Heure de la dernière modification (instant précis, fuseau du Gabon)
+  function formatHeureModification(value) {
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return "-";
+    return d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Libreville" });
+  }
+
+  function affichageHeure(objet) {
+    if (objet.modified_at) {
+      return formatHeureModification(objet.modified_at) + ' <span class="block text-[10px] font-semibold text-primary">modifiée</span>';
+    }
+    return formatHeure(objet.created_at);
+  }
+
   function formatHeure(value) {
     if (!value) return "-";
     const d = new Date(value);
@@ -674,7 +688,7 @@
         ${formatDateFr(vente.date)}
       </td>
       <td class="px-6 py-4 text-sm">
-        ${formatHeure(vente.created_at)}
+        ${affichageHeure(vente)}
       </td>
       <td class="px-6 py-4">
         ${echapperHtml(vente.description || "-")}
@@ -744,6 +758,7 @@
         }
       </td>
       <td class="px-6 py-4 text-center">
+        ${window.OGOUE_MODIFIER?.estModifiable(vente.created_at) ? `<button class="edit-btn text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary text-lg mr-3" title="Modifier" data-id="${vente.id}">✏️</button>` : ""}
         <button class="delete-btn text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-xl" title="Supprimer" data-id="${vente.id}">
           🗑️
         </button>
@@ -782,6 +797,7 @@
 
     // Ajouter l'event listener pour supprimer
     const deleteBtn = tr.querySelector('.delete-btn');
+    tr.querySelector('.edit-btn')?.addEventListener('click', () => ouvrirModificationVente(vente));
     if (deleteBtn) {
       deleteBtn.addEventListener('click', () => {
         const venteId = deleteBtn.getAttribute('data-id');
@@ -1242,6 +1258,54 @@
   }
 
   // ─── Events ─────────────────────────────
+
+  // Modification d'une vente (24 h après l'enregistrement, contrôlée par le serveur)
+  function ouvrirModificationVente(vente) {
+    // Vente sans article lié : si le libellé correspond à un article du catalogue, on le pré-sélectionne,
+    // sans rien envoyer tant que le choix n'est pas modifié (sinon le stock serait décompté à tort).
+    const articleLie = vente.article_id || null;
+    const correspondance = articleLie ? null : (articlesCache || []).find(
+      (x) => String(x.name).trim().toLowerCase() === String(vente.description || "").trim().toLowerCase()
+    );
+    const valeurInitiale = articleLie || (correspondance ? correspondance.id : "__autre__");
+    window.OGOUE_MODIFIER.ouvrir({
+      titre: "Modifier la vente",
+      url: `${API_BASE_URL}/api/sales/${vente.id}`,
+      token: getToken(),
+      champs: [
+        { name: "saleDate", label: "Date de la transaction", type: "date", value: vente.date, disabled: !!vente.numeroRecu,
+          aide: vente.numeroRecu ? "Un reçu numéroté a été émis : la date ne peut plus changer." : "" },
+        { name: "articleId", label: "Nom de l'article / service", type: "select",
+          value: valeurInitiale, disabled: !!vente.numeroRecu,
+          options: [].concat(articleLie && !(articlesCache || []).some((x) => x.id === articleLie) ? [{ value: articleLie, label: "Article actuel (hors catalogue)" }] : [], (articlesCache || []).map((x) => ({ value: x.id, label: x.name })), [{ value: "__autre__", label: "Autres (saisir un libellé)" }]),
+          aide: vente.numeroRecu ? "Un reçu numéroté a été émis : l'article ne peut plus changer." : "Le stock de l'article est recalculé automatiquement." },
+        { name: "description", label: "Libellé", type: "text", value: vente.description || "", disabled: !!vente.numeroRecu,
+          visibleSi: { champ: "articleId", valeur: "__autre__" } },
+        { name: "quantity", label: "Quantité", type: "number", value: vente.quantite, disabled: !!vente.numeroRecu,
+          aide: vente.numeroRecu ? "Un reçu numéroté a été émis : la quantité ne peut plus changer." : "" },
+        { name: "paymentMethod", label: "Moyen de paiement", type: "select", value: vente.moyen_paiement || "",
+          options: [{ value: "cash", label: "Cash" }, { value: "mobile_money", label: "Mobile Money" }] },
+        { name: "amount", label: "Montant (FCFA)", type: "number", value: vente.montant, disabled: !!vente.numeroRecu,
+          aide: vente.numeroRecu ? "Un reçu numéroté a été émis : le montant ne peut plus changer." : "" },
+        { name: "note", label: "Commentaire (facultatif)", type: "textarea", value: vente.note || "", pleine: true },
+      ],
+      transformer: (corps) => {
+        // Choix inchangé : on n'envoie pas l'article (le stock ne bouge pas)
+        if (corps.articleId === valeurInitiale) {
+          delete corps.articleId;
+          if (valeurInitiale !== "__autre__") delete corps.description;
+        } else if (corps.articleId === "__autre__") corps.articleId = null;
+        else delete corps.description;
+        return corps;
+      },
+      onSaved: async () => {
+        ventesCacheMois = null;
+        ventesCacheAnnee = null;
+        await renderCompactTable();
+        if (modal && !modal.classList.contains("hidden")) renderFullTable();
+      },
+    });
+  }
 
   form.addEventListener("submit", async function (e) {
     e.preventDefault();

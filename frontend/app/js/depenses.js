@@ -380,6 +380,20 @@
     return d.toLocaleDateString("fr-FR");
   }
 
+  // Heure de la dernière modification (instant précis, fuseau du Gabon)
+  function formatHeureModification(value) {
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return "-";
+    return d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Libreville" });
+  }
+
+  function affichageHeure(objet) {
+    if (objet.modified_at) {
+      return formatHeureModification(objet.modified_at) + ' <span class="block text-[10px] font-semibold text-primary">modifiée</span>';
+    }
+    return formatHeure(objet.created_at);
+  }
+
   function formatHeure(value) {
     if (!value) return "-";
     const d = new Date(value);
@@ -472,7 +486,7 @@
         ${formatDateFr(depense.date)}
       </td>
       <td class="px-6 py-4 text-sm">
-        ${formatHeure(depense.created_at)}
+        ${affichageHeure(depense)}
       </td>
       <td class="px-6 py-4">
         ${echapperHtml(depense.categorie || "-")}
@@ -511,6 +525,7 @@
         }
       </td>
       <td class="px-6 py-4 text-center">
+        ${window.OGOUE_MODIFIER?.estModifiable(depense.created_at) ? `<button class="edit-btn text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary text-lg mr-3" title="Modifier" data-id="${depense.id}">✏️</button>` : ""}
         <button class="delete-btn text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-xl" title="Supprimer" data-id="${depense.id}">
           🗑️
         </button>
@@ -549,6 +564,7 @@
 
     // Ajouter l'event listener pour supprimer
     const deleteBtn = tr.querySelector('.delete-btn');
+    tr.querySelector('.edit-btn')?.addEventListener('click', () => ouvrirModificationDepense(depense));
     if (deleteBtn) {
       deleteBtn.addEventListener('click', () => {
         const depenseId = deleteBtn.getAttribute('data-id');
@@ -872,6 +888,51 @@
   }
 
   // ─── Événements ─────────────────────────────
+  // Modification d'une dépense (24 h après l'enregistrement, contrôlée par le serveur)
+  function ouvrirModificationDepense(depense) {
+    window.OGOUE_MODIFIER.ouvrir({
+      titre: "Modifier la dépense",
+      url: `${API_BASE_URL}/api/expenses/${depense.id}`,
+      token: getToken(),
+      champs: [
+        { name: "expenseDate", label: "Date de la transaction", type: "date", value: depense.date },
+        { name: "category", label: "Catégorie", type: "select", value: depense.categorie || "",
+          options: [].concat(
+            [{ value: "", label: "Sélectionner une catégorie" }],
+            depense.categorie && ![...baseCategories, ...loadCustomCategories()].includes(depense.categorie) ? [{ value: depense.categorie, label: depense.categorie }] : [],
+            [...baseCategories, ...loadCustomCategories()].map((c) => ({ value: c, label: c })),
+            [{ value: "__OTHER__", label: "Autres (préciser)" }]
+          ) },
+        { name: "categorieAutre", label: "Préciser la catégorie", type: "text", value: "",
+          visibleSi: { champ: "category", valeur: "__OTHER__" } },
+        { name: "paymentMethod", label: "Moyen de paiement", type: "select", value: depense.moyen_paiement || "",
+          options: [{ value: "cash", label: "Cash" }, { value: "mobile_money", label: "Mobile Money" }] },
+        { name: "amount", label: "Montant (FCFA)", type: "number", value: depense.montant },
+        { name: "note", label: "Commentaire (facultatif)", type: "textarea", value: depense.note || "", pleine: true },
+      ],
+      transformer: (corps) => {
+        if (corps.category === "__OTHER__") {
+          const libelle = String(corps.categorieAutre || "").trim().replace(/s+/g, " ");
+          corps.category = libelle;
+          if (libelle) {
+            const custom = loadCustomCategories();
+            const existe = [...baseCategories, ...custom].some((c) => c.toLowerCase() === libelle.toLowerCase());
+            if (!existe) saveCustomCategories([...custom, libelle]);
+          }
+        }
+        delete corps.categorieAutre;
+        if (corps.category === "") delete corps.category;
+        return corps;
+      },
+      onSaved: async () => {
+        depensesCacheMois = null;
+        depensesCacheAnnee = null;
+        await renderCompactTable();
+        if (modal && !modal.classList.contains("hidden")) renderFullTable();
+      },
+    });
+  }
+
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
 

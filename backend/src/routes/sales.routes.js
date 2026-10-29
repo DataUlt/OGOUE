@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { listSales, createSale, updateSaleReceipt, deleteSale, getSaleRecuUrl, etablirSaleRecu, getSaleJustificatifUrl } from "../controllers/sales.controller.js";
+import { listSales, createSale, updateSaleReceipt, deleteSale, getSaleRecuUrl, etablirSaleRecu, getSaleJustificatifUrl, updateSale } from "../controllers/sales.controller.js";
 import upload from "../middleware/upload.middleware.js";
 import { exigerFonction } from "../middleware/plan.middleware.js";
 
@@ -22,5 +22,7 @@ r.post("/:id/recu", exigerFonction("recus", "L'émission de reçus numérotés")
 r.get("/:id/justificatif", getSaleJustificatifUrl);
 
 r.put("/:id", upload.single("receipt"), updateSaleReceipt);
+// Modifier les champs de la vente : 24 h après l'enregistrement seulement (contrôlé côté serveur)
+r.patch("/:id", updateSale);
 r.delete("/:id", deleteSale);
 export default r;
