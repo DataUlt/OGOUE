@@ -547,6 +547,10 @@ function mettreEnAvant(i, avecBulle) {
     `<div class="tdb-tip-sec">Dépenses</div>` +
     listeInfo(seau.depenses, (d) => d.categorie || "Dépense", "−", "#0B1F3F", "Aucune dépense");
   tip.hidden = false;
+  // Sur téléphone : au-dessus de la courbe, sur toute la largeur, pour ne pas cacher le doigt
+  const mobile = window.innerWidth <= 760;
+  tip.classList.toggle("act-tip-haut", mobile);
+  if (mobile) { tip.style.left = ""; return; }
   // À droite du point, ou à gauche dans la seconde moitié
   const largeur = tip.offsetWidth;
   const px = a.x(i);

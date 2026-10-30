@@ -8,6 +8,18 @@
     <!-- Restriction d'acces : un agent est redirige vers ses propres pages -->
     <script src="js/role-guard.js"></script>
 
+    <script>
+        // Thème clair / sombre choisi ailleurs dans l'appli (même clé que header-ui.js, propre au rôle)
+        (function () {
+            try {
+                var u = JSON.parse(localStorage.getItem("user") || "null");
+                var cle = u && u.role === "agent" ? "ogo_theme_agent" : "ogo_theme_manager";
+                var t = localStorage.getItem(cle) || localStorage.getItem("ogo_theme") || "light";
+                document.documentElement.classList.toggle("dark", t === "dark");
+                document.documentElement.classList.toggle("light", t !== "dark");
+            } catch (e) {}
+        })();
+    </script>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 
     <link href="https://fonts.googleapis.com" rel="preconnect"/>

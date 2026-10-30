@@ -82,5 +82,37 @@
     }
   }
 
+  // Champ obligatoire vide ou valeur refusée : sur téléphone le navigateur bloque l'envoi
+  // sans rien dire. On signale chaque champ en rouge et on amène l'écran sur le premier.
+  let premierSignale = false;
+
+  function effacerErreur(champ) {
+    champ.classList.remove("!border-red-500", "ring-2", "ring-red-500/30");
+    const msg = champ.parentElement && champ.parentElement.querySelector(":scope > [data-erreur-champ]");
+    if (msg) msg.remove();
+  }
+
+  document.addEventListener("invalid", function (e) {
+    const champ = e.target;
+    if (!champ || !champ.form) return;
+    e.preventDefault(); // remplace la bulle du navigateur, absente sur iPhone
+    effacerErreur(champ);
+    champ.classList.add("!border-red-500", "ring-2", "ring-red-500/30");
+    const msg = document.createElement("p");
+    msg.setAttribute("data-erreur-champ", "");
+    msg.className = "mt-1 text-sm font-medium text-red-600";
+    msg.textContent = champ.validity.valueMissing ? "Ce champ est obligatoire." : champ.validationMessage;
+    champ.insertAdjacentElement("afterend", msg);
+    champ.addEventListener("input", () => effacerErreur(champ), { once: true });
+    champ.addEventListener("change", () => effacerErreur(champ), { once: true });
+
+    if (!premierSignale) {
+      premierSignale = true;
+      setTimeout(() => { premierSignale = false; }, 0);
+      champ.scrollIntoView({ behavior: "smooth", block: "center" });
+      champ.focus({ preventScroll: true });
+    }
+  }, true);
+
   window.OGOUE_FEEDBACK = { debut: debut, succes: succes, fin: fin };
 })();
