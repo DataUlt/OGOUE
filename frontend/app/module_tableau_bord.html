@@ -175,6 +175,7 @@
         .tdb-trend { display: flex; align-items: center; gap: 10px; margin-top: 16px; font-size: 14px; color: rgba(255,255,255,.7); flex-wrap: wrap; }
         .tdb-trend-pill { background: var(--cyan); color: #06243A; font-weight: 700; height: 26px; padding: 0 10px; border-radius: 999px; display: flex; align-items: center; gap: 3px; }
         .tdb-trend-pill .material-symbols-rounded { font-size: 17px; }
+        .tdb-trend-pill.is-baisse { background: var(--orange); color: #3A1F02; }
         .tdb-stats { display: flex; gap: 32px; }
         .tdb-stat-l { display: flex; align-items: center; gap: 8px; font-size: 14px; color: rgba(255,255,255,.7); }
         .tdb-tick { width: 10px; height: 3px; border-radius: 2px; display: inline-block; }
@@ -197,6 +198,15 @@
         .tdb-xlabels { display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,.5); margin-top: 10px; }
         .tdb-note { font-size: 13px; color: rgba(255,255,255,.65); border-top: 1px solid rgba(255,255,255,.12); padding-top: 14px; display: flex; align-items: center; gap: 8px; }
         .tdb-note .material-symbols-rounded { font-size: 18px; }
+
+        /* Évolution de l'activité (courbe du bloc du haut) */
+        .act-chart { position: relative; }
+        .act-svg { display: block; overflow: visible; }
+        .act-axe { font-size: 11px; fill: rgba(255,255,255,.5); }
+        .act-mois { font-size: 12px; fill: rgba(255,255,255,.5); }
+        .act-mois.is-on { fill: #fff; font-weight: 600; }
+        .act-vide { text-align: center; color: rgba(255,255,255,.6); padding: 50px 0; }
+        .act-tip { top: 0; }
 
         /* Boutons du mobile */
         .tdb-mobile-actions { display: none; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -388,7 +398,7 @@
                             <span class="tdb-unit" id="tdbUnite">FCFA</span>
                         </div>
                         <div class="tdb-trend">
-                            <span class="tdb-trend-pill"><span class="material-symbols-rounded">trending_up</span><span id="tdbTendance">—</span></span>
+                            <span class="tdb-trend-pill" id="tdbTendancePastille"><span class="material-symbols-rounded" id="tdbTendanceIcone">trending_flat</span><span id="tdbTendance">—</span></span>
                             <span>par rapport à <span id="tdbVs">…</span></span>
                         </div>
                     </div>
@@ -404,14 +414,7 @@
                     </div>
                 </div>
 
-                <div>
-                    <div class="tdb-chart" id="chart-evolution">
-                        <div id="tdbSvg" class="tdb-svg"><div class="tdb-skel-block"></div></div>
-                        <span class="tdb-dot" id="tdbDot"></span>
-                    <div id="tdbTip" class="tdb-tip" hidden></div>
-                    </div>
-                    <div class="tdb-xlabels" id="tdbXLabels"></div>
-                </div>
+                <div class="act-chart" id="actChart"><div class="tdb-skel-block" style="min-height:250px"></div></div>
 
                 <div class="tdb-note">
                     <span class="material-symbols-rounded">info</span>L'écart entre les deux courbes, c'est ce qui vous reste.

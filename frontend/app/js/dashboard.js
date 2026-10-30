@@ -1,5 +1,8 @@
 ﻿// js/dashboard.js
 // Tableau de bord : données réelles de la période choisie, présentées selon
+// Éléments absents de la page : l'opération est simplement ignorée
+const fantome = new Proxy(function () {}, { get: () => fantome, set: () => true, apply: () => fantome });
+const ecran = (id) => document.getElementById(id) || fantome;
 // la maquette « OGOUE Refonte ». Une requête par type couvre tout ce qu'il
 // faut (période, période précédente, mois en cours, aujourd'hui) ; le reste
 // se filtre dans le navigateur.
@@ -320,7 +323,8 @@ function construireSerie(jours, ventes, depenses) {
     etiquettes,
     seaux,
     heures: false,
-    jours: n
+    jours: n,
+    dates: jours
   };
 }
 
@@ -383,6 +387,172 @@ function graphiqueSvg(entrees, sorties) {
   return { svg, finY: (pa[pa.length - 1].Y / H * 100).toFixed(2) + "%" };
 }
 
+// ========== ÉVOLUTION DE L'ACTIVITÉ ==========
+// Ventes et dépenses cumulées, créneau par créneau (heure ou jour), dans le bloc du haut.
+// Le dessin est à l'échelle réelle de la zone (1 unité = 1 pixel) pour garder des textes lisibles.
+
+const ACT_ENTREE = "#14B8D9", ACT_SORTIE = "#F2A04B";
+let activiteCourante = null;
+let activiteDerniere = null;
+
+function fcfa(v) {
+  return new Intl.NumberFormat("fr-FR").format(Math.round(v)).replace(/[  ]/g, " ") + " FCFA";
+}
+
+// Pas des repères : 1, 2, 2,5 ou 5 fois une puissance de dix (quatre intervalles environ)
+function pasActivite(max) {
+  const brut = Math.max(max, 1) / 4;
+  const p = Math.pow(10, Math.floor(Math.log10(brut)));
+  const f = brut / p;
+  return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p;
+}
+
+function rendreActivite(v) {
+  const zone = document.getElementById("actChart");
+  if (!zone) return;
+  activiteDerniere = v;
+  const serie = v.serie;
+  const seaux = serie.seaux || [];
+  const n = seaux.length;
+  const somme = (liste) => liste.reduce((s, o) => s + (Number(o.montant) || 0), 0);
+  // Montants cumulés depuis le début de la période : la courbe montre l'évolution du total
+  const cumuler = (liste) => { let t = 0; return liste.map((m) => (t += m)); };
+  const ventesCreneau = seaux.map((s) => somme(s.ventes));
+  const depensesCreneau = seaux.map((s) => somme(s.depenses));
+  const ventes = cumuler(ventesCreneau);
+  const depenses = cumuler(depensesCreneau);
+
+  if (!n) {
+    zone.innerHTML = `<p class="act-vide">Aucune opération sur la période.</p>`;
+    activiteCourante = null;
+    return;
+  }
+
+  // Dimensions
+  const mobile = window.innerWidth <= 760;
+  const W = Math.max(280, zone.clientWidth);
+  const H = mobile ? 210 : 250;
+  const X0 = mobile ? 66 : 84, X1 = W - 10, HAUT = 12, Y0 = H - 30;
+  const max = Math.max(0, ...ventes, ...depenses);
+  const pas = pasActivite(max);
+  const sommet = pas * Math.max(1, Math.ceil(max / pas));
+  const x = (i) => (n === 1 ? (X0 + X1) / 2 : X0 + (i * (X1 - X0)) / (n - 1));
+  const y = (val) => Y0 - (val / sommet) * (Y0 - HAUT);
+  const ptsV = ventes.map((val, i) => ({ X: x(i), Y: y(val) }));
+  const ptsD = depenses.map((val, i) => ({ X: x(i), Y: y(val) }));
+  const lV = tracerMonotone(ptsV), lD = tracerMonotone(ptsD);
+  const fond = (ligne) => `${ligne} L${x(n - 1)},${Y0} L${x(0)},${Y0} Z`;
+
+  // Repères horizontaux et montants
+  const court = (val) => (mobile ? montantCourt(val) : fcfa(val));
+  let grille = "";
+  for (let val = 0; val <= sommet + 1e-6; val += pas) {
+    grille += `<line x1="${X0}" y1="${y(val)}" x2="${X1}" y2="${y(val)}" stroke="rgba(255,255,255,.08)" stroke-width="1"/>` +
+      `<text x="${X0 - 10}" y="${y(val) + 4}" text-anchor="end" class="act-axe">${court(val)}</text>`;
+  }
+
+  // Libellés de l'axe horizontal : tous si peu nombreux, sinon quelques-uns répartis
+  const libelleCourt = (i) => (serie.heures ? seaux[i].libelle : etiquetteJour(serie.dates[i], n));
+  const k = Math.min(n, mobile ? 4 : n <= 12 ? 12 : 7);
+  const indices = k === n
+    ? seaux.map((_, i) => i)
+    : Array.from({ length: k }, (_, j) => Math.round((j * (n - 1)) / (k - 1)));
+  const etiquettes = indices
+    .map((i) => {
+      const ancre = i === 0 && n > 1 ? "start" : i === n - 1 && n > 1 ? "end" : "middle";
+      return `<text x="${x(i)}" y="${H - 8}" text-anchor="${ancre}" class="act-mois" data-i="${i}">${echapper(libelleCourt(i))}</text>`;
+    })
+    .join("");
+
+  // Un point seulement sur les créneaux qui ont une opération ; les autres restent cachés (r=0)
+  const cercles = (pts, couleur, cle, montants) =>
+    pts.map((p, i) => {
+      const op = montants[i] > 0 ? 1 : 0;
+      return `<circle data-${cle}="${i}" data-op="${op}" cx="${p.X}" cy="${p.Y}" r="${op ? 4.5 : 0}" fill="${couleur}"/>`;
+    }).join("");
+
+  zone.innerHTML =
+    `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" class="act-svg">` +
+    `<defs><linearGradient id="actGV" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${ACT_ENTREE}" stop-opacity=".45"/><stop offset="100%" stop-color="${ACT_ENTREE}" stop-opacity="0"/></linearGradient>` +
+    `<linearGradient id="actGD" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${ACT_SORTIE}" stop-opacity=".3"/><stop offset="100%" stop-color="${ACT_SORTIE}" stop-opacity="0"/></linearGradient></defs>` +
+    grille +
+    `<path d="${fond(lV)}" fill="url(#actGV)"/><path d="${fond(lD)}" fill="url(#actGD)"/>` +
+    `<path d="${lD}" fill="none" stroke="${ACT_SORTIE}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>` +
+    `<path d="${lV}" fill="none" stroke="${ACT_ENTREE}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>` +
+    `<line id="actGuide" x1="0" y1="${HAUT}" x2="0" y2="${Y0}" stroke="rgba(255,255,255,.45)" stroke-dasharray="5 5" visibility="hidden"/>` +
+    cercles(ptsD, ACT_SORTIE, "d", depensesCreneau) + cercles(ptsV, ACT_ENTREE, "v", ventesCreneau) +
+    etiquettes +
+    `</svg><div class="tdb-tip act-tip" id="actTip" hidden></div>`;
+
+  activiteCourante = { n, x, W, ventes, depenses, seaux };
+
+  // Créneau mis en avant au départ : le dernier qui a de l'activité (sans info-bulle)
+  let dernier = -1;
+  ventesCreneau.forEach((val, i) => { if (val || depensesCreneau[i]) dernier = i; });
+  if (dernier >= 0) mettreEnAvant(dernier, false);
+
+  if (!zone.dataset.survol) {
+    zone.dataset.survol = "1";
+    const survol = (clientX) => {
+      const a = activiteCourante;
+      if (!a) return;
+      const xv = clientX - zone.getBoundingClientRect().left;
+      let meilleur = 0;
+      for (let i = 1; i < a.n; i++) {
+        if (Math.abs(a.x(i) - xv) < Math.abs(a.x(meilleur) - xv)) meilleur = i;
+      }
+      mettreEnAvant(meilleur, true);
+    };
+    zone.addEventListener("mousemove", (e) => survol(e.clientX));
+    zone.addEventListener("mouseleave", () => { const t = zone.querySelector("#actTip"); if (t) t.hidden = true; });
+    zone.addEventListener("touchstart", (e) => survol(e.touches[0].clientX), { passive: true });
+    zone.addEventListener("touchmove", (e) => survol(e.touches[0].clientX), { passive: true });
+    // Redessin à la nouvelle largeur
+    let attente;
+    window.addEventListener("resize", () => {
+      clearTimeout(attente);
+      attente = setTimeout(() => { if (activiteDerniere) rendreActivite(activiteDerniere); }, 150);
+    });
+  }
+}
+
+// Ligne pointillée, points agrandis et, au survol, info-bulle détaillée sur un créneau
+function mettreEnAvant(i, avecBulle) {
+  const zone = document.getElementById("actChart");
+  const a = activiteCourante;
+  if (!zone || !a) return;
+  const guide = zone.querySelector("#actGuide");
+  guide.setAttribute("x1", a.x(i));
+  guide.setAttribute("x2", a.x(i));
+  guide.setAttribute("visibility", "visible");
+  zone.querySelectorAll("circle").forEach((c) => {
+    const actif = Number(c.dataset.v ?? c.dataset.d) === i;
+    c.setAttribute("r", actif ? 7 : c.dataset.op === "1" ? 4.5 : 0);
+    c.setAttribute("stroke", actif ? "#0B2A5B" : "none");
+    c.setAttribute("stroke-width", actif ? 3 : 0);
+  });
+  zone.querySelectorAll(".act-mois").forEach((t) => t.classList.toggle("is-on", Number(t.dataset.i) === i));
+
+  const tip = zone.querySelector("#actTip");
+  if (!avecBulle) { tip.hidden = true; return; }
+  const seau = a.seaux[i];
+  tip.innerHTML =
+    `<div class="tdb-tip-h">${echapper(seau.libelle)}</div>` +
+    `<div class="tdb-tip-cum">` +
+    `<span><i style="background:var(--cyan)"></i>Entré ${montantCourt(a.ventes[i])}</span>` +
+    `<span><i style="background:var(--orange)"></i>Sorti ${montantCourt(a.depenses[i])}</span>` +
+    `</div>` +
+    `<div class="tdb-tip-sec">Ventes</div>` +
+    listeInfo(seau.ventes, (o) => o.description || "Vente", "+", "#007C96", "Aucune vente") +
+    `<div class="tdb-tip-sec">Dépenses</div>` +
+    listeInfo(seau.depenses, (d) => d.categorie || "Dépense", "−", "#0B1F3F", "Aucune dépense");
+  tip.hidden = false;
+  // À droite du point, ou à gauche dans la seconde moitié
+  const largeur = tip.offsetWidth;
+  const px = a.x(i);
+  tip.style.left = Math.max(0, Math.min(a.W - largeur, px > a.W / 2 ? px - largeur - 14 : px + 14)) + "px";
+}
+
 // ========== AFFICHAGE ==========
 
 // Solde affiché : il glisse vers sa nouvelle valeur, comme dans la maquette
@@ -391,8 +561,8 @@ let frameSolde = null;
 
 function afficherSolde(valeur) {
   const p = formatParts(valeur);
-  document.getElementById("tdbSolde").textContent = p.num;
-  document.getElementById("tdbUnite").textContent = p.unit;
+  ecran("tdbSolde").textContent = p.num;
+  ecran("tdbUnite").textContent = p.unit;
 }
 
 function animerSolde(cible) {
@@ -417,14 +587,14 @@ let grapheCourant = null;
 
 function rendreGraphique(serie) {
   const { svg, finY } = graphiqueSvg(serie.entrees, serie.sorties);
-  document.getElementById("tdbSvg").innerHTML = svg;
-  document.getElementById("tdbDot").style.top = finY;
-  document.getElementById("tdbXLabels").innerHTML =
+  ecran("tdbSvg").innerHTML = svg;
+  ecran("tdbDot").style.top = finY;
+  ecran("tdbXLabels").innerHTML =
     serie.etiquettes.map((l) => `<span>${echapper(l)}</span>`).join("");
 
   grapheCourant = serie;
 
-  const zone = document.getElementById("chart-evolution");
+  const zone = ecran("chart-evolution");
   if (!zone.dataset.survol) {
     zone.dataset.survol = "1";
     zone.addEventListener("mousemove", (e) => survolerGraphe(e.clientX));
@@ -435,7 +605,7 @@ function rendreGraphique(serie) {
 }
 
 function masquerInfoGraphe() {
-  document.getElementById("tdbTip").hidden = true;
+  ecran("tdbTip").hidden = true;
 }
 
 // Ligne d'une opération dans l'info-bulle
@@ -463,8 +633,8 @@ function valeurAu(points, fraction) {
 
 function survolerGraphe(clientX) {
   if (!grapheCourant || !grapheCourant.seaux.length) return;
-  const zone = document.getElementById("chart-evolution");
-  const tip = document.getElementById("tdbTip");
+  const zone = ecran("chart-evolution");
+  const tip = ecran("tdbTip");
   const r = zone.getBoundingClientRect();
   const fraction = Math.min(1, Math.max(0, (clientX - r.left) / r.width));
 
@@ -756,8 +926,8 @@ function afficher(donnees, plage) {
   dernierCalcul = v;
   if (fenetreJustificatifs().classList.contains("is-open")) rendreJustificatifs(v);
 
-  document.getElementById("tdbPhrase").textContent = `Ce qui reste ${lib.phrase}`;
-  document.getElementById("tdbVs").textContent = lib.vs;
+  ecran("tdbPhrase").textContent = `Ce qui reste ${lib.phrase}`;
+  ecran("tdbVs").textContent = lib.vs;
   document.getElementById("tdbBestPeriode").textContent = `· ${lib.court}`;
 
   document.querySelectorAll(".tdb-pill").forEach((b) => {
@@ -765,15 +935,19 @@ function afficher(donnees, plage) {
   });
 
   const pct = v.variation;
-  document.getElementById("tdbTendance").textContent = pct === null
+  ecran("tdbTendance").textContent = pct === null
     ? "—"
     : `${pct >= 0 ? "+" : "−"}${Math.abs(pct).toFixed(1).replace(".", ",")} %`;
+  // Flèche et couleur selon le sens de la variation
+  ecran("tdbTendanceIcone").textContent = pct === null || pct === 0 ? "trending_flat" : pct > 0 ? "trending_up" : "trending_down";
+  ecran("tdbTendancePastille").classList.toggle("is-baisse", pct !== null && pct < 0);
 
-  document.getElementById("kpi-chiffre-affaires").innerHTML = `${montantCourt(v.entrees)} <span class="tdb-nb">(${v.nbVentes})</span>`;
-  document.getElementById("kpi-depenses").innerHTML = `${montantCourt(v.sorties)} <span class="tdb-nb">(${v.nbDepenses})</span>`;
+  ecran("kpi-chiffre-affaires").innerHTML = `${montantCourt(v.entrees)} <span class="tdb-nb">(${v.nbVentes})</span>`;
+  ecran("kpi-depenses").innerHTML = `${montantCourt(v.sorties)} <span class="tdb-nb">(${v.nbDepenses})</span>`;
 
   animerSolde(v.net);
   rendreGraphique(v.serie);
+  rendreActivite(v);
   rendreOperations(v.operations, plage);
 
   const todos = [];
