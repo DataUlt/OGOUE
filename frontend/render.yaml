@@ -25,9 +25,12 @@
       - type: rewrite
         source: /signin
         destination: /signin.html
-      - type: rewrite
+      - type: redirect
         source: /apropos
-        destination: /apropos.html
+        destination: /#apropos
+      - type: rewrite
+        source: /faq
+        destination: /faq.html
       - type: rewrite
         source: /tarifs
         destination: /tarifs.html

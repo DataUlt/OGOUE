@@ -52,6 +52,7 @@
     .chevron { transition: transform .2s ease; }
     /* Titres et surtitres de la mise en forme */
     .titre-xl { font-size: clamp(38px, 5.2vw, 64px); line-height: 1.06; font-weight: 800; letter-spacing: -0.02em; }
+    .titre-accueil { font-size: clamp(34px, 4.3vw, 54px); }
     .titre-l  { font-size: clamp(30px, 3.6vw, 44px); line-height: 1.15; font-weight: 800; letter-spacing: -0.015em; }
     .surtitre { font-size: 14px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #0088CC; }
   </style>
@@ -72,8 +73,7 @@
           <a class="text-text-light hover:text-primary transition-colors" href="/#accompagnement">Notre accompagnement</a>
           <a class="text-text-light hover:text-primary transition-colors" href="/index.html#comment">Comment ça marche</a>
           <a class="text-text-light hover:text-primary transition-colors" href="/tarifs">Tarifs</a>
-          <a class="text-text-light hover:text-primary transition-colors" href="/index.html#faq">Questions fréquentes</a>
-          <a class="text-text-light hover:text-primary transition-colors" href="/apropos">À propos</a>
+          <a class="text-text-light hover:text-primary transition-colors" href="/#apropos">À propos</a>
         </div>
 
         <div class="hidden lg:flex items-center gap-5">
@@ -94,8 +94,7 @@
           <a class="rounded-xl px-4 py-3 text-[15px] font-semibold text-text-light hover:bg-background-light transition" href="/#accompagnement">Notre accompagnement</a>
           <a class="rounded-xl px-4 py-3 text-[15px] font-semibold text-text-light hover:bg-background-light transition" href="/index.html#comment">Comment ça marche</a>
           <a class="rounded-xl px-4 py-3 text-[15px] font-semibold text-text-light hover:bg-background-light transition" href="/tarifs">Tarifs</a>
-          <a class="rounded-xl px-4 py-3 text-[15px] font-semibold text-text-light hover:bg-background-light transition" href="/index.html#faq">Questions fréquentes</a>
-          <a class="rounded-xl px-4 py-3 text-[15px] font-semibold text-text-light hover:bg-background-light transition" href="/apropos">À propos</a>
+          <a class="rounded-xl px-4 py-3 text-[15px] font-semibold text-text-light hover:bg-background-light transition" href="/#apropos">À propos</a>
           <div class="pt-3 flex flex-col gap-2">
             <a href="/login" class="rounded-full h-12 px-6 inline-flex items-center justify-center border border-black/10 bg-white text-[15px] font-bold">Se connecter</a>
             <a href="/tarifs" class="rounded-full h-12 px-6 inline-flex items-center justify-center bg-primary text-white text-[15px] font-bold">Créer un compte</a>
@@ -107,20 +106,25 @@
     <main class="flex-1">
 
       <!-- 1. PREMIER ÉCRAN -->
-      <section class="bg-white px-6 pt-8 pb-16 sm:pt-24 sm:pb-28">
+      <section class="bg-white px-6 pt-8 pb-16 sm:pt-10 sm:pb-28">
         <div class="max-w-7xl mx-auto grid grid-cols-[minmax(0,1fr)] lg:grid-cols-2 gap-16 items-center">
           <div>
             <p class="surtitre">De la petite activité à la PME structurée</p>
-            <h1 class="titre-xl mt-4">
+            <h1 class="titre-xl titre-accueil mt-4">
               Bien gérer aujourd’hui<br>
               <span class="text-primary">pour mieux préparer son développement demain.</span>
             </h1>
-            <p class="mt-7 text-[19px] leading-relaxed text-text-light-muted max-w-xl">
-              OGOUE ne se limite pas à simplifier votre comptabilité. Nous structurons votre gestion financière
-              au quotidien, et nous vous préparons aux opportunités de financement qui se présenteront à mesure
-              que votre activité se développe.
+            <p class="mt-5 text-2xl sm:text-[24px] leading-snug font-bold text-text-light max-w-xl">
+              De la bonne gestion aux moyens de grandir : OGOUE vous accompagne à chaque étape.
             </p>
-            <div class="mt-10 flex flex-col sm:flex-row gap-4">
+            <p class="mt-4 text-[17px] leading-relaxed text-text-light-muted max-w-xl">
+              Nous aidons les commerçants, entrepreneurs et PME à structurer leurs finances, à piloter leur activité
+              avec plus de visibilité et à poser les bases d'une croissance durable.
+            </p>
+            <p class="mt-3 text-[17px] leading-relaxed font-bold text-text-light max-w-xl">
+              Une gestion financière claire et structurée pour mieux préparer vos projets et vos demandes de financement.
+            </p>
+            <div class="mt-6 flex flex-col sm:flex-row gap-3">
               <a href="/login" class="rounded-full px-7 py-4 inline-flex items-center justify-center bg-primary text-white text-base font-bold hover:bg-primary/90 transition">
                 Se connecter
               </a>
@@ -128,11 +132,13 @@
                 Préparer mon financement
               </a>
             </div>
-            <p class="mt-6 text-sm text-text-light-muted">Gratuit pour commencer · Sans carte bancaire · Cash et Mobile Money</p>
           </div>
 
           <!-- Aperçu de l'application, construit en HTML à partir de l'écran réel -->
-          <div class="rounded-2xl bg-[#f3f4f1] p-5 sm:p-6">
+          <div class="relative rounded-2xl bg-[#f3f4f1] p-5 sm:p-6">
+            <p class="absolute -top-10 left-0 right-0 text-center text-sm font-semibold text-text-light">
+              Vos ventes, vos dépenses, vos comptes au même endroit.
+            </p>
             <div class="flex items-center justify-between gap-4">
               <p class="text-base font-bold text-text-light">Mon activité</p>
               <span class="shrink-0 rounded-full border border-black/10 bg-white px-4 py-1.5 text-xs text-text-light-muted">01/08/2026 – 25/08/2026</span>
@@ -184,9 +190,6 @@
             </div>
           </div>
         </div>
-        <p class="max-w-7xl mx-auto mt-14 text-sm font-semibold text-text-light">
-          Vos ventes. Vos dépenses. Vos comptes. Au même endroit.
-        </p>
       </section>
 
       <!-- 2. LE PARCOURS -->
@@ -195,7 +198,7 @@
           <h2 class="titre-l mt-4 text-text-light">Créer son activité, c'est un début. La faire grandir, c'est le projet.</h2>
           <p class="mt-6 text-lg leading-relaxed text-text-light-muted max-w-3xl">
             L'entrepreneuriat est une voie vers l'autonomie, quel que soit son âge.
-            L'ambition : passer d'une petite activité à une entreprise structurée, puis à une PME capable de se
+            L'ambition : passer d'une petite activité à une activité structurée, puis à une PME capable de se
             développer. OGOUE vous accompagne à chaque étape.
           </p>
 
@@ -207,7 +210,7 @@
             </li>
             <li class="rounded-xl border border-black/10 bg-white p-8">
               <span class="flex items-center justify-center size-10 rounded-full bg-primary text-white font-black">2</span>
-              <h3 class="mt-6 text-xl font-bold">Une entreprise structurée</h3>
+              <h3 class="mt-6 text-xl font-bold">Une activité structurée</h3>
               <p class="mt-3 text-[15px] leading-relaxed text-text-light-muted">Votre comptabilité est suivie, vos justificatifs conservés, votre compte de résultat et votre trésorerie à jour.</p>
             </li>
             <li class="rounded-xl border border-black/10 bg-white p-8">
@@ -221,22 +224,14 @@
 
       <!-- 3. CE QUE LA CROISSANCE DEMANDE -->
       <section class="bg-white px-6 py-24 sm:py-28">
-        <div class="max-w-5xl mx-auto grid grid-cols-[minmax(0,1fr)] lg:grid-cols-2 gap-14">
+        <div class="max-w-3xl mx-auto text-center">
           <div>
             <h2 class="titre-l text-text-light">Grandir demande des ressources.</h2>
             <p class="mt-6 text-lg leading-relaxed text-text-light-muted">
-              À un moment, chaque entrepreneur a besoin de moyens supplémentaires pour franchir un cap. La question
-              du financement devient alors essentielle.
+              À un moment, chaque entrepreneur a besoin de moyens supplémentaires pour franchir un cap : augmenter son capital; acquérir du matériel; accroître sa capacité de production; recruter; s'implanter sur de nouveaux marchés... La question du financement devient alors essentielle.
             </p>
             <p class="mt-4 text-lg font-bold text-text-light">Mais pour l'obtenir, un projet ambitieux ne suffit pas.</p>
           </div>
-          <ul class="grid grid-cols-[minmax(0,1fr)] gap-3 content-start">
-            <li class="rounded-xl border border-black/10 bg-background-light px-6 py-4 font-semibold">Augmenter son capital</li>
-            <li class="rounded-xl border border-black/10 bg-background-light px-6 py-4 font-semibold">Acquérir du matériel</li>
-            <li class="rounded-xl border border-black/10 bg-background-light px-6 py-4 font-semibold">Accroître sa capacité de production</li>
-            <li class="rounded-xl border border-black/10 bg-background-light px-6 py-4 font-semibold">Recruter</li>
-            <li class="rounded-xl border border-black/10 bg-background-light px-6 py-4 font-semibold">S'implanter sur de nouveaux marchés</li>
-          </ul>
         </div>
       </section>
 
@@ -244,10 +239,10 @@
       <section id="financement" class="bg-secondary text-white px-6 py-28 sm:py-32">
         <div class="max-w-7xl mx-auto grid grid-cols-[minmax(0,1fr)] lg:grid-cols-2 gap-16 items-start">
           <div>
-            <p class="text-sm font-bold uppercase tracking-[.08em] text-sky-200">Là où OGOUE fait la différence</p>
-            <h2 class="titre-l mt-4 text-white">Ce qu'un financeur attend, vous apprenez à le montrer.</h2>
+            <p class="text-sm font-bold uppercase tracking-[.08em] text-sky-200">Là où OGOUE vous aide</p>
+            <h2 class="titre-l mt-4 text-white">Ce qu'un financeur attend, nous vous apprenons à le montrer.</h2>
             <p class="mt-6 text-lg leading-relaxed text-white/75">
-              Banque, microfinance ou autre organisme : tous vous demanderont des preuves. En structurant et en
+              Banque, microfinance ou autre organisme vous demanderont tous des preuves. En structurant et en
               suivant votre comptabilité, OGOUE vous donne une meilleure visibilité sur votre activité, des données
               financières plus fiables et des éléments concrets pour présenter votre situation.
             </p>
@@ -263,7 +258,7 @@
           </div>
 
           <div class="rounded-xl bg-white/5 border border-white/15 p-8">
-            <h3 class="text-sm font-bold uppercase tracking-[.08em] text-white/70">Ce que le financeur vous demande · Ce qu'OGOUE vous apporte</h3>
+            <h3 class="text-sm font-bold uppercase tracking-[.08em] text-white/70">Ce que le financeur vous demande, OGOUE vous l'apporte</h3>
             <div class="mt-6 divide-y divide-white/15">
               <div class="py-5">
                 <p class="font-bold">Démontrer la viabilité de votre activité</p>
@@ -298,16 +293,23 @@
                 <li class="flex gap-3"><span class="material-symbols-outlined text-primary text-xl shrink-0">check_circle</span>Votre compte de résultat et votre tableau de trésorerie remplis à partir de vos saisies</li>
                 <li class="flex gap-3"><span class="material-symbols-outlined text-primary text-xl shrink-0">check_circle</span>Vos agents saisissent avec leur propre code, vous gardez la vue d'ensemble</li>
               </ul>
+              <div class="mt-6 flex gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+                <span class="material-symbols-outlined text-amber-600">warning</span>
+                <p>
+                  OGOUE ne remplace pas la saisie des opérations : la qualité de vos chiffres dépend aussi de la régularité
+                  et de l'exactitude de vos enregistrements.
+                </p>
+              </div>
             </div>
 
             <div class="rounded-xl border border-black/10 bg-white p-8 lg:p-10">
               <p class="text-sm font-bold text-primary">02 · Demain</p>
               <h3 class="mt-3 text-2xl font-bold leading-snug">Vous préparer à la recherche de financement</h3>
               <ul class="mt-7 divide-y divide-black/10 text-[15px]">
-                <li class="flex items-center justify-between gap-4 py-4"><span>Découvrir les solutions de financement disponibles</span><span class="shrink-0 rounded-full bg-black/5 px-3 py-1 text-xs font-bold text-text-light-muted">Bientôt</span></li>
-                <li class="flex items-center justify-between gap-4 py-4"><span>Comparer les conditions des différentes institutions</span><span class="shrink-0 rounded-full bg-black/5 px-3 py-1 text-xs font-bold text-text-light-muted">Bientôt</span></li>
-                <li class="flex items-center justify-between gap-4 py-4"><span>Mieux comprendre les critères d'éligibilité</span><span class="shrink-0 rounded-full bg-black/5 px-3 py-1 text-xs font-bold text-text-light-muted">Bientôt</span></li>
-                <li class="flex items-center justify-between gap-4 py-4"><span>Constituer un dossier solide, adapté à chaque organisme</span><span class="shrink-0 rounded-full bg-black/5 px-3 py-1 text-xs font-bold text-text-light-muted">Bientôt</span></li>
+                <li class="flex items-center justify-between gap-4 py-4"><span>Découvrir les solutions de financement disponibles</span></li>
+                <li class="flex items-center justify-between gap-4 py-4"><span>Comparer les conditions des différentes institutions</span></li>
+                <li class="flex items-center justify-between gap-4 py-4"><span>Mieux comprendre les critères d'éligibilité</span></li>
+                <li class="flex items-center justify-between gap-4 py-4"><span>Constituer un dossier solide, adapté à chaque organisme</span></li>
               </ul>
             </div>
           </div>
@@ -437,9 +439,9 @@
               <p class="mt-2 text-[15px] text-text-light-muted">Votre espace est protégé par votre mot de passe, chaque agent a son propre code.</p>
             </div>
             <div class="rounded-xl border border-black/10 bg-background-light p-7">
-              <span class="material-symbols-outlined text-primary text-3xl">cloud_done</span>
-              <h3 class="mt-4 text-lg font-bold">Vos données en ligne</h3>
-              <p class="mt-2 text-[15px] text-text-light-muted">Elles ne disparaissent pas si votre téléphone est perdu ou cassé.</p>
+              <span class="material-symbols-outlined text-primary text-3xl">shield_lock</span>
+              <h3 class="mt-4 text-lg font-bold">Des données sécurisées</h3>
+              <p class="mt-2 text-[15px] text-text-light-muted">Vos chiffres sont stockés en ligne, sur des serveurs protégés. Seuls vous et les agents que vous autorisez y avez accès.</p>
             </div>
             <div class="rounded-xl border border-black/10 bg-background-light p-7">
               <span class="material-symbols-outlined text-primary text-3xl">visibility_off</span>
@@ -452,19 +454,15 @@
               <p class="mt-2 text-[15px] text-text-light-muted">Une question sur votre espace ? Écrivez-nous, nous vous répondons.</p>
             </div>
           </div>
-          <p class="mt-8 text-sm text-text-light-muted max-w-2xl">
-            OGOUE ne remplace pas la saisie des opérations : la qualité de vos chiffres dépend aussi de la régularité
-            et de l'exactitude de vos enregistrements.
-          </p>
         </div>
       </section>
 
       <!-- 9. À PROPOS ET QUESTIONS -->
       <section id="apropos" class="px-6 py-24 sm:py-28">
-        <div class="max-w-7xl mx-auto grid grid-cols-[minmax(0,1fr)] lg:grid-cols-2 gap-16">
+        <div class="max-w-7xl mx-auto grid grid-cols-[minmax(0,1fr)] gap-16">
           <div>
             <p class="surtitre">Qui nous sommes</p>
-            <h2 class="titre-l mt-4 text-text-light">Pas seulement un outil de gestion comptable.</h2>
+            <h2 class="titre-l mt-4 text-text-light">Bien plus qu'un outil de gestion, un partenaire pour le développement des entreprises</h2>
             <p class="mt-6 text-lg leading-relaxed text-text-light-muted">
               OGOUE est une solution d'accompagnement au développement des entreprises : de leur structuration
               financière jusqu'à la préparation de leurs projets de financement.
@@ -475,62 +473,33 @@
             </p>
           </div>
 
-          <div id="faq">
-            <h3 class="text-sm font-bold uppercase tracking-[.08em] text-text-light-muted">Questions fréquentes</h3>
-            <div class="mt-5 divide-y divide-black/10 border-y border-black/10">
-              <details class="py-5">
-                <summary class="flex items-center justify-between gap-4 font-bold">
-                  <span>Faut-il être expert en comptabilité ?</span>
-                  <span class="material-symbols-outlined chevron text-primary">expand_more</span>
-                </summary>
-                <p class="mt-3 text-[15px] leading-relaxed text-text-light-muted">
-                  Non. Si vous savez noter une vente sur un cahier, vous savez utiliser OGOUE. Vous saisissez la date,
-                  ce que vous avez vendu, le montant et le moyen de paiement. Les documents comptables sont remplis par
-                  la plateforme à partir de vos saisies.
-                </p>
-              </details>
-              <details class="py-5">
-                <summary class="flex items-center justify-between gap-4 font-bold">
-                  <span>Je ne cherche pas de crédit. OGOUE est-il pour moi ?</span>
-                  <span class="material-symbols-outlined chevron text-primary">expand_more</span>
-                </summary>
-                <p class="mt-3 text-[15px] leading-relaxed text-text-light-muted">
-                  Oui. Une gestion structurée vous sert dès aujourd'hui pour mieux suivre votre activité. Le financement
-                  reste une possibilité pour plus tard, jamais une obligation.
-                </p>
-              </details>
-              <details class="py-5">
-                <summary class="flex items-center justify-between gap-4 font-bold">
-                  <span>Pourquoi utiliser OGOUE si je travaille déjà avec Excel ou WhatsApp ?</span>
-                  <span class="material-symbols-outlined chevron text-primary">expand_more</span>
-                </summary>
-                <p class="mt-3 text-[15px] leading-relaxed text-text-light-muted">
-                  Excel et WhatsApp servent à noter des informations, mais rien n'y est rassemblé : il faut ouvrir plusieurs
-                  fichiers, remonter des conversations et additionner soi-même. Dans OGOUE, vos ventes et vos dépenses
-                  sont réunies et vos totaux sont déjà calculés.
-                </p>
-              </details>
-              <details class="py-5">
-                <summary class="flex items-center justify-between gap-4 font-bold">
-                  <span>Est-ce qu'OGOUE me donne un financement ?</span>
-                  <span class="material-symbols-outlined chevron text-primary">expand_more</span>
-                </summary>
-                <p class="mt-3 text-[15px] leading-relaxed text-text-light-muted">
-                  Non. OGOUE ne prête pas d'argent et ne décide à la place d'aucune banque. Vous pouvez consulter les offres
-                  de nos établissements partenaires depuis votre espace. Vos comptes étant déjà tenus, vous n'avez rien à
-                  reconstituer dans l'urgence au moment de préparer un dossier.
-                </p>
-              </details>
-              <details class="py-5">
-                <summary class="flex items-center justify-between gap-4 font-bold">
-                  <span>Comment commencer ?</span>
-                  <span class="material-symbols-outlined chevron text-primary">expand_more</span>
-                </summary>
-                <p class="mt-3 text-[15px] leading-relaxed text-text-light-muted">
-                  Créez votre compte avec votre adresse e-mail, renseignez le nom de votre entreprise, puis enregistrez votre
-                  première vente. L'inscription est gratuite et prend deux minutes.
-                </p>
-              </details>
+          <div>
+            <p class="surtitre">Nos valeurs</p>
+            <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div class="rounded-xl border border-black/10 bg-background-light p-6">
+                <span class="material-symbols-outlined text-primary text-3xl">eco</span>
+                <h3 class="mt-4 text-lg font-bold">Durabilité</h3>
+                <p class="mt-1 text-[15px] font-semibold text-text-light">Construire aujourd'hui en pensant à demain.</p>
+                <p class="mt-2 text-[14px] leading-relaxed text-text-light-muted">OGOUE privilégie les décisions responsables, la création de valeur à long terme et une contribution positive à son environnement et à la société.</p>
+              </div>
+              <div class="rounded-xl border border-black/10 bg-background-light p-6">
+                <span class="material-symbols-outlined text-primary text-3xl">verified_user</span>
+                <h3 class="mt-4 text-lg font-bold">Intégrité</h3>
+                <p class="mt-1 text-[15px] font-semibold text-text-light">Faire ce qui est juste, même lorsque personne ne regarde.</p>
+                <p class="mt-2 text-[14px] leading-relaxed text-text-light-muted">OGOUE s'engage à agir avec honnêteté, transparence et responsabilité dans ses relations avec ses clients, ses partenaires et ses collaborateurs.</p>
+              </div>
+              <div class="rounded-xl border border-black/10 bg-background-light p-6">
+                <span class="material-symbols-outlined text-primary text-3xl">workspace_premium</span>
+                <h3 class="mt-4 text-lg font-bold">Excellence</h3>
+                <p class="mt-1 text-[15px] font-semibold text-text-light">Viser la qualité dans tout ce que nous entreprenons.</p>
+                <p class="mt-2 text-[14px] leading-relaxed text-text-light-muted">OGOUE recherche la qualité, le professionnalisme et l'amélioration continue afin de proposer des solutions fiables et durables.</p>
+              </div>
+              <div class="rounded-xl border border-black/10 bg-background-light p-6">
+                <span class="material-symbols-outlined text-primary text-3xl">handshake</span>
+                <h3 class="mt-4 text-lg font-bold">Respect</h3>
+                <p class="mt-1 text-[15px] font-semibold text-text-light">Placer l'humain au cœur de chaque relation.</p>
+                <p class="mt-2 text-[14px] leading-relaxed text-text-light-muted">OGOUE valorise l'écoute, la diversité, la dignité et la considération de chaque personne, quels que soient son rôle et son parcours.</p>
+              </div>
             </div>
           </div>
         </div>
@@ -545,8 +514,8 @@
             Découvrez une façon plus simple de suivre vos comptes avec OGOUE.
           </p>
           <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="/tarifs" class="rounded-full px-8 py-4 inline-flex items-center justify-center bg-white text-secondary text-base font-bold hover:bg-white/90 transition">Créer mon compte gratuitement</a>
-            <a href="#faq" class="rounded-full px-8 py-4 inline-flex items-center justify-center border border-white/30 text-base font-bold text-white hover:bg-white/10 transition">Besoin d'aide ?</a>
+            <a href="/tarifs" class="rounded-full px-8 py-4 inline-flex items-center justify-center bg-white text-secondary text-base font-bold hover:bg-white/90 transition">Créer mon compte</a>
+            <a href="/faq" class="rounded-full px-8 py-4 inline-flex items-center justify-center border border-white/30 text-base font-bold text-white hover:bg-white/10 transition">Besoin d'aide ?</a>
           </div>
         </div>
       </section>
@@ -565,7 +534,7 @@
           <ul class="mt-4 space-y-3 text-sm text-text-light-muted">
             <li><a class="hover:text-text-light" href="/#accompagnement">Notre accompagnement</a></li>
             <li><a class="hover:text-text-light" href="/#financement">Financement</a></li>
-            <li><a class="hover:text-text-light" href="/apropos">À propos</a></li>
+            <li><a class="hover:text-text-light" href="/#apropos">À propos</a></li>
           </ul>
         </div>
         <div>
@@ -573,7 +542,7 @@
           <ul class="mt-4 space-y-3 text-sm text-text-light-muted">
             <li><a class="hover:text-text-light" href="/tarifs">Créer un compte</a></li>
             <li><a class="hover:text-text-light" href="/login">Se connecter</a></li>
-            <li><a class="hover:text-text-light" href="/#faq">Questions fréquentes</a></li>
+            <li><a class="hover:text-text-light" href="/#faq">FAQ</a></li>
             <li><a class="hover:text-text-light" href="/conditions-utilisation">Conditions d'utilisation</a></li>
           </ul>
         </div>

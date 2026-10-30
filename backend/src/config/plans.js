@@ -69,7 +69,7 @@ export const FORMULES = {
     audit: false,
     scoreTracabilite: false,
     historiqueMois: null,
-    operationsMois: 1500,
+    operationsMois: 1100,
     agentsMax: 3,
     stockageGo: 2,
   },
