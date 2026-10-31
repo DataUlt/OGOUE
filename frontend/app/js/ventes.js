@@ -732,6 +732,9 @@
             ? `<span class="recu-lien inline-flex items-center gap-1 font-medium text-primary cursor-pointer hover:underline whitespace-nowrap" title="Ouvrir le reçu ${echapperHtml(vente.numeroRecu)}" data-id="${echapperHtml(vente.id)}">
                  <span class="material-symbols-outlined text-[15px]">description</span>${echapperHtml(vente.numeroRecu)}
                </span>`
+            // Vente d'un autre (agent qui consulte) : rien à compléter ici
+            : vente.peut_agir === false
+            ? "-"
             // Vente sans justificatif : les deux mêmes voies que dans le
             // formulaire restent ouvertes, sans quoi la case resterait
             // vide définitivement.
@@ -758,10 +761,11 @@
         }
       </td>
       <td class="px-6 py-4 text-center">
+        ${vente.peut_agir === false ? `<span class="material-symbols-outlined text-lg text-gray-400" title="Enregistrée par ${echapperHtml(vente.created_by_name || "un autre utilisateur")} : seul son auteur ou le gérant peut la modifier ou la supprimer">lock</span>` : `
         ${window.OGOUE_MODIFIER?.estModifiable(vente.created_at) ? `<button class="edit-btn text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary text-lg mr-3" title="Modifier" data-id="${vente.id}">✏️</button>` : ""}
         <button class="delete-btn text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-xl" title="Supprimer" data-id="${vente.id}">
           🗑️
-        </button>
+        </button>`}
       </td>
     `;
 
@@ -1427,6 +1431,236 @@
   if (btnExport) {
     btnExport.addEventListener("click", exportVentesCSV);
   }
+
+  // =========================
+  // ⚡ MODE RUSH
+  // =========================
+  // Pour les moments d'affluence : une carte par article du catalogue,
+  // un appui = une vente (quantité 1, prix du catalogue, date du jour),
+  // envoyée tout de suite. Une erreur se corrige depuis le tableau des
+  // ventes, comme le justificatif, qui se fait plus tard.
+  (function modeRush() {
+    const titre = form.parentElement.querySelector("h2");
+    if (!titre) return;
+
+    const CLE_PAIEMENT = "ogo_rush_paiement";
+    const lire = (cle, defaut) => { try { return localStorage.getItem(cle) || defaut; } catch (e) { return defaut; } };
+    const ecrire = (cle, val) => { try { localStorage.setItem(cle, val); } catch (e) {} };
+
+    // ── Bascule Saisie normale / Mode rush, à côté du titre ──
+    const entete = document.createElement("div");
+    entete.className = "flex flex-wrap items-center justify-between gap-3 mb-6";
+    titre.classList.remove("mb-6");
+    titre.replaceWith(entete);
+    entete.appendChild(titre);
+    const bascule = document.createElement("div");
+    bascule.className = "inline-flex rounded-full bg-gray-100 dark:bg-gray-800 p-1";
+    bascule.innerHTML =
+      `<button type="button" data-mode="normal" class="px-4 h-9 rounded-full text-sm font-bold">Saisie normale</button>` +
+      `<button type="button" data-mode="rush" class="px-4 h-9 rounded-full text-sm font-bold inline-flex items-center gap-1"><span class="material-symbols-outlined text-base">bolt</span>Mode rush</button>`;
+    entete.appendChild(bascule);
+
+    // ── Zone du mode rush, sous le formulaire ──
+    const zone = document.createElement("div");
+    zone.className = "hidden";
+    zone.innerHTML = `
+      <div class="flex flex-wrap items-center gap-3 mb-4">
+        <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Paiement :</span>
+        <div class="inline-flex rounded-full bg-gray-100 dark:bg-gray-800 p-1" data-rush-paiement>
+          <button type="button" data-paiement="cash" class="px-4 h-9 rounded-full text-sm font-bold">Cash</button>
+          <button type="button" data-paiement="mobile_money" class="px-4 h-9 rounded-full text-sm font-bold">Mobile Money</button>
+        </div>
+        <input type="search" data-rush-recherche placeholder="Rechercher un article"
+               class="form-input ml-auto w-full sm:w-64 h-10 rounded-full border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark text-sm px-4 text-[#0d1b19] dark:text-white">
+      </div>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Un appui = une vente. Le reçu ou le justificatif s'ajoute plus tard, depuis le tableau des ventes.</p>
+      <div data-rush-grille class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3"></div>
+      <div data-rush-barre class="hidden sticky bottom-3 mt-4 z-10 items-center gap-3 rounded-2xl bg-[#0d1b19] text-white px-4 py-3 shadow-lg">
+        <span class="material-symbols-outlined text-base animate-spin">progress_activity</span>
+        <span data-rush-attente class="text-sm font-medium"></span>
+      </div>
+      <p data-rush-bilan class="mt-4 text-sm font-medium text-gray-600 dark:text-gray-300"></p>`;
+    form.insertAdjacentElement("afterend", zone);
+
+    const grille = zone.querySelector("[data-rush-grille]");
+    const barre = zone.querySelector("[data-rush-barre]");
+    const texteAttente = zone.querySelector("[data-rush-attente]");
+    const bilan = zone.querySelector("[data-rush-bilan]");
+    const recherche = zone.querySelector("[data-rush-recherche]");
+
+    let paiement = lire(CLE_PAIEMENT, "cash");
+    let ordre = [];            // articles triés, figés pendant la session (les cartes ne bougent pas sous le doigt)
+    const enAttente = [];      // ventes parties, réponse du serveur pas encore reçue : { article }
+    const envoyes = {};        // ventes enregistrées pendant la session, par article
+    let session = { nombre: 0, total: 0 };
+    let chaine = Promise.resolve();
+    let rafraichir = null;
+
+    const styleBouton = (b, actif) => {
+      b.classList.toggle("bg-white", actif);
+      b.classList.toggle("dark:bg-gray-600", actif);
+      b.classList.toggle("shadow-sm", actif);
+      b.classList.toggle("text-[#0d1b19]", actif);
+      b.classList.toggle("dark:text-white", actif);
+      b.classList.toggle("text-gray-500", !actif);
+    };
+
+    function majPaiement() {
+      zone.querySelectorAll("[data-paiement]").forEach((b) => styleBouton(b, b.dataset.paiement === paiement));
+    }
+    zone.querySelector("[data-rush-paiement]").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-paiement]");
+      if (!b) return;
+      paiement = b.dataset.paiement;
+      ecrire(CLE_PAIEMENT, paiement);
+      majPaiement();
+    });
+
+    const cle = (nom) => normalizeLabel(nom).toLowerCase();
+    const attenteDe = (article) => enAttente.filter((p) => p.article.id === article.id).length;
+    const suiviStock = (a) => a.stock !== null && a.stock !== undefined;
+    const today = () => {
+      const d = new Date();
+      return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+    };
+
+    // Du plus vendu au moins vendu, d'après les ventes du mois en cours
+    async function trier() {
+      let ventes = [];
+      try { ventes = await getVentesPeriodeCourante(); } catch (e) {}
+      const compte = {};
+      (ventes || []).forEach((v) => {
+        const k = cle(v.description);
+        compte[k] = (compte[k] || 0) + 1;
+      });
+      ordre = [...articlesCache].sort((a, b) =>
+        (compte[cle(b.name)] || 0) - (compte[cle(a.name)] || 0) || String(a.name).localeCompare(String(b.name), "fr"));
+    }
+
+    function carte(a) {
+      const prix = Number(a.unitPrice) || 0;
+      const reste = suiviStock(a) ? Number(a.stock) - attenteDe(a) : null;
+      const bloque = prix <= 0 || (reste !== null && reste <= 0);
+      const n = (envoyes[a.id] || 0) + attenteDe(a);
+      const sousTitre = prix <= 0
+        ? "Prix à fixer dans le catalogue"
+        : reste !== null && reste <= 0
+          ? "Rupture de stock"
+          : reste !== null ? `Stock : ${reste}` : "";
+      return `<button type="button" data-rush-article="${echapperHtml(a.id)}" ${bloque ? "disabled" : ""}
+        class="relative text-left min-h-[104px] rounded-2xl border-2 p-4 flex flex-col justify-between gap-2 transition active:scale-95
+               ${bloque ? "border-gray-200 dark:border-gray-700 opacity-50 cursor-not-allowed" : "border-[#cfe7e3] dark:border-gray-600 bg-white dark:bg-[#1f3532] hover:border-primary"}">
+        ${n ? `<span class="absolute -top-2 -right-2 min-w-7 h-7 px-2 rounded-full bg-primary text-white text-sm font-bold flex items-center justify-center">×${n}</span>` : ""}
+        <span class="font-bold text-[#0d1b19] dark:text-white leading-snug line-clamp-2">${echapperHtml(a.name)}</span>
+        <span>
+          <span class="block text-base font-bold text-primary">${prix > 0 ? formatPrice(prix) : "—"}</span>
+          ${sousTitre ? `<span class="block text-xs text-gray-500 dark:text-gray-400">${sousTitre}</span>` : ""}
+        </span>
+      </button>`;
+    }
+
+    function afficher() {
+      if (!articlesCache.length) {
+        grille.innerHTML = `<div class="col-span-full rounded-2xl border border-dashed border-gray-300 dark:border-gray-600 p-6 text-center text-sm text-gray-600 dark:text-gray-300">
+          Le mode rush utilise votre catalogue. <a href="module_articles.html" class="font-bold text-primary hover:underline">Ajoutez vos articles et leurs prix</a> pour l'utiliser.</div>`;
+        return;
+      }
+      const filtre = cle(recherche.value);
+      const liste = ordre.filter((a) => !filtre || cle(a.name).includes(filtre));
+      grille.innerHTML = liste.length
+        ? liste.map(carte).join("")
+        : `<p class="col-span-full text-sm text-gray-500 dark:text-gray-400">Aucun article ne correspond. Pour un article hors catalogue, passez en saisie normale.</p>`;
+    }
+
+    function majBarre() {
+      barre.classList.toggle("hidden", !enAttente.length);
+      barre.classList.toggle("flex", !!enAttente.length);
+      const dernier = enAttente[enAttente.length - 1];
+      texteAttente.textContent = enAttente.length
+        ? `Enregistrement en cours : ${enAttente.length} vente${enAttente.length > 1 ? "s" : ""} · dernière : ${dernier.article.name}`
+        : "";
+      bilan.textContent = session.nombre
+        ? `Depuis l'ouverture du mode rush : ${session.nombre} vente${session.nombre > 1 ? "s" : ""} · ${formatPrice(session.total)}`
+        : "";
+    }
+
+    function envoyer(p) {
+      const article = p.article;
+      chaine = chaine.then(async () => {
+        const prix = Number(article.unitPrice) || 0;
+        const resultat = await addVente({
+          id: generateId(),
+          date: today(),
+          description: article.name,
+          article_id: article.id,
+          moyen_paiement: paiement,
+          type_vente: article.type === "services" ? "services" : "produits",
+          quantite: 1,
+          montant: prix,
+          justificatif: "",
+          editer_recu: false,
+          note: "",
+        });
+        if (resultat) {
+          envoyes[article.id] = (envoyes[article.id] || 0) + 1;
+          session.nombre += 1;
+          session.total += prix;
+          if (suiviStock(article)) article.stock = Number(article.stock) - 1;
+          // Même confirmation verte qu'en saisie normale
+          window.OGOUE_FEEDBACK?.succes(`Vente enregistrée : ${echapperHtml(article.name)} · ${formatPrice(prix)}`);
+        }
+        const i = enAttente.indexOf(p);
+        if (i >= 0) enAttente.splice(i, 1);
+        afficher();
+        majBarre();
+        // Tableau des ventes du jour remis à jour (un seul rechargement si les appuis s'enchaînent)
+        clearTimeout(rafraichir);
+        rafraichir = setTimeout(() => {
+          ventesCacheMois = null;
+          ventesCacheAnnee = null;
+          renderCompactTable();
+        }, 300);
+      });
+    }
+
+    function appui(article) {
+      const p = { article };
+      enAttente.push(p);
+      if (navigator.vibrate) navigator.vibrate(15);
+      afficher();
+      majBarre();
+      envoyer(p);
+    }
+
+    grille.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-rush-article]");
+      if (!b || b.disabled) return;
+      const article = ordre.find((a) => String(a.id) === b.dataset.rushArticle);
+      if (article) appui(article);
+    });
+    recherche.addEventListener("input", afficher);
+
+    async function choisirMode(mode) {
+      const rush = mode === "rush";
+      bascule.querySelectorAll("[data-mode]").forEach((b) => styleBouton(b, b.dataset.mode === mode));
+      form.classList.toggle("hidden", rush);
+      zone.classList.toggle("hidden", !rush);
+      if (rush) {
+        if (!articlesCache.length) await loadArticles();
+        await trier();
+        afficher();
+        majBarre();
+      }
+    }
+    bascule.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-mode]");
+      if (b) choisirMode(b.dataset.mode);
+    });
+
+    majPaiement();
+    // La page s'ouvre toujours en saisie normale ; le mode rush se choisit à chaque fois
+    choisirMode("normal");
+  })();
 
   // Initialisation : charger et afficher les ventes de la période actuelle
   renderCompactTable();

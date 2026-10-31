@@ -12,6 +12,7 @@ import { appliquerFenetre } from "../config/fenetre-historique.js";
 import { verifierQuota } from "../utils/quota-stockage.js";
 import { verifierQuotaOperations } from "../utils/quota-operations.js";
 import { dansFenetreModification, MESSAGE_FENETRE_DEPASSEE } from "../utils/fenetre-modification.js";
+import { peutAgirSur, refusPasAuteur } from "../utils/droits-operation.js";
 
 const listSchema = z.object({
   month: z.coerce.number().int().min(1).max(12).optional(),
@@ -51,10 +52,12 @@ export async function listExpenses(req, res) {
       finalStartDate = startDate;
       finalEndDate = endDate;
     } else if (month && year) {
-      const firstDay = new Date(year, month - 1, 1);
-      const lastDay = new Date(year, month, 0);
-      finalStartDate = firstDay.toISOString().split('T')[0];
-      finalEndDate = lastDay.toISOString().split('T')[0];
+      // Dates écrites directement : passer par toISOString décale d'un jour
+      // dès que le serveur n'est pas en UTC (le 31 sortait du mois en UTC+1)
+      const mm = String(month).padStart(2, "0");
+      const dernierJour = new Date(Date.UTC(year, month, 0)).getUTCDate();
+      finalStartDate = `${year}-${mm}-01`;
+      finalEndDate = `${year}-${mm}-${String(dernierJour).padStart(2, "0")}`;
     }
 
     // La formule gratuite ne donne accès qu'aux derniers mois. Le
@@ -152,7 +155,9 @@ export async function listExpenses(req, res) {
       created_at: row.created_at,
       modified_at: row.modified_at,
       modified_by_name: row.modified_by_name,
-      created_by_name: row.created_by_name
+      created_by_name: row.created_by_name,
+      // L'interface masque modifier / supprimer quand c'est faux (le serveur refuse de toute façon)
+      peut_agir: peutAgirSur(req.user, row.created_by)
     }));
 
     return res.json({ expenses: transformedExpenses });
@@ -321,7 +326,7 @@ export async function updateExpenseReceipt(req, res) {
     // plus rien ne le référencera et il faudra le retirer du bucket.
     const { data: checkData, error: checkError } = await supabase
       .from("expenses")
-      .select("id, receipt_storage_path")
+      .select("id, receipt_storage_path, created_by")
       .eq("id", id)
       .eq("organization_id", organizationId)
       .single();
@@ -329,6 +334,9 @@ export async function updateExpenseReceipt(req, res) {
     if (checkError || !checkData) {
       return res.status(404).json({ error: "Expense not found" });
     }
+
+    // Un agent n'agit que sur ses propres opérations (le gérant sur toutes)
+    if (!peutAgirSur(req.user, checkData.created_by)) return refusPasAuteur(res);
 
     const champs = {
       receipt_name: req.body.receiptName || req.file?.originalname || null,
@@ -449,6 +457,9 @@ export async function deleteExpense(req, res) {
       return res.status(404).json({ error: "Expense not found" });
     }
 
+    // Un agent n'agit que sur ses propres opérations (le gérant sur toutes)
+    if (!peutAgirSur(req.user, expense.created_by)) return refusPasAuteur(res);
+
     // Enregistrer la suppression dans l'audit
     try {
       await logDeletion({
@@ -557,13 +568,16 @@ export async function updateExpense(req, res) {
 
     const { data: row, error } = await supabase
       .from("expenses")
-      .select("id, created_at")
+      .select("id, created_at, created_by")
       .eq("id", req.params.id)
       .eq("organization_id", organizationId)
       .maybeSingle();
     if (error || !row) {
       return res.status(404).json({ error: "Expense not found" });
     }
+
+    // Un agent n'agit que sur ses propres opérations (le gérant sur toutes)
+    if (!peutAgirSur(req.user, row.created_by)) return refusPasAuteur(res);
 
     if (!dansFenetreModification(row.created_at)) {
       return res.status(403).json({ error: MESSAGE_FENETRE_DEPASSEE, code: "fenetre_depassee" });

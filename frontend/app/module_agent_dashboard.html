@@ -7,6 +7,7 @@
     <link rel="icon" type="image/png" href="O-removebg-preview.png">
 
     <!-- Tailwind -->
+    <script src="js/role-guard.js"></script>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 
     <!-- Fonts -->
@@ -108,6 +109,10 @@
                 color-scheme: dark;
             }
         }
+        /* Tableaux : sur grand écran, toutes les colonnes restent visibles sans défilement */
+        @media (min-width: 1280px) { .ecran-large { margin-left: -2.75rem; margin-right: -2.75rem; } }
+        .ecran-large table { font-size: 13px; }
+        .ecran-large th, .ecran-large td { padding-left: .625rem; padding-right: .625rem; }
     </style>
 </head>
 
@@ -146,7 +151,7 @@
 
     <!-- ===== CONTENU PAGE VENTES ===== -->
     <main class="flex-grow">
-        <div class="container mx-auto px-4 py-8">
+        <div class="mx-auto max-w-[1120px] px-[18px] md:px-11 py-8">
             <div class="flex flex-col gap-8">
 
                 <!-- Titre page -->
@@ -159,21 +164,27 @@
                             Enregistrer et suivre vos ventes quotidiennes.
                         </p>
                     </div>
+                    <!-- Tutoriel video, lu dans une fenetre par aide.js -->
+                    <button type="button" data-tuto="vente"
+                            class="inline-flex items-center gap-2 rounded-lg border border-[#0B2A5B] bg-[#0B2A5B] px-4 py-2 text-sm font-bold text-white dark:text-white hover:bg-[#0B2A5B]/90">
+                        <span class="material-symbols-outlined text-xl text-primary" style="font-variation-settings:'FILL' 1">play_circle</span>
+                        <span>Voir le tuto</span>
+                    </button>
                 </header>
 
                 <!-- Onglets -->
                 <div class="border-b border-gray-200 dark:border-gray-700">
-                    <nav class="flex gap-5 sm:gap-8 -mb-px overflow-x-auto">
+                    <nav class="grid grid-cols-3 sm:flex sm:gap-8 -mb-px">
                         <a href="module_agent_dashboard"
-                           class="shrink-0 whitespace-nowrap flex flex-col items-center justify-center border-b-[3px] border-b-primary text-[#0d1b19] dark:text-white pb-3 pt-4 px-2">
+                           class="shrink-0 whitespace-nowrap flex flex-col items-center justify-center border-b-[3px] border-b-primary text-[#0d1b19] dark:text-white pb-3 pt-4 px-1 sm:px-2">
                             <p class="text-sm font-bold leading-normal tracking-[0.015em]">Ventes</p>
                         </a>
                         <a href="module_agent_depenses"
-                           class="shrink-0 whitespace-nowrap flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
+                           class="shrink-0 whitespace-nowrap flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-1 sm:px-2">
                             <p class="text-sm font-bold leading-normal tracking-[0.015em]">D&eacute;penses</p>
                         </a>
                         <a href="module_agent_resume"
-                           class="shrink-0 whitespace-nowrap flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-2">
+                           class="shrink-0 whitespace-nowrap flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-1 sm:px-2">
                             <p class="text-sm font-bold leading-normal tracking-[0.015em]">R&eacute;sum&eacute;</p>
                         </a>
                     </nav>
@@ -505,7 +516,7 @@
                 <!-- Tableau des ventes r&eacute;centes (vue compacte) -->
                 <div class="mt-4">
                     <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-xl font-bold text-[#0d1b19] dark:text:white">
+                        <h2 class="text-xl font-bold text-[#0d1b19] dark:text-white">
                             Ventes r&eacute;centes d'aujourd'hui
                         </h2>
                         <button
@@ -518,7 +529,7 @@
                         </button>
                     </div>
 
-                    <div class="overflow-x-auto bg-white dark:bg-[#182c29] rounded-xl shadow-sm border border-[#cfe7e3]/70 dark:border-gray-700/70">
+                    <div class="ecran-large overflow-x-auto bg-white dark:bg-[#182c29] rounded-xl shadow-sm border border-[#cfe7e3]/70 dark:border-gray-700/70">
                         <table data-cartes class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                             <thead class="text-xs text-gray-700 dark:text-gray-300 uppercase bg-gray-50 dark:bg-gray-800/50">
                             <tr>
@@ -574,7 +585,7 @@
                 </button>
             </div>
 
-            <div class="px-6 pb-6 pt-3 overflow-x-auto overflow-y-auto">
+            <div class="ecran-large px-6 pb-6 pt-3 overflow-x-auto overflow-y-auto">
                 <table data-cartes class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                     <thead class="text-xs text-gray-700 dark:text-gray-300 uppercase bg-gray-50 dark:bg-gray-800/50">
                     <tr>
@@ -604,6 +615,7 @@
 <script src="js/tableau-cartes.js"></script>
 <script src="js/commentaire-complet.js"></script>
 <script src="js/header-ui.js"></script>
+<script src="js/aide.js"></script>
 <script src="js/recu-client.js"></script>
 <script src="js/modifier-operation.js"></script>
 <script src="js/feedback-enregistrement.js"></script>

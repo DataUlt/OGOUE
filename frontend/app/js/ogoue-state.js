@@ -204,7 +204,9 @@ async function addVente(vente, onProgress) {
         headers: {
           "Authorization": `Bearer ${token}`
         },
-        body: formData
+        body: formData,
+        // La vente part au bout même si la page est quittée juste après (mode rush)
+        keepalive: true
       });
 
       if (response.status === 401) {

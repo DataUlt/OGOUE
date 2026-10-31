@@ -525,10 +525,11 @@
         }
       </td>
       <td class="px-6 py-4 text-center">
+        ${depense.peut_agir === false ? `<span class="material-symbols-outlined text-lg text-gray-400" title="Enregistrée par ${echapperHtml(depense.created_by_name || "un autre utilisateur")} : seul son auteur ou le gérant peut la modifier ou la supprimer">lock</span>` : `
         ${window.OGOUE_MODIFIER?.estModifiable(depense.created_at) ? `<button class="edit-btn text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary text-lg mr-3" title="Modifier" data-id="${depense.id}">✏️</button>` : ""}
         <button class="delete-btn text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-xl" title="Supprimer" data-id="${depense.id}">
           🗑️
-        </button>
+        </button>`}
       </td>
     `;
 

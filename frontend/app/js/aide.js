@@ -107,6 +107,12 @@
   // ---------- 2. Fenetre de lecture ----------
   var fenetre = null;
 
+  // La page Aide est reservee au gerant : l'agent n'y est pas renvoye
+  function estAgent() {
+    try { return (JSON.parse(localStorage.getItem("user") || "null") || {}).role === "agent"; }
+    catch (e) { return false; }
+  }
+
   function construireFenetre() {
     fenetre = document.createElement("div");
     fenetre.className = "fixed inset-0 z-50 hidden items-center justify-center bg-black/70 px-4";
@@ -122,9 +128,10 @@
           "</button>" +
         "</div>" +
         '<div data-aide-cadre class="relative aspect-video overflow-hidden rounded-xl bg-black shadow-2xl"></div>' +
+        (estAgent() ? "" :
         '<p class="mt-3 text-center text-sm text-white/80">' +
           'Retrouvez tous les tutoriels dans <a href="module_aide.html" class="font-semibold underline hover:text-white">Aide</a>.' +
-        "</p>" +
+        "</p>") +
       "</div>";
 
     fenetre.addEventListener("click", function (e) {
