@@ -1436,8 +1436,10 @@
   // ⚡ MODE RUSH
   // =========================
   // Pour les moments d'affluence : une carte par article du catalogue,
-  // un appui = une vente (quantité 1, prix du catalogue, date du jour),
-  // envoyée tout de suite. Une erreur se corrige depuis le tableau des
+  // un appui = une vente (quantité 1, prix du catalogue, date du jour).
+  // Des appuis rapides sur la même carte se regroupent en une seule vente :
+  // deux appuis = quantité 2, trois = quantité 3… La vente part dès que
+  // l'on cesse d'appuyer. Une erreur se corrige depuis le tableau des
   // ventes, comme le justificatif, qui se fait plus tard.
   (function modeRush() {
     const titre = form.parentElement.querySelector("h2");
@@ -1473,7 +1475,7 @@
         <input type="search" data-rush-recherche placeholder="Rechercher un article"
                class="form-input ml-auto w-full sm:w-64 h-10 rounded-full border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark text-sm px-4 text-[#0d1b19] dark:text-white">
       </div>
-      <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Un appui = une vente. Le reçu ou le justificatif s'ajoute plus tard, depuis le tableau des ventes.</p>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Un appui = une vente. Appuis rapides sur la même carte = une vente de plusieurs unités (2 appuis = quantité 2). Le reçu ou le justificatif s'ajoute plus tard, depuis le tableau des ventes.</p>
       <div data-rush-grille class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3"></div>
       <div data-rush-barre class="hidden sticky bottom-3 mt-4 z-10 items-center gap-3 rounded-2xl bg-[#0d1b19] text-white px-4 py-3 shadow-lg">
         <span class="material-symbols-outlined text-base animate-spin">progress_activity</span>
@@ -1490,7 +1492,9 @@
 
     let paiement = lire(CLE_PAIEMENT, "cash");
     let ordre = [];            // articles triés, figés pendant la session (les cartes ne bougent pas sous le doigt)
-    const enAttente = [];      // ventes parties, réponse du serveur pas encore reçue : { article }
+    const DELAI_REGROUPEMENT_MS = 700; // pause qui clôt une série d'appuis sur une carte
+    const enAttente = [];      // ventes en cours de saisie ou d'envoi : { article, quantite, minuterie }
+    const enCours = {};        // série d'appuis encore ouverte, par article
     const envoyes = {};        // ventes enregistrées pendant la session, par article
     let session = { nombre: 0, total: 0 };
     let chaine = Promise.resolve();
@@ -1517,7 +1521,7 @@
     });
 
     const cle = (nom) => normalizeLabel(nom).toLowerCase();
-    const attenteDe = (article) => enAttente.filter((p) => p.article.id === article.id).length;
+    const attenteDe = (article) => enAttente.filter((p) => p.article.id === article.id).reduce((s, p) => s + p.quantite, 0);
     const suiviStock = (a) => a.stock !== null && a.stock !== undefined;
     const today = () => {
       const d = new Date();
@@ -1548,7 +1552,7 @@
           ? "Rupture de stock"
           : reste !== null ? `Stock : ${reste}` : "";
       return `<button type="button" data-rush-article="${echapperHtml(a.id)}" ${bloque ? "disabled" : ""}
-        class="relative text-left min-h-[104px] rounded-2xl border-2 p-4 flex flex-col justify-between gap-2 transition active:scale-95
+        class="relative text-left min-h-[104px] rounded-2xl border-2 p-4 flex flex-col justify-between gap-2 transition active:scale-95 touch-manipulation select-none
                ${bloque ? "border-gray-200 dark:border-gray-700 opacity-50 cursor-not-allowed" : "border-[#cfe7e3] dark:border-gray-600 bg-white dark:bg-[#1f3532] hover:border-primary"}">
         ${n ? `<span class="absolute -top-2 -right-2 min-w-7 h-7 px-2 rounded-full bg-primary text-white text-sm font-bold flex items-center justify-center">×${n}</span>` : ""}
         <span class="font-bold text-[#0d1b19] dark:text-white leading-snug line-clamp-2">${echapperHtml(a.name)}</span>
@@ -1577,7 +1581,7 @@
       barre.classList.toggle("flex", !!enAttente.length);
       const dernier = enAttente[enAttente.length - 1];
       texteAttente.textContent = enAttente.length
-        ? `Enregistrement en cours : ${enAttente.length} vente${enAttente.length > 1 ? "s" : ""} · dernière : ${dernier.article.name}`
+        ? `Enregistrement en cours : ${enAttente.length} vente${enAttente.length > 1 ? "s" : ""} · dernière : ${dernier.article.name}${dernier.quantite > 1 ? " ×" + dernier.quantite : ""}`
         : "";
       bilan.textContent = session.nombre
         ? `Depuis l'ouverture du mode rush : ${session.nombre} vente${session.nombre > 1 ? "s" : ""} · ${formatPrice(session.total)}`
@@ -1588,6 +1592,8 @@
       const article = p.article;
       chaine = chaine.then(async () => {
         const prix = Number(article.unitPrice) || 0;
+        const quantite = p.quantite;
+        const montant = prix * quantite;
         const resultat = await addVente({
           id: generateId(),
           date: today(),
@@ -1595,19 +1601,19 @@
           article_id: article.id,
           moyen_paiement: paiement,
           type_vente: article.type === "services" ? "services" : "produits",
-          quantite: 1,
-          montant: prix,
+          quantite,
+          montant,
           justificatif: "",
           editer_recu: false,
           note: "",
         });
         if (resultat) {
-          envoyes[article.id] = (envoyes[article.id] || 0) + 1;
+          envoyes[article.id] = (envoyes[article.id] || 0) + quantite;
           session.nombre += 1;
-          session.total += prix;
-          if (suiviStock(article)) article.stock = Number(article.stock) - 1;
+          session.total += montant;
+          if (suiviStock(article)) article.stock = Number(article.stock) - quantite;
           // Même confirmation verte qu'en saisie normale
-          window.OGOUE_FEEDBACK?.succes(`Vente enregistrée : ${echapperHtml(article.name)} · ${formatPrice(prix)}`);
+          window.OGOUE_FEEDBACK?.succes(`Vente enregistrée : ${echapperHtml(article.name)}${quantite > 1 ? " ×" + quantite : ""} · ${formatPrice(montant)}`);
         }
         const i = enAttente.indexOf(p);
         if (i >= 0) enAttente.splice(i, 1);
@@ -1623,14 +1629,35 @@
       });
     }
 
+    // Clôt la série d'appuis d'un article et envoie la vente
+    function cloturer(p) {
+      clearTimeout(p.minuterie);
+      if (enCours[p.article.id] === p) delete enCours[p.article.id];
+      envoyer(p);
+    }
+
     function appui(article) {
-      const p = { article };
-      enAttente.push(p);
+      let p = enCours[article.id];
+      if (p) {
+        p.quantite += 1;
+        clearTimeout(p.minuterie);
+      } else {
+        p = { article, quantite: 1, minuterie: null };
+        enCours[article.id] = p;
+        enAttente.push(p);
+      }
+      p.minuterie = setTimeout(() => cloturer(p), DELAI_REGROUPEMENT_MS);
       if (navigator.vibrate) navigator.vibrate(15);
       afficher();
       majBarre();
-      envoyer(p);
     }
+
+    // Page quittée ou mise en arrière-plan : les séries ouvertes partent tout de suite
+    function toutCloturer() {
+      Object.values(enCours).forEach(cloturer);
+    }
+    document.addEventListener("visibilitychange", () => { if (document.hidden) toutCloturer(); });
+    window.addEventListener("pagehide", toutCloturer);
 
     grille.addEventListener("click", (e) => {
       const b = e.target.closest("[data-rush-article]");
@@ -1650,6 +1677,8 @@
         await trier();
         afficher();
         majBarre();
+      } else {
+        toutCloturer();
       }
     }
     bascule.addEventListener("click", (e) => {
