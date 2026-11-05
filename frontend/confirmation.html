@@ -24,6 +24,14 @@
     <span id="icone" class="material-symbols-outlined text-5xl text-[#0B2A5B]">progress_activity</span>
     <h1 id="titre" class="mt-4 text-xl font-bold">Confirmation de votre adresse…</h1>
     <p id="message" class="mt-2 text-sm text-[#5c6c60]"></p>
+    <!-- Première fois : le compte se termine avec le mot de passe (voir finaliserAvecMotDePasse) -->
+    <form id="finaliser" class="hidden mt-6 text-left" onsubmit="finaliserAvecMotDePasse(event)">
+      <label for="finaliser-mdp" class="block text-sm font-semibold text-[#0a0c0a]">Mot de passe</label>
+      <input id="finaliser-mdp" type="password" autocomplete="current-password" required
+        class="mt-2 block w-full h-14 px-4 rounded-[14px] border border-black/20 text-[17px] focus:outline-none focus:border-[#0088CC] focus:ring-2 focus:ring-[#0088CC]/20" />
+      <p id="finaliser-erreur" class="hidden mt-3 text-sm text-red-600"></p>
+      <button id="finaliser-bouton" type="submit" class="mt-5 w-full h-14 rounded-[16px] bg-[#0088CC] text-white text-[17px] font-bold hover:bg-[#0088CC]/90 disabled:opacity-60">Accéder à mon compte</button>
+    </form>
     <a id="lien" href="/login" class="hidden mt-6 inline-block rounded-lg text-white bg-[#0B2A5B] hover:bg-[#0B2A5B]/90 font-semibold px-5 py-3">Aller à la connexion</a>
   </main>
 
@@ -77,6 +85,18 @@
         }
       } catch (e) {
         console.error(e);
+        // Premier passage : le serveur ne crée l'entreprise qu'à la première
+        // connexion avec mot de passe (il en a besoin pour ouvrir aussi le
+        // compte de financement). On le demande ici, sans renvoyer ailleurs.
+        emailConfirme = emailDuJeton(accessToken);
+        if (emailConfirme) {
+          document.getElementById('icone').textContent = 'mark_email_read';
+          document.getElementById('titre').textContent = 'Adresse confirmée';
+          document.getElementById('message').textContent = "Dernière étape : saisissez le mot de passe choisi à l'inscription pour accéder à votre compte.";
+          document.getElementById('finaliser').classList.remove('hidden');
+          document.getElementById('finaliser-mdp').focus();
+          return;
+        }
         afficherErreur(
           'Adresse confirmée',
           'Votre adresse est bien confirmée, mais la connexion automatique a échoué. Connectez-vous avec votre e-mail et votre mot de passe.'
@@ -84,7 +104,11 @@
         return;
       }
 
-      // Suite choisie à l'inscription (paiement ou onboarding), deux chemins connus seulement
+      rediriger();
+    }
+
+    // Suite choisie à l'inscription (paiement ou onboarding), deux chemins connus seulement
+    function rediriger() {
       let suite = '';
       try {
         suite = localStorage.getItem('ogo_suite_apres_confirmation') || '';
@@ -94,9 +118,54 @@
         ? suite
         : '/app/module_tableau_bord.html';
 
+      document.getElementById('finaliser').classList.add('hidden');
+      document.getElementById('icone').textContent = 'check_circle';
       document.getElementById('titre').textContent = 'Adresse confirmée';
       document.getElementById('message').textContent = 'Bienvenue sur OGOUE. Redirection en cours…';
       setTimeout(() => { window.location.href = destination; }, 1200);
+    }
+
+    let emailConfirme = '';
+
+    // L'e-mail est dans le jeton reçu par le lien (partie centrale, en base64)
+    function emailDuJeton(jeton) {
+      try {
+        const morceau = jeton.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+        return JSON.parse(decodeURIComponent(escape(atob(morceau)))).email || '';
+      } catch (e) { return ''; }
+    }
+
+    // Connexion classique : elle crée l'entreprise au premier passage
+    async function finaliserAvecMotDePasse(event) {
+      event.preventDefault();
+      const bouton = document.getElementById('finaliser-bouton');
+      const erreur = document.getElementById('finaliser-erreur');
+      const motDePasse = document.getElementById('finaliser-mdp').value;
+      erreur.classList.add('hidden');
+      bouton.disabled = true;
+      try {
+        const reponse = await fetch(`${API_BASE_URL}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: emailConfirme, password: motDePasse })
+        });
+        const data = await reponse.json().catch(() => ({}));
+        if (!reponse.ok || !data.token) throw new Error(data.error || 'Connexion impossible. Réessayez.');
+
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        try {
+          const orgReponse = await fetch(`${API_BASE_URL}/api/organization`, {
+            headers: { 'Authorization': `Bearer ${data.token}` }
+          });
+          if (orgReponse.ok) localStorage.setItem('ogo_org', JSON.stringify(await orgReponse.json()));
+        } catch (e) { console.error('Organisation non chargée :', e); }
+        rediriger();
+      } catch (e) {
+        erreur.textContent = e.message;
+        erreur.classList.remove('hidden');
+        bouton.disabled = false;
+      }
     }
 
     ouvrirSession();

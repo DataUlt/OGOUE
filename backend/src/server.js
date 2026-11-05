@@ -2,6 +2,7 @@
 import { ensureBucketExists } from "./utils/supabase-storage.js";
 import { ensureDossiersBucketExists } from "./utils/financing-storage.js";
 import { ensureRecusBucketExists } from "./utils/recu-vente.js";
+import { planifierPurgeComptes } from "./utils/purge-comptes.js";
 
 const port = Number(process.env.PORT || 3001);
 
@@ -27,6 +28,8 @@ try {
   const server = app.listen(port, "0.0.0.0", () => {
     console.log(`✅ API is running on http://localhost:${port}`);
     console.log(`✅ Access from browser: http://127.0.0.1:${port}`);
+    // Comptes supprimés par leur gérant : effacement définitif 30 jours après
+    planifierPurgeComptes();
   });
 
   server.on("error", (err) => {

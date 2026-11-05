@@ -1,6 +1,7 @@
 ﻿import jwt from "jsonwebtoken";
 import { supabase } from "../db/supabase.js";
 import { JWT_SECRET } from "../config/secrets.js";
+import { etatSuppression, refusCompteFerme } from "../utils/compte-ferme.js";
 
 /**
  * Middleware pour vérifier et décoder le JWT Supabase
@@ -34,6 +35,9 @@ export async function authMiddleware(req, res, next) {
           role: "agent",
           organizationId: decoded.organizationId,
         };
+        // Compte supprimé par le gérant : ses agents perdent l'accès aussi
+        const etat = await etatSuppression(decoded.organizationId);
+        if (etat.ferme) return refusCompteFerme(res, etat.prevueLe);
         return next();
       }
     } catch (jwtErr) {
@@ -80,6 +84,10 @@ export async function authMiddleware(req, res, next) {
     if (!req.user.organizationId) {
       return res.status(403).json({ error: "Compte non rattaché à une entreprise" });
     }
+
+    // Compte supprimé par le gérant : fermé jusqu'à l'effacement définitif
+    const etat = await etatSuppression(req.user.organizationId);
+    if (etat.ferme) return refusCompteFerme(res, etat.prevueLe);
 
     next();
   } catch (err) {

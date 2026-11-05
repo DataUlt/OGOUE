@@ -2,6 +2,7 @@
 import { z } from "zod";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config/secrets.js";
+import { etatSuppression, refusCompteFerme } from "../utils/compte-ferme.js";
 
 // Seuls le RCCM et le NIF restent facultatifs : beaucoup de petites
 // entreprises n'en disposent pas encore au moment de l'inscription, et
@@ -501,6 +502,10 @@ export async function login(req, res) {
       });
     }
 
+    // Compte supprimé par le gérant : plus de connexion jusqu'à l'effacement
+    const suppression = await etatSuppression(userData.organization_id);
+    if (suppression.ferme) return refusCompteFerme(res, suppression.prevueLe);
+
     return res.json({
       message: "Connexion réussie",
       token: authData.session.access_token,
@@ -688,6 +693,10 @@ export async function loginAgent(req, res) {
       console.warn("Tentative de connexion agent avec un code invalide");
       return res.status(401).json({ error: "Code d'accès invalide ou désactivé" });
     }
+
+    // Entreprise supprimée par son gérant : ses agents ne se connectent plus
+    const suppression = await etatSuppression(agentRecord.organization_id);
+    if (suppression.ferme) return refusCompteFerme(res, suppression.prevueLe);
 
     // Récupérer les informations de l'organisation
     const { data: orgData, error: orgError } = await supabase

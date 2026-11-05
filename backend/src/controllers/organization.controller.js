@@ -1,4 +1,5 @@
-﻿import { supabase } from "../db/supabase.js";
+﻿import { supabase, supabaseAuth } from "../db/supabase.js";
+import { DELAI_SUPPRESSION_JOURS, oublierEtatSuppression } from "../utils/compte-ferme.js";
 
 export async function getOrganization(req, res) {
   try {
@@ -101,6 +102,61 @@ export async function enregistrerCanalAcquisition(req, res) {
     return res.json({ ok: true });
   } catch (error) {
     console.error("enregistrerCanalAcquisition error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+/**
+ * POST /api/organization/suppression — le gérant supprime son compte.
+ *
+ * Rien n'est effacé sur le moment : le compte est fermé (plus de connexion,
+ * agents compris) et l'effacement est programmé 30 jours plus tard
+ * (utils/purge-comptes.js). D'ici là, il se restaure en base
+ * (sql/SUPPRESSION_COMPTE.sql).
+ * Le mot de passe et le mot SUPPRIMER sont exigés : un clic égaré, ou un
+ * téléphone resté ouvert, ne doit pas suffire.
+ */
+export async function demanderSuppressionCompte(req, res) {
+  try {
+    const { password, confirmation } = req.body || {};
+    if (String(confirmation || "").trim().toUpperCase() !== "SUPPRIMER") {
+      return res.status(400).json({ error: "Tapez SUPPRIMER pour confirmer." });
+    }
+    if (!password || !req.user?.email) {
+      return res.status(400).json({ error: "Votre mot de passe est nécessaire pour confirmer." });
+    }
+
+    const { error: erreurVerif } = await supabaseAuth.auth.signInWithPassword({
+      email: req.user.email,
+      password: String(password),
+    });
+    if (erreurVerif) {
+      return res.status(401).json({ error: "Mot de passe incorrect", code: "mot_de_passe" });
+    }
+
+    const maintenant = new Date();
+    const prevueLe = new Date(maintenant.getTime() + DELAI_SUPPRESSION_JOURS * 24 * 60 * 60 * 1000);
+    const { data, error } = await supabase
+      .from("organizations")
+      .update({
+        suppression_demandee_le: maintenant.toISOString(),
+        suppression_prevue_le: prevueLe.toISOString(),
+      })
+      .eq("id", req.user.organizationId)
+      .select("id")
+      .maybeSingle();
+
+    if (error || !data) {
+      // Colonnes absentes tant que sql/SUPPRESSION_COMPTE.sql n'est pas passé
+      console.error("Demande de suppression impossible:", error?.message);
+      return res.status(500).json({ error: "La suppression n'a pas pu être enregistrée. Réessayez ou contactez OGOUE." });
+    }
+
+    oublierEtatSuppression(req.user.organizationId);
+    console.log(`🗑️  Suppression demandée pour ${req.user.organizationId}, effacement prévu le ${prevueLe.toISOString()}`);
+    return res.json({ ok: true, prevueLe: prevueLe.toISOString() });
+  } catch (error) {
+    console.error("demanderSuppressionCompte error:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 }

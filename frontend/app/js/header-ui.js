@@ -785,7 +785,15 @@
       content.appendChild(changerMdp);
     }
     content.appendChild(logoutLink);
-    
+    // Supprimer le compte : gérant seul, en retrait sous la déconnexion
+    if (u && u.role === 'manager') {
+      const supprimer = document.createElement('div');
+      supprimer.className = 'pt-3';
+      supprimer.innerHTML = '<button type="button" class="text-xs text-gray-500 dark:text-gray-400 hover:text-red-600 hover:underline flex items-center gap-2"><span class="material-symbols-outlined text-sm">delete_forever</span>Supprimer mon compte</button>';
+      supprimer.querySelector('button').addEventListener('click', () => { popover.remove(); ouvrirSuppressionCompte(); });
+      content.appendChild(supprimer);
+    }
+
     container.appendChild(content);
     popover.appendChild(container);
     
@@ -900,6 +908,18 @@
 
     if(notifBtn) attachBadge(notifBtn);
 
+    // Un seul panneau ouvert a la fois : ouvrir l'un ferme les autres.
+    // Les boutons arretent la propagation du clic, le gestionnaire du
+    // document ne peut donc pas s'en charger.
+    function fermerAutres(garde){
+      if(garde !== 'notif' && notifPopover){ notifPopover.remove(); notifPopover=null; }
+      if(garde !== 'settings' && settingsPopover){ settingsPopover.remove(); settingsPopover=null; }
+      if(garde !== 'profile' && profilePopover){ profilePopover.remove(); profilePopover=null; }
+    }
+    // Panneau ferme par sa propre croix : la variable doit l'oublier,
+    // sinon le bouton demanderait deux clics pour le rouvrir
+    const ouvert = (p) => !!(p && p.isConnected);
+
     document.addEventListener('click', function(e){
       if(notifBtn && !notifBtn.contains(e.target) && notifPopover && !notifPopover.contains(e.target)) { notifPopover.remove(); notifPopover=null; }
       if(settingsBtn && !settingsBtn.contains(e.target) && settingsPopover && !settingsPopover.contains(e.target)) { settingsPopover.remove(); settingsPopover=null; }
@@ -922,9 +942,11 @@
     if(notifBtn) {
       notifBtn.addEventListener('click', async function(e){
         e.stopPropagation();
-        if(notifPopover){ notifPopover.remove(); notifPopover=null; return; }
-        notifPopover = createPopover();
-        await renderNotifications(notifPopover);
+        if(ouvert(notifPopover)){ notifPopover.remove(); notifPopover=null; return; }
+        fermerAutres('notif');
+        const panneau = notifPopover = createPopover();
+        await renderNotifications(panneau);
+        if(notifPopover !== panneau) return;
         document.body.appendChild(notifPopover);
         setTimeout(() => positionPopover(notifPopover, notifBtn), 0);
       });
@@ -933,7 +955,8 @@
     if(settingsBtn) {
       settingsBtn.addEventListener('click', function(e){
         e.stopPropagation();
-        if(settingsPopover){ settingsPopover.remove(); settingsPopover=null; return; }
+        if(ouvert(settingsPopover)){ settingsPopover.remove(); settingsPopover=null; return; }
+        fermerAutres('settings');
         settingsPopover = createPopover();
         renderSettings(settingsPopover);
         document.body.appendChild(settingsPopover);
@@ -944,9 +967,12 @@
     if(profileEl) {
       profileEl.addEventListener('click', async function(e){
         e.stopPropagation();
-        if(profilePopover){ profilePopover.remove(); profilePopover=null; return; }
-        profilePopover = createPopover();
-        await renderProfile(profilePopover);
+        if(ouvert(profilePopover)){ profilePopover.remove(); profilePopover=null; return; }
+        fermerAutres('profile');
+        const panneau = profilePopover = createPopover();
+        await renderProfile(panneau);
+        // Un autre panneau a ete ouvert pendant le chargement : on n'affiche pas celui-ci
+        if(profilePopover !== panneau) return;
         document.body.appendChild(profilePopover);
         setTimeout(() => positionPopover(profilePopover, profileEl), 0);
       });
@@ -1183,6 +1209,75 @@ function ouvrirChangementMotDePasse() {
       ok.style.display = 'block';
       setTimeout(() => fond.remove(), 1500);
     } catch (e) {
+      afficherErreur('Connexion impossible. Réessayez.');
+    }
+  });
+}
+
+// ===== Suppression du compte (gérant) =====
+// Le serveur ferme le compte tout de suite et n'efface les données que
+// 30 jours plus tard : on le dit clairement avant de confirmer.
+function ouvrirSuppressionCompte() {
+  const ancien = document.getElementById('ogo-suppr-fenetre');
+  if (ancien) ancien.remove();
+  const fond = document.createElement('div');
+  fond.id = 'ogo-suppr-fenetre';
+  fond.style.cssText = 'position:fixed;inset:0;z-index:110;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(15,23,42,.45)';
+  const styleChamp = 'display:block;width:100%;margin-top:6px;padding:12px 14px;border:1px solid #E7EBF0;border-radius:12px;font-size:15px;box-sizing:border-box';
+  fond.innerHTML =
+    '<div style="width:100%;max-width:460px;max-height:90vh;overflow-y:auto;background:#fff;border-radius:24px;padding:24px;color:#0B1F3F">' +
+    '<h2 style="margin:0;font-size:20px;font-weight:700;color:#B91C1C">Supprimer mon compte</h2>' +
+    '<p style="margin:12px 0 0;font-size:14px;line-height:1.5">Votre compte sera <strong>fermé immédiatement</strong> : ni vous ni vos agents ne pourrez plus vous connecter.</p>' +
+    '<p style="margin:8px 0 0;font-size:14px;line-height:1.5">Toutes les données de l\'entreprise (ventes, dépenses, catalogue, agents, reçus et justificatifs) seront <strong>définitivement effacées dans 30 jours</strong>. D\'ici là, vous pouvez nous contacter pour restaurer le compte.</p>' +
+    '<p style="margin:8px 0 0;font-size:14px;line-height:1.5">Les dossiers de financement déjà envoyés restent chez l\'institution concernée. Un abonnement en cours n\'est pas remboursé.</p>' +
+    '<label style="display:block;margin-top:16px;font-size:14px;font-weight:600">Mot de passe' +
+    '<input id="suppr-mdp" type="password" autocomplete="current-password" style="' + styleChamp + '" /></label>' +
+    '<label style="display:block;margin-top:14px;font-size:14px;font-weight:600">Tapez <strong>SUPPRIMER</strong> pour confirmer' +
+    '<input id="suppr-mot" type="text" autocomplete="off" style="' + styleChamp + '" /></label>' +
+    '<p id="suppr-erreur" style="display:none;margin:12px 0 0;font-size:13px;color:#B91C1C"></p>' +
+    '<div style="display:flex;gap:10px;margin-top:20px">' +
+    '<button id="suppr-annuler" type="button" style="flex:1;height:46px;border:0;border-radius:999px;background:#F4F6F9;font-weight:600;color:#0B1F3F;cursor:pointer">Annuler</button>' +
+    '<button id="suppr-valider" type="button" style="flex:1;height:46px;border:0;border-radius:999px;background:#B91C1C;font-weight:600;color:#fff;cursor:pointer">Supprimer le compte</button>' +
+    '</div></div>';
+  document.body.appendChild(fond);
+
+  const erreur = document.getElementById('suppr-erreur');
+  const bouton = document.getElementById('suppr-valider');
+  const afficherErreur = (msg) => { erreur.textContent = msg; erreur.style.display = 'block'; };
+
+  document.getElementById('suppr-annuler').addEventListener('click', () => fond.remove());
+  fond.addEventListener('click', (e) => { if (e.target === fond) fond.remove(); });
+  bouton.addEventListener('click', async () => {
+    const motDePasse = document.getElementById('suppr-mdp').value;
+    const mot = document.getElementById('suppr-mot').value.trim().toUpperCase();
+    if (!motDePasse) return afficherErreur('Saisissez votre mot de passe.');
+    if (mot !== 'SUPPRIMER') return afficherErreur('Tapez SUPPRIMER pour confirmer.');
+    bouton.disabled = true;
+    bouton.style.opacity = '.6';
+    try {
+      const reponse = await fetch(API_BASE_URL + '/api/organization/suppression', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+        body: JSON.stringify({ password: motDePasse, confirmation: mot })
+      });
+      const data = await reponse.json().catch(() => ({}));
+      if (!reponse.ok) {
+        bouton.disabled = false;
+        bouton.style.opacity = '';
+        return afficherErreur(data.error || 'Suppression impossible. Réessayez.');
+      }
+      const date = data.prevueLe ? new Date(data.prevueLe).toLocaleDateString('fr-FR') : '';
+      alert('Votre compte est fermé. Les données seront définitivement effacées' + (date ? ' le ' + date : ' dans 30 jours') + '.');
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('user');
+      if (typeof oublierChiffresMemorises === 'function') oublierChiffresMemorises();
+      const MARKETING_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
+        ? 'http://localhost:8080'
+        : 'https://www.ogoue.com';
+      window.location.href = MARKETING_BASE + '/login.html';
+    } catch (e) {
+      bouton.disabled = false;
+      bouton.style.opacity = '';
       afficherErreur('Connexion impossible. Réessayez.');
     }
   });

@@ -291,6 +291,9 @@
     return n.toLocaleString("fr-FR", { maximumFractionDigits: 0 }) + " FCFA";
   }
 
+  // Appelé après chaque mise en place des champs d'article (saisie par cartes)
+  let apresChangementListe = null;
+
   function setModeListEmpty() {
     // liste vide => input texte seul, pas de select, pas de "Autres"
     if (firstWrapper) firstWrapper.classList.remove("hidden");
@@ -307,6 +310,7 @@
       autreInput.required = false;
       autreInput.value = "";
     }
+    if (apresChangementListe) apresChangementListe();
   }
 
   function setModeListNotEmpty() {
@@ -330,6 +334,7 @@
     }
 
     buildArticleOptions();
+    if (apresChangementListe) apresChangementListe();
   }
 
   function toggleOther(isOther) {
@@ -1431,6 +1436,253 @@
   if (btnExport) {
     btnExport.addEventListener("click", exportVentesCSV);
   }
+
+  // =========================
+  // 🧾 SAISIE NORMALE PAR CARTES
+  // =========================
+  // Même grille d'articles que le mode rush, mais rien ne part tout seul :
+  // un appui choisit l'article, chaque appui de plus sur la même carte
+  // ajoute une unité, le prix se calcule depuis le catalogue. La date, le
+  // commentaire et le justificatif restent à remplir, puis la personne
+  // appuie sur « Enregistrer la vente ».
+  // Les champs d'origine restent dans la page, cachés : ils portent les
+  // valeurs envoyées (getFormData) et reviennent pour la saisie à la main
+  // (article hors catalogue, prix négocié).
+  (function saisieParCartes() {
+    const dateInput = document.getElementById("vente-date");
+    const moyenInput = document.getElementById("vente-moyen-paiement");
+    const typeInput = document.getElementById("vente-type");
+    const qteInput = document.getElementById("vente-quantite");
+    const montantInput = document.getElementById("vente-montant");
+    if (!dateInput || !moyenInput || !typeInput || !qteInput || !montantInput || !selectWrapper) return;
+
+    const ligneDate = dateInput.closest(".grid");
+    const blocArticle = selectWrapper.parentElement;
+    const ligneMoyen = moyenInput.closest(".grid");
+    const ligneQuantite = qteInput.closest(".grid");
+    const CLE_PAIEMENT = "ogo_rush_paiement"; // même préférence que le mode rush
+    const lire = (cle, defaut) => { try { return localStorage.getItem(cle) || defaut; } catch (e) { return defaut; } };
+    const ecrire = (cle, val) => { try { localStorage.setItem(cle, val); } catch (e) {} };
+
+    let actif = false;      // grille affichée (sinon : saisie à la main)
+    let manuel = false;     // la personne a choisi la saisie à la main
+    let ordre = [];
+    let choix = null;       // { article, quantite }
+    let paiement = lire(CLE_PAIEMENT, "cash");
+
+    // ── Paiement, à côté de la date ──
+    const blocPaiement = document.createElement("div");
+    blocPaiement.className = "hidden flex-col";
+    blocPaiement.innerHTML =
+      `<p class="text-base font-medium leading-normal pb-2 text-[#0d1b19] dark:text-gray-200">Moyen de paiement<span class="text-red-500">*</span></p>` +
+      `<div class="inline-flex self-start rounded-full bg-gray-100 dark:bg-gray-800 p-1" data-cartes-paiement>` +
+      `<button type="button" data-paiement="cash" class="px-5 h-12 rounded-full text-sm font-bold">Cash</button>` +
+      `<button type="button" data-paiement="mobile_money" class="px-5 h-12 rounded-full text-sm font-bold">Mobile Money</button></div>`;
+    ligneDate.appendChild(blocPaiement);
+
+    // ── Grille d'articles et résumé du choix ──
+    const blocCartes = document.createElement("div");
+    blocCartes.className = "hidden";
+    blocCartes.innerHTML = `
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+        <p class="text-base font-medium leading-normal text-[#0d1b19] dark:text-gray-200">Article / service<span class="text-red-500">*</span></p>
+        <input type="search" data-cartes-recherche placeholder="Rechercher un article"
+               class="form-input w-full sm:w-64 h-10 rounded-full border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark text-sm px-4 text-[#0d1b19] dark:text-white">
+      </div>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Un appui choisit l'article. Appuis répétés sur la même carte = plusieurs unités (2 appuis = quantité 2).</p>
+      <div data-cartes-grille class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3"></div>
+      <div data-cartes-choix class="hidden mt-4 items-center justify-between gap-3 rounded-2xl border border-primary/40 bg-primary/5 px-4 py-3">
+        <p class="text-sm text-[#0d1b19] dark:text-gray-100"><span data-cartes-resume class="font-bold"></span></p>
+        <div class="flex items-center gap-2 shrink-0">
+          <button type="button" data-cartes-moins class="size-9 rounded-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-lg font-bold" aria-label="Une unité de moins">−</button>
+          <button type="button" data-cartes-plus class="size-9 rounded-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-lg font-bold" aria-label="Une unité de plus">+</button>
+          <button type="button" data-cartes-retirer class="ml-1 text-sm font-medium text-gray-500 hover:text-red-600 hover:underline">Retirer</button>
+        </div>
+      </div>
+      <p data-cartes-erreur class="hidden mt-3 text-sm font-medium text-red-600"></p>
+      <button type="button" data-cartes-manuel class="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+        <span class="material-symbols-outlined text-base">edit</span>Article hors catalogue ou prix différent ? Saisie à la main
+      </button>`;
+    ligneDate.insertAdjacentElement("afterend", blocCartes);
+
+    // Retour à la grille depuis la saisie à la main
+    const lienGrille = document.createElement("button");
+    lienGrille.type = "button";
+    lienGrille.className = "hidden mt-2 items-center gap-1 text-sm font-medium text-primary hover:underline";
+    lienGrille.innerHTML = `<span class="material-symbols-outlined text-base">grid_view</span>Revenir aux articles du catalogue`;
+    blocArticle.appendChild(lienGrille);
+
+    const grille = blocCartes.querySelector("[data-cartes-grille]");
+    const zoneChoix = blocCartes.querySelector("[data-cartes-choix]");
+    const resume = blocCartes.querySelector("[data-cartes-resume]");
+    const erreur = blocCartes.querySelector("[data-cartes-erreur]");
+    const recherche = blocCartes.querySelector("[data-cartes-recherche]");
+    const cle = (nom) => normalizeLabel(nom).toLowerCase();
+    const suiviStock = (a) => a.stock !== null && a.stock !== undefined;
+
+    function majPaiement() {
+      blocPaiement.querySelectorAll("[data-paiement]").forEach((b) => {
+        const on = b.dataset.paiement === paiement;
+        b.classList.toggle("bg-white", on);
+        b.classList.toggle("dark:bg-gray-600", on);
+        b.classList.toggle("shadow-sm", on);
+        b.classList.toggle("text-[#0d1b19]", on);
+        b.classList.toggle("dark:text-white", on);
+        b.classList.toggle("text-gray-500", !on);
+      });
+      moyenInput.value = paiement;
+    }
+
+    async function trier() {
+      let ventes = [];
+      try { ventes = await getVentesPeriodeCourante(); } catch (e) {}
+      const compte = {};
+      (ventes || []).forEach((v) => { const k = cle(v.description); compte[k] = (compte[k] || 0) + 1; });
+      ordre = [...articlesCache].sort((a, b) =>
+        (compte[cle(b.name)] || 0) - (compte[cle(a.name)] || 0) || String(a.name).localeCompare(String(b.name), "fr"));
+    }
+
+    function carte(a) {
+      const prix = Number(a.unitPrice) || 0;
+      const reste = suiviStock(a) ? Number(a.stock) : null;
+      const bloque = prix <= 0 || (reste !== null && reste <= 0);
+      const choisi = choix && choix.article.id === a.id;
+      const sousTitre = prix <= 0 ? "Prix à fixer dans le catalogue"
+        : reste !== null && reste <= 0 ? "Rupture de stock"
+        : reste !== null ? `Stock : ${reste}` : "";
+      return `<button type="button" data-carte-article="${echapperHtml(a.id)}" ${bloque ? "disabled" : ""}
+        class="relative text-left min-h-[104px] rounded-2xl border-2 p-4 flex flex-col justify-between gap-2 transition active:scale-95 touch-manipulation select-none
+               ${bloque ? "border-gray-200 dark:border-gray-700 opacity-50 cursor-not-allowed"
+                 : choisi ? "border-primary bg-primary/5 dark:bg-[#1f3532] ring-2 ring-primary/30"
+                 : "border-[#cfe7e3] dark:border-gray-600 bg-white dark:bg-[#1f3532] hover:border-primary"}">
+        ${choisi ? `<span class="absolute -top-2 -right-2 min-w-7 h-7 px-2 rounded-full bg-primary text-white text-sm font-bold flex items-center justify-center">×${choix.quantite}</span>` : ""}
+        <span class="font-bold text-[#0d1b19] dark:text-white leading-snug line-clamp-2">${echapperHtml(a.name)}</span>
+        <span>
+          <span class="block text-base font-bold text-primary">${prix > 0 ? formatPrice(prix) : "—"}</span>
+          ${sousTitre ? `<span class="block text-xs text-gray-500 dark:text-gray-400">${sousTitre}</span>` : ""}
+        </span>
+      </button>`;
+    }
+
+    function afficher() {
+      const filtre = cle(recherche.value);
+      const liste = ordre.filter((a) => !filtre || cle(a.name).includes(filtre));
+      grille.innerHTML = liste.length
+        ? liste.map(carte).join("")
+        : `<p class="col-span-full text-sm text-gray-500 dark:text-gray-400">Aucun article ne correspond. Pour un article hors catalogue, utilisez la saisie à la main.</p>`;
+      zoneChoix.classList.toggle("hidden", !choix);
+      zoneChoix.classList.toggle("flex", !!choix);
+      if (choix) {
+        const prix = Number(choix.article.unitPrice) || 0;
+        resume.textContent = `${choix.article.name} × ${choix.quantite} = ${formatPrice(prix * choix.quantite)}`;
+      }
+    }
+
+    // Les champs cachés portent le choix : getFormData les lit à l'envoi
+    function reporterChoix() {
+      erreur.classList.add("hidden");
+      if (!choix) {
+        if (articleSelect) articleSelect.value = "";
+        qteInput.value = "";
+        montantInput.value = "";
+        return;
+      }
+      const a = choix.article;
+      if (articleSelect) articleSelect.value = a.name;
+      qteInput.value = String(choix.quantite);
+      montantInput.value = String((Number(a.unitPrice) || 0) * choix.quantite);
+      typeInput.value = a.type === "services" ? "services" : "produits";
+      moyenInput.value = paiement;
+    }
+
+    const maxPour = (a) => (suiviStock(a) ? Number(a.stock) : Infinity);
+    function changerQuantite(delta) {
+      if (!choix) return;
+      const q = choix.quantite + delta;
+      if (q < 1) { choix = null; }
+      else if (q > maxPour(choix.article)) {
+        erreur.textContent = `Il ne reste que ${maxPour(choix.article)} unité(s) de « ${choix.article.name} » en stock.`;
+        erreur.classList.remove("hidden");
+        return;
+      } else choix.quantite = q;
+      reporterChoix();
+      afficher();
+    }
+
+    // Grille ou champs d'origine. Les champs cachés perdent leur « required » :
+    // un champ obligatoire invisible bloquerait l'envoi sans rien dire.
+    function appliquer() {
+      actif = !manuel && articlesCache.length > 0;
+      blocCartes.classList.toggle("hidden", !actif);
+      blocPaiement.classList.toggle("hidden", !actif);
+      blocPaiement.classList.toggle("flex", actif);
+      blocArticle.classList.toggle("hidden", actif);
+      ligneMoyen.classList.toggle("hidden", actif);
+      ligneQuantite.classList.toggle("hidden", actif);
+      lienGrille.classList.toggle("hidden", actif || articlesCache.length === 0);
+      lienGrille.classList.toggle("inline-flex", !actif && articlesCache.length > 0);
+      [moyenInput, typeInput, qteInput, montantInput].forEach((c) => { c.required = !actif; });
+      if (actif) {
+        if (articleSelect) articleSelect.required = false;
+        if (firstInput) firstInput.required = false;
+        if (autreInput) { autreInput.required = false; autreWrapper?.classList.add("hidden"); }
+        majPaiement();
+        reporterChoix();
+      }
+    }
+
+    // Le catalogue a été (re)chargé : setModeList* vient de remettre les champs d'origine
+    apresChangementListe = async () => {
+      if (!manuel && articlesCache.length) { await trier(); afficher(); }
+      appliquer();
+    };
+
+    blocPaiement.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-paiement]");
+      if (!b) return;
+      paiement = b.dataset.paiement;
+      ecrire(CLE_PAIEMENT, paiement);
+      majPaiement();
+    });
+    grille.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-carte-article]");
+      if (!b || b.disabled) return;
+      const a = ordre.find((x) => String(x.id) === b.dataset.carteArticle);
+      if (!a) return;
+      if (choix && choix.article.id === a.id) return changerQuantite(1);
+      choix = { article: a, quantite: 1 };
+      if (navigator.vibrate) navigator.vibrate(15);
+      reporterChoix();
+      afficher();
+    });
+    blocCartes.querySelector("[data-cartes-plus]").addEventListener("click", () => changerQuantite(1));
+    blocCartes.querySelector("[data-cartes-moins]").addEventListener("click", () => changerQuantite(-1));
+    blocCartes.querySelector("[data-cartes-retirer]").addEventListener("click", () => { choix = null; reporterChoix(); afficher(); });
+    blocCartes.querySelector("[data-cartes-manuel]").addEventListener("click", () => {
+      manuel = true;
+      choix = null;
+      appliquer();
+      if (articlesCache.length) setModeListNotEmpty(); // champs d'origine propres
+    });
+    lienGrille.addEventListener("click", () => { manuel = false; apresChangementListe(); });
+    recherche.addEventListener("input", afficher);
+
+    // Envoi sans article choisi : message sous la grille plutôt qu'une alerte
+    form.addEventListener("submit", (e) => {
+      if (!actif || choix) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      erreur.textContent = "Choisissez un article en appuyant sur sa carte.";
+      erreur.classList.remove("hidden");
+      blocCartes.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, true);
+
+    // Après un enregistrement (form.reset) : grille vide, paiement conservé
+    form.addEventListener("reset", () => {
+      choix = null;
+      setTimeout(() => { if (actif) { majPaiement(); reporterChoix(); afficher(); } }, 0);
+    });
+  })();
 
   // =========================
   // ⚡ MODE RUSH
