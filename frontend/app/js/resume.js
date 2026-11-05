@@ -105,7 +105,8 @@ function loadRepartitions(ventes, depenses) {
   // Répartition moyens de paiement (ventes)
   const ventesParPaiement = {};
   ventes.forEach((v) => {
-    const paiement = v.moyen_paiement === "mobile_money" ? "Mobile Money" : 
+    const paiement = v.moyen_paiement === "credit" ? "Crédit" :
+                     v.moyen_paiement === "mobile_money" ? "Mobile Money" :
                      v.moyen_paiement === "cash" ? "Cash" : 
                      (v.moyen_paiement || "Autres");
     const montant = parseFloat(v.montant || v.amount || 0);
@@ -121,7 +122,7 @@ function loadRepartitions(ventes, depenses) {
       const html = `
         <div class="flex items-center gap-4 py-4">
           <div class="flex flex-col gap-1 flex-1">
-            <p class="text-sm font-normal leading-normal text-white/75">Total encaissé en ${paiement}</p>
+            <p class="text-sm font-normal leading-normal text-white/75">${paiement === "Crédit" ? "Vendu à crédit (pas encore encaissé)" : `Total encaissé en ${paiement}`}</p>
             <p class="text-base font-semibold leading-normal text-white">${formatMontant(montant)}</p>
           </div>
           <div class="w-12 h-12 rounded-full bg-white/15 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">

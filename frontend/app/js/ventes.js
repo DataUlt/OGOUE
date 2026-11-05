@@ -710,6 +710,8 @@
             ? "Mobile Money"
             : vente.moyen_paiement === "cash"
             ? "Cash"
+            : vente.moyen_paiement === "credit"
+            ? '<span class="inline-flex items-center rounded-full bg-orange-100 dark:bg-orange-900/40 px-2 py-0.5 text-xs font-bold text-orange-700 dark:text-orange-300">Crédit</span>'
             : echapperHtml(vente.moyen_paiement || "-")
         }
       </td>
@@ -1293,7 +1295,7 @@
         { name: "quantity", label: "Quantité", type: "number", value: vente.quantite, disabled: !!vente.numeroRecu,
           aide: vente.numeroRecu ? "Un reçu numéroté a été émis : la quantité ne peut plus changer." : "" },
         { name: "paymentMethod", label: "Moyen de paiement", type: "select", value: vente.moyen_paiement || "",
-          options: [{ value: "cash", label: "Cash" }, { value: "mobile_money", label: "Mobile Money" }] },
+          options: [{ value: "cash", label: "Cash" }, { value: "mobile_money", label: "Mobile Money" }, { value: "credit", label: "Crédit (payé plus tard)" }] },
         { name: "amount", label: "Montant (FCFA)", type: "number", value: vente.montant, disabled: !!vente.numeroRecu,
           aide: vente.numeroRecu ? "Un reçu numéroté a été émis : le montant ne peut plus changer." : "" },
         { name: "note", label: "Commentaire (facultatif)", type: "textarea", value: vente.note || "", pleine: true },
@@ -1466,6 +1468,7 @@
 
     let actif = false;      // grille affichée (sinon : saisie à la main)
     let manuel = false;     // la personne a choisi la saisie à la main
+    let chargement = true;  // catalogue pas encore reçu du serveur : on montre déjà la grille
     let ordre = [];
     let choix = null;       // { article, quantite }
     let paiement = lire(CLE_PAIEMENT, "cash");
@@ -1477,7 +1480,8 @@
       `<p class="text-base font-medium leading-normal pb-2 text-[#0d1b19] dark:text-gray-200">Moyen de paiement<span class="text-red-500">*</span></p>` +
       `<div class="inline-flex self-start rounded-full bg-gray-100 dark:bg-gray-800 p-1" data-cartes-paiement>` +
       `<button type="button" data-paiement="cash" class="px-5 h-12 rounded-full text-sm font-bold">Cash</button>` +
-      `<button type="button" data-paiement="mobile_money" class="px-5 h-12 rounded-full text-sm font-bold">Mobile Money</button></div>`;
+      `<button type="button" data-paiement="mobile_money" class="px-5 h-12 rounded-full text-sm font-bold">Mobile Money</button>` +
+      `<button type="button" data-paiement="credit" class="px-5 h-12 rounded-full text-sm font-bold" title="Le client paiera plus tard">Crédit</button></div>`;
     ligneDate.appendChild(blocPaiement);
 
     // ── Grille d'articles et résumé du choix ──
@@ -1500,8 +1504,8 @@
         </div>
       </div>
       <p data-cartes-erreur class="hidden mt-3 text-sm font-medium text-red-600"></p>
-      <button type="button" data-cartes-manuel class="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
-        <span class="material-symbols-outlined text-base">edit</span>Article hors catalogue ou prix différent ? Saisie à la main
+      <button type="button" data-cartes-ajouter class="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+        <span class="material-symbols-outlined text-base">add_circle</span>Article ou service absent ? Ajoutez-le au catalogue
       </button>`;
     ligneDate.insertAdjacentElement("afterend", blocCartes);
 
@@ -1519,6 +1523,21 @@
     const recherche = blocCartes.querySelector("[data-cartes-recherche]");
     const cle = (nom) => normalizeLabel(nom).toLowerCase();
     const suiviStock = (a) => a.stock !== null && a.stock !== undefined;
+
+    // Le serveur met parfois plusieurs secondes à répondre : le dernier
+    // catalogue connu, rangé dans l'ordre d'affichage, s'affiche tout de
+    // suite, puis il est remplacé dès que la réponse arrive.
+    const CLE_CATALOGUE = "ogo_catalogue_cartes";
+    const entreprise = (() => { try { return (JSON.parse(localStorage.getItem("user") || "null") || {}).organizationId || ""; } catch (e) { return ""; } })();
+    function lireCatalogue() {
+      try {
+        const c = JSON.parse(localStorage.getItem(CLE_CATALOGUE) || "null");
+        return c && c.entreprise === entreprise && Array.isArray(c.articles) ? c.articles : null;
+      } catch (e) { return null; }
+    }
+    function garderCatalogue() {
+      try { localStorage.setItem(CLE_CATALOGUE, JSON.stringify({ entreprise, articles: ordre })); } catch (e) {}
+    }
 
     function majPaiement() {
       blocPaiement.querySelectorAll("[data-paiement]").forEach((b) => {
@@ -1565,6 +1584,13 @@
     }
 
     function afficher() {
+      if (chargement && !ordre.length) {
+        // Cartes d'attente, à la place des anciens champs
+        grille.innerHTML = Array.from({ length: 4 }, () =>
+          `<div class="min-h-[104px] rounded-2xl border-2 border-gray-100 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 animate-pulse"></div>`).join("");
+        zoneChoix.classList.add("hidden");
+        return;
+      }
       const filtre = cle(recherche.value);
       const liste = ordre.filter((a) => !filtre || cle(a.name).includes(filtre));
       grille.innerHTML = liste.length
@@ -1612,7 +1638,7 @@
     // Grille ou champs d'origine. Les champs cachés perdent leur « required » :
     // un champ obligatoire invisible bloquerait l'envoi sans rien dire.
     function appliquer() {
-      actif = !manuel && articlesCache.length > 0;
+      actif = !manuel && (chargement || articlesCache.length > 0);
       blocCartes.classList.toggle("hidden", !actif);
       blocPaiement.classList.toggle("hidden", !actif);
       blocPaiement.classList.toggle("flex", actif);
@@ -1633,7 +1659,9 @@
 
     // Le catalogue a été (re)chargé : setModeList* vient de remettre les champs d'origine
     apresChangementListe = async () => {
-      if (!manuel && articlesCache.length) { await trier(); afficher(); }
+      chargement = false;
+      if (!manuel && articlesCache.length) { await trier(); garderCatalogue(); afficher(); }
+      else if (!articlesCache.length) { ordre = []; garderCatalogue(); }
       appliquer();
     };
 
@@ -1658,12 +1686,108 @@
     blocCartes.querySelector("[data-cartes-plus]").addEventListener("click", () => changerQuantite(1));
     blocCartes.querySelector("[data-cartes-moins]").addEventListener("click", () => changerQuantite(-1));
     blocCartes.querySelector("[data-cartes-retirer]").addEventListener("click", () => { choix = null; reporterChoix(); afficher(); });
-    blocCartes.querySelector("[data-cartes-manuel]").addEventListener("click", () => {
-      manuel = true;
-      choix = null;
-      appliquer();
-      if (articlesCache.length) setModeListNotEmpty(); // champs d'origine propres
-    });
+    blocCartes.querySelector("[data-cartes-ajouter]").addEventListener("click", ouvrirAjoutCatalogue);
+
+    // ── Fenêtre « Ajouter au catalogue » ──
+    // L'article ajouté rejoint le catalogue partagé (gérant et agents) et
+    // devient aussitôt le choix de la vente en cours.
+    function ouvrirAjoutCatalogue() {
+      document.getElementById("ogo-ajout-catalogue")?.remove();
+      const champ = "form-input w-full h-12 rounded-xl border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark px-4 text-base text-[#0d1b19] dark:text-white focus:ring-2 focus:ring-primary/50";
+      const fond = document.createElement("div");
+      fond.id = "ogo-ajout-catalogue";
+      fond.className = "fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4";
+      fond.innerHTML = `
+        <form role="dialog" aria-modal="true" aria-labelledby="ogo-ajout-titre" novalidate
+              class="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-2xl">
+          <div class="flex items-center justify-between gap-4 mb-1">
+            <h3 id="ogo-ajout-titre" class="text-xl font-bold text-[#0d1b19] dark:text-white">Ajouter au catalogue</h3>
+            <button type="button" data-fermer aria-label="Fermer" class="inline-flex items-center justify-center size-8 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200">
+              <span class="material-symbols-outlined text-base">close</span>
+            </button>
+          </div>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">Il sera proposé à chaque vente, pour vous et vos agents.</p>
+          <div class="inline-flex rounded-full bg-gray-100 dark:bg-gray-700 p-1 mb-5" data-type>
+            <button type="button" data-valeur="produits" class="px-4 h-9 rounded-full text-sm font-bold">Produit</button>
+            <button type="button" data-valeur="services" class="px-4 h-9 rounded-full text-sm font-bold">Service</button>
+          </div>
+          <label class="block mb-4"><span class="block text-sm font-semibold text-[#0d1b19] dark:text-gray-200 mb-2">Nom</span>
+            <input name="nom" type="text" maxlength="120" placeholder="Ex. : Gâteau au chocolat" class="${champ}"></label>
+          <label class="block mb-4"><span class="block text-sm font-semibold text-[#0d1b19] dark:text-gray-200 mb-2">Prix de vente (FCFA)</span>
+            <input name="prix" type="number" min="1" step="1" inputmode="numeric" placeholder="Ex. : 4000" class="${champ}"></label>
+          <label class="block mb-2" data-bloc-stock><span class="block text-sm font-semibold text-[#0d1b19] dark:text-gray-200 mb-2">Stock disponible <span class="font-normal text-gray-500">(facultatif)</span></span>
+            <input name="stock" type="number" min="0" step="1" inputmode="numeric" placeholder="Laissez vide si vous ne suivez pas le stock" class="${champ}"></label>
+          <p data-erreur class="hidden mt-3 text-sm font-medium text-red-600"></p>
+          <div class="mt-6 flex justify-end gap-3">
+            <button type="button" data-fermer class="px-5 h-12 rounded-xl text-sm font-bold bg-gray-200 dark:bg-gray-700 text-[#0d1b19] dark:text-gray-200 hover:bg-gray-300">Annuler</button>
+            <button type="submit" data-valider class="px-5 h-12 rounded-xl text-sm font-bold bg-primary text-white hover:bg-primary/90 disabled:opacity-60">Ajouter et choisir</button>
+          </div>
+          <div class="mt-5 pt-4 border-t border-gray-200 dark:border-gray-700 text-sm space-y-2">
+            <a href="module_articles.html" class="block text-primary font-medium hover:underline">Gérer tout le catalogue (prix d'achat, modifications…)</a>
+          </div>
+        </form>`;
+      document.body.appendChild(fond);
+
+      const f = fond.querySelector("form");
+      const erreurAjout = fond.querySelector("[data-erreur]");
+      const blocStock = fond.querySelector("[data-bloc-stock]");
+      let type = "produits";
+      const majType = () => {
+        fond.querySelectorAll("[data-type] [data-valeur]").forEach((b) => {
+          const on = b.dataset.valeur === type;
+          b.classList.toggle("bg-white", on); b.classList.toggle("dark:bg-gray-600", on); b.classList.toggle("shadow-sm", on);
+          b.classList.toggle("text-[#0d1b19]", on); b.classList.toggle("dark:text-white", on); b.classList.toggle("text-gray-500", !on);
+        });
+        blocStock.classList.toggle("hidden", type === "services"); // un service ne se stocke pas
+      };
+      majType();
+      fond.querySelector("[data-type]").addEventListener("click", (e) => {
+        const b = e.target.closest("[data-valeur]");
+        if (b) { type = b.dataset.valeur; majType(); }
+      });
+
+      const fermer = () => { document.removeEventListener("keydown", surEchap); fond.remove(); };
+      function surEchap(e) { if (e.key === "Escape") fermer(); }
+      document.addEventListener("keydown", surEchap);
+      fond.querySelectorAll("[data-fermer]").forEach((b) => b.addEventListener("click", fermer));
+      fond.addEventListener("click", (e) => { if (e.target === fond) fermer(); });
+
+      f.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const nom = normalizeLabel(f.elements.nom.value);
+        const prix = Number(f.elements.prix.value);
+        const stockSaisi = f.elements.stock.value.trim();
+        const montrer = (m) => { erreurAjout.textContent = m; erreurAjout.classList.remove("hidden"); };
+        if (!nom) return montrer("Indiquez le nom.");
+        if (!(prix > 0)) return montrer("Indiquez un prix de vente supérieur à 0.");
+        if (findArticleByName(nom)) return montrer("Un article porte déjà ce nom dans le catalogue.");
+        const stock = type === "produits" && stockSaisi !== "" ? Math.max(0, Math.floor(Number(stockSaisi))) : null;
+
+        const bouton = fond.querySelector("[data-valider]");
+        bouton.disabled = true;
+        erreurAjout.classList.add("hidden");
+        const resultat = await window.OGOUE.addArticle({ name: nom, type, unitPrice: prix, stock });
+        if (!resultat.ok) {
+          bouton.disabled = false;
+          return montrer(resultat.status === 409 ? "Un article porte déjà ce nom dans le catalogue." : (resultat.error || "Ajout impossible. Réessayez."));
+        }
+
+        fermer();
+        await loadArticles();
+        buildArticleOptions();
+        manuel = false;
+        await apresChangementListe();
+        const ajoute = ordre.find((a) => (resultat.article && a.id === resultat.article.id) || cle(a.name) === cle(nom));
+        if (ajoute && !(suiviStock(ajoute) && Number(ajoute.stock) <= 0)) {
+          choix = { article: ajoute, quantite: 1 };
+          reporterChoix();
+          afficher();
+        }
+        window.OGOUE_FEEDBACK?.succes(`« ${echapperHtml(nom)} » ajouté au catalogue`);
+      });
+
+      f.elements.nom.focus();
+    }
     lienGrille.addEventListener("click", () => { manuel = false; apresChangementListe(); });
     recherche.addEventListener("input", afficher);
 
@@ -1676,6 +1800,18 @@
       erreur.classList.remove("hidden");
       blocCartes.scrollIntoView({ behavior: "smooth", block: "center" });
     }, true);
+
+    const catalogueGarde = lireCatalogue();
+    if (catalogueGarde && catalogueGarde.length) {
+      ordre = catalogueGarde;
+      // Les cartes doivent pouvoir servir avant la réponse : même liste que celle de l'envoi
+      if (!articlesCache.length) {
+        articlesCache = catalogueGarde.slice();
+        buildArticleOptions(); // la liste cachée doit connaître l'article choisi
+      }
+    }
+    afficher();
+    appliquer();
 
     // Après un enregistrement (form.reset) : grille vide, paiement conservé
     form.addEventListener("reset", () => {
@@ -1723,6 +1859,7 @@
         <div class="inline-flex rounded-full bg-gray-100 dark:bg-gray-800 p-1" data-rush-paiement>
           <button type="button" data-paiement="cash" class="px-4 h-9 rounded-full text-sm font-bold">Cash</button>
           <button type="button" data-paiement="mobile_money" class="px-4 h-9 rounded-full text-sm font-bold">Mobile Money</button>
+          <button type="button" data-paiement="credit" class="px-4 h-9 rounded-full text-sm font-bold" title="Le client paiera plus tard">Crédit</button>
         </div>
         <input type="search" data-rush-recherche placeholder="Rechercher un article"
                class="form-input ml-auto w-full sm:w-64 h-10 rounded-full border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark text-sm px-4 text-[#0d1b19] dark:text-white">

@@ -89,6 +89,7 @@ function formatDate(valeur) {
 const MOYENS = {
   cash: "Espèces",
   mobile_money: "Mobile Money",
+  credit: "Crédit (à régler)",
   card: "Carte bancaire",
   bank_transfer: "Virement bancaire",
   cheque: "Chèque",
