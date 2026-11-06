@@ -7,7 +7,9 @@
     const style = document.createElement('style');
     style.textContent =
         '@media (max-width: 767px) {' +
-        '  header:has(#menu-toggle) img[alt*="Logo"] { margin-left: -31px; }' +
+        // Taille d'origine (comme sur la page Articles) : sans « max-width: none »,
+        // le logo se laisse écraser en largeur pour faire place au menu
+        '  header:has(#menu-toggle) img[alt*="Logo"] { margin-left: -42px; max-width: none; }' +
         '  header:has(#menu-toggle) #menu-toggle { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }' +
         '}';
     document.head.appendChild(style);

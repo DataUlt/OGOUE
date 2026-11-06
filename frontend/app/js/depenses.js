@@ -1162,10 +1162,21 @@
     blocCartes.innerHTML = `
       <p class="text-base font-medium leading-normal pb-2 text-[#0a0c0a] dark:text-gray-200">Catégorie <span class="text-red-500">*</span></p>
       <div data-cartes-categories class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3"></div>
+      <button type="button" data-changer-categorie class="hidden mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline">
+        <span class="material-symbols-outlined text-base">swap_horiz</span>Changer de catégorie</button>
       <p data-cartes-erreur class="hidden mt-3 text-sm font-medium text-red-600">Choisissez la catégorie de cette dépense.</p>`;
     ligneDate.insertAdjacentElement("afterend", blocCartes);
     const grille = blocCartes.querySelector("[data-cartes-categories]");
     const erreur = blocCartes.querySelector("[data-cartes-erreur]");
+    const changer = blocCartes.querySelector("[data-changer-categorie]");
+
+    // Tant qu'aucune catégorie n'est choisie, la suite du formulaire (montant,
+    // commentaire, justificatif, bouton) reste cachée. Classe dédiée : les
+    // blocs gardent leur propre « hidden » (cadre crédit, zones d'envoi).
+    const styleEtape = document.createElement("style");
+    styleEtape.textContent = ".depense-attente { display: none !important; }";
+    document.head.appendChild(styleEtape);
+    const suite = () => { const l = []; for (let n = blocCartes.nextElementSibling; n; n = n.nextElementSibling) l.push(n); return l; };
     // « Préciser la catégorie » apparaît juste sous les cartes
     if (categorieAutreWrapper) {
       categorieAutreWrapper.classList.remove("md:col-span-2");
@@ -1184,17 +1195,31 @@
           <span class="material-symbols-outlined text-2xl ${on ? "text-primary" : "text-gray-400"}">${icone}</span>
           <span class="min-w-0 max-w-full font-bold text-sm max-[359px]:text-[13px] sm:text-[15px] leading-tight break-words hyphens-auto text-[#0a0c0a] dark:text-white">${echapperHtml(libelle)}</span></button>`;
       };
-      grille.innerHTML = choix.map((c) => carte(c, c, ICONES[c.toLowerCase()] || "sell")).join("") +
+      // Catégorie choisie : seule sa carte reste, et la suite du formulaire apparaît
+      const choisie = categorieSelect.value;
+      const cartes = choix.map((c) => carte(c, c, ICONES[c.toLowerCase()] || "sell")).join("") +
         carte("__OTHER__", "Autre catégorie", "add_circle");
+      grille.innerHTML = choisie
+        ? (choisie === "__OTHER__" ? carte("__OTHER__", "Autre catégorie", "add_circle") : carte(choisie, choisie, ICONES[choisie.toLowerCase()] || "sell"))
+        : cartes;
+      changer.classList.toggle("hidden", !choisie);
+      suite().forEach((el) => el.classList.toggle("depense-attente", !choisie));
+    }
+    function choisirCategorie(valeur) {
+      categorieSelect.value = valeur;
+      categorieSelect.dispatchEvent(new Event("change")); // « Autres » : affiche ou cache le champ à préciser
+      erreur.classList.add("hidden");
+      afficherCartes();
     }
     grille.addEventListener("click", (e) => {
       const b = e.target.closest("[data-categorie]");
       if (!b) return;
-      categorieSelect.value = b.dataset.categorie;
-      categorieSelect.dispatchEvent(new Event("change")); // « Autres » : affiche le champ à préciser
-      erreur.classList.add("hidden");
-      afficherCartes();
+      // Un appui sur la carte déjà choisie revient à la liste complète
+      if (categorieSelect.value === b.dataset.categorie) { choisirCategorie(""); return; }
+      choisirCategorie(b.dataset.categorie);
+      if (b.dataset.categorie !== "__OTHER__") document.getElementById("depense-montant")?.focus();
     });
+    changer.addEventListener("click", () => choisirCategorie(""));
 
     // Sans catégorie, on ne laisse pas partir la dépense : le message est sous les cartes
     form.addEventListener("submit", (e) => {

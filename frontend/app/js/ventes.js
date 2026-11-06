@@ -1620,14 +1620,16 @@
         <input type="search" data-cartes-recherche placeholder="Rechercher un article"
                class="form-input w-full sm:w-64 h-10 rounded-full border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark text-sm px-4 text-[#0d1b19] dark:text-white">
       </div>
-      <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Un appui choisit l'article. Appuis répétés sur la même carte = plusieurs unités (2 appuis = quantité 2).</p>
+      <p data-cartes-astuce class="text-sm text-gray-500 dark:text-gray-400 mb-3">Un appui ajoute l'article à la vente. Réglez ensuite la quantité avec + et −.</p>
       <div data-cartes-grille class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3"></div>
       <p data-cartes-erreur class="hidden mt-3 text-sm font-medium text-red-600"></p>
       <button type="button" data-cartes-ajouter class="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
         <span class="material-symbols-outlined text-base">add_circle</span>Article ou service absent ? Ajoutez-le au catalogue
       </button>
       <div data-cartes-panier class="hidden mt-4 rounded-2xl border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-700"></div>
-      <div data-cartes-total class="hidden mt-3 flex-wrap items-center justify-between gap-x-6 gap-y-1 rounded-2xl bg-gray-100 dark:bg-gray-800 px-5 py-3 text-[15px] text-[#0d1b19] dark:text-gray-100"></div>`;
+      <div data-cartes-total class="hidden mt-3 flex-wrap items-center justify-between gap-x-6 gap-y-1 rounded-2xl bg-gray-100 dark:bg-gray-800 px-5 py-3 text-[15px] text-[#0d1b19] dark:text-gray-100"></div>
+      <button type="button" data-cartes-autre class="hidden mt-3 items-center gap-1 text-sm font-semibold text-primary hover:underline">
+        <span class="material-symbols-outlined text-base">add_circle</span>Ajouter un autre article</button>`;
     ligneDate.insertAdjacentElement("afterend", blocCartes);
 
     // ── Vente à crédit : trois questions (qui, avance, quand) ──
@@ -1692,6 +1694,26 @@
     const zoneTotal = blocCartes.querySelector("[data-cartes-total]");
     const erreur = blocCartes.querySelector("[data-cartes-erreur]");
     const recherche = blocCartes.querySelector("[data-cartes-recherche]");
+    const astuce = blocCartes.querySelector("[data-cartes-astuce]");
+    const lienCatalogue = blocCartes.querySelector("[data-cartes-ajouter]");
+    const boutonAutre = blocCartes.querySelector("[data-cartes-autre]");
+
+    // Comme pour les dépenses : tant qu'aucun article n'est choisi, la suite du
+    // formulaire (commentaire, justificatif, bouton) reste cachée. Un article
+    // choisi replie la grille ; « Ajouter un autre article » la rouvre.
+    let grilleOuverte = false;
+    const styleEtape = document.createElement("style");
+    styleEtape.textContent = ".vente-attente { display: none !important; }";
+    document.head.appendChild(styleEtape);
+    const grilleRepliee = () => actif && panier.length > 0 && !grilleOuverte;
+    function majEtape() {
+      const replie = grilleRepliee();
+      [recherche, astuce, lienCatalogue].forEach((el) => el.classList.toggle("hidden", replie));
+      boutonAutre.classList.toggle("hidden", !replie);
+      boutonAutre.classList.toggle("inline-flex", replie);
+      const attente = actif && !panier.length;
+      for (let n = blocCartes.nextElementSibling; n; n = n.nextElementSibling) n.classList.toggle("vente-attente", attente);
+    }
     const cle = (nom) => normalizeLabel(nom).toLowerCase();
     const suiviStock = (a) => a.stock !== null && a.stock !== undefined;
     const enCredit = () => moyenInput.value === "credit";
@@ -1805,8 +1827,9 @@
                  : "border-[#cfe7e3] dark:border-gray-600 bg-white dark:bg-[#1f3532] hover:border-primary"}">
         <span class="font-bold text-[#0d1b19] dark:text-white leading-snug line-clamp-2">${echapperHtml(a.name)}</span>
         <span>
-          <span class="flex items-center gap-2 text-base font-bold text-primary">${prix > 0 ? formatPrice(prix) : "—"}${l ? `<span class="rounded-lg bg-primary px-2 py-0.5 text-xs font-extrabold text-white">× ${l.quantite}</span>` : ""}</span>
-          ${sousTitre ? `<span class="block text-xs text-gray-500 dark:text-gray-400">${sousTitre}</span>` : ""}
+          <span class="flex flex-wrap items-center gap-x-2 gap-y-1 text-base font-bold text-primary"><span class="whitespace-nowrap">${prix > 0 ? formatPrice(prix) : "—"}</span>${l ? `<span class="whitespace-nowrap rounded-lg bg-primary px-2 py-0.5 text-xs font-extrabold text-white">× ${l.quantite}</span>` : ""}</span>
+          <!-- Ligne gardée même vide : les prix restent alignés d’une carte à l’autre -->
+          <span class="block text-xs text-gray-500 dark:text-gray-400">${sousTitre || "&nbsp;"}</span>
         </span>
       </button>`;
     }
@@ -1836,7 +1859,11 @@
         return;
       }
       const filtre = cle(recherche.value);
-      const liste = ordre.filter((a) => !filtre || cle(a.name).includes(filtre));
+      // Grille repliée : seules les cartes des articles choisis restent, comme
+      // la catégorie choisie d'une dépense
+      const liste = grilleRepliee()
+        ? panier.map((l) => l.article)
+        : ordre.filter((a) => !filtre || cle(a.name).includes(filtre));
       grille.innerHTML = liste.length
         ? liste.map(carte).join("")
         : `<p class="col-span-full text-sm text-gray-500 dark:text-gray-400">Aucun article ne correspond. Ajoutez-le au catalogue avec le lien ci-dessous.</p>`;
@@ -1856,6 +1883,7 @@
       blocJustificatif?.classList.toggle("hidden", plusieurs);
       noteJustificatif.classList.toggle("hidden", !plusieurs);
       afficherTotal();
+      majEtape();
     }
 
     // Les champs cachés portent le premier article : getFormData les lit à l'envoi
@@ -1912,6 +1940,7 @@
       } else {
         majCredit();
       }
+      majEtape();
     }
 
     // Le catalogue a été (re)chargé : setModeList* vient de remettre les champs d'origine
@@ -1934,6 +1963,7 @@
       if (!b || b.disabled) return;
       const a = ordre.find((x) => String(x.id) === b.dataset.carteArticle);
       if (!a) return;
+      grilleOuverte = false;
       if (ligneDe(a)) return changerQuantite(a, 1);
       panier.push({ article: a, quantite: 1 });
       if (navigator.vibrate) navigator.vibrate(15);
@@ -1950,6 +1980,7 @@
       else if (e.target.closest("[data-retirer]")) { panier = panier.filter((x) => x.article.id !== a.id); reporterChoix(); afficher(); }
     });
     blocCartes.querySelector("[data-cartes-ajouter]").addEventListener("click", ouvrirAjoutCatalogue);
+    boutonAutre.addEventListener("click", () => { grilleOuverte = true; afficher(); });
 
     // ── Fenêtre « Ajouter au catalogue » ──
     // L'article ajouté rejoint le catalogue partagé (gérant et agents) et
@@ -2263,7 +2294,8 @@
         <span class="font-bold text-[#0d1b19] dark:text-white leading-snug line-clamp-2">${echapperHtml(a.name)}</span>
         <span>
           <span class="block text-base font-bold text-primary">${prix > 0 ? formatPrice(prix) : "—"}</span>
-          ${sousTitre ? `<span class="block text-xs text-gray-500 dark:text-gray-400">${sousTitre}</span>` : ""}
+          <!-- Ligne gardée même vide : les prix restent alignés d’une carte à l’autre -->
+          <span class="block text-xs text-gray-500 dark:text-gray-400">${sousTitre || "&nbsp;"}</span>
         </span>
       </button>`;
     }

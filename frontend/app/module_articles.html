@@ -41,6 +41,12 @@
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
         }
+        /* Téléphone : le logo commence au même niveau que le titre de la page
+           (en-tête à 24 px du bord, marge transparente de 44 px dans l'image,
+           contenu à 18 px) */
+        @media (max-width: 767px) {
+            #nav-logo img { margin-left: -50px; max-width: none; }
+        }
     </style>
     <!-- Restriction d'acces : un agent est redirige vers ses propres pages -->
     <script src="js/role-guard.js"></script>
@@ -92,14 +98,14 @@
                 </p>
             </div>
 
-            <div class="mb-10 flex items-start gap-4">
-                <!-- Retour a la page precedente (masque pendant la configuration,
-                     ou l'on reviendrait sur la creation de compte) -->
+            <div class="mb-10 flex flex-col items-start gap-4">
+                <!-- Retour a la page precedente, au-dessus du titre (masque pendant
+                     la configuration, ou l'on reviendrait sur la creation de compte) -->
                 <button type="button"
                         id="btn-retour"
                         onclick="history.back()"
                         title="Retour"
-                        class="flex-shrink-0 mt-1 flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 dark:bg-primary/30 text-primary hover:bg-primary/30 dark:hover:bg-primary/40 transition-colors">
+                        class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 dark:bg-primary/30 text-primary hover:bg-primary/30 dark:hover:bg-primary/40 transition-colors">
                     <span class="material-symbols-outlined">arrow_back</span>
                 </button>
                 <div>
