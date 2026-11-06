@@ -137,6 +137,8 @@ async function addVente(vente, onProgress) {
     formData.append("note", vente.note || "");
     // Article du catalogue : permet de décompter son stock (vide = hors catalogue)
     formData.append("articleId", vente.article_id || "");
+    // Vente à crédit : date promise du solde (facultative)
+    if (vente.credit_echeance) formData.append("creditEcheance", vente.credit_echeance);
 
 
     // Ajouter le fichier s'il existe
@@ -260,6 +262,8 @@ async function addDepense(depense, onProgress) {
     formData.append("receiptName", depense.justificatif || "");
     // Commentaire libre du gérant sur cette dépense (facultatif)
     formData.append("note", depense.note || "");
+    // Dépense à crédit : date de remboursement estimée (facultative)
+    if (depense.credit_echeance) formData.append("creditEcheance", depense.credit_echeance);
     
     // Ajouter le fichier s'il existe
     if (depense.file) {
@@ -975,7 +979,204 @@ async function nonLusParDossier() {
   return ok && data && data.parDossier ? data.parDossier : {};
 }
 
+
+// ===== Crédits clients =====
+// Ce que les clients doivent : ventes à crédit et règlements (avances,
+// paiements), toutes dates (GET /api/credits). Le calcul par client est
+// le même que côté serveur (backend/src/utils/credits.js).
+async function creditsRequest(chemin, options = {}) {
+  const token = getToken();
+  if (!token) { handleUnauthorized(); return { ok: false, status: 401, data: null }; }
+  const reponse = await fetch(`${API_BASE_URL}/api/credits${chemin}`, {
+    ...options,
+    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}`, ...(options.headers || {}) }
+  });
+  if (reponse.status === 401) { handleUnauthorized(); return { ok: false, status: 401, data: null }; }
+  const data = await reponse.json().catch(() => ({}));
+  return { ok: reponse.ok, status: reponse.status, data };
+}
+
+async function getCredits() {
+  try {
+    const { ok, status, data } = await creditsRequest("");
+    return {
+      ok, status,
+      ventes: ok ? (data.ventes || []) : [],
+      reglements: ok ? (data.reglements || []) : [],
+      error: ok ? null : (data?.error || "Crédits indisponibles")
+    };
+  } catch (e) {
+    console.error("❌ Crédits clients :", e);
+    return { ok: false, status: 0, ventes: [], reglements: [], error: "Erreur réseau" };
+  }
+}
+
+/** Avance (à la vente) ou paiement (ensuite) : { clientNom, clientTelephone, montant, moyen, nature } */
+async function enregistrerReglement(reglement) {
+  try {
+    const { ok, data } = await creditsRequest("/reglements", { method: "POST", body: JSON.stringify(reglement) });
+    return { ok, reste: data?.reste, error: ok ? null : (data?.error || "Paiement non enregistré") };
+  } catch (e) { return { ok: false, error: "Erreur réseau" }; }
+}
+
+async function annulerReglement(id) {
+  try {
+    const { ok, data } = await creditsRequest(`/reglements/${encodeURIComponent(id)}`, { method: "DELETE" });
+    return { ok, error: ok ? null : (data?.error || "Annulation impossible") };
+  } catch (e) { return { ok: false, error: "Erreur réseau" }; }
+}
+
+// Même client malgré les majuscules, accents ou espaces en trop
+function cleClient(nom) {
+  return String(nom || "")
+    .normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .toLowerCase().trim().replace(/\s+/g, " ");
+}
+
+const DELAI_CREDIT_PAR_DEFAUT_JOURS = 30; // sans date promise : dû 30 jours après la vente
+
+/**
+ * Regroupe par client : ce qu'il doit, ses retards et sa prochaine échéance.
+ * Les règlements s'imputent aux ventes les plus anciennes d'abord : la
+ * première vente encore impayée dit depuis quand le client est en retard.
+ * @returns {{ clients: Array, du: number, enRetard: number, nbEnRetard: number }}
+ */
+function resumerCredits(ventes, reglements, aujourdhui) {
+  const jour = aujourdhui || (() => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); })();
+  const plusJours = (iso, n) => { const d = new Date(iso + "T12:00:00"); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+  const ecart = (a, b) => Math.round((new Date(b + "T12:00:00") - new Date(a + "T12:00:00")) / 86400000);
+
+  const parCle = new Map();
+  const fiche = (nom) => {
+    const k = cleClient(nom);
+    if (!parCle.has(k)) parCle.set(k, { cle: k, nom: String(nom || "").trim() || "Client sans nom", telephone: "", ventes: [], reglements: [] });
+    return parCle.get(k);
+  };
+  (ventes || []).forEach((v) => {
+    const f = fiche(v.client_nom);
+    if (v.client_telephone) f.telephone = v.client_telephone;
+    f.ventes.push(v);
+  });
+  (reglements || []).forEach((r) => {
+    const f = fiche(r.client_nom);
+    if (r.client_telephone && !f.telephone) f.telephone = r.client_telephone;
+    f.reglements.push(r);
+  });
+
+  const parVente = {}; // id de vente → { reste, soldeLe, soldeMoyen, client }
+  const clients = [...parCle.values()].map((f) => {
+    f.ventes.sort((a, b) => String(a.date).localeCompare(String(b.date)));
+    const vendu = f.ventes.reduce((s, v) => s + (Number(v.montant) || 0), 0);
+    const verse = f.reglements.reduce((s, r) => s + (Number(r.montant) || 0), 0);
+    // Imputation, règlement par règlement dans l'ordre des dates : un paiement
+    // fait pour une vente précise (sale_id) la règle d'abord ; le reste va aux
+    // ventes les plus anciennes. On garde le jour et le moyen du règlement
+    // qui solde chaque vente.
+    f.ventes.forEach((v) => { v.reste = Number(v.montant) || 0; v.soldeLe = null; v.soldeMoyen = null; });
+    const imputer = (v, r, dispo) => {
+      const couvert = Math.min(dispo, v.reste);
+      v.reste -= couvert;
+      if (couvert > 0 && v.reste <= 0) { v.soldeLe = String(r.regle_le).slice(0, 10); v.soldeMoyen = r.moyen; }
+      return dispo - couvert;
+    };
+    [...f.reglements].sort((a, b) => String(a.regle_le).localeCompare(String(b.regle_le))).forEach((r) => {
+      let dispo = Number(r.montant) || 0;
+      const cible = r.sale_id ? f.ventes.find((v) => v.id === r.sale_id) : null;
+      if (cible && cible.reste > 0) dispo = imputer(cible, r, dispo);
+      for (const v of f.ventes) { if (dispo <= 0) break; if (v.reste > 0) dispo = imputer(v, r, dispo); }
+    });
+    let premierRetard = null, prochaine = null;
+    f.ventes.forEach((v) => {
+      parVente[v.id] = { reste: Math.max(0, v.reste), soldeLe: v.soldeLe, soldeMoyen: v.soldeMoyen, client: f.nom, telephone: f.telephone };
+      if (v.reste <= 0) return;
+      const echeance = v.echeance || plusJours(v.date, DELAI_CREDIT_PAR_DEFAUT_JOURS);
+      if (echeance < jour) { if (!premierRetard || echeance < premierRetard) premierRetard = echeance; }
+      else if (!prochaine || echeance < prochaine) prochaine = echeance;
+    });
+    const du = Math.max(0, vendu - verse);
+    const historique = [
+      ...f.ventes.map((v) => ({ type: "vente", date: v.date, libelle: v.description, quantite: v.quantite, montant: Number(v.montant) || 0, note: v.note, id: v.id })),
+      ...f.reglements.map((r) => ({ type: r.nature === "avance" ? "avance" : "paiement", date: String(r.regle_le).slice(0, 10), moyen: r.moyen, montant: Number(r.montant) || 0, par: r.par, id: r.id }))
+    ].sort((a, b) => a.date.localeCompare(b.date) || (a.type === "vente" ? -1 : 1));
+    return {
+      cle: f.cle, nom: f.nom, telephone: f.telephone,
+      nbVentes: f.ventes.length, vendu, verse, du, historique,
+      enRetard: du > 0 && !!premierRetard,
+      joursRetard: du > 0 && premierRetard ? ecart(premierRetard, jour) : 0,
+      prochaineEcheance: du > 0 && !premierRetard ? prochaine : null,
+      derniereActivite: historique.length ? historique[historique.length - 1].date : ""
+    };
+  });
+
+  const actifs = clients.filter((c) => c.du > 0);
+  const retard = actifs.filter((c) => c.enRetard);
+  return {
+    clients: clients.sort((a, b) => (b.enRetard - a.enRetard) || (b.joursRetard - a.joursRetard) || (b.du - a.du)),
+    parVente,
+    du: actifs.reduce((s, c) => s + c.du, 0),
+    nbClients: actifs.length,
+    enRetard: retard.reduce((s, c) => s + c.du, 0),
+    nbEnRetard: retard.length
+  };
+}
+
+
+// Un client ne peut pas avoir payé plus que ce qu'il a acheté à crédit : le
+// surplus (vente supprimée après coup) n'est pas compté comme argent entré.
+// Même règle que backend/src/utils/credits.js (reglementsPlafonnes).
+function reglementsPlafonnes(ventes, reglements) {
+  const vendu = {};
+  (ventes || []).forEach((v) => { const k = cleClient(v.client_nom); vendu[k] = (vendu[k] || 0) + (Number(v.montant) || 0); });
+  const pris = {};
+  return [...(reglements || [])]
+    .sort((a, b) => String(a.regle_le).localeCompare(String(b.regle_le)))
+    .map((r) => {
+      const k = r.client_cle || cleClient(r.client_nom);
+      const montant = Math.min(Number(r.montant) || 0, Math.max(0, (vendu[k] || 0) - (pris[k] || 0)));
+      pris[k] = (pris[k] || 0) + montant;
+      return { ...r, montant };
+    })
+    .filter((r) => r.montant > 0);
+}
+
+// ===== Dépenses à crédit =====
+// Une dépense à crédit (achat payé plus tard) se paie depuis le tableau des
+// dépenses : son moyen de paiement passe à Cash ou Mobile Money.
+async function reglerDepense(id, moyen) {
+  const token = getToken();
+  if (!token) { handleUnauthorized(); return { ok: false, error: "Non connecté" }; }
+  try {
+    const reponse = await fetch(`${API_BASE_URL}/api/expenses/${encodeURIComponent(id)}/reglement`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+      body: JSON.stringify({ moyen })
+    });
+    if (reponse.status === 401) { handleUnauthorized(); return { ok: false, error: "Session expirée" }; }
+    const data = await reponse.json().catch(() => ({}));
+    return { ok: reponse.ok, error: reponse.ok ? null : (data.error || "Paiement non enregistré") };
+  } catch (e) { return { ok: false, error: "Erreur réseau" }; }
+}
+
+// Dépenses qui sont ou ont été à crédit, toutes dates (tableau de bord)
+async function getDepensesCredit() {
+  const token = getToken();
+  if (!token) return { ok: false, depenses: [] };
+  try {
+    const reponse = await fetch(`${API_BASE_URL}/api/expenses/credits`, { headers: { "Authorization": `Bearer ${token}` } });
+    const data = await reponse.json().catch(() => ({}));
+    return { ok: reponse.ok, depenses: reponse.ok ? (data.depenses || []) : [] };
+  } catch (e) { return { ok: false, depenses: [] }; }
+}
+
 window.OGOUE = {
+  reglerDepense,
+  getDepensesCredit,
+  getCredits,
+  enregistrerReglement,
+  annulerReglement,
+  resumerCredits,
+  reglementsPlafonnes,
+  cleClient,
   appState,
   getToken,
   getCurrentUser,

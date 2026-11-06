@@ -1,9 +1,12 @@
 ﻿import { Router } from "express";
-import { listExpenses, createExpense, updateExpenseReceipt, deleteExpense, getExpenseJustificatifUrl, updateExpense } from "../controllers/expenses.controller.js";
+import { listExpenses, createExpense, updateExpenseReceipt, deleteExpense, getExpenseJustificatifUrl, updateExpense, reglerExpense, listExpensesCredit } from "../controllers/expenses.controller.js";
 import upload from "../middleware/upload.middleware.js";
 
 const r = Router();
 r.get("/", listExpenses);
+// Dépenses à crédit : la liste (tableau de bord) et le paiement d'une dette, à tout moment
+r.get("/credits", listExpensesCredit);
+r.post("/:id/reglement", reglerExpense);
 
 // Consulter un justificatif deja depose reste ouvert a toutes les
 // formules : c'est le document du client. Seul son depot est reserve.

@@ -176,7 +176,7 @@
         .tdb-trend-pill { background: var(--cyan); color: #06243A; font-weight: 700; height: 26px; padding: 0 10px; border-radius: 999px; display: flex; align-items: center; gap: 3px; }
         .tdb-trend-pill .material-symbols-rounded { font-size: 17px; }
         .tdb-trend-pill.is-baisse { background: var(--orange); color: #3A1F02; }
-        .tdb-stats { display: flex; gap: 32px; }
+        .tdb-stats { display: flex; flex-wrap: wrap; gap: 16px 32px; }
         .tdb-stat-l { display: flex; align-items: center; gap: 8px; font-size: 14px; color: rgba(255,255,255,.7); }
         .tdb-tick { width: 10px; height: 3px; border-radius: 2px; display: inline-block; }
         .tdb-nb { font-size: .6em; font-weight: 500; color: rgba(255,255,255,.6); margin-left: 2px; }
@@ -207,13 +207,23 @@
         .act-mois.is-on { fill: #fff; font-weight: 600; }
         .act-vide { text-align: center; color: rgba(255,255,255,.6); padding: 50px 0; }
         .act-tip { top: 0; }
+        .act-tete { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; margin-bottom: -8px; }
+        .act-meilleur { font-size: 14px; color: rgba(255,255,255,.8); }
+        .act-meilleur b { color: #fff; font-weight: 600; }
+        .act-val { font-size: 12px; font-weight: 700; fill: #fff; }
+        .act-val-recu { font-size: 11px; font-weight: 600; fill: rgba(255,255,255,.85); }
+        .act-val-dedans { font-size: 11px; font-weight: 700; fill: #0B2A5B; }
+        .act-reste { font-size: 11.5px; font-weight: 700; }
+        .act-reste.is-pos { fill: #4ADE80; }
+        .act-reste.is-neg { fill: #FF8A8A; }
         .act-tip.act-tip-haut { top: auto; bottom: calc(100% + 8px); left: 0; right: 0; width: auto; }
 
         /* Boutons du mobile */
         .tdb-mobile-actions { display: none; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .tdb-mbtn { height: 64px; border-radius: 22px; font-weight: 600; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .tdb-mobile-actions { flex: 1 1 260px; max-width: 380px; }
+        .tdb-mbtn { height: 48px; padding: 0 12px; border-radius: 18px; font-weight: 600; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; }
         .tdb-mbtn:hover { text-decoration: none; }
-        .tdb-mbtn .material-symbols-rounded { font-size: 24px; }
+        .tdb-mbtn .material-symbols-rounded { font-size: 22px; }
         .tdb-mbtn-sale { background: var(--cyan); color: #06243A; }
         .tdb-mbtn-exp { background: var(--orangeSoft); color: var(--orangeInk); }
 
@@ -344,6 +354,11 @@
                     <a href="module_depenses" class="tdb-qbtn tdb-qbtn-exp"><span class="material-symbols-rounded">remove</span>Dépense</a>
                     <a href="module_ventes" class="tdb-qbtn tdb-qbtn-sale"><span class="material-symbols-rounded">add</span>Vente</a>
                 </div>
+                <!-- Boutons du mobile (remplacent les raccourcis ci-dessus), à côté du bonjour -->
+                <div class="tdb-mobile-actions">
+                    <a href="module_ventes" class="tdb-mbtn tdb-mbtn-sale"><span class="material-symbols-rounded">add</span>J'ai vendu</a>
+                    <a href="module_depenses" class="tdb-mbtn tdb-mbtn-exp"><span class="material-symbols-rounded">remove</span>J'ai dépensé</a>
+                </div>
             </div>
 
             <!-- Carte héro : solde de la période, entrées, sorties, courbes -->
@@ -415,18 +430,21 @@
                     </div>
                 </div>
 
+                <!-- Courbes cumulées ou bâtons par mois (semaine, jour selon la période) -->
+                <div class="act-tete">
+                    <span class="act-meilleur" id="actMeilleur"></span>
+                    <div class="tdb-pills" id="actVues" role="group" aria-label="Affichage du graphique">
+                        <button type="button" class="tdb-pill" data-vue="cumul">Cumulé</button>
+                        <button type="button" class="tdb-pill" data-vue="barres">Par mois</button>
+                    </div>
+                </div>
+
                 <div class="act-chart" id="actChart"><div class="tdb-skel-block" style="min-height:250px"></div></div>
 
                 <div class="tdb-note">
-                    <span class="material-symbols-rounded">info</span>L'écart entre les deux courbes, c'est ce qui vous reste.
+                    <span class="material-symbols-rounded">info</span><span id="actNote">L'écart entre les deux courbes, c'est ce qui vous reste.</span>
                 </div>
             </section>
-
-            <!-- Boutons du mobile (remplacent les raccourcis de l'en-tête) -->
-            <div class="tdb-mobile-actions">
-                <a href="module_ventes" class="tdb-mbtn tdb-mbtn-sale"><span class="material-symbols-rounded">add</span>J'ai vendu</a>
-                <a href="module_depenses" class="tdb-mbtn tdb-mbtn-exp"><span class="material-symbols-rounded">remove</span>J'ai dépensé</a>
-            </div>
 
             <!-- Opérations du jour, à faire, meilleures ventes -->
             <div class="tdb-lower">

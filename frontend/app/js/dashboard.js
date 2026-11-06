@@ -196,11 +196,17 @@ async function chargerDonnees(plage) {
   const debut = plusPetit(prec.debut, plage.debut, plagePreset("mois").debut, auj);
   const fin = plusGrand(plage.fin, auj);
 
-  const [ventes, depenses] = await Promise.all([
+  const [ventes, depenses, credits, dettes] = await Promise.all([
     window.OGOUE.getVentesPourPlage(debut, fin),
-    window.OGOUE.getDepensesPourPlage(debut, fin)
+    window.OGOUE.getDepensesPourPlage(debut, fin),
+    typeof window.OGOUE.getCredits === "function"
+      ? window.OGOUE.getCredits().then((r) => (r.ok ? r : null)).catch(() => null)
+      : null,
+    typeof window.OGOUE.getDepensesCredit === "function"
+      ? window.OGOUE.getDepensesCredit().then((r) => (r.ok ? r.depenses : null)).catch(() => null)
+      : null
   ]);
-  return { ventes: ventes || [], depenses: depenses || [] };
+  return { ventes: ventes || [], depenses: depenses || [], credits, dettes };
 }
 
 // ========== CALCULS ==========
@@ -392,8 +398,232 @@ function graphiqueSvg(entrees, sorties) {
 // Le dessin est à l'échelle réelle de la zone (1 unité = 1 pixel) pour garder des textes lisibles.
 
 const ACT_ENTREE = "#14B8D9", ACT_SORTIE = "#F2A04B";
+const ACT_RESTE = "#4ADE80", ACT_DEFICIT = "#FF6B6B";
 let activiteCourante = null;
 let activiteDerniere = null;
+let barresCourantes = null;
+
+// Vue du graphique : les barres par jour, semaine ou mois par défaut ; les
+// courbes cumulées si on les a choisies sur cet appareil
+let vueActivite = (() => { try { return localStorage.getItem("ogo_tdb_vue") === "cumul" ? "cumul" : "barres"; } catch (e) { return "barres"; } })();
+
+const NOTES_ACTIVITE = {
+  cumul: "L'écart entre les deux courbes, c'est ce qui vous reste : en vert quand il vous reste de l'argent, en rouge quand vous avez dépensé plus que reçu.",
+  barres: "Barre bleue : vos ventes ; barre orange : vos dépenses, à crédit comprises. Partie pleine : l'argent réellement reçu ou sorti ; partie claire : ce qui n'est pas encore payé."
+};
+
+// Découpage des bâtons selon la longueur de la période
+function uniteBarres(nbJours) {
+  return nbJours > 62 ? "mois" : nbJours > 14 ? "semaine" : "jour";
+}
+
+// Un seau par mois, semaine (du lundi) ou jour : ventes (CA), argent reçu,
+// dépenses engagées (à crédit comprises), argent sorti
+function seauxBarres(jours, ventes, recus, depenses, sorties) {
+  const unite = uniteBarres(jours.length);
+  const plusieursAnnees = jours[0].slice(0, 4) !== jours[jours.length - 1].slice(0, 4);
+  const cleDe = (iso) => {
+    if (unite === "mois") return iso.slice(0, 7);
+    if (unite === "jour") return iso;
+    const d = deIso(iso);
+    d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+    return isoDe(d);
+  };
+  const seaux = [];
+  const index = new Map();
+  jours.forEach((j) => {
+    const k = cleDe(j);
+    if (index.has(k)) return;
+    index.set(k, seaux.length);
+    const d = deIso(j);
+    const court = unite === "mois"
+      ? d.toLocaleDateString("fr-FR", { month: "short" }) + (plusieursAnnees ? ` ${String(d.getFullYear()).slice(2)}` : "")
+      : etiquetteJour(j, unite === "jour" ? jours.length : 8);
+    const long = unite === "mois"
+      ? d.toLocaleDateString("fr-FR", { month: "long", year: "numeric" })
+      : unite === "semaine"
+        ? `semaine du ${d.toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}`
+        : d.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+    seaux.push({ court, long, ca: 0, recu: 0, nb: 0, dep: 0, sorti: 0, nbDep: 0 });
+  });
+  const ranger = (liste, champ) => liste.forEach((op) => {
+    const j = jourDe(op);
+    const i = j ? index.get(cleDe(j)) : undefined;
+    if (i === undefined) return;
+    seaux[i][champ] += Number(op.montant) || 0;
+    if (champ === "ca") seaux[i].nb += 1;
+    if (champ === "dep") seaux[i].nbDep += 1;
+  });
+  ranger(ventes, "ca");
+  ranger(recus, "recu");
+  ranger(depenses, "dep");
+  ranger(sorties, "sorti");
+  return { unite, seaux };
+}
+
+// Bâtons : pour chaque mois (ou semaine, jour), une barre des ventes et une
+// des dépenses, côte à côte ; le meilleur mois de ventes mis en avant
+function rendreBarres(v, zone) {
+  const { unite, seaux } = seauxBarres(v.serie.dates, v.ventesPeriode || [], v.entreesListe || [], v.depensesPeriode || [], v.sortiesListe || []);
+  const n = seaux.length;
+  const mobile = window.innerWidth <= 760;
+  const W = Math.max(280, zone.clientWidth);
+  const H = mobile ? 226 : 266;
+  const X0 = mobile ? 66 : 84, X1 = W - 10, HAUT = 36, Y0 = H - 46;
+  const max = Math.max(0, ...seaux.map((s) => Math.max(s.ca, s.recu, s.dep, s.sorti)));
+  const pas = pasActivite(max);
+  const sommet = pas * Math.max(1, Math.ceil(max / pas));
+  const y = (val) => Y0 - (val / sommet) * (Y0 - HAUT);
+  const creneau = (X1 - X0) / n;
+  const cx = (i) => X0 + creneau * (i + 0.5);
+  const ecart = Math.max(2, Math.min(6, creneau * 0.05));
+  const large = Math.max(4, Math.min(46, (creneau * 0.7 - ecart) / 2));
+  let meilleur = -1;
+  seaux.forEach((s, i) => { if (s.ca > 0 && (meilleur < 0 || s.ca > seaux[meilleur].ca)) meilleur = i; });
+
+  const court = (val) => (mobile ? montantCourt(val) : fcfa(val));
+  let grille = "";
+  for (let val = 0; val <= sommet + 1e-6; val += pas) {
+    grille += `<line x1="${X0}" y1="${y(val)}" x2="${X1}" y2="${y(val)}" stroke="rgba(255,255,255,.08)" stroke-width="1"/>` +
+      `<text x="${X0 - 10}" y="${y(val) + 4}" text-anchor="end" class="act-axe">${court(val)}</text>`;
+  }
+  const hauteur = (val) => (val > 0 ? Math.max(2, Y0 - y(val)) : 0);
+  const rx = Math.min(6, large / 4);
+
+  // Une barre : sa hauteur = le total (ventes, ou dépenses) ; la partie
+  // pleine, en bas = l'argent réellement reçu (ou sorti) ; la partie claire
+  // au-dessus = ce qui n'est pas encore payé. Si l'argent dépasse le total
+  // (anciens crédits réglés ce mois-là), un pointillé marque le total.
+  function barre(i, x0, total, argent, couleur, parts, fort) {
+    const hT = hauteur(total), hA = hauteur(argent);
+    let html = `<rect data-b="${i}" data-part="${parts[0]}" x="${x0}" y="${Y0 - hT}" width="${large}" height="${hT}" rx="${rx}" fill="${couleur}" fill-opacity="${fort ? 0.32 : 0.2}"/>` +
+      `<rect data-b="${i}" data-part="${parts[1]}" x="${x0}" y="${Y0 - hA}" width="${large}" height="${hA}" rx="${rx}" fill="${couleur}" fill-opacity="${fort ? 1 : 0.6}"/>`;
+    if (argent > total && hT > 0) {
+      html += `<line x1="${x0}" y1="${Y0 - hT}" x2="${x0 + large}" y2="${Y0 - hT}" stroke="#fff" stroke-width="1.5" stroke-dasharray="3 3"/>`;
+    }
+    return { html, haut: Y0 - Math.max(hT, hA) - 7, hT, hA };
+  }
+  // Montant payé : dans la partie claire, juste au-dessus de la partie pleine ;
+  // sans place, en haut de la partie pleine ; sinon, seulement au survol
+  function montantPaye(xc, total, argent, b) {
+    if (!(argent > 0 && argent < total)) return "";
+    if (b.hT - b.hA >= 17) return `<text x="${xc}" y="${Y0 - b.hA - 5}" text-anchor="middle" class="act-val-recu">${montantCourt(argent)}</text>`;
+    if (b.hA >= 18) return `<text x="${xc}" y="${Y0 - b.hA + 13}" text-anchor="middle" class="act-val-dedans">${montantCourt(argent)}</text>`;
+    return "";
+  }
+
+  const batons = seaux.map((s, i) => {
+    const fort = i === meilleur;
+    const xV = cx(i) - ecart / 2 - large, xD = cx(i) + ecart / 2;
+    const bV = barre(i, xV, s.ca, s.recu, ACT_ENTREE, ["ca", "recu"], fort);
+    const bD = barre(i, xD, s.dep, s.sorti, ACT_SORTIE, ["dep", "sorti"], fort);
+    let html = bV.html + bD.html;
+    if (fort) {
+      const xcV = xV + large / 2, xcD = xD + large / 2;
+      // Les deux totaux au-dessus de leurs barres ; s'ils se toucheraient
+      // (barres de hauteur proche et montants larges), celui de la barre la
+      // plus basse monte d'une ligne
+      let yV = bV.haut, yD = bD.haut;
+      const demi = (txt) => txt.length * 3.6;
+      const tV = montantCourt(s.ca), tD = s.dep > 0 ? montantCourt(s.dep) : "";
+      if (tD && Math.abs(yV - yD) < 14 && demi(tV) + demi(tD) + 4 > xcD - xcV) {
+        if (yV > yD) yV = yD - 14; else yD = yV - 14;
+      }
+      html += `<text x="${xcV}" y="${yV}" text-anchor="middle" class="act-val">${tV}</text>`;
+      if (tD) html += `<text x="${xcD}" y="${yD}" text-anchor="middle" class="act-val">${tD}</text>`;
+      html += montantPaye(xcV, s.ca, s.recu, bV) + montantPaye(xcD, s.dep, s.sorti, bD);
+    }
+    return html;
+  }).join("");
+
+  // Libellés : tous s'ils tiennent, sinon quelques-uns répartis
+  const k = Math.min(n, mobile ? 6 : 12);
+  const indices = k === n ? seaux.map((_, i) => i) : Array.from({ length: k }, (_, j) => Math.round((j * (n - 1)) / (k - 1)));
+  // Sous chaque libellé, ce qui reste (argent reçu − argent sorti) : vert ou rouge
+  const etiquettes = indices.map((i) => {
+    const s = seaux[i];
+    const reste = s.recu - s.sorti;
+    const ligneReste = s.recu || s.sorti
+      ? `<text x="${cx(i)}" y="${H - 6}" text-anchor="middle" class="act-reste ${reste < 0 ? "is-neg" : "is-pos"}">${texteReste(reste)}</text>`
+      : "";
+    return `<text x="${cx(i)}" y="${H - 24}" text-anchor="middle" class="act-mois${i === meilleur ? " is-on" : ""}" data-i="${i}">${echapper(s.court)}</text>` + ligneReste;
+  }).join("");
+
+  zone.innerHTML = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" class="act-svg">${grille}${batons}${etiquettes}</svg><div class="tdb-tip act-tip" id="actTip" hidden></div>`;
+  barresCourantes = { seaux, X0, creneau, cx, W, meilleur };
+
+  const nom = { mois: "Meilleur mois", semaine: "Meilleure semaine", jour: "Meilleur jour" }[unite];
+  document.getElementById("actMeilleur").innerHTML = meilleur >= 0
+    ? `${nom} : <b>${echapper(seaux[meilleur].long)}</b> · ${montantCourt(seaux[meilleur].ca)} ${formatParts(0).unit === "FCFA" ? "F " : ""}de ventes`
+    : "Pas encore de vente sur la période.";
+}
+
+// Reste signé : « +52 000 », « −11 600 », « 0 »
+function texteReste(reste) {
+  return `${reste > 0 ? "+" : reste < 0 ? "−" : ""}${montantCourt(Math.abs(reste))}`;
+}
+
+// Info-bulle d'un bâton
+function survolerBarre(clientX) {
+  const zone = document.getElementById("actChart");
+  const b = barresCourantes;
+  if (!zone || !b) return;
+  const xv = clientX - zone.getBoundingClientRect().left;
+  const i = Math.max(0, Math.min(b.seaux.length - 1, Math.floor((xv - b.X0) / b.creneau)));
+  const s = b.seaux[i];
+  zone.querySelectorAll("rect[data-b]").forEach((r) => {
+    const j = Number(r.dataset.b);
+    const fort = j === i || j === b.meilleur;
+    const clair = r.dataset.part === "ca" || r.dataset.part === "dep";
+    r.setAttribute("fill-opacity", clair ? (fort ? 0.32 : 0.2) : (fort ? 1 : 0.6));
+  });
+  const tip = zone.querySelector("#actTip");
+  tip.innerHTML =
+    `<div class="tdb-tip-h" style="text-transform:none">${echapper(s.long.charAt(0).toUpperCase() + s.long.slice(1))}</div>` +
+    ligneInfo("Ventes (chiffre d'affaires)", montantCourt(s.ca), "var(--cyanInk)") +
+    ligneInfo("Argent reçu", montantCourt(s.recu), "var(--ink)") +
+    `<div class="tdb-tip-vide">${s.nb} vente${s.nb > 1 ? "s" : ""}${i === b.meilleur ? " · la meilleure de la période" : ""}</div>` +
+    ligneInfo("Dépenses", montantCourt(s.dep), "var(--orangeInk)") +
+    ligneInfo("Argent sorti", montantCourt(s.sorti), "var(--ink)") +
+    `<div class="tdb-tip-vide">${s.nbDep} dépense${s.nbDep > 1 ? "s" : ""}</div>` +
+    ligneInfo("Reste (reçu − sorti)", texteReste(s.recu - s.sorti), s.recu - s.sorti < 0 ? "#C0392B" : "#0E8A5F");
+  tip.hidden = false;
+  const mobile = window.innerWidth <= 760;
+  tip.classList.toggle("act-tip-haut", mobile);
+  if (mobile) { tip.style.left = ""; return; }
+  const largeur = tip.offsetWidth;
+  const px = b.cx(i);
+  tip.style.left = Math.max(0, Math.min(b.W - largeur, px > b.W / 2 ? px - largeur - 20 : px + 20)) + "px";
+}
+
+// Bascule Cumulé / Par mois, au-dessus du graphique
+function majVuesActivite(v) {
+  const groupe = document.getElementById("actVues");
+  if (!groupe) return "cumul";
+  const jours = v.serie.jours || 0;
+  // Sur une seule journée, seules les courbes heure par heure ont du sens
+  groupe.hidden = jours <= 1;
+  const vue = jours <= 1 ? "cumul" : vueActivite;
+  const libelle = { mois: "Par mois", semaine: "Par semaine", jour: "Par jour" }[uniteBarres(jours)];
+  groupe.querySelectorAll("[data-vue]").forEach((b) => {
+    b.classList.toggle("is-on", b.dataset.vue === vue);
+    if (b.dataset.vue === "barres") b.textContent = libelle;
+  });
+  if (!groupe.dataset.branche) {
+    groupe.dataset.branche = "1";
+    groupe.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-vue]");
+      if (!b || b.dataset.vue === vueActivite) return;
+      vueActivite = b.dataset.vue;
+      try { localStorage.setItem("ogo_tdb_vue", vueActivite); } catch (err) {}
+      if (activiteDerniere) rendreActivite(activiteDerniere);
+    });
+  }
+  const note = document.getElementById("actNote");
+  if (note) note.textContent = NOTES_ACTIVITE[vue];
+  if (vue === "cumul") document.getElementById("actMeilleur").textContent = "";
+  return vue;
+}
 
 function fcfa(v) {
   return new Intl.NumberFormat("fr-FR").format(Math.round(v)).replace(/[  ]/g, " ") + " FCFA";
@@ -411,7 +641,14 @@ function rendreActivite(v) {
   const zone = document.getElementById("actChart");
   if (!zone) return;
   activiteDerniere = v;
+  barresCourantes = null;
   const serie = v.serie;
+  if (majVuesActivite(v) === "barres" && seaux0(serie)) {
+    activiteCourante = null;
+    rendreBarres(v, zone);
+    brancherSurvolActivite(zone);
+    return;
+  }
   const seaux = serie.seaux || [];
   const n = seaux.length;
   const somme = (liste) => liste.reduce((s, o) => s + (Number(o.montant) || 0), 0);
@@ -473,10 +710,13 @@ function rendreActivite(v) {
 
   zone.innerHTML =
     `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" class="act-svg">` +
-    `<defs><linearGradient id="actGV" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${ACT_ENTREE}" stop-opacity=".45"/><stop offset="100%" stop-color="${ACT_ENTREE}" stop-opacity="0"/></linearGradient>` +
-    `<linearGradient id="actGD" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${ACT_SORTIE}" stop-opacity=".3"/><stop offset="100%" stop-color="${ACT_SORTIE}" stop-opacity="0"/></linearGradient></defs>` +
+    // Bande entre les deux courbes : verte là où les entrées dépassent les sorties
+    // (sous la courbe bleue, hors de la zone sous l'orange), rouge dans le cas inverse
+    `<defs><mask id="actHorsD"><rect width="${W}" height="${H}" fill="#fff"/><path d="${fond(lD)}" fill="#000"/></mask>` +
+    `<mask id="actHorsV"><rect width="${W}" height="${H}" fill="#fff"/><path d="${fond(lV)}" fill="#000"/></mask></defs>` +
     grille +
-    `<path d="${fond(lV)}" fill="url(#actGV)"/><path d="${fond(lD)}" fill="url(#actGD)"/>` +
+    `<path d="${fond(lV)}" fill="${ACT_RESTE}" fill-opacity=".38" mask="url(#actHorsD)"/>` +
+    `<path d="${fond(lD)}" fill="${ACT_DEFICIT}" fill-opacity=".5" mask="url(#actHorsV)"/>` +
     `<path d="${lD}" fill="none" stroke="${ACT_SORTIE}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>` +
     `<path d="${lV}" fill="none" stroke="${ACT_ENTREE}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>` +
     `<line id="actGuide" x1="0" y1="${HAUT}" x2="0" y2="${Y0}" stroke="rgba(255,255,255,.45)" stroke-dasharray="5 5" visibility="hidden"/>` +
@@ -490,10 +730,19 @@ function rendreActivite(v) {
   let dernier = -1;
   ventesCreneau.forEach((val, i) => { if (val || depensesCreneau[i]) dernier = i; });
   if (dernier >= 0) mettreEnAvant(dernier, false);
+  brancherSurvolActivite(zone);
+}
 
+// La période a au moins un jour à découper en bâtons
+function seaux0(serie) {
+  return Array.isArray(serie.dates) && serie.dates.length > 1;
+}
+
+function brancherSurvolActivite(zone) {
   if (!zone.dataset.survol) {
     zone.dataset.survol = "1";
     const survol = (clientX) => {
+      if (barresCourantes) { survolerBarre(clientX); return; }
       const a = activiteCourante;
       if (!a) return;
       const xv = clientX - zone.getBoundingClientRect().left;
@@ -542,6 +791,10 @@ function mettreEnAvant(i, avecBulle) {
     `<span><i style="background:var(--cyan)"></i>Entré ${montantCourt(a.ventes[i])}</span>` +
     `<span><i style="background:var(--orange)"></i>Sorti ${montantCourt(a.depenses[i])}</span>` +
     `</div>` +
+    (() => {
+      const reste = a.ventes[i] - a.depenses[i];
+      return `<div class="tdb-tip-li"><span>Reste</span><b style="color:${reste < 0 ? "#C0392B" : "#0E8A5F"}">${reste < 0 ? "−" : ""}${montantCourt(Math.abs(reste))}</b></div>`;
+    })() +
     `<div class="tdb-tip-sec">Ventes</div>` +
     listeInfo(seau.ventes, (o) => o.description || "Vente", "+", "#007C96", "Aucune vente") +
     `<div class="tdb-tip-sec">Dépenses</div>` +
@@ -876,10 +1129,52 @@ function calculer(donnees, plage) {
   const ventesPrec = donnees.ventes.filter(dans(prec.debut, prec.fin));
   const depensesPrec = donnees.depenses.filter(dans(prec.debut, prec.fin));
 
-  const entrees = somme(ventes);
-  const sorties = somme(depenses);
+  // Une vente à crédit n'est pas de l'argent reçu : l'argent entre avec les
+  // règlements (avance à la vente, paiements ensuite), à leur date.
+  const credits = donnees.credits;
+  const reglementsComptes = window.OGOUE.reglementsPlafonnes
+    ? window.OGOUE.reglementsPlafonnes(credits?.ventes, credits?.reglements)
+    : (credits?.reglements || []);
+  const reglements = reglementsComptes.map((r) => ({
+    date: isoDe(new Date(r.regle_le)),
+    created_at: r.regle_le,
+    montant: Number(r.montant) || 0,
+    description: `${r.nature === "avance" ? "Avance" : "Paiement"} crédit · ${(r.client_nom || "client").trim()}`,
+    _reglement: true
+  }));
+  const encaissements = (liste, debut, fin) => [
+    ...liste.filter((v) => v.moyen_paiement !== "credit"),
+    ...reglements.filter(dans(debut, fin))
+  ];
+  const entreesListe = encaissements(ventes, plage.debut, plage.fin);
+  const entreesPrec = encaissements(ventesPrec, prec.debut, prec.fin);
+
+  // Même chose côté dépenses : un achat à crédit n'est pas de l'argent
+  // sorti ; il sort le jour où la dette est payée.
+  const dettes = donnees.dettes || [];
+  const payeesPlusTard = new Set(dettes.filter((d) => d.regle_le).map((d) => d.id));
+  const paiementsDettes = dettes.filter((d) => d.regle_le).map((d) => ({
+    date: isoDe(new Date(d.regle_le)),
+    created_at: d.regle_le,
+    montant: Number(d.montant) || 0,
+    categorie: `Dette payée · ${d.categorie || "dépense"}`,
+    _paiementDette: true
+  }));
+  const decaissements = (liste, debut, fin) => [
+    ...liste.filter((d) => d.moyen_paiement !== "credit" && !payeesPlusTard.has(d.id)),
+    ...paiementsDettes.filter(dans(debut, fin))
+  ];
+  const sortiesListe = decaissements(depenses, plage.debut, plage.fin);
+  const sortiesPrec = decaissements(depensesPrec, prec.debut, prec.fin);
+  const aPayer = dettes.filter((d) => d.moyen_paiement === "credit").reduce((s, d) => s + (Number(d.montant) || 0), 0);
+  const aEncaisser = credits && window.OGOUE.resumerCredits
+    ? window.OGOUE.resumerCredits(credits.ventes, credits.reglements).du
+    : 0;
+
+  const entrees = somme(entreesListe);
+  const sorties = somme(sortiesListe);
   const net = entrees - sorties;
-  const netPrecedent = somme(ventesPrec) - somme(depensesPrec);
+  const netPrecedent = somme(entreesPrec) - somme(sortiesPrec);
 
   const auj = plageAujourdhui();
   const mois = plagePreset("mois");
@@ -908,12 +1203,18 @@ function calculer(donnees, plage) {
   return {
     entrees,
     sorties,
-    nbVentes: ventes.length,
-    nbDepenses: depenses.length,
+    aEncaisser,
+    aPayer,
+    nbVentes: entreesListe.length,
+    nbDepenses: sortiesListe.length,
     net,
     netPrecedent,
     variation: variation(net, netPrecedent),
-    serie: construireSerie(joursEntre(plage.debut, plage.fin), ventes, depenses),
+    serie: construireSerie(joursEntre(plage.debut, plage.fin), entreesListe, sortiesListe),
+    ventesPeriode: ventes,
+    entreesListe,
+    depensesPeriode: depenses,
+    sortiesListe,
     operations,
     meilleures,
     depensesSansJustificatif: depensesSansJustif.length,
@@ -934,7 +1235,7 @@ function afficher(donnees, plage) {
   ecran("tdbVs").textContent = lib.vs;
   document.getElementById("tdbBestPeriode").textContent = `· ${lib.court}`;
 
-  document.querySelectorAll(".tdb-pill").forEach((b) => {
+  document.querySelectorAll(".tdb-pill[data-preset]").forEach((b) => {
     b.classList.toggle("is-on", b.dataset.preset === plage.preset);
   });
 
@@ -948,6 +1249,8 @@ function afficher(donnees, plage) {
 
   ecran("kpi-chiffre-affaires").innerHTML = `${montantCourt(v.entrees)} <span class="tdb-nb">(${v.nbVentes})</span>`;
   ecran("kpi-depenses").innerHTML = `${montantCourt(v.sorties)} <span class="tdb-nb">(${v.nbDepenses})</span>`;
+  afficherAEncaisser(v.aEncaisser);
+  afficherAPayer(v.aPayer);
 
   animerSolde(v.net);
   rendreGraphique(v.serie);
@@ -965,6 +1268,47 @@ function afficher(donnees, plage) {
   rendreAFaire(todos);
 
   rendreMeilleures(v.meilleures, v.entrees);
+}
+
+// Dépenses à crédit pas encore payées (toutes dates) : visible seulement s'il y en a
+function afficherAPayer(montant) {
+  const encaisser = document.getElementById("tdbAEncaisser");
+  const sorti = document.getElementById("kpi-depenses");
+  if (!sorti) return;
+  let bloc = document.getElementById("tdbAPayer");
+  if (!bloc) {
+    bloc = document.createElement("a");
+    bloc.id = "tdbAPayer";
+    bloc.href = "module_credits.html#fournisseurs";
+    bloc.title = "Voir ce qu'il vous reste à payer";
+    bloc.style.color = "inherit";
+    bloc.innerHTML =
+      '<div class="tdb-stat-l"><span class="tdb-tick" style="background:#E8833A"></span>À payer</div>' +
+      '<div class="tdb-stat-v" data-montant></div>';
+    (encaisser || sorti.parentElement).insertAdjacentElement("afterend", bloc);
+  }
+  bloc.hidden = !(montant > 0);
+  bloc.querySelector("[data-montant]").textContent = montantCourt(montant);
+}
+
+// Crédits clients pas encore réglés (toutes dates) : visible seulement s'il y en a
+function afficherAEncaisser(montant) {
+  const sorti = document.getElementById("kpi-depenses");
+  if (!sorti) return;
+  let bloc = document.getElementById("tdbAEncaisser");
+  if (!bloc) {
+    bloc = document.createElement("a");
+    bloc.id = "tdbAEncaisser";
+    bloc.href = "module_credits.html";
+    bloc.title = "Voir les crédits clients";
+    bloc.style.color = "inherit";
+    bloc.innerHTML =
+      '<div class="tdb-stat-l"><span class="tdb-tick" style="background:#F2C94C"></span>À encaisser</div>' +
+      '<div class="tdb-stat-v" data-montant></div>';
+    sorti.parentElement.insertAdjacentElement("afterend", bloc);
+  }
+  bloc.hidden = !(montant > 0);
+  bloc.querySelector("[data-montant]").textContent = montantCourt(montant);
 }
 
 function afficherDateEtBonjour() {
@@ -1081,7 +1425,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   // Périodes rapides : le sélecteur de date du HTML fait le reste
-  document.querySelectorAll(".tdb-pill").forEach((b) => {
+  document.querySelectorAll(".tdb-pill[data-preset]").forEach((b) => {
     b.addEventListener("click", () => {
       const p = plagePreset(b.dataset.preset);
       document.dispatchEvent(new CustomEvent("dashboard:presetRange", {

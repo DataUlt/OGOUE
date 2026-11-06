@@ -15,6 +15,7 @@ import { verifierQuota } from "../utils/quota-stockage.js";
 import { verifierQuotaOperations } from "../utils/quota-operations.js";
 import { dansFenetreModification, MESSAGE_FENETRE_DEPASSEE } from "../utils/fenetre-modification.js";
 import { peutAgirSur, refusPasAuteur } from "../utils/droits-operation.js";
+import { retirerExcedentReglements } from "../utils/credits.js";
 
 const listSchema = z.object({
   month: z.coerce.number().int().min(1).max(12).optional(),
@@ -40,6 +41,11 @@ const createSchema = z.object({
   clientName: z.string().max(150).optional().nullable(),
   clientPhone: z.string().max(50).optional().nullable(),
   clientEmail: z.string().max(150).optional().nullable(),
+  // Vente à crédit : date à laquelle le client a promis de payer le reste
+  creditEcheance: z.preprocess(
+    (v) => (v === "" || v === null || v === undefined ? null : v),
+    z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable()
+  ).optional(),
   // Commentaire libre du gérant, facultatif. Ex. : avance versée, solde
   // à percevoir. Plafonné pour rester un pense-bête et non un journal.
   note: z.string().max(1000).optional().nullable(),
@@ -94,7 +100,7 @@ export async function listSales(req, res) {
     const construireRequete = () => {
       let query = supabase
         .from("sales")
-        .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, receipt_url, receipt_number, note, created_at, modified_at, modified_by_name, created_by, article_id")
+        .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, receipt_url, receipt_number, note, created_at, modified_at, modified_by_name, created_by, article_id, client_name, client_phone")
         .eq("organization_id", organizationId);
 
       // Bornes indépendantes : la fenêtre de la formule gratuite pose un
@@ -179,6 +185,8 @@ export async function listSales(req, res) {
       modified_at: row.modified_at,
       modified_by_name: row.modified_by_name,
       note: row.note,
+      client_nom: row.client_name,
+      client_telephone: row.client_phone,
       created_at: row.created_at,
       created_by_name: row.created_by_name,
       // L'interface masque modifier / supprimer quand c'est faux (le serveur refuse de toute façon)
@@ -410,6 +418,10 @@ export async function createSale(req, res) {
   try {
     const data = createSchema.parse(req.body);
 
+    if (data.paymentMethod === "credit" && !String(data.clientName || "").trim()) {
+      return res.status(400).json({ error: "Vente à crédit : indiquez le nom du client qui doit payer.", code: "client_requis" });
+    }
+
     // Récupérer l'organizationId du JWT
     const organizationId = req.user.organizationId;
 
@@ -503,9 +515,7 @@ export async function createSale(req, res) {
       }
     }
 
-    const { data: row, error } = await supabase
-      .from("sales")
-      .insert({
+    const ligneVente = {
         organization_id: organizationId,
         sale_date: data.saleDate,
         description: data.description,
@@ -521,11 +531,18 @@ export async function createSale(req, res) {
         client_phone: videEnNull(data.clientPhone),
         client_email: videEnNull(data.clientEmail),
         note: videEnNull(data.note),
+        // Seulement si la colonne existe (sql/CREDITS_CLIENTS.sql) : on ne l'écrit que pour un crédit daté
+        ...(data.paymentMethod === "credit" && data.creditEcheance ? { credit_echeance: data.creditEcheance } : {}),
         article_id: articleSuivi ? articleSuivi.id : null,
         created_by: req.user.userId || req.user.sub || req.user.id,
-      })
-      .select("id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, receipt_url, receipt_storage_path, client_name, client_phone, client_email, note, created_at")
-      .single();
+    };
+    const COLONNES_RETOUR = "id, sale_date, description, sale_type, payment_method, quantity, amount, receipt_name, receipt_url, receipt_storage_path, client_name, client_phone, client_email, note, created_at";
+    let { data: row, error } = await supabase.from("sales").insert(ligneVente).select(COLONNES_RETOUR).single();
+    // Colonne credit_echeance absente (migration pas encore passée) : la vente passe sans la date promise
+    if (error && ligneVente.credit_echeance && /credit_echeance/.test(error.message || "")) {
+      delete ligneVente.credit_echeance;
+      ({ data: row, error } = await supabase.from("sales").insert(ligneVente).select(COLONNES_RETOUR).single());
+    }
 
     if (error || !row) {
       console.error("Erreur createSale:", error);
@@ -802,6 +819,15 @@ export async function deleteSale(req, res) {
       }
     }
 
+    // Vente à crédit : les paiements faits pour elle, repérés avant que la
+    // suppression ne les détache (sale_id passe à NULL)
+    let paiementsDeLaVente = [];
+    if (sale.payment_method === "credit") {
+      const { data: lies } = await supabase.from("credit_reglements").select("id")
+        .eq("organization_id", organizationId).eq("sale_id", id);
+      paiementsDeLaVente = (lies || []).map((r) => r.id);
+    }
+
     // Supprimer l'enregistrement de la base de données
     const { error: deleteError } = await supabase
       .from("sales")
@@ -812,6 +838,14 @@ export async function deleteSale(req, res) {
     if (deleteError) {
       console.error("Erreur deleteSale:", deleteError);
       return res.status(500).json({ error: "Internal server error" });
+    }
+
+    // Ce que le client avait payé et qui ne couvre plus aucune vente est retiré :
+    // sinon cet argent resterait compté comme entré
+    let reglementsRetires = 0;
+    if (sale.payment_method === "credit") {
+      try { reglementsRetires = await retirerExcedentReglements(organizationId, sale.client_name, paiementsDeLaVente); }
+      catch (e) { console.error("⚠️  Paiements de crédit non ajustés après suppression:", e.message); }
     }
 
     // Vente supprimée : on rend la quantité au stock de l'article, s'il est suivi
@@ -830,7 +864,7 @@ export async function deleteSale(req, res) {
       }
     }
 
-    return res.json({ message: "Sale deleted successfully" });
+    return res.json({ message: "Sale deleted successfully", reglementsRetires });
   } catch (error) {
     console.error("Erreur deleteSale:", error);
     return res.status(500).json({ error: "Internal server error" });
@@ -866,7 +900,7 @@ export async function updateSale(req, res) {
 
     const { data: row, error } = await supabase
       .from("sales")
-      .select("id, created_at, receipt_number, article_id, quantity, description, created_by")
+      .select("id, created_at, receipt_number, article_id, quantity, description, created_by, payment_method, client_name")
       .eq("id", req.params.id)
       .eq("organization_id", organizationId)
       .maybeSingle();
@@ -1004,7 +1038,15 @@ export async function updateSale(req, res) {
       return res.status(500).json({ error: "Impossible de modifier la vente" });
     }
 
-    return res.json({ message: "Sale updated successfully" });
+    // Vente à crédit modifiée (moyen ou montant) : le client peut avoir payé
+    // plus que ce qu'il doit désormais, ce surplus est retiré
+    let reglementsRetires = 0;
+    if (row.payment_method === "credit" && (champs.payment_method !== undefined || champs.amount !== undefined)) {
+      try { reglementsRetires = await retirerExcedentReglements(organizationId, row.client_name, []); }
+      catch (e) { console.error("⚠️  Paiements de crédit non ajustés après modification:", e.message); }
+    }
+
+    return res.json({ message: "Sale updated successfully", reglementsRetires });
   } catch (error) {
     if (error?.name === "ZodError") {
       return res.status(400).json({ error: error.issues?.[0]?.message || "Validation error", details: error.issues });
@@ -1025,3 +1067,4 @@ async function nomAuteur(req) {
   const { data } = await supabase.from("users").select("first_name").eq("id", userId).maybeSingle();
   return data?.first_name || null;
 }
+

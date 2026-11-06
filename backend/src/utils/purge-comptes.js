@@ -80,6 +80,9 @@ export async function effacerCompte(organizationId) {
   for (const table of ["stock_movements", "sales", "expenses", "articles", "agents", "deletion_audit", "receipt_counters"]) {
     await effacer(table, organizationId);
   }
+  // Règlements des crédits clients (table absente tant que la migration n'est pas passée)
+  const { error: eCredits } = await supabase.from("credit_reglements").delete().eq("organization_id", organizationId);
+  if (eCredits && !/does not exist|schema cache/i.test(eCredits.message)) throw new Error(`effacement credit_reglements : ${eCredits.message}`);
 
   // 4. Comptes de connexion, puis fiches utilisateurs
   for (const u of utilisateurs) {

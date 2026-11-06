@@ -369,6 +369,8 @@
       // Facultatif : absent du contrôle de présence plus haut, une dépense
       // sans commentaire doit pouvoir s'enregistrer.
       note: (noteInput?.value || "").trim(),
+      // Dépense à crédit : date de remboursement estimée (facultative)
+      credit_echeance: moyenPaiement === "credit" ? (document.getElementById("depense-credit-echeance")?.value || "") : "",
       file // Ajouter l'objet File pour l'upload
     };
   }
@@ -500,7 +502,19 @@
             ? "Mobile Money"
             : depense.moyen_paiement === "cash"
             ? "Cash"
+            : depense.moyen_paiement === "credit"
+            ? `<span class="inline-flex items-center rounded-full bg-orange-100 dark:bg-orange-900/40 px-2 py-0.5 text-xs font-bold text-orange-700 dark:text-orange-300">Crédit</span>`
             : echapperHtml(depense.moyen_paiement || "-")
+        }${
+          // Encore à payer : date prévue et bouton « Payer » (à tout moment, pas seulement 24 h)
+          depense.moyen_paiement === "credit"
+            ? `${depense.credit_echeance ? `<span class="block text-[11px] ${depense.credit_echeance < new Date().toISOString().slice(0, 10) ? "font-bold text-red-600" : "text-gray-500 dark:text-gray-400"}">à rembourser le ${formatDateFr(depense.credit_echeance)}</span>` : ""}
+               ${depense.peut_agir === false ? "" : `<span class="payer-dette mt-1 flex flex-wrap items-center gap-1">
+                 <button type="button" class="payer-ouvrir h-7 px-3 rounded-full bg-primary text-white text-xs font-bold hover:bg-primary/90">Payer</button></span>`}`
+            // Déjà payée : on garde la trace du crédit
+            : depense.credit_regle_le
+            ? `<span class="block text-[11px] text-gray-500 dark:text-gray-400">crédit payé le ${formatDateFr(depense.credit_regle_le)}</span>`
+            : ""
         }
       </td>
       <td class="px-6 py-4">
@@ -561,6 +575,35 @@
           }
         });
       }
+    }
+
+    // Payer une dépense à crédit : on choisit le moyen, la ligne passe à ce moyen
+    const zonePayer = tr.querySelector('.payer-dette');
+    if (zonePayer) {
+      zonePayer.addEventListener('click', async (e) => {
+        if (e.target.closest('.payer-ouvrir')) {
+          zonePayer.innerHTML =
+            '<span class="text-[11px] text-gray-500">Payé en :</span>' +
+            '<button type="button" data-moyen="cash" class="h-7 px-2.5 rounded-full bg-[#0d1b19] text-white text-xs font-bold">Cash</button>' +
+            '<button type="button" data-moyen="mobile_money" class="h-7 px-2.5 rounded-full bg-[#0d1b19] text-white text-xs font-bold">Mobile Money</button>' +
+            '<button type="button" data-renoncer class="h-7 px-1 text-xs text-gray-500 hover:underline">Annuler</button>';
+          return;
+        }
+        if (e.target.closest('[data-renoncer]')) {
+          zonePayer.innerHTML = '<button type="button" class="payer-ouvrir h-7 px-3 rounded-full bg-primary text-white text-xs font-bold hover:bg-primary/90">Payer</button>';
+          return;
+        }
+        const moyen = e.target.closest('[data-moyen]')?.dataset.moyen;
+        if (!moyen) return;
+        zonePayer.querySelectorAll('button').forEach((b) => { b.disabled = true; });
+        const r = await window.OGOUE.reglerDepense(depense.id, moyen);
+        if (!r.ok) { alert(r.error); zonePayer.querySelectorAll('button').forEach((b) => { b.disabled = false; }); return; }
+        window.OGOUE_FEEDBACK?.succes(`Dette payée en ${moyen === "cash" ? "Cash" : "Mobile Money"} · ${formatMontant(depense.montant)}`);
+        depensesCacheMois = null;
+        depensesCacheAnnee = null;
+        await renderCompactTable();
+        if (modal && !modal.classList.contains("hidden")) renderFullTable();
+      });
     }
 
     // Ajouter l'event listener pour supprimer
@@ -907,7 +950,7 @@
         { name: "categorieAutre", label: "Préciser la catégorie", type: "text", value: "",
           visibleSi: { champ: "category", valeur: "__OTHER__" } },
         { name: "paymentMethod", label: "Moyen de paiement", type: "select", value: depense.moyen_paiement || "",
-          options: [{ value: "cash", label: "Cash" }, { value: "mobile_money", label: "Mobile Money" }] },
+          options: [{ value: "cash", label: "Cash" }, { value: "mobile_money", label: "Mobile Money" }, { value: "credit", label: "Crédit (payé plus tard)" }] },
         { name: "amount", label: "Montant (FCFA)", type: "number", value: depense.montant },
         { name: "note", label: "Commentaire (facultatif)", type: "textarea", value: depense.note || "", pleine: true },
       ],
@@ -1029,4 +1072,147 @@
 
   // Initialisation
   renderCompactTable();
+
+  // =========================
+  // 💳 DÉPENSE À CRÉDIT (payée plus tard)
+  // =========================
+  // Le moyen « Crédit » fait apparaître une date de remboursement estimée,
+  // et rappelle de noter le fournisseur dans le commentaire. La dette se
+  // paie ensuite depuis le tableau (bouton « Payer »).
+  (function depenseACredit() {
+    const moyen = document.getElementById("depense-moyen-paiement");
+    const note = document.getElementById("depense-note");
+    if (!moyen) return;
+    const ligne = moyen.closest(".grid") || moyen.closest("label");
+    const bloc = document.createElement("div");
+    bloc.className = "hidden rounded-2xl border border-orange-200 dark:border-orange-900/50 bg-orange-50/70 dark:bg-orange-950/20 p-4";
+    bloc.innerHTML =
+      '<label class="flex flex-col md:max-w-sm"><p class="text-base font-medium leading-normal pb-2 text-[#0a0c0a] dark:text-gray-200">Date de remboursement estimée <span class="font-normal text-gray-500">(facultatif)</span></p>' +
+      '<input id="depense-credit-echeance" type="date" class="form-input date-input flex w-full rounded-lg text-[#0a0c0a] dark:text-white border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-14 p-[15px] text-base"></label>' +
+      '<p class="mt-3 text-sm text-orange-800 dark:text-orange-300"><strong>Pensez à écrire le nom du fournisseur dans le commentaire</strong> : vous saurez à qui vous devez cet argent. Quand vous l\'aurez payé, appuyez sur « Payer » dans le tableau des dépenses.</p>';
+    ligne.insertAdjacentElement("afterend", bloc);
+    const placeholderNote = note ? note.placeholder : "";
+    function maj() {
+      const credit = moyen.value === "credit";
+      bloc.classList.toggle("hidden", !credit);
+      if (note) note.placeholder = credit ? "Ex. : Laiterie Estuaire, 20 L de lait, à régler vendredi." : placeholderNote;
+    }
+    moyen.addEventListener("change", maj);
+    form.addEventListener("reset", () => setTimeout(maj, 0));
+    maj();
+  })();
+
+  // =========================
+  // 🧾 SAISIE PAR BOUTONS ET CARTES (même présentation que les ventes)
+  // =========================
+  // Le moyen de paiement devient trois boutons à côté de la date, et les
+  // catégories des cartes à toucher. Les listes d'origine restent dans la
+  // page, cachées : ce sont toujours elles qui portent les valeurs envoyées.
+  (function saisieParCartes() {
+    const moyen = document.getElementById("depense-moyen-paiement");
+    const dateInput = document.getElementById("depense-date");
+    if (!moyen || !dateInput || !categorieSelect) return;
+    const ligneDate = dateInput.closest(".grid");
+    const labelCategorie = categorieSelect.closest("label");
+    const labelMoyen = moyen.closest("label");
+    if (!ligneDate || !labelCategorie || !labelMoyen) return;
+
+    // Choix vérifiés à l'envoi, avec un message sous les cartes
+    categorieSelect.required = false;
+    moyen.required = false;
+    labelCategorie.classList.add("hidden");
+    labelMoyen.classList.add("hidden");
+
+    const CLE_PAIEMENT = "ogo_depense_paiement";
+    // Crédit : choisi dépense par dépense, jamais retenu ; sinon le dernier moyen utilisé
+    const paiementHabituel = () => { try { return localStorage.getItem(CLE_PAIEMENT) === "mobile_money" ? "mobile_money" : "cash"; } catch (e) { return "cash"; } };
+    const choisirMoyen = (valeur) => { moyen.value = valeur; moyen.dispatchEvent(new Event("change")); majMoyen(); };
+
+    // ── Moyen de paiement, à côté de la date ──
+    const blocPaiement = document.createElement("div");
+    blocPaiement.className = "flex flex-col";
+    blocPaiement.innerHTML =
+      `<p class="text-base font-medium leading-normal pb-2 text-[#0a0c0a] dark:text-gray-200">Moyen de paiement <span class="text-red-500">*</span></p>` +
+      `<div class="inline-flex self-start rounded-full bg-gray-100 dark:bg-gray-800 p-1" data-depense-paiement>` +
+      `<button type="button" data-paiement="cash" class="px-3 sm:px-5 h-12 rounded-full text-sm font-bold whitespace-nowrap">Cash</button>` +
+      `<button type="button" data-paiement="mobile_money" class="px-3 sm:px-5 h-12 rounded-full text-sm font-bold whitespace-nowrap">Mobile Money</button>` +
+      `<button type="button" data-paiement="credit" class="px-3 sm:px-5 h-12 rounded-full text-sm font-bold whitespace-nowrap" title="Payé plus tard">Crédit</button></div>`;
+    labelCategorie.insertAdjacentElement("afterend", blocPaiement);
+    function majMoyen() {
+      blocPaiement.querySelectorAll("[data-paiement]").forEach((b) => {
+        const on = b.dataset.paiement === moyen.value;
+        ["bg-white", "dark:bg-gray-600", "shadow-sm", "text-[#0a0c0a]", "dark:text-white"].forEach((k) => b.classList.toggle(k, on));
+        b.classList.toggle("text-gray-500", !on);
+      });
+    }
+    blocPaiement.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-paiement]");
+      if (!b) return;
+      if (b.dataset.paiement !== "credit") { try { localStorage.setItem(CLE_PAIEMENT, b.dataset.paiement); } catch (err) {} }
+      choisirMoyen(b.dataset.paiement);
+    });
+
+    // ── Catégories en cartes, sous la date ──
+    const ICONES = {
+      "achats / stocks": "inventory_2", "salaires": "payments", "loyer": "home", "marketing": "campaign",
+      "électricité": "bolt", "eau": "water_drop", "internet & télécom": "wifi", "transport & logistique": "local_shipping",
+      "impôts & taxes": "account_balance", "entretien & maintenance": "build"
+    };
+    const blocCartes = document.createElement("div");
+    blocCartes.innerHTML = `
+      <p class="text-base font-medium leading-normal pb-2 text-[#0a0c0a] dark:text-gray-200">Catégorie <span class="text-red-500">*</span></p>
+      <div data-cartes-categories class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3"></div>
+      <p data-cartes-erreur class="hidden mt-3 text-sm font-medium text-red-600">Choisissez la catégorie de cette dépense.</p>`;
+    ligneDate.insertAdjacentElement("afterend", blocCartes);
+    const grille = blocCartes.querySelector("[data-cartes-categories]");
+    const erreur = blocCartes.querySelector("[data-cartes-erreur]");
+    // « Préciser la catégorie » apparaît juste sous les cartes
+    if (categorieAutreWrapper) {
+      categorieAutreWrapper.classList.remove("md:col-span-2");
+      categorieAutreWrapper.classList.add("mt-4");
+      blocCartes.appendChild(categorieAutreWrapper);
+    }
+
+    function afficherCartes() {
+      const choix = [...categorieSelect.options].filter((o) => o.value && o.value !== "__OTHER__").map((o) => o.value);
+      const carte = (valeur, libelle, icone) => {
+        const on = categorieSelect.value === valeur;
+        return `<button type="button" data-categorie="${echapperHtml(valeur)}"
+          class="flex flex-col items-start gap-1.5 sm:flex-row sm:items-center sm:gap-3 min-w-0 text-left rounded-2xl border-2 px-3 max-[359px]:px-2.5 py-3 sm:px-4 min-h-[64px] transition ${on
+            ? "border-primary bg-primary/10 dark:bg-primary/20"
+            : "border-[#cfe7e3] dark:border-gray-700 bg-white dark:bg-[#182c29] hover:border-primary/50"}">
+          <span class="material-symbols-outlined text-2xl ${on ? "text-primary" : "text-gray-400"}">${icone}</span>
+          <span class="min-w-0 max-w-full font-bold text-sm max-[359px]:text-[13px] sm:text-[15px] leading-tight break-words hyphens-auto text-[#0a0c0a] dark:text-white">${echapperHtml(libelle)}</span></button>`;
+      };
+      grille.innerHTML = choix.map((c) => carte(c, c, ICONES[c.toLowerCase()] || "sell")).join("") +
+        carte("__OTHER__", "Autre catégorie", "add_circle");
+    }
+    grille.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-categorie]");
+      if (!b) return;
+      categorieSelect.value = b.dataset.categorie;
+      categorieSelect.dispatchEvent(new Event("change")); // « Autres » : affiche le champ à préciser
+      erreur.classList.add("hidden");
+      afficherCartes();
+    });
+
+    // Sans catégorie, on ne laisse pas partir la dépense : le message est sous les cartes
+    form.addEventListener("submit", (e) => {
+      if (categorieSelect.value) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      erreur.classList.remove("hidden");
+      blocCartes.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, true);
+
+    // Après un enregistrement (le formulaire est vidé) : moyen habituel, aucune
+    // catégorie choisie, et la nouvelle catégorie « Autres » parmi les cartes
+    form.addEventListener("reset", () => setTimeout(() => {
+      choisirMoyen(paiementHabituel());
+      afficherCartes();
+    }, 0));
+
+    choisirMoyen(paiementHabituel());
+    afficherCartes();
+  })();
 })();

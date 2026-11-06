@@ -556,6 +556,9 @@
     const editeRecu = !!recuZoneAuto && !recuZoneAuto.classList.contains("hidden");
     const lireClient = (id) =>
       editeRecu ? (document.getElementById(id)?.value || "").trim() : "";
+    // Vente à crédit : le client vient du bloc « Qui doit payer ? »
+    const credit = moyenPaiement === "credit";
+    const lireCredit = (id) => (document.getElementById(id)?.value || "").trim();
 
     return {
       id: generateId(),
@@ -569,8 +572,12 @@
       montant: isNaN(montant) ? 0 : montant,
       justificatif: justificatifFile,
       editer_recu: editeRecu,
-      client_nom: lireClient("recu-client-nom"),
-      client_telephone: lireClient("recu-client-telephone"),
+      client_nom: credit ? lireCredit("vente-credit-client") : lireClient("recu-client-nom"),
+      client_telephone: credit ? lireCredit("vente-credit-telephone") : lireClient("recu-client-telephone"),
+      // Vente à crédit : date promise du solde, et avance versée tout de suite
+      credit_echeance: credit ? lireCredit("vente-credit-echeance") : "",
+      credit_avance: credit ? (Number(lireCredit("vente-credit-avance")) || 0) : 0,
+      credit_avance_moyen: credit ? lireCredit("vente-credit-avance-moyen") : "",
       client_email: lireClient("recu-client-email"),
       // Facultatif : absent du contrôle de présence plus haut, une vente
       // sans commentaire doit pouvoir s'enregistrer.
@@ -637,7 +644,7 @@
     );
   }
 
-  async function deleteVente(venteId) {
+  async function deleteVente(venteId, vente) {
     try {
       // Importer le module d'audit
       const { default: DeletionAuditManager } = await import("./deletion-audit.js");
@@ -650,7 +657,7 @@
         `${API_BASE_URL}/api/sales/${venteId}`,
         {
           title: "Supprimer cette vente ?",
-          message: "Vous êtes sur le point de supprimer cet enregistrement. Veuillez expliquer le motif de cette suppression.",
+          message: messageSuppression(venteId, vente),
           recordType: "sale",
           recordId: venteId
         }
@@ -671,7 +678,11 @@
           }, 50);
         }
 
-        // Notification succès
+        // Vente à crédit : ce que doit le client et ses paiements ont changé
+        if (vente?.moyen_paiement === "credit") {
+          try { sessionStorage.removeItem("ogo_credits_retard"); } catch (err) {}
+          creditsClients.rafraichir();
+        }
         console.log('✅ Vente supprimée avec succès');
       } else {
         console.error('❌ Erreur suppression:', result.error);
@@ -681,6 +692,64 @@
       console.error('Erreur lors de la suppression:', error);
       alert('Erreur lors de la suppression de la vente');
     }
+  }
+
+  // Texte de la fenêtre de suppression ; pour une vente à crédit déjà
+  // (en partie) payée, on prévient que ces paiements partent avec elle
+  function messageSuppression(venteId, vente) {
+    const base = "Vous êtes sur le point de supprimer cet enregistrement. Veuillez expliquer le motif de cette suppression.";
+    if (vente?.moyen_paiement !== "credit") return base;
+    const info = creditsClients.infoVente(venteId);
+    const paye = info ? (Number(vente.montant) || 0) - info.reste : 0;
+    if (!(paye > 0)) return base;
+    return `${base}<span class="block mt-3 rounded-lg bg-orange-50 dark:bg-orange-900/30 px-3 py-2 text-orange-800 dark:text-orange-200 font-semibold">${echapperHtml(info.client)} a déjà payé ${formatMontant(paye)} sur cette vente. Ce qui ne couvre pas ses autres crédits sera retiré de l'argent entré.</span>`;
+  }
+
+  // Vente à crédit : encore due (reste, bouton « Payer ») ou déjà réglée (moyen et date).
+  // Le détail vient des crédits clients (page Crédits), chargés à part.
+  function celluleCreditVente(vente) {
+    const info = creditsClients.infoVente(vente.id);
+    const MOYENS = { cash: "Cash", mobile_money: "Mobile Money" };
+    if (info && info.reste <= 0) {
+      return `${MOYENS[info.soldeMoyen] || "Réglé"}<span class="block text-[11px] text-gray-500 dark:text-gray-400">crédit réglé le ${formatDateFr(info.soldeLe)}</span>`;
+    }
+    const pastille = '<span class="inline-flex items-center rounded-full bg-orange-100 dark:bg-orange-900/40 px-2 py-0.5 text-xs font-bold text-orange-700 dark:text-orange-300">Crédit</span>';
+    if (!info) return pastille; // crédits pas encore chargés : le bouton viendra ensuite
+    const partiel = info.reste < (Number(vente.montant) || 0);
+    return pastille +
+      (partiel ? `<span class="block text-[11px] text-gray-500 dark:text-gray-400">reste ${formatMontant(info.reste)}</span>` : "") +
+      `<span class="payer-vente mt-1 flex flex-wrap items-center gap-1" data-id="${echapperHtml(vente.id)}">
+         <button type="button" class="payer-ouvrir h-7 px-3 rounded-full bg-primary text-white text-xs font-bold hover:bg-primary/90">Payer</button></span>`;
+  }
+
+  // « Payer » : un paiement du client pour ce qui reste dû sur cette vente
+  function brancherPayerVente(tr) {
+    const zone = tr.querySelector(".payer-vente");
+    if (!zone) return;
+    zone.addEventListener("click", async (e) => {
+      if (e.target.closest(".payer-ouvrir")) {
+        zone.innerHTML =
+          '<span class="text-[11px] text-gray-500">Payé en :</span>' +
+          '<button type="button" data-moyen="cash" class="h-7 px-2.5 rounded-full bg-[#0d1b19] text-white text-xs font-bold">Cash</button>' +
+          '<button type="button" data-moyen="mobile_money" class="h-7 px-2.5 rounded-full bg-[#0d1b19] text-white text-xs font-bold">Mobile Money</button>' +
+          '<button type="button" data-renoncer class="h-7 px-1 text-xs text-gray-500 hover:underline">Annuler</button>';
+        return;
+      }
+      if (e.target.closest("[data-renoncer]")) {
+        zone.innerHTML = '<button type="button" class="payer-ouvrir h-7 px-3 rounded-full bg-primary text-white text-xs font-bold hover:bg-primary/90">Payer</button>';
+        return;
+      }
+      const moyen = e.target.closest("[data-moyen]")?.dataset.moyen;
+      if (!moyen) return;
+      const info = creditsClients.infoVente(zone.dataset.id);
+      if (!info || !(info.reste > 0)) return;
+      zone.querySelectorAll("button").forEach((b) => { b.disabled = true; });
+      const r = await window.OGOUE.enregistrerReglement({ venteId: zone.dataset.id, montant: info.reste, moyen, nature: "paiement" });
+      if (!r.ok) { alert(r.error); zone.querySelectorAll("button").forEach((b) => { b.disabled = false; }); return; }
+      window.OGOUE_FEEDBACK?.succes(`Crédit réglé · ${echapperHtml(info.client)} · ${formatMontant(info.reste)}`);
+      try { sessionStorage.removeItem("ogo_credits_retard"); } catch (err) {}
+      await creditsClients.rafraichir(); // le tableau se redessine avec la vente réglée
+    });
   }
 
   function createRow(vente) {
@@ -711,7 +780,7 @@
             : vente.moyen_paiement === "cash"
             ? "Cash"
             : vente.moyen_paiement === "credit"
-            ? '<span class="inline-flex items-center rounded-full bg-orange-100 dark:bg-orange-900/40 px-2 py-0.5 text-xs font-bold text-orange-700 dark:text-orange-300">Crédit</span>'
+            ? celluleCreditVente(vente)
             : echapperHtml(vente.moyen_paiement || "-")
         }
       </td>
@@ -809,10 +878,11 @@
     // Ajouter l'event listener pour supprimer
     const deleteBtn = tr.querySelector('.delete-btn');
     tr.querySelector('.edit-btn')?.addEventListener('click', () => ouvrirModificationVente(vente));
+    brancherPayerVente(tr);
     if (deleteBtn) {
       deleteBtn.addEventListener('click', () => {
         const venteId = deleteBtn.getAttribute('data-id');
-        deleteVente(venteId);
+        deleteVente(venteId, vente);
       });
     }
 
@@ -1382,6 +1452,7 @@
 
     window.OGOUE_FEEDBACK?.fin(bouton);
     window.OGOUE_FEEDBACK?.succes("Vente enregistrée avec succès");
+    if (data.moyen_paiement === "credit") await creditsClients.apresVente(data);
 
     // ✅ Afficher la zone de succès si fichier
     if (data.file) {
@@ -1440,16 +1511,68 @@
   }
 
   // =========================
+  // 🤝 CLIENTS À CRÉDIT
+  // =========================
+  // Qui doit déjà combien : sert aux raccourcis du bloc « Le client paiera
+  // plus tard » et à l'avance versée à la vente. La page « Crédits »
+  // (module_credits.html) montre le détail et encaisse les paiements.
+  const creditsClients = (function () {
+    let resume = { clients: [] };
+    const abonnes = [];
+    async function rafraichir() {
+      if (!window.OGOUE?.getCredits) return;
+      const r = await window.OGOUE.getCredits();
+      if (!r.ok) return;
+      resume = window.OGOUE.resumerCredits(r.ventes, r.reglements);
+      abonnes.forEach((f) => f(resume));
+    }
+    // Avance reçue au moment d'une vente à crédit : un règlement pour ce client
+    async function apresVente(data) {
+      const avance = Number(data.credit_avance) || 0;
+      if (avance > 0 && window.OGOUE?.enregistrerReglement) {
+        const r = await window.OGOUE.enregistrerReglement({
+          clientNom: data.client_nom,
+          clientTelephone: data.client_telephone || null,
+          montant: avance,
+          moyen: data.credit_avance_moyen === "mobile_money" ? "mobile_money" : "cash",
+          nature: "avance",
+        });
+        if (!r.ok) alert(`La vente est enregistrée, mais l'avance n'a pas pu l'être : ${r.error}\n\nAjoutez-la depuis la page Crédits.`);
+      }
+      await rafraichir();
+      try { sessionStorage.removeItem("ogo_credits_retard"); } catch (e) {}
+    }
+    return {
+      rafraichir,
+      apresVente,
+      resume: () => resume,
+      surChangement: (f) => abonnes.push(f),
+      infoVente: (id) => (resume.parVente ? resume.parVente[id] || null : null),
+      duPar: (nom) => {
+        const k = window.OGOUE?.cleClient ? window.OGOUE.cleClient(nom) : String(nom).toLowerCase();
+        return resume.clients.find((c) => c.cle === k) || null;
+      },
+    };
+  })();
+
+  // Crédits chargés ou modifiés : les ventes à crédit du tableau changent d'état
+  creditsClients.surChangement(() => {
+    renderCompactTable();
+    if (modal && !modal.classList.contains("hidden")) renderFullTable();
+  });
+
+  // =========================
   // 🧾 SAISIE NORMALE PAR CARTES
   // =========================
-  // Même grille d'articles que le mode rush, mais rien ne part tout seul :
-  // un appui choisit l'article, chaque appui de plus sur la même carte
-  // ajoute une unité, le prix se calcule depuis le catalogue. La date, le
-  // commentaire et le justificatif restent à remplir, puis la personne
-  // appuie sur « Enregistrer la vente ».
+  // Même grille d'articles que le mode rush, mais rien ne part tout seul.
+  // Un appui ajoute l'article au panier, chaque appui de plus sur la même
+  // carte ajoute une unité ; plusieurs articles peuvent être choisis. Le
+  // prix se calcule depuis le catalogue. La personne remplit la date, le
+  // commentaire et le justificatif, puis appuie sur « Enregistrer la vente ».
+  // Un panier de plusieurs articles devient une vente par article (même
+  // date, même paiement, même client).
   // Les champs d'origine restent dans la page, cachés : ils portent les
-  // valeurs envoyées (getFormData) et reviennent pour la saisie à la main
-  // (article hors catalogue, prix négocié).
+  // valeurs envoyées (getFormData) et reviennent quand le catalogue est vide.
   (function saisieParCartes() {
     const dateInput = document.getElementById("vente-date");
     const moyenInput = document.getElementById("vente-moyen-paiement");
@@ -1462,16 +1585,20 @@
     const blocArticle = selectWrapper.parentElement;
     const ligneMoyen = moyenInput.closest(".grid");
     const ligneQuantite = qteInput.closest(".grid");
+    const blocJustificatif = document.getElementById("justificatif-choix")?.parentElement || null;
     const CLE_PAIEMENT = "ogo_rush_paiement"; // même préférence que le mode rush
     const lire = (cle, defaut) => { try { return localStorage.getItem(cle) || defaut; } catch (e) { return defaut; } };
     const ecrire = (cle, val) => { try { localStorage.setItem(cle, val); } catch (e) {} };
+    const fcfa = (n) => (Number(n) || 0).toLocaleString("fr-FR", { maximumFractionDigits: 0 });
 
     let actif = false;      // grille affichée (sinon : saisie à la main)
-    let manuel = false;     // la personne a choisi la saisie à la main
+    let manuel = false;     // saisie à la main (catalogue vide)
     let chargement = true;  // catalogue pas encore reçu du serveur : on montre déjà la grille
     let ordre = [];
-    let choix = null;       // { article, quantite }
-    let paiement = lire(CLE_PAIEMENT, "cash");
+    let panier = [];        // [{ article, quantite }]
+    // Crédit : choisi vente par vente, jamais retenu ; sinon le dernier moyen utilisé
+    const paiementHabituel = () => { const m = lire(CLE_PAIEMENT, "cash"); return m === "mobile_money" ? m : "cash"; };
+    let paiement = paiementHabituel();
 
     // ── Paiement, à côté de la date ──
     const blocPaiement = document.createElement("div");
@@ -1479,12 +1606,12 @@
     blocPaiement.innerHTML =
       `<p class="text-base font-medium leading-normal pb-2 text-[#0d1b19] dark:text-gray-200">Moyen de paiement<span class="text-red-500">*</span></p>` +
       `<div class="inline-flex self-start rounded-full bg-gray-100 dark:bg-gray-800 p-1" data-cartes-paiement>` +
-      `<button type="button" data-paiement="cash" class="px-5 h-12 rounded-full text-sm font-bold">Cash</button>` +
-      `<button type="button" data-paiement="mobile_money" class="px-5 h-12 rounded-full text-sm font-bold">Mobile Money</button>` +
-      `<button type="button" data-paiement="credit" class="px-5 h-12 rounded-full text-sm font-bold" title="Le client paiera plus tard">Crédit</button></div>`;
+      `<button type="button" data-paiement="cash" class="px-3 sm:px-5 h-12 rounded-full text-sm font-bold whitespace-nowrap">Cash</button>` +
+      `<button type="button" data-paiement="mobile_money" class="px-3 sm:px-5 h-12 rounded-full text-sm font-bold whitespace-nowrap">Mobile Money</button>` +
+      `<button type="button" data-paiement="credit" class="px-3 sm:px-5 h-12 rounded-full text-sm font-bold whitespace-nowrap" title="Le client paiera plus tard">Crédit</button></div>`;
     ligneDate.appendChild(blocPaiement);
 
-    // ── Grille d'articles et résumé du choix ──
+    // ── Grille d'articles, panier et total ──
     const blocCartes = document.createElement("div");
     blocCartes.className = "hidden";
     blocCartes.innerHTML = `
@@ -1495,19 +1622,63 @@
       </div>
       <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Un appui choisit l'article. Appuis répétés sur la même carte = plusieurs unités (2 appuis = quantité 2).</p>
       <div data-cartes-grille class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3"></div>
-      <div data-cartes-choix class="hidden mt-4 items-center justify-between gap-3 rounded-2xl border border-primary/40 bg-primary/5 px-4 py-3">
-        <p class="text-sm text-[#0d1b19] dark:text-gray-100"><span data-cartes-resume class="font-bold"></span></p>
-        <div class="flex items-center gap-2 shrink-0">
-          <button type="button" data-cartes-moins class="size-9 rounded-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-lg font-bold" aria-label="Une unité de moins">−</button>
-          <button type="button" data-cartes-plus class="size-9 rounded-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-lg font-bold" aria-label="Une unité de plus">+</button>
-          <button type="button" data-cartes-retirer class="ml-1 text-sm font-medium text-gray-500 hover:text-red-600 hover:underline">Retirer</button>
-        </div>
-      </div>
       <p data-cartes-erreur class="hidden mt-3 text-sm font-medium text-red-600"></p>
       <button type="button" data-cartes-ajouter class="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
         <span class="material-symbols-outlined text-base">add_circle</span>Article ou service absent ? Ajoutez-le au catalogue
-      </button>`;
+      </button>
+      <div data-cartes-panier class="hidden mt-4 rounded-2xl border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-700"></div>
+      <div data-cartes-total class="hidden mt-3 flex-wrap items-center justify-between gap-x-6 gap-y-1 rounded-2xl bg-gray-100 dark:bg-gray-800 px-5 py-3 text-[15px] text-[#0d1b19] dark:text-gray-100"></div>`;
     ligneDate.insertAdjacentElement("afterend", blocCartes);
+
+    // ── Vente à crédit : trois questions (qui, avance, quand) ──
+    const champ = "form-input w-full h-12 rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-background-dark px-5 text-base text-[#0d1b19] dark:text-white placeholder:text-gray-400 focus:ring-2 focus:ring-primary/40";
+    const pastille = "h-10 px-4 rounded-full border text-sm font-semibold transition";
+    const blocCredit = document.createElement("div");
+    blocCredit.className = "hidden rounded-[22px] border border-sky-200 dark:border-sky-900/60 bg-sky-50/70 dark:bg-sky-950/20 p-5 space-y-4";
+    blocCredit.innerHTML = `
+      <p class="flex items-center gap-2"><span class="size-2 rounded-full bg-primary"></span>
+        <strong class="text-[15px] text-[#0d1b19] dark:text-white">Le client paiera plus tard</strong>
+        <span class="text-sm text-gray-500 dark:text-gray-400">· 3 questions, c'est tout</span></p>
+      <div>
+        <label for="vente-credit-client" class="block text-sm font-semibold text-[#0d1b19] dark:text-gray-200 mb-2">Qui vous doit cet argent ?<span class="text-red-500">*</span></label>
+        <input id="vente-credit-client" type="text" maxlength="150" autocomplete="off" placeholder="Nom du client" class="${champ}">
+        <div data-credit-clients class="mt-3 flex flex-wrap gap-2"></div>
+        <p data-credit-doit class="hidden mt-2 text-sm font-bold text-orange-800 dark:text-orange-300"></p>
+        <div data-credit-tel class="hidden mt-3">
+          <input id="vente-credit-telephone" type="tel" maxlength="50" autocomplete="off" placeholder="Téléphone (facultatif, pour lui rappeler sur WhatsApp)" class="${champ}">
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label for="vente-credit-avance" class="block text-sm font-semibold text-[#0d1b19] dark:text-gray-200 mb-2">Avance reçue <span class="font-normal text-gray-500">(facultatif)</span></label>
+          <input id="vente-credit-avance" type="number" min="0" step="1" inputmode="numeric" placeholder="0 FCFA" class="${champ}">
+          <input id="vente-credit-avance-moyen" type="hidden" value="cash">
+          <div data-credit-avance-moyen class="hidden mt-2 inline-flex rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-1 text-xs">
+            <button type="button" data-valeur="cash" class="px-3 h-8 rounded-full font-bold">reçue en Cash</button>
+            <button type="button" data-valeur="mobile_money" class="px-3 h-8 rounded-full font-bold">en Mobile Money</button>
+          </div>
+        </div>
+        <div>
+          <label for="vente-credit-echeance" class="block text-sm font-semibold text-[#0d1b19] dark:text-gray-200 mb-2">Il paiera le reste le… <span class="font-normal text-gray-500">(facultatif)</span></label>
+          <input id="vente-credit-echeance" type="date" class="form-input date-input w-full h-12 rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-background-dark px-5 text-base text-[#0d1b19] dark:text-white">
+        </div>
+      </div>`;
+    ligneDate.insertAdjacentElement("afterend", blocCredit);
+    const champNomCredit = blocCredit.querySelector("#vente-credit-client");
+    const champTelCredit = blocCredit.querySelector("#vente-credit-telephone");
+    const champAvance = blocCredit.querySelector("#vente-credit-avance");
+    const champAvanceMoyen = blocCredit.querySelector("#vente-credit-avance-moyen");
+    const champEcheance = blocCredit.querySelector("#vente-credit-echeance");
+    const zoneClients = blocCredit.querySelector("[data-credit-clients]");
+    const zoneDoit = blocCredit.querySelector("[data-credit-doit]");
+    const zoneTel = blocCredit.querySelector("[data-credit-tel]");
+    const zoneAvanceMoyen = blocCredit.querySelector("[data-credit-avance-moyen]");
+
+    // Plusieurs articles : le reçu ou le justificatif s'ajoute ensuite, vente par vente
+    const noteJustificatif = document.createElement("p");
+    noteJustificatif.className = "hidden text-sm text-gray-500 dark:text-gray-400";
+    noteJustificatif.textContent = "Plusieurs articles : chacun devient une vente. Le reçu ou le justificatif s'ajoute ensuite depuis le tableau des ventes.";
+    blocJustificatif?.insertAdjacentElement("afterend", noteJustificatif);
 
     // Retour à la grille depuis la saisie à la main
     const lienGrille = document.createElement("button");
@@ -1517,12 +1688,18 @@
     blocArticle.appendChild(lienGrille);
 
     const grille = blocCartes.querySelector("[data-cartes-grille]");
-    const zoneChoix = blocCartes.querySelector("[data-cartes-choix]");
-    const resume = blocCartes.querySelector("[data-cartes-resume]");
+    const zonePanier = blocCartes.querySelector("[data-cartes-panier]");
+    const zoneTotal = blocCartes.querySelector("[data-cartes-total]");
     const erreur = blocCartes.querySelector("[data-cartes-erreur]");
     const recherche = blocCartes.querySelector("[data-cartes-recherche]");
     const cle = (nom) => normalizeLabel(nom).toLowerCase();
     const suiviStock = (a) => a.stock !== null && a.stock !== undefined;
+    const enCredit = () => moyenInput.value === "credit";
+    const totalPanier = () => panier.reduce((s, l) => s + (Number(l.article.unitPrice) || 0) * l.quantite, 0);
+    const styleChoix = (b, on) => {
+      ["bg-white", "dark:bg-gray-600", "shadow-sm", "text-[#0d1b19]", "dark:text-white"].forEach((k) => b.classList.toggle(k, on));
+      b.classList.toggle("text-gray-500", !on);
+    };
 
     // Le serveur met parfois plusieurs secondes à répondre : le dernier
     // catalogue connu, rangé dans l'ordre d'affichage, s'affiche tout de
@@ -1539,17 +1716,67 @@
       try { localStorage.setItem(CLE_CATALOGUE, JSON.stringify({ entreprise, articles: ordre })); } catch (e) {}
     }
 
+    // ── Bloc crédit ──
+    function majClientsCredit() {
+      const debiteurs = creditsClients.resume().clients.filter((c) => c.du > 0).sort((a, b) => b.du - a.du).slice(0, 5);
+      const choisi = window.OGOUE?.cleClient ? window.OGOUE.cleClient(champNomCredit.value) : "";
+      zoneClients.innerHTML = debiteurs.map((c) =>
+        `<button type="button" data-client="${echapperHtml(c.nom)}" data-tel="${echapperHtml(c.telephone || "")}" class="${pastille} ${c.cle === choisi ? "border-2 border-primary text-primary font-extrabold bg-white dark:bg-gray-800" : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-[#0d1b19] dark:text-white"}">${echapperHtml(c.nom)}</button>`
+      ).join("") + (debiteurs.length ? `<button type="button" data-nouveau-client class="${pastille} border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-[#0d1b19] dark:text-white">+ Nouveau client</button>` : "");
+      const connu = champNomCredit.value.trim() ? creditsClients.duPar(champNomCredit.value) : null;
+      zoneDoit.classList.toggle("hidden", !(connu && connu.du > 0));
+      if (connu && connu.du > 0) zoneDoit.textContent = `Ce client vous doit déjà ${fcfa(connu.du)} F.`;
+      // Téléphone demandé seulement si on ne le connaît pas encore
+      zoneTel.classList.toggle("hidden", !champNomCredit.value.trim() || !!(connu && connu.telephone));
+    }
+    function majAvance() {
+      const avance = Number(champAvance.value) || 0;
+      zoneAvanceMoyen.classList.toggle("hidden", !(avance > 0));
+      zoneAvanceMoyen.classList.toggle("inline-flex", avance > 0);
+      zoneAvanceMoyen.querySelectorAll("[data-valeur]").forEach((b) => styleChoix(b, b.dataset.valeur === champAvanceMoyen.value));
+    }
+    // La date promise ne peut pas précéder la vente
+    function majEcheances() {
+      champEcheance.min = dateInput.value || "";
+      if (champEcheance.value && champEcheance.min && champEcheance.value < champEcheance.min) champEcheance.value = "";
+    }
+    dateInput.addEventListener("change", majEcheances);
+    function majCredit() {
+      const credit = enCredit();
+      blocCredit.classList.toggle("hidden", !credit);
+      champNomCredit.required = credit;
+      if (credit) { majClientsCredit(); majAvance(); majEcheances(); }
+      afficherTotal();
+    }
+    moyenInput.addEventListener("change", majCredit);
+    creditsClients.surChangement(() => { if (enCredit()) majClientsCredit(); });
+
+    zoneClients.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-client]");
+      if (b) {
+        champNomCredit.value = b.dataset.client;
+        champTelCredit.value = b.dataset.tel || "";
+        majClientsCredit();
+        return;
+      }
+      if (e.target.closest("[data-nouveau-client]")) {
+        champNomCredit.value = "";
+        champTelCredit.value = "";
+        majClientsCredit();
+        champNomCredit.focus();
+      }
+    });
+    champNomCredit.addEventListener("input", majClientsCredit);
+    champAvance.addEventListener("input", () => { majAvance(); afficherTotal(); });
+    zoneAvanceMoyen.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-valeur]");
+      if (b) { champAvanceMoyen.value = b.dataset.valeur; majAvance(); }
+    });
+
     function majPaiement() {
-      blocPaiement.querySelectorAll("[data-paiement]").forEach((b) => {
-        const on = b.dataset.paiement === paiement;
-        b.classList.toggle("bg-white", on);
-        b.classList.toggle("dark:bg-gray-600", on);
-        b.classList.toggle("shadow-sm", on);
-        b.classList.toggle("text-[#0d1b19]", on);
-        b.classList.toggle("dark:text-white", on);
-        b.classList.toggle("text-gray-500", !on);
-      });
+      blocPaiement.querySelectorAll("[data-paiement]").forEach((b) => styleChoix(b, b.dataset.paiement === paiement));
       moyenInput.value = paiement;
+      majCredit();
     }
 
     async function trier() {
@@ -1561,26 +1788,43 @@
         (compte[cle(b.name)] || 0) - (compte[cle(a.name)] || 0) || String(a.name).localeCompare(String(b.name), "fr"));
     }
 
+    const ligneDe = (a) => panier.find((l) => l.article.id === a.id) || null;
+
     function carte(a) {
       const prix = Number(a.unitPrice) || 0;
       const reste = suiviStock(a) ? Number(a.stock) : null;
       const bloque = prix <= 0 || (reste !== null && reste <= 0);
-      const choisi = choix && choix.article.id === a.id;
+      const l = ligneDe(a);
       const sousTitre = prix <= 0 ? "Prix à fixer dans le catalogue"
         : reste !== null && reste <= 0 ? "Rupture de stock"
         : reste !== null ? `Stock : ${reste}` : "";
       return `<button type="button" data-carte-article="${echapperHtml(a.id)}" ${bloque ? "disabled" : ""}
         class="relative text-left min-h-[104px] rounded-2xl border-2 p-4 flex flex-col justify-between gap-2 transition active:scale-95 touch-manipulation select-none
                ${bloque ? "border-gray-200 dark:border-gray-700 opacity-50 cursor-not-allowed"
-                 : choisi ? "border-primary bg-primary/5 dark:bg-[#1f3532] ring-2 ring-primary/30"
+                 : l ? "border-primary bg-primary/5 dark:bg-[#1f3532]"
                  : "border-[#cfe7e3] dark:border-gray-600 bg-white dark:bg-[#1f3532] hover:border-primary"}">
-        ${choisi ? `<span class="absolute -top-2 -right-2 min-w-7 h-7 px-2 rounded-full bg-primary text-white text-sm font-bold flex items-center justify-center">×${choix.quantite}</span>` : ""}
         <span class="font-bold text-[#0d1b19] dark:text-white leading-snug line-clamp-2">${echapperHtml(a.name)}</span>
         <span>
-          <span class="block text-base font-bold text-primary">${prix > 0 ? formatPrice(prix) : "—"}</span>
+          <span class="flex items-center gap-2 text-base font-bold text-primary">${prix > 0 ? formatPrice(prix) : "—"}${l ? `<span class="rounded-lg bg-primary px-2 py-0.5 text-xs font-extrabold text-white">× ${l.quantite}</span>` : ""}</span>
           ${sousTitre ? `<span class="block text-xs text-gray-500 dark:text-gray-400">${sousTitre}</span>` : ""}
         </span>
       </button>`;
+    }
+
+    function afficherTotal() {
+      const total = totalPanier();
+      zoneTotal.classList.toggle("hidden", !panier.length);
+      zoneTotal.classList.toggle("flex", panier.length > 0);
+      if (!panier.length) return;
+      if (!enCredit()) {
+        zoneTotal.innerHTML = `<span>Total <strong>${fcfa(total)} F</strong></span>`;
+        return;
+      }
+      const avance = Math.min(Number(champAvance.value) || 0, total);
+      zoneTotal.innerHTML =
+        `<span>Total <strong>${fcfa(total)} F</strong></span>` +
+        `<span>− Avance <strong>${fcfa(avance)} F</strong></span>` +
+        `<span>Reste à crédit <strong class="text-red-700 dark:text-red-400">${fcfa(total - avance)} F</strong></span>`;
     }
 
     function afficher() {
@@ -1588,49 +1832,60 @@
         // Cartes d'attente, à la place des anciens champs
         grille.innerHTML = Array.from({ length: 4 }, () =>
           `<div class="min-h-[104px] rounded-2xl border-2 border-gray-100 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 animate-pulse"></div>`).join("");
-        zoneChoix.classList.add("hidden");
+        zonePanier.classList.add("hidden");
         return;
       }
       const filtre = cle(recherche.value);
       const liste = ordre.filter((a) => !filtre || cle(a.name).includes(filtre));
       grille.innerHTML = liste.length
         ? liste.map(carte).join("")
-        : `<p class="col-span-full text-sm text-gray-500 dark:text-gray-400">Aucun article ne correspond. Pour un article hors catalogue, utilisez la saisie à la main.</p>`;
-      zoneChoix.classList.toggle("hidden", !choix);
-      zoneChoix.classList.toggle("flex", !!choix);
-      if (choix) {
-        const prix = Number(choix.article.unitPrice) || 0;
-        resume.textContent = `${choix.article.name} × ${choix.quantite} = ${formatPrice(prix * choix.quantite)}`;
-      }
+        : `<p class="col-span-full text-sm text-gray-500 dark:text-gray-400">Aucun article ne correspond. Ajoutez-le au catalogue avec le lien ci-dessous.</p>`;
+      zonePanier.classList.toggle("hidden", !panier.length);
+      zonePanier.innerHTML = panier.map((l) => {
+        const prix = Number(l.article.unitPrice) || 0;
+        return `<div class="flex items-center justify-between gap-3 px-4 py-2.5" data-ligne="${echapperHtml(l.article.id)}">
+          <span class="min-w-0 text-sm text-[#0d1b19] dark:text-gray-100"><strong>${echapperHtml(l.article.name)}</strong> × ${l.quantite} = ${formatPrice(prix * l.quantite)}</span>
+          <span class="flex items-center gap-2 shrink-0">
+            <button type="button" data-moins class="size-8 rounded-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 font-bold" aria-label="Une unité de moins">−</button>
+            <button type="button" data-plus class="size-8 rounded-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 font-bold" aria-label="Une unité de plus">+</button>
+            <button type="button" data-retirer class="ml-1 text-xs font-medium text-gray-500 hover:text-red-600 hover:underline">Retirer</button>
+          </span></div>`;
+      }).join("");
+      // Plusieurs articles : pas de justificatif dans le formulaire
+      const plusieurs = panier.length > 1;
+      blocJustificatif?.classList.toggle("hidden", plusieurs);
+      noteJustificatif.classList.toggle("hidden", !plusieurs);
+      afficherTotal();
     }
 
-    // Les champs cachés portent le choix : getFormData les lit à l'envoi
+    // Les champs cachés portent le premier article : getFormData les lit à l'envoi
     function reporterChoix() {
       erreur.classList.add("hidden");
-      if (!choix) {
+      if (!panier.length) {
         if (articleSelect) articleSelect.value = "";
         qteInput.value = "";
         montantInput.value = "";
         return;
       }
-      const a = choix.article;
+      const { article: a, quantite } = panier[0];
       if (articleSelect) articleSelect.value = a.name;
-      qteInput.value = String(choix.quantite);
-      montantInput.value = String((Number(a.unitPrice) || 0) * choix.quantite);
+      qteInput.value = String(quantite);
+      montantInput.value = String((Number(a.unitPrice) || 0) * quantite);
       typeInput.value = a.type === "services" ? "services" : "produits";
       moyenInput.value = paiement;
     }
 
     const maxPour = (a) => (suiviStock(a) ? Number(a.stock) : Infinity);
-    function changerQuantite(delta) {
-      if (!choix) return;
-      const q = choix.quantite + delta;
-      if (q < 1) { choix = null; }
-      else if (q > maxPour(choix.article)) {
-        erreur.textContent = `Il ne reste que ${maxPour(choix.article)} unité(s) de « ${choix.article.name} » en stock.`;
+    function changerQuantite(a, delta) {
+      const l = ligneDe(a);
+      if (!l) return;
+      const q = l.quantite + delta;
+      if (q < 1) panier = panier.filter((x) => x !== l);
+      else if (q > maxPour(a)) {
+        erreur.textContent = `Il ne reste que ${maxPour(a)} unité(s) de « ${a.name} » en stock.`;
         erreur.classList.remove("hidden");
         return;
-      } else choix.quantite = q;
+      } else l.quantite = q;
       reporterChoix();
       afficher();
     }
@@ -1654,6 +1909,8 @@
         if (autreInput) { autreInput.required = false; autreWrapper?.classList.add("hidden"); }
         majPaiement();
         reporterChoix();
+      } else {
+        majCredit();
       }
     }
 
@@ -1669,7 +1926,7 @@
       const b = e.target.closest("[data-paiement]");
       if (!b) return;
       paiement = b.dataset.paiement;
-      ecrire(CLE_PAIEMENT, paiement);
+      if (paiement !== "credit") ecrire(CLE_PAIEMENT, paiement);
       majPaiement();
     });
     grille.addEventListener("click", (e) => {
@@ -1677,23 +1934,29 @@
       if (!b || b.disabled) return;
       const a = ordre.find((x) => String(x.id) === b.dataset.carteArticle);
       if (!a) return;
-      if (choix && choix.article.id === a.id) return changerQuantite(1);
-      choix = { article: a, quantite: 1 };
+      if (ligneDe(a)) return changerQuantite(a, 1);
+      panier.push({ article: a, quantite: 1 });
       if (navigator.vibrate) navigator.vibrate(15);
       reporterChoix();
       afficher();
     });
-    blocCartes.querySelector("[data-cartes-plus]").addEventListener("click", () => changerQuantite(1));
-    blocCartes.querySelector("[data-cartes-moins]").addEventListener("click", () => changerQuantite(-1));
-    blocCartes.querySelector("[data-cartes-retirer]").addEventListener("click", () => { choix = null; reporterChoix(); afficher(); });
+    zonePanier.addEventListener("click", (e) => {
+      const l = e.target.closest("[data-ligne]");
+      if (!l) return;
+      const a = ordre.find((x) => String(x.id) === l.dataset.ligne) || panier.find((x) => String(x.article.id) === l.dataset.ligne)?.article;
+      if (!a) return;
+      if (e.target.closest("[data-plus]")) changerQuantite(a, 1);
+      else if (e.target.closest("[data-moins]")) changerQuantite(a, -1);
+      else if (e.target.closest("[data-retirer]")) { panier = panier.filter((x) => x.article.id !== a.id); reporterChoix(); afficher(); }
+    });
     blocCartes.querySelector("[data-cartes-ajouter]").addEventListener("click", ouvrirAjoutCatalogue);
 
     // ── Fenêtre « Ajouter au catalogue » ──
     // L'article ajouté rejoint le catalogue partagé (gérant et agents) et
-    // devient aussitôt le choix de la vente en cours.
+    // entre aussitôt dans le panier.
     function ouvrirAjoutCatalogue() {
       document.getElementById("ogo-ajout-catalogue")?.remove();
-      const champ = "form-input w-full h-12 rounded-xl border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark px-4 text-base text-[#0d1b19] dark:text-white focus:ring-2 focus:ring-primary/50";
+      const champAjout = "form-input w-full h-12 rounded-xl border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark px-4 text-base text-[#0d1b19] dark:text-white focus:ring-2 focus:ring-primary/50";
       const fond = document.createElement("div");
       fond.id = "ogo-ajout-catalogue";
       fond.className = "fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4";
@@ -1712,11 +1975,11 @@
             <button type="button" data-valeur="services" class="px-4 h-9 rounded-full text-sm font-bold">Service</button>
           </div>
           <label class="block mb-4"><span class="block text-sm font-semibold text-[#0d1b19] dark:text-gray-200 mb-2">Nom</span>
-            <input name="nom" type="text" maxlength="120" placeholder="Ex. : Gâteau au chocolat" class="${champ}"></label>
+            <input name="nom" type="text" maxlength="120" placeholder="Ex. : Gâteau au chocolat" class="${champAjout}"></label>
           <label class="block mb-4"><span class="block text-sm font-semibold text-[#0d1b19] dark:text-gray-200 mb-2">Prix de vente (FCFA)</span>
-            <input name="prix" type="number" min="1" step="1" inputmode="numeric" placeholder="Ex. : 4000" class="${champ}"></label>
+            <input name="prix" type="number" min="1" step="1" inputmode="numeric" placeholder="Ex. : 4000" class="${champAjout}"></label>
           <label class="block mb-2" data-bloc-stock><span class="block text-sm font-semibold text-[#0d1b19] dark:text-gray-200 mb-2">Stock disponible <span class="font-normal text-gray-500">(facultatif)</span></span>
-            <input name="stock" type="number" min="0" step="1" inputmode="numeric" placeholder="Laissez vide si vous ne suivez pas le stock" class="${champ}"></label>
+            <input name="stock" type="number" min="0" step="1" inputmode="numeric" placeholder="Laissez vide si vous ne suivez pas le stock" class="${champAjout}"></label>
           <p data-erreur class="hidden mt-3 text-sm font-medium text-red-600"></p>
           <div class="mt-6 flex justify-end gap-3">
             <button type="button" data-fermer class="px-5 h-12 rounded-xl text-sm font-bold bg-gray-200 dark:bg-gray-700 text-[#0d1b19] dark:text-gray-200 hover:bg-gray-300">Annuler</button>
@@ -1733,11 +1996,7 @@
       const blocStock = fond.querySelector("[data-bloc-stock]");
       let type = "produits";
       const majType = () => {
-        fond.querySelectorAll("[data-type] [data-valeur]").forEach((b) => {
-          const on = b.dataset.valeur === type;
-          b.classList.toggle("bg-white", on); b.classList.toggle("dark:bg-gray-600", on); b.classList.toggle("shadow-sm", on);
-          b.classList.toggle("text-[#0d1b19]", on); b.classList.toggle("dark:text-white", on); b.classList.toggle("text-gray-500", !on);
-        });
+        fond.querySelectorAll("[data-type] [data-valeur]").forEach((b) => styleChoix(b, b.dataset.valeur === type));
         blocStock.classList.toggle("hidden", type === "services"); // un service ne se stocke pas
       };
       majType();
@@ -1778,8 +2037,8 @@
         manuel = false;
         await apresChangementListe();
         const ajoute = ordre.find((a) => (resultat.article && a.id === resultat.article.id) || cle(a.name) === cle(nom));
-        if (ajoute && !(suiviStock(ajoute) && Number(ajoute.stock) <= 0)) {
-          choix = { article: ajoute, quantite: 1 };
+        if (ajoute && !(suiviStock(ajoute) && Number(ajoute.stock) <= 0) && !ligneDe(ajoute)) {
+          panier.push({ article: ajoute, quantite: 1 });
           reporterChoix();
           afficher();
         }
@@ -1791,14 +2050,61 @@
     lienGrille.addEventListener("click", () => { manuel = false; apresChangementListe(); });
     recherche.addEventListener("input", afficher);
 
-    // Envoi sans article choisi : message sous la grille plutôt qu'une alerte
-    form.addEventListener("submit", (e) => {
-      if (!actif || choix) return;
+    // ── Envoi ──
+    // Contrôles propres à la grille et au crédit, puis : un seul article →
+    // le gestionnaire habituel du formulaire ; plusieurs → une vente par article.
+    form.addEventListener("submit", async (e) => {
+      if (!actif) return;
+      const bloquer = (texte, cible) => {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        erreur.textContent = texte;
+        erreur.classList.remove("hidden");
+        (cible || blocCartes).scrollIntoView({ behavior: "smooth", block: "center" });
+      };
+      if (!panier.length) return bloquer("Choisissez un article en appuyant sur sa carte.");
+      if (enCredit() && (Number(champAvance.value) || 0) >= totalPanier()) {
+        return bloquer("L'avance couvre tout : choisissez plutôt Cash ou Mobile Money.", blocCredit);
+      }
+      if (panier.length === 1) return; // envoi habituel (getFormData lit les champs cachés)
+
       e.preventDefault();
       e.stopImmediatePropagation();
-      erreur.textContent = "Choisissez un article en appuyant sur sa carte.";
-      erreur.classList.remove("hidden");
-      blocCartes.scrollIntoView({ behavior: "smooth", block: "center" });
+      const base = getFormData();
+      if (!base || !base.date) return;
+      const bouton = form.querySelector('button[type="submit"]');
+      window.OGOUE_FEEDBACK?.debut(bouton, "Enregistrement des ventes…");
+      let faites = 0;
+      for (const l of panier) {
+        const prix = Number(l.article.unitPrice) || 0;
+        const ok = await addVente({
+          ...base,
+          id: generateId(),
+          description: l.article.name,
+          article_id: l.article.id,
+          type_vente: l.article.type === "services" ? "services" : "produits",
+          quantite: l.quantite,
+          montant: prix * l.quantite,
+          justificatif: "",
+          editer_recu: false,
+          file: null,
+        });
+        if (!ok) break;
+        faites += 1;
+      }
+      window.OGOUE_FEEDBACK?.fin(bouton);
+      if (!faites) return; // addVente a déjà expliqué le refus
+      if (base.moyen_paiement === "credit") await creditsClients.apresVente(base);
+      window.OGOUE_FEEDBACK?.succes(faites === panier.length
+        ? `${faites} ventes enregistrées · ${formatPrice(totalPanier())}`
+        : `${faites} vente(s) sur ${panier.length} enregistrée(s) : vérifiez le tableau`);
+      form.reset();
+      setTodayAsDefaultDate();
+      ventesCacheMois = null;
+      ventesCacheAnnee = null;
+      await renderCompactTable();
+      await loadArticles();
+      if (articlesCache.length) setModeListNotEmpty();
     }, true);
 
     const catalogueGarde = lireCatalogue();
@@ -1812,11 +2118,16 @@
     }
     afficher();
     appliquer();
+    creditsClients.rafraichir();
 
-    // Après un enregistrement (form.reset) : grille vide, paiement conservé
+    // Après un enregistrement (form.reset) : panier vide, paiement conservé
     form.addEventListener("reset", () => {
-      choix = null;
-      setTimeout(() => { if (actif) { majPaiement(); reporterChoix(); afficher(); } }, 0);
+      panier = [];
+      paiement = paiementHabituel();
+      setTimeout(() => {
+        champAvanceMoyen.value = "cash";
+        if (actif) { majPaiement(); reporterChoix(); afficher(); } else majCredit();
+      }, 0);
     });
   })();
 
@@ -1861,6 +2172,8 @@
           <button type="button" data-paiement="mobile_money" class="px-4 h-9 rounded-full text-sm font-bold">Mobile Money</button>
           <button type="button" data-paiement="credit" class="px-4 h-9 rounded-full text-sm font-bold" title="Le client paiera plus tard">Crédit</button>
         </div>
+        <input type="text" data-rush-client maxlength="150" autocomplete="off" placeholder="Qui doit payer ? (nom du client)"
+               class="hidden form-input w-full sm:w-64 h-10 rounded-full border-2 border-orange-300 bg-orange-50 dark:bg-orange-950/30 text-sm px-4 text-[#0d1b19] dark:text-white">
         <input type="search" data-rush-recherche placeholder="Rechercher un article"
                class="form-input ml-auto w-full sm:w-64 h-10 rounded-full border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark text-sm px-4 text-[#0d1b19] dark:text-white">
       </div>
@@ -1879,7 +2192,9 @@
     const bilan = zone.querySelector("[data-rush-bilan]");
     const recherche = zone.querySelector("[data-rush-recherche]");
 
-    let paiement = lire(CLE_PAIEMENT, "cash");
+    // Crédit : choisi vente par vente, jamais retenu ; sinon le dernier moyen utilisé
+    const paiementHabituel = () => { const m = lire(CLE_PAIEMENT, "cash"); return m === "mobile_money" ? m : "cash"; };
+    let paiement = paiementHabituel();
     let ordre = [];            // articles triés, figés pendant la session (les cartes ne bougent pas sous le doigt)
     const DELAI_REGROUPEMENT_MS = 700; // pause qui clôt une série d'appuis sur une carte
     const enAttente = [];      // ventes en cours de saisie ou d'envoi : { article, quantite, minuterie }
@@ -1900,12 +2215,13 @@
 
     function majPaiement() {
       zone.querySelectorAll("[data-paiement]").forEach((b) => styleBouton(b, b.dataset.paiement === paiement));
+      zone.querySelector("[data-rush-client]").classList.toggle("hidden", paiement !== "credit");
     }
     zone.querySelector("[data-rush-paiement]").addEventListener("click", (e) => {
       const b = e.target.closest("[data-paiement]");
       if (!b) return;
       paiement = b.dataset.paiement;
-      ecrire(CLE_PAIEMENT, paiement);
+      if (paiement !== "credit") ecrire(CLE_PAIEMENT, paiement);
       majPaiement();
     });
 
@@ -1988,14 +2304,16 @@
           date: today(),
           description: article.name,
           article_id: article.id,
-          moyen_paiement: paiement,
+          moyen_paiement: p.paiement,
           type_vente: article.type === "services" ? "services" : "produits",
           quantite,
           montant,
           justificatif: "",
           editer_recu: false,
+          client_nom: p.client || "",
           note: "",
         });
+        if (resultat && p.paiement === "credit") creditsClients.apresVente({ client_nom: p.client });
         if (resultat) {
           envoyes[article.id] = (envoyes[article.id] || 0) + quantite;
           session.nombre += 1;
@@ -2031,7 +2349,18 @@
         p.quantite += 1;
         clearTimeout(p.minuterie);
       } else {
-        p = { article, quantite: 1, minuterie: null };
+        // Crédit : impossible sans savoir qui doit payer
+        const client = normalizeLabel(zone.querySelector("[data-rush-client]").value);
+        if (paiement === "credit" && !client) {
+          const champ = zone.querySelector("[data-rush-client]");
+          champ.focus();
+          champ.classList.add("ring-2", "ring-red-500");
+          setTimeout(() => champ.classList.remove("ring-2", "ring-red-500"), 1500);
+          window.OGOUE_FEEDBACK?.succes("Indiquez d'abord le nom du client qui prend à crédit");
+          return;
+        }
+        // Moyen de paiement et client figés au moment de l'appui
+        p = { article, quantite: 1, minuterie: null, paiement, client: paiement === "credit" ? client : "" };
         enCours[article.id] = p;
         enAttente.push(p);
       }

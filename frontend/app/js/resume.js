@@ -138,7 +138,8 @@ function loadRepartitions(ventes, depenses) {
   const depensesParPaiement = {};
   let totalDepenses = 0;
   depenses.forEach((d) => {
-    const paiement = d.moyen_paiement === "mobile_money" ? "Mobile Money" : 
+    const paiement = d.moyen_paiement === "credit" ? "Crédit (à payer)" :
+                     d.moyen_paiement === "mobile_money" ? "Mobile Money" :
                      d.moyen_paiement === "cash" ? "Cash" : 
                      (d.moyen_paiement || "Autres");
     const montant = parseFloat(d.montant || d.amount || 0);

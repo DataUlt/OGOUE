@@ -30,7 +30,13 @@ const createSchema = z.object({
   // Commentaire libre du gérant, facultatif. Ex. : acompte fournisseur,
   // solde à régler. Plafonné pour rester un pense-bête, pas un journal.
   note: z.string().max(1000).optional().nullable(),
+  // Dépense à crédit : date de remboursement estimée (facultative)
+  creditEcheance: z.preprocess((v) => (v === "" || v === null || v === undefined ? null : v), z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable()).optional(),
 });
+
+// Colonnes ajoutées par sql/DEPENSES_CREDIT.sql : lues et écrites seulement si elles existent
+const COLONNES_CREDIT = ", credit_echeance, credit_regle_le";
+const colonneCreditAbsente = (erreur) => /credit_(echeance|regle_le)/.test(erreur?.message || "");
 
 /** Une chaîne vide venue du formulaire vaut absence d'information. */
 function videEnNull(valeur) {
@@ -72,10 +78,11 @@ export async function listExpenses(req, res) {
 
     // La requête est reconstruite à chaque page, d'où la fabrique : un
     // constructeur Supabase déjà exécuté ne peut pas resservir.
+    let colonnesCredit = COLONNES_CREDIT;
     const construireRequete = () => {
       let query = supabase
         .from("expenses")
-        .select("id, expense_date, category, payment_method, amount, receipt_name, receipt_url, note, created_at, modified_at, modified_by_name, created_by")
+        .select("id, expense_date, category, payment_method, amount, receipt_name, receipt_url, note, created_at, modified_at, modified_by_name, created_by" + colonnesCredit)
         .eq("organization_id", organizationId);
 
       // Bornes indépendantes : la fenêtre de la formule gratuite pose un
@@ -92,7 +99,12 @@ export async function listExpenses(req, res) {
         .order("id", { ascending: false });
     };
 
-    const { data: rows, error } = await lireToutesLesLignes(construireRequete);
+    let { data: rows, error } = await lireToutesLesLignes(construireRequete);
+    // Migration DEPENSES_CREDIT.sql pas encore passée : on relit sans ces colonnes
+    if (error && colonneCreditAbsente(error)) {
+      colonnesCredit = "";
+      ({ data: rows, error } = await lireToutesLesLignes(construireRequete));
+    }
 
     if (error) {
       console.error("Erreur listExpenses:", error);
@@ -152,6 +164,9 @@ export async function listExpenses(req, res) {
       montant: row.amount,
       justificatif: row.receipt_name,
       note: row.note,
+      // Dépense à crédit : remboursement prévu, et jour où elle a été payée
+      credit_echeance: row.credit_echeance || null,
+      credit_regle_le: row.credit_regle_le || null,
       created_at: row.created_at,
       modified_at: row.modified_at,
       modified_by_name: row.modified_by_name,
@@ -238,9 +253,7 @@ export async function createExpense(req, res) {
       }
     }
 
-    const { data: row, error } = await supabase
-      .from("expenses")
-      .insert({
+    const ligneDepense = {
         organization_id: organizationId,
         expense_date: data.expenseDate,
         category: data.category,
@@ -251,10 +264,17 @@ export async function createExpense(req, res) {
         receipt_storage_path: receiptStoragePath,
         receipt_size_bytes: req.file?.size ?? null,
         note: videEnNull(data.note),
+        // Dépense à crédit : date de remboursement estimée
+        ...(data.paymentMethod === "credit" && data.creditEcheance ? { credit_echeance: data.creditEcheance } : {}),
         created_by: req.user.userId || req.user.sub || req.user.id,
-      })
-      .select("id, expense_date, category, payment_method, amount, receipt_name, receipt_url, receipt_storage_path, note, created_at")
-      .single();
+    };
+    const COLONNES_RETOUR = "id, expense_date, category, payment_method, amount, receipt_name, receipt_url, receipt_storage_path, note, created_at";
+    let { data: row, error } = await supabase.from("expenses").insert(ligneDepense).select(COLONNES_RETOUR).single();
+    // Colonne absente (migration pas encore passée) : la dépense passe sans la date estimée
+    if (error && ligneDepense.credit_echeance && colonneCreditAbsente(error)) {
+      delete ligneDepense.credit_echeance;
+      ({ data: row, error } = await supabase.from("expenses").insert(ligneDepense).select(COLONNES_RETOUR).single());
+    }
 
     if (error || !row) {
       console.error("Erreur createExpense:", error);
@@ -626,4 +646,88 @@ async function nomAuteur(req) {
   if (!userId) return null;
   const { data } = await supabase.from("users").select("first_name").eq("id", userId).maybeSingle();
   return data?.first_name || null;
+}
+
+/**
+ * POST /api/expenses/:id/reglement — une dépense à crédit est payée.
+ *
+ * Le moyen de paiement passe de « credit » à celui utilisé (Cash, Mobile
+ * Money) et le jour du paiement est gardé : la dépense reste dans les
+ * charges à sa date d'achat, mais l'argent sort de la trésorerie le jour
+ * du paiement. Possible à tout moment (ce n'est pas une modification de la
+ * dépense), par son auteur ou par le gérant.
+ */
+export async function reglerExpense(req, res) {
+  try {
+    const moyen = String(req.body?.moyen || "");
+    if (!["cash", "mobile_money"].includes(moyen)) {
+      return res.status(400).json({ error: "Indiquez comment la dette a été payée : Cash ou Mobile Money." });
+    }
+    const { data: row, error } = await supabase
+      .from("expenses")
+      .select("id, payment_method, created_by")
+      .eq("id", req.params.id)
+      .eq("organization_id", req.user.organizationId)
+      .maybeSingle();
+    if (error || !row) return res.status(404).json({ error: "Expense not found" });
+    if (!peutAgirSur(req.user, row.created_by)) return refusPasAuteur(res);
+    if (row.payment_method !== "credit") return res.status(409).json({ error: "Cette dépense n'est pas (ou plus) à crédit." });
+
+    // Condition sur « encore à crédit » : deux clics simultanés ne paient qu'une fois
+    const { data: maj, error: e2 } = await supabase
+      .from("expenses")
+      .update({ payment_method: moyen, credit_regle_le: new Date().toISOString() })
+      .eq("id", row.id)
+      .eq("organization_id", req.user.organizationId)
+      .eq("payment_method", "credit")
+      .select("id, payment_method, credit_regle_le")
+      .maybeSingle();
+    if (e2) {
+      console.error("reglerExpense:", e2.message);
+      return res.status(colonneCreditAbsente(e2) ? 503 : 500).json({
+        error: colonneCreditAbsente(e2) ? "Le paiement des dépenses à crédit n'est pas encore activé (sql/DEPENSES_CREDIT.sql)." : "Paiement non enregistré. Réessayez.",
+      });
+    }
+    if (!maj) return res.status(409).json({ error: "Cette dépense vient déjà d'être payée." });
+    return res.json({ ok: true, moyen_paiement: maj.payment_method, credit_regle_le: maj.credit_regle_le });
+  } catch (error) {
+    console.error("Erreur reglerExpense:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+/**
+ * GET /api/expenses/credits — dépenses à crédit, payées ou non, toutes
+ * dates : ce qui reste à payer et les paiements, pour le tableau de bord.
+ */
+export async function listExpensesCredit(req, res) {
+  try {
+    const { data, error } = await lireToutesLesLignes(() =>
+      supabase.from("expenses")
+        .select("id, expense_date, category, amount, payment_method, note, credit_echeance, credit_regle_le")
+        .eq("organization_id", req.user.organizationId)
+        .or("payment_method.eq.credit,credit_regle_le.not.is.null")
+        .order("expense_date", { ascending: true })
+        .order("id", { ascending: true }));
+    if (error) {
+      if (colonneCreditAbsente(error)) return res.status(503).json({ error: "Migration sql/DEPENSES_CREDIT.sql à passer", code: "migration_depenses_credit" });
+      console.error("listExpensesCredit:", error.message);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+    return res.json({
+      depenses: (data || []).map((d) => ({
+        id: d.id,
+        date: d.expense_date,
+        categorie: d.category,
+        montant: Number(d.amount) || 0,
+        moyen_paiement: d.payment_method,
+        note: d.note,
+        echeance: d.credit_echeance,
+        regle_le: d.credit_regle_le,
+      })),
+    });
+  } catch (error) {
+    console.error("Erreur listExpensesCredit:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
 }

@@ -13,6 +13,7 @@ import auditRoutes from "./routes/audit.routes.js";
 import articlesRoutes from "./routes/articles.routes.js";
 import financingRoutes from "./routes/financing.routes.js";
 import etatsFinanciersRoutes from "./routes/etats-financiers.routes.js";
+import creditsRoutes from "./routes/credits.routes.js";
 import { authMiddleware } from "./middleware/auth.middleware.js";
 import { planMiddleware } from "./middleware/plan.middleware.js";
 import { stockageUtilise } from "./utils/quota-stockage.js";
@@ -101,6 +102,7 @@ app.use("/api/agents", authMiddleware, planMiddleware, agentsRoutes);
 app.use("/api/audit", authMiddleware, planMiddleware, auditRoutes);
 app.use("/api/etats-financiers", authMiddleware, planMiddleware, etatsFinanciersRoutes);
 app.use("/api/articles", authMiddleware, articlesRoutes);
+app.use("/api/credits", authMiddleware, planMiddleware, creditsRoutes);
 app.use("/api/financing", authMiddleware, financingRoutes);
 // Le financement reste ouvert à toutes les formules, y compris la
 // gratuite : le verrouiller priverait les institutions du volume qui

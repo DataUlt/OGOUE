@@ -1323,3 +1323,66 @@ function ouvrirSuppressionCompte() {
   });
   window.addEventListener('storage', actualiser);
 })();
+
+// ===== Menu « Crédits » (gérant), avec le nombre de clients en retard =====
+// Inséré avant « Financement », sur ordinateur et sur téléphone, comme le
+// lien « Aide » d'aide.js. Le nombre vient de GET /api/credits ; il est
+// gardé pour la session afin de s'afficher sans attendre le serveur.
+(function menuCredits() {
+  var CLE = 'ogo_credits_retard';
+  function utilisateur() { try { return JSON.parse(localStorage.getItem('user') || 'null'); } catch (e) { return null; } }
+
+  function poserBadge(lien, nombre) {
+    var b = lien.querySelector(':scope > .ogo-badge-credits');
+    if (!nombre) { if (b) b.remove(); return; }
+    if (!b) {
+      b = document.createElement('span');
+      b.className = 'ogo-badge-credits ml-1.5 inline-flex items-center justify-center align-middle text-[11px] font-bold text-white bg-red-600 rounded-full min-w-[20px] h-[20px] px-1';
+      b.title = 'Clients en retard de paiement';
+      lien.appendChild(b);
+    }
+    b.textContent = nombre > 99 ? '99+' : String(nombre);
+  }
+
+  function inserer() {
+    var u = utilisateur();
+    if (!u || u.role === 'agent') return [];
+    var entete = document.querySelector('header');
+    if (!entete) return [];
+    var surPage = /module_credits/.test(location.pathname);
+    var liens = [];
+    entete.querySelectorAll('a[href^="module_scoring"]').forEach(function (financement) {
+      var existant = financement.parentNode.querySelector('a[href^="module_credits"]');
+      if (existant) { liens.push(existant); return; }
+      var actif = null, inactif = null;
+      financement.parentNode.querySelectorAll('a').forEach(function (a) {
+        if (/\btext-primary\b/.test(a.className)) actif = actif || a; else inactif = inactif || a;
+      });
+      var lien = document.createElement('a');
+      lien.className = (surPage && actif ? actif : (inactif || financement)).className;
+      if (surPage && !actif) lien.className = lien.className.replace(/text-\[#0d1b19\]|dark:text-gray-300|font-medium/g, '') + ' text-primary font-bold';
+      lien.href = 'module_credits.html';
+      lien.textContent = 'Crédits';
+      financement.parentNode.insertBefore(lien, financement);
+      liens.push(lien);
+    });
+    return liens;
+  }
+
+  async function demarrer() {
+    var liens = inserer();
+    if (!liens.length) return;
+    var garde = Number(sessionStorage.getItem(CLE) || 0);
+    liens.forEach(function (l) { poserBadge(l, garde); });
+    if (!window.OGOUE || typeof window.OGOUE.getCredits !== 'function') return;
+    var r = await window.OGOUE.getCredits();
+    if (!r.ok) return;
+    var n = window.OGOUE.resumerCredits(r.ventes, r.reglements).nbEnRetard;
+    try { sessionStorage.setItem(CLE, String(n)); } catch (e) {}
+    liens.forEach(function (l) { poserBadge(l, n); });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', demarrer);
+  else demarrer();
+})();
+

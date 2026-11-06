@@ -467,16 +467,27 @@ document.addEventListener("DOMContentLoaded", function () {
                 <table class="w-full text-sm">
                     <tbody>
                         <tr class="border-b border-[#cfe7e3] dark:border-gray-700 bg-background-light dark:bg-background-dark">
-                            <td class="px-4 py-3 font-semibold">Flux Entrants (Ventes)</td>
+                            <td class="px-4 py-3 font-semibold">Flux Entrants (argent encaissé)</td>
                             <td class="px-4 py-3 text-right font-semibold text-green-600 dark:text-green-400">${data.fluxEntrants.toFixed(2)} FCFA</td>
                         </tr>
         `;
         
         // Détails des moyens de paiement entrants
+        const LIBELLES_MOYENS = { cash: "Cash", mobile_money: "Mobile Money" };
+        const libelleMoyen = (m) => LIBELLES_MOYENS[m] || m;
         Object.entries(data.ventesByPayment).forEach(([method, amount]) => {
             html += `
                         <tr class="border-b border-[#cfe7e3] dark:border-gray-700">
-                            <td class="px-4 py-3">&nbsp;&nbsp;${method}</td>
+                            <td class="px-4 py-3">&nbsp;&nbsp;Ventes payées en ${libelleMoyen(method)}</td>
+                            <td class="px-4 py-3 text-right">${amount.toFixed(2)} FCFA</td>
+                        </tr>
+            `;
+        });
+        // Crédits clients réglés pendant la période (l'argent arrive à ce moment-là)
+        Object.entries(data.creditsEncaissesByPayment || {}).forEach(([method, amount]) => {
+            html += `
+                        <tr class="border-b border-[#cfe7e3] dark:border-gray-700">
+                            <td class="px-4 py-3">&nbsp;&nbsp;Crédits clients encaissés en ${libelleMoyen(method)}</td>
                             <td class="px-4 py-3 text-right">${amount.toFixed(2)} FCFA</td>
                         </tr>
             `;
@@ -493,7 +504,16 @@ document.addEventListener("DOMContentLoaded", function () {
         Object.entries(data.depensesByPayment).forEach(([method, amount]) => {
             html += `
                         <tr class="border-b border-[#cfe7e3] dark:border-gray-700">
-                            <td class="px-4 py-3">&nbsp;&nbsp;${method}</td>
+                            <td class="px-4 py-3">&nbsp;&nbsp;Dépenses payées en ${libelleMoyen(method)}</td>
+                            <td class="px-4 py-3 text-right">${amount.toFixed(2)} FCFA</td>
+                        </tr>
+            `;
+        });
+        // Dépenses à crédit payées pendant la période (l'argent sort à ce moment-là)
+        Object.entries(data.dettesPayeesByPayment || {}).forEach(([method, amount]) => {
+            html += `
+                        <tr class="border-b border-[#cfe7e3] dark:border-gray-700">
+                            <td class="px-4 py-3">&nbsp;&nbsp;Dettes payées en ${libelleMoyen(method)}</td>
                             <td class="px-4 py-3 text-right">${amount.toFixed(2)} FCFA</td>
                         </tr>
             `;
@@ -510,6 +530,54 @@ document.addEventListener("DOMContentLoaded", function () {
                 </table>
             </div>
         `;
+
+        // Crédits clients : vendus mais pas encore encaissés, hors flux
+        if (data.ventesACredit || data.creancesFinPeriode) {
+            html += `
+            <div class="mt-4 overflow-x-auto rounded-lg border border-orange-200 dark:border-orange-900/50">
+                <table class="w-full text-sm">
+                    <tbody>
+                        <tr class="border-b border-orange-200 dark:border-orange-900/50 bg-orange-50 dark:bg-orange-950/20">
+                            <td class="px-4 py-3 font-semibold" colspan="2">Crédits clients (pas encore de l'argent en caisse)</td>
+                        </tr>
+                        <tr class="border-b border-orange-200 dark:border-orange-900/50">
+                            <td class="px-4 py-3">&nbsp;&nbsp;Vendu à crédit sur la période</td>
+                            <td class="px-4 py-3 text-right">${(data.ventesACredit || 0).toFixed(2)} FCFA</td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-3 font-semibold">Créances clients en fin de période</td>
+                            <td class="px-4 py-3 text-right font-semibold text-orange-600 dark:text-orange-400">${(data.creancesFinPeriode || 0).toFixed(2)} FCFA</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Une vente à crédit compte dans le chiffre d'affaires dès la vente (compte de résultat). Elle n'entre dans la trésorerie que le jour où le client la règle.</p>
+            `;
+        }
+
+        // Dépenses à crédit : achetées mais pas encore payées, hors flux
+        if (data.achatsACredit || data.dettesFinPeriode) {
+            html += `
+            <div class="mt-4 overflow-x-auto rounded-lg border border-orange-200 dark:border-orange-900/50">
+                <table class="w-full text-sm">
+                    <tbody>
+                        <tr class="border-b border-orange-200 dark:border-orange-900/50 bg-orange-50 dark:bg-orange-950/20">
+                            <td class="px-4 py-3 font-semibold" colspan="2">Dépenses à crédit (pas encore de l'argent sorti)</td>
+                        </tr>
+                        <tr class="border-b border-orange-200 dark:border-orange-900/50">
+                            <td class="px-4 py-3">&nbsp;&nbsp;Acheté à crédit sur la période</td>
+                            <td class="px-4 py-3 text-right">${(data.achatsACredit || 0).toFixed(2)} FCFA</td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-3 font-semibold">Dettes restant à payer en fin de période</td>
+                            <td class="px-4 py-3 text-right font-semibold text-orange-600 dark:text-orange-400">${(data.dettesFinPeriode || 0).toFixed(2)} FCFA</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Une dépense à crédit compte dans vos charges dès sa date (compte de résultat). Elle ne sort de la trésorerie que le jour où vous la payez.</p>
+            `;
+        }
         
         return html;
     }
@@ -711,6 +779,82 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // État des ventes à crédit (id → { reste, soldeLe, soldeMoyen, client }),
+    // chargé avec l'historique des ventes depuis les crédits clients
+    let creditsVentes = {};
+    async function chargerCreditsVentes() {
+        if (!window.OGOUE?.getCredits) return;
+        const r = await window.OGOUE.getCredits();
+        if (r.ok) creditsVentes = window.OGOUE.resumerCredits(r.ventes, r.reglements).parVente || {};
+    }
+    const etatCreditVente = (v) => {
+        if ((v.moyen_paiement || v.moyenPaiement) !== "credit") return "comptant";
+        const info = creditsVentes[v.id];
+        return info && info.reste <= 0 ? "regle" : "credit";
+    };
+    function celluleMoyenVente(v, avecActions) {
+        const moyenBrut = v.moyen_paiement || v.moyenPaiement || "";
+        const libelles = { cash: "Cash", mobile_money: "Mobile Money" };
+        if (moyenBrut !== "credit") return echapperHtml(libelles[moyenBrut] || moyenBrut || "-");
+        const info = creditsVentes[v.id];
+        if (info && info.reste <= 0) {
+            return `${echapperHtml(libelles[info.soldeMoyen] || "Réglé")}<span class="block text-[11px] text-gray-500 dark:text-gray-400">crédit réglé le ${formatDateFR(info.soldeLe)}</span>`;
+        }
+        let html = "Crédit";
+        if (info && info.reste < (parseFloat(v.montant) || 0)) html += `<span class="block text-[11px] text-gray-500 dark:text-gray-400">reste ${info.reste.toLocaleString("fr-FR")} FCFA</span>`;
+        if (avecActions && info) {
+            html += `<span class="payer-vente mt-1 flex flex-wrap items-center gap-1" data-id="${echapperHtml(v.id)}">
+                <button type="button" class="payer-ouvrir h-7 px-3 rounded-full bg-primary text-white text-xs font-bold hover:bg-primary/90">Payer</button></span>`;
+        }
+        return html;
+    }
+
+    // « Payer » une vente à crédit : un paiement du client pour ce qui reste dû sur cette vente
+    function brancherPaiementsVentes(conteneur) {
+        if (conteneur.dataset.payerVentesBranche) return;
+        conteneur.dataset.payerVentesBranche = "1";
+        conteneur.addEventListener("click", async (e) => {
+            const zone = e.target.closest(".payer-vente");
+            if (!zone) return;
+            if (e.target.closest(".payer-ouvrir")) {
+                zone.innerHTML =
+                    '<span class="text-[11px] text-gray-500">Payé en :</span>' +
+                    '<button type="button" data-moyen="cash" class="h-7 px-2.5 rounded-full bg-[#0d1b19] text-white text-xs font-bold">Cash</button>' +
+                    '<button type="button" data-moyen="mobile_money" class="h-7 px-2.5 rounded-full bg-[#0d1b19] text-white text-xs font-bold">Mobile Money</button>' +
+                    '<button type="button" data-renoncer class="h-7 px-1 text-xs text-gray-500 hover:underline">Annuler</button>';
+                return;
+            }
+            if (e.target.closest("[data-renoncer]")) {
+                zone.innerHTML = '<button type="button" class="payer-ouvrir h-7 px-3 rounded-full bg-primary text-white text-xs font-bold hover:bg-primary/90">Payer</button>';
+                return;
+            }
+            const moyen = e.target.closest("[data-moyen]")?.dataset.moyen;
+            if (!moyen) return;
+            const id = zone.dataset.id;
+            const info = creditsVentes[id];
+            if (!info || !(info.reste > 0)) return;
+            zone.querySelectorAll("button").forEach((b) => { b.disabled = true; });
+            const r = await window.OGOUE.enregistrerReglement({ venteId: id, montant: info.reste, moyen, nature: "paiement" });
+            if (!r.ok) { alert(r.error); zone.querySelectorAll("button").forEach((b) => { b.disabled = false; }); return; }
+            await chargerCreditsVentes();
+            // Toutes les lignes à crédit du même client peuvent avoir changé : on les redessine
+            const donnees = window.etatFinanciersData;
+            conteneur.querySelectorAll("tr[data-vente-id]").forEach((tr) => {
+                const v = (donnees?.ventes || []).find((x) => String(x.id) === tr.dataset.venteId);
+                if (!v || (v.moyen_paiement || v.moyenPaiement) !== "credit") return;
+                tr.dataset.etatCredit = etatCreditVente(v);
+                const cellule = tr.querySelector("[data-moyen-cellule]");
+                if (cellule) cellule.innerHTML = celluleMoyenVente(v, true);
+            });
+            if (donnees && Array.isArray(donnees.ventes)) {
+                donnees.ventesHtml = `<h3>Historique des Ventes (${donnees.ventes.length})</h3>${renderHistoriqueVentes(donnees.ventes)}`;
+            }
+            try { sessionStorage.removeItem("ogo_credits_retard"); } catch (err) {}
+            window.OGOUE_FEEDBACK?.succes(`Crédit réglé · ${echapperHtml(info.client)} · ${info.reste.toLocaleString("fr-FR")} FCFA`);
+            appliquerFiltreDepenses(conteneur);
+        });
+    }
+
     function renderHistoriqueVentes(ventes, avecActions = false) {
         if (ventes.length === 0) {
             return '<p class="mt-4 text-sm text-gray-500 dark:text-gray-400">Aucune vente pour cette période.</p>';
@@ -744,19 +888,19 @@ document.addEventListener("DOMContentLoaded", function () {
             const produit = echapperHtml(v.description || "-");
             const quantite = v.quantite || 1;
             const montantNum = parseFloat(v.montant) || 0;
-            const paiement = echapperHtml(v.moyen_paiement || v.moyenPaiement || "-");
+            const paiement = celluleMoyenVente(v, avecActions);
             const type = v.type_vente === "produits" ? "Produits" : v.type_vente === "services" ? "Service" : echapperHtml(v.type_vente || "-");
             const creePar = echapperHtml(v.created_by_name || "-");
             const justificatifHtml = celluleJustificatifHtml(v, "vente");
 
             html += `
-                        <tr class="border-b border-[#cfe7e3] dark:border-gray-700" data-vente-id="${v.id}">
+                        <tr class="border-b border-[#cfe7e3] dark:border-gray-700" data-vente-id="${v.id}" data-etat-credit="${etatCreditVente(v)}">
                             <td class="px-4 py-3">${formatDateFR(localDate)}</td>
                             <td class="px-4 py-3">${heure}</td>
                             <td class="px-4 py-3">${produit}</td>
                             <td class="px-4 py-3 text-center">${quantite}</td>
                             <td class="px-4 py-3 text-right font-semibold">${montantNum.toFixed(2).replace('.', ',')} FCFA</td>
-                            <td class="px-4 py-3">${paiement}</td>
+                            <td class="px-4 py-3" data-moyen-cellule>${paiement}</td>
                             <td class="px-4 py-3">${type}</td>
                             <td class="px-4 py-3">${creePar}</td>
                             <td class="px-4 py-3 text-xs">${justificatifHtml}</td>
@@ -785,6 +929,125 @@ document.addEventListener("DOMContentLoaded", function () {
      * @param {Array} depenses
      * @param {boolean} avecActions - voir renderHistoriqueVentes.
      */
+    // Moyen de paiement d'une dépense ; à crédit : date de remboursement prévue
+    // et, quand les actions sont permises, le bouton « Payer » ; déjà payée :
+    // le jour du paiement.
+    function celluleMoyenDepense(d, avecActions) {
+        const moyenBrut = d.moyen_paiement || d.moyenPaiement || "";
+        const libellesMoyens = { cash: "Cash", mobile_money: "Mobile Money", credit: "Crédit" };
+        let html = echapperHtml(libellesMoyens[moyenBrut] || moyenBrut || "-");
+        if (moyenBrut === "credit") {
+            if (d.credit_echeance) html += `<span class="block text-[11px] text-gray-500 dark:text-gray-400">à rembourser le ${formatDateFR(d.credit_echeance)}</span>`;
+            if (avecActions && d.peut_agir !== false) {
+                html += `<span class="payer-dette mt-1 flex flex-wrap items-center gap-1" data-id="${echapperHtml(d.id)}">
+                    <button type="button" class="payer-ouvrir h-7 px-3 rounded-full bg-primary text-white text-xs font-bold hover:bg-primary/90">Payer</button></span>`;
+            }
+        } else if (d.credit_regle_le) {
+            html += `<span class="block text-[11px] text-gray-500 dark:text-gray-400">crédit payé le ${formatDateFR(getLocalDateString(new Date(d.credit_regle_le)))}</span>`;
+        }
+        return html;
+    }
+
+    /**
+     * Bouton « Payer » des dépenses à crédit, comme dans la page Dépenses :
+     * le moyen de paiement passe à Cash ou Mobile Money. La ligne, l'export
+     * Excel et l'impression sont mis à jour sans recharger.
+     */
+    function brancherPaiementsDettes(conteneur) {
+        if (conteneur.dataset.payerBranche) return;
+        conteneur.dataset.payerBranche = "1";
+        conteneur.addEventListener("click", async (e) => {
+            const zone = e.target.closest(".payer-dette");
+            if (!zone) return;
+            if (e.target.closest(".payer-ouvrir")) {
+                zone.innerHTML =
+                    '<span class="text-[11px] text-gray-500">Payé en :</span>' +
+                    '<button type="button" data-moyen="cash" class="h-7 px-2.5 rounded-full bg-[#0d1b19] text-white text-xs font-bold">Cash</button>' +
+                    '<button type="button" data-moyen="mobile_money" class="h-7 px-2.5 rounded-full bg-[#0d1b19] text-white text-xs font-bold">Mobile Money</button>' +
+                    '<button type="button" data-renoncer class="h-7 px-1 text-xs text-gray-500 hover:underline">Annuler</button>';
+                return;
+            }
+            if (e.target.closest("[data-renoncer]")) {
+                zone.innerHTML = '<button type="button" class="payer-ouvrir h-7 px-3 rounded-full bg-primary text-white text-xs font-bold hover:bg-primary/90">Payer</button>';
+                return;
+            }
+            const moyen = e.target.closest("[data-moyen]")?.dataset.moyen;
+            if (!moyen) return;
+            const id = zone.dataset.id;
+            zone.querySelectorAll("button").forEach((b) => { b.disabled = true; });
+            const r = await window.OGOUE.reglerDepense(id, moyen);
+            if (!r.ok) { alert(r.error); zone.querySelectorAll("button").forEach((b) => { b.disabled = false; }); return; }
+
+            // Données en mémoire (export Excel, impression) et cellule de la ligne
+            const maintenant = new Date().toISOString();
+            const donnees = window.etatFinanciersData;
+            let depense = null;
+            (donnees?.depenses || []).forEach((d) => {
+                if (String(d.id) === String(id)) { d.moyen_paiement = moyen; d.credit_regle_le = maintenant; depense = d; }
+            });
+            const ligneTr = zone.closest("tr[data-etat-credit]");
+            if (ligneTr) ligneTr.dataset.etatCredit = "regle";
+            const cellule = zone.closest("[data-moyen-cellule]");
+            if (cellule) cellule.innerHTML = celluleMoyenDepense(depense || { moyen_paiement: moyen, credit_regle_le: maintenant }, true);
+            if (donnees && Array.isArray(donnees.depenses)) {
+                donnees.depensesHtml = `<h3>Historique des Dépenses (${donnees.depenses.length})</h3>${renderHistoriqueDepenses(donnees.depenses)}`;
+            }
+            window.OGOUE_FEEDBACK?.succes(`Dette payée en ${moyen === "cash" ? "Cash" : "Mobile Money"}`);
+            appliquerFiltreDepenses(conteneur);
+        });
+    }
+
+    const etatCreditDepense = (d) => ((d.moyen_paiement || d.moyenPaiement) === "credit" ? "credit" : d.credit_regle_le ? "regle" : "comptant");
+
+    /**
+     * Filtre de l'historique des dépenses : Tout / Crédit (encore à payer) /
+     * Réglé (crédits déjà payés). Il agit sur les lignes affichées ; une
+     * dette payée pendant qu'un filtre est actif change de groupe aussitôt.
+     */
+    const FILTRES_DEPENSES = [["tout", "Tout"], ["credit", "Crédit"], ["regle", "Réglé"]];
+    function filtreDepensesHtml(nature = "depense") {
+        return `<div class="mb-3 inline-flex rounded-full bg-gray-100 dark:bg-gray-800 p-1" data-filtre-credit data-nature="${nature}">${FILTRES_DEPENSES.map(([v, t], i) =>
+            `<button type="button" data-filtre="${v}" class="px-4 h-9 rounded-full text-sm font-bold ${i === 0 ? "bg-white dark:bg-gray-600 shadow-sm text-[#0d1b19] dark:text-white" : "text-gray-500"}">${t} <span data-nb class="font-semibold opacity-70"></span></button>`).join("")}</div>`;
+    }
+    function appliquerFiltreDepenses(conteneur) {
+        const zone = conteneur.querySelector("[data-filtre-credit]");
+        if (!zone) return;
+        const choisi = zone.dataset.choisi || "tout";
+        const lignes = [...conteneur.querySelectorAll("tr[data-etat-credit]")];
+        const nombre = { tout: lignes.length, credit: 0, regle: 0 };
+        lignes.forEach((l) => {
+            const etat = l.dataset.etatCredit;
+            if (etat in nombre) nombre[etat] += 1;
+            l.style.display = choisi === "tout" || etat === choisi ? "" : "none";
+        });
+        zone.querySelectorAll("[data-filtre]").forEach((b) => {
+            const on = b.dataset.filtre === choisi;
+            ["bg-white", "dark:bg-gray-600", "shadow-sm", "text-[#0d1b19]", "dark:text-white"].forEach((k) => b.classList.toggle(k, on));
+            b.classList.toggle("text-gray-500", !on);
+            b.querySelector("[data-nb]").textContent = `(${nombre[b.dataset.filtre]})`;
+        });
+        const vide = conteneur.querySelector("[data-filtre-vide]");
+        const visibles = choisi === "tout" ? lignes.length : nombre[choisi];
+        if (vide) {
+            vide.classList.toggle("hidden", visibles > 0);
+            const vente = zone.dataset.nature === "vente";
+            vide.textContent = choisi === "credit"
+                ? (vente ? "Aucune vente à crédit en attente de paiement sur la période." : "Aucune dépense à crédit à payer sur la période.")
+                : "Aucun crédit réglé sur la période.";
+        }
+    }
+    function brancherFiltreDepenses(conteneur) {
+        const zone = conteneur.querySelector("[data-filtre-credit]");
+        if (!zone) return;
+        zone.addEventListener("click", (e) => {
+            const b = e.target.closest("[data-filtre]");
+            if (!b) return;
+            zone.dataset.choisi = b.dataset.filtre;
+            appliquerFiltreDepenses(conteneur);
+        });
+        appliquerFiltreDepenses(conteneur);
+    }
+
     function renderHistoriqueDepenses(depenses, avecActions = false) {
         if (depenses.length === 0) {
             return '<p class="mt-4 text-sm text-gray-500 dark:text-gray-400">Aucune dépense pour cette période.</p>';
@@ -815,17 +1078,17 @@ document.addEventListener("DOMContentLoaded", function () {
             const heure = d.created_at ? formatHeureGabon(new Date(d.created_at)) : "-";
             const categorie = echapperHtml(d.categorie || d.category || "-");
             const montantNum = parseFloat(d.montant) || 0;
-            const paiement = echapperHtml(d.moyen_paiement || d.moyenPaiement || "-");
+            const paiement = celluleMoyenDepense(d, avecActions);
             const creePar = echapperHtml(d.created_by_name || "-");
             const justificatifHtml = celluleJustificatifHtml(d, "depense");
 
             html += `
-                        <tr class="border-b border-[#cfe7e3] dark:border-gray-700" data-depense-id="${d.id}">
+                        <tr class="border-b border-[#cfe7e3] dark:border-gray-700" data-depense-id="${d.id}" data-etat-credit="${etatCreditDepense(d)}">
                             <td class="px-4 py-3">${formatDateFR(localDate)}</td>
                             <td class="px-4 py-3">${heure}</td>
                             <td class="px-4 py-3">${categorie}</td>
                             <td class="px-4 py-3 text-right font-semibold">${montantNum.toFixed(2).replace('.', ',')} FCFA</td>
-                            <td class="px-4 py-3">${paiement}</td>
+                            <td class="px-4 py-3" data-moyen-cellule>${paiement}</td>
                             <td class="px-4 py-3">${creePar}</td>
                             <td class="px-4 py-3 text-xs">${justificatifHtml}</td>
                             ${celluleCommentaire(d.note)}
@@ -1010,14 +1273,19 @@ document.addEventListener("DOMContentLoaded", function () {
         try {
             const ventes = await window.OGOUE.getVentesPourPeriode(month, year, plagePeriode());
             const ventesFiltered = filterByDateRange(ventes);
+            await chargerCreditsVentes();
 
             const resultsContainer = conteneurResultats("generateVentesBtn");
 
             const ventesHtml = `<div class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm p-5">
                     <h3 class="text-lg font-bold mb-2">Historique des Ventes (${ventesFiltered.length})</h3>
+                    ${filtreDepensesHtml("vente")}
                     ${renderHistoriqueVentes(ventesFiltered, true)}
+                    <p data-filtre-vide class="hidden py-4 text-center text-sm text-gray-500 dark:text-gray-400"></p>
                 </div>`;
             resultsContainer.innerHTML = ventesHtml;
+            brancherFiltreDepenses(resultsContainer);
+            brancherPaiementsVentes(resultsContainer);
 
             brancherJustificatifs(resultsContainer);
 
@@ -1062,13 +1330,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const depensesHtml = `<div class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm p-5">
                     <h3 class="text-lg font-bold mb-2">Historique des Dépenses (${depensesFiltered.length})</h3>
+                    ${filtreDepensesHtml()}
                     ${renderHistoriqueDepenses(depensesFiltered, true)}
+                    <p data-filtre-vide class="hidden py-4 text-center text-sm text-gray-500 dark:text-gray-400"></p>
                 </div>`;
             resultsContainer.innerHTML = depensesHtml;
+            brancherFiltreDepenses(resultsContainer);
 
             brancherJustificatifs(resultsContainer);
 
             brancherSuppressions(resultsContainer, "depense");
+            brancherPaiementsDettes(resultsContainer);
 
             window.etatFinanciersData = window.etatFinanciersData || {};
             window.etatFinanciersData.depenses = depensesFiltered;
@@ -1272,11 +1544,14 @@ document.addEventListener("DOMContentLoaded", function () {
                         feuilles.push({
                             nom: "Dépenses",
                             lignes: [
-                                ["Date", "Catégorie", "Description", "Montant", "Justificatif", "Commentaire"],
+                                ["Date", "Catégorie", "Description", "Moyen de paiement", "Crédit payé le", "Montant", "Justificatif", "Commentaire"],
                                 ...depenses.map(d => [
                                     d.date || "",
                                     d.category || d.categorie || "",
                                     d.description || "",
+                                    ({ cash: "Cash", mobile_money: "Mobile Money", credit: "Crédit (à payer)" })[d.moyen_paiement] || d.moyen_paiement || "",
+                                    // Dépense achetée à crédit puis payée : le jour du paiement
+                                    d.credit_regle_le ? getLocalDateString(new Date(d.credit_regle_le)) : "",
                                     nombre(d.amount ?? d.montant),
                                     d.receiptName || d.justificatif || "",
                                     d.note || ""
