@@ -55,12 +55,6 @@
     .titre-accueil { font-size: clamp(34px, 4.3vw, 54px); }
     .titre-l  { font-size: clamp(30px, 3.6vw, 44px); line-height: 1.15; font-weight: 800; letter-spacing: -0.015em; }
     .surtitre { font-size: 14px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #0088CC; }
-    /* Téléphone : logo à la taille de l'application (112 px de haut) et aligné
-       sur le texte de la page (l'image a 44 px de marge transparente à gauche) ;
-       les marges négatives haut et bas gardent l'en-tête à sa hauteur */
-    @media (max-width: 1023px) {
-      #logo-accueil { height: 112px; max-width: none; margin: -16px 0 -16px -44px; }
-    }
   </style>
 </head>
 
@@ -71,7 +65,7 @@
     <header class="sticky top-0 z-50 w-full bg-white border-b border-black/10">
       <nav class="px-6 lg:px-10 py-2 lg:py-4 flex items-center justify-between gap-4">
         <a href="/" class="flex items-center">
-          <img id="logo-accueil" src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-20 lg:h-24 w-auto">
+          <img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-20 lg:h-24 w-auto max-lg:h-28 max-lg:max-w-none max-lg:-my-4 max-lg:-ml-11">
         </a>
 
         <div class="hidden lg:flex items-center gap-7 text-[15px] font-semibold">
@@ -530,7 +524,7 @@
 
     <!-- FOOTER : ne contient que des liens vers des pages qui existent -->
     <footer class="bg-white border-t border-black/10 px-6 py-14">
-      <div class="max-w-7xl mx-auto grid grid-cols-[minmax(0,1fr)] md:grid-cols-4 gap-10">
+      <div class="max-w-7xl mx-auto grid grid-cols-[minmax(0,1fr)] md:grid-cols-3 lg:grid-cols-5 gap-10">
         <div>
           <img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-14 w-auto">
           <p class="mt-4 text-sm text-text-light-muted leading-relaxed">Bien gérer aujourd’hui pour mieux préparer son développement demain</p>
@@ -556,6 +550,16 @@
           <p class="text-sm font-bold">Financeurs</p>
           <ul class="mt-4 space-y-3 text-sm text-text-light-muted">
             <li><a class="hover:text-text-light" href="https://financement.ogoue.com/institution-login">Espace institution</a></li>
+          </ul>
+        </div>
+        <!-- Contact : même numéro pour les appels et WhatsApp (au Gabon, le 0 initial se garde après 241) -->
+        <div>
+          <p class="text-sm font-bold">Nous contacter</p>
+          <ul class="mt-4 space-y-3 text-sm text-text-light-muted">
+            <li><a class="inline-flex items-center gap-2 hover:text-text-light" href="tel:+24107604560">
+              <span class="material-symbols-outlined text-lg">call</span>+241 07 60 45 60</a></li>
+            <li><a class="inline-flex items-center gap-2 hover:text-text-light" href="https://wa.me/24107604560" target="_blank" rel="noopener">
+              <span class="material-symbols-outlined text-lg">chat</span>Écrire sur WhatsApp</a></li>
           </ul>
         </div>
       </div>
