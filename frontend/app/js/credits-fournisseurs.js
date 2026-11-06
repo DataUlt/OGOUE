@@ -43,6 +43,22 @@
     if (b) choisirVue(b.dataset.vue);
   });
 
+  // Nombre sur chaque bouton : clients qui vous doivent, dettes à payer
+  function badgeVue(vue, nombre) {
+    const bouton = bascule.querySelector(`[data-vue="${vue}"]`);
+    let b = bouton.querySelector(".ogo-badge-vue");
+    if (!nombre) { b?.remove(); return; }
+    if (!b) {
+      b = document.createElement("span");
+      b.className = "ogo-badge-vue ml-1 inline-flex items-center justify-center text-[11px] font-bold text-white bg-red-600 rounded-full min-w-[20px] h-[20px] px-1";
+      bouton.appendChild(b);
+    }
+    b.textContent = nombre > 99 ? "99+" : String(nombre);
+  }
+  function badgesVues(c) { badgeVue("clients", c.clients); badgeVue("fournisseurs", c.dettes); }
+  document.addEventListener("ogo:credits-compte", (e) => badgesVues(e.detail));
+  if (window.OGOUE_badgeCredits) badgesVues(window.OGOUE_badgeCredits.compte());
+
   // ── Dettes ──
   const liste = el("dettesListe");
   const message = el("dettesMessage");
@@ -131,6 +147,7 @@
       return;
     }
     depenses = r.depenses.map((d) => ({ ...d, montant: Number(d.montant) || 0 }));
+    window.OGOUE_badgeCredits?.afficher({ dettes: depenses.filter((d) => d.moyen_paiement === "credit").length });
     afficher();
   }
 

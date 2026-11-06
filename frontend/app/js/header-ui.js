@@ -912,6 +912,8 @@
     // Les boutons arretent la propagation du clic, le gestionnaire du
     // document ne peut donc pas s'en charger.
     function fermerAutres(garde){
+      // Le menu des trois traits (téléphone) compte aussi parmi les panneaux
+      document.getElementById('mobile-menu')?.classList.add('hidden');
       if(garde !== 'notif' && notifPopover){ notifPopover.remove(); notifPopover=null; }
       if(garde !== 'settings' && settingsPopover){ settingsPopover.remove(); settingsPopover=null; }
       if(garde !== 'profile' && profilePopover){ profilePopover.remove(); profilePopover=null; }
@@ -1324,12 +1326,14 @@ function ouvrirSuppressionCompte() {
   window.addEventListener('storage', actualiser);
 })();
 
-// ===== Menu « Crédits » (gérant), avec le nombre de clients en retard =====
+// ===== Menu « Crédits » (gérant), avec le nombre de crédits à suivre =====
 // Inséré avant « Financement », sur ordinateur et sur téléphone, comme le
-// lien « Aide » d'aide.js. Le nombre vient de GET /api/credits ; il est
-// gardé pour la session afin de s'afficher sans attendre le serveur.
+// lien « Aide » d'aide.js. Le nombre additionne les clients qui doivent
+// encore de l'argent (GET /api/credits) et les dépenses à crédit pas encore
+// payées (GET /api/expenses/credits). Gardé pour la session afin de
+// s'afficher sans attendre le serveur.
 (function menuCredits() {
-  var CLE = 'ogo_credits_retard';
+  var CLE = 'ogo_credits_compte';
   function utilisateur() { try { return JSON.parse(localStorage.getItem('user') || 'null'); } catch (e) { return null; } }
 
   function poserBadge(lien, nombre) {
@@ -1338,7 +1342,7 @@ function ouvrirSuppressionCompte() {
     if (!b) {
       b = document.createElement('span');
       b.className = 'ogo-badge-credits ml-1.5 inline-flex items-center justify-center align-middle text-[11px] font-bold text-white bg-red-600 rounded-full min-w-[20px] h-[20px] px-1';
-      b.title = 'Clients en retard de paiement';
+      b.title = 'Crédits à suivre : clients qui vous doivent et dettes à payer';
       lien.appendChild(b);
     }
     b.textContent = nombre > 99 ? '99+' : String(nombre);
@@ -1369,17 +1373,88 @@ function ouvrirSuppressionCompte() {
     return liens;
   }
 
+  // Sur téléphone, le lien « Crédits » est caché derrière les trois traits :
+  // le même nombre s'affiche sur le bouton du menu
+  function poserBadgeMenu(nombre) {
+    var bouton = document.getElementById('menu-toggle');
+    if (!bouton) return;
+    var b = bouton.querySelector('.ogo-badge-menu');
+    if (!nombre) { if (b) b.remove(); return; }
+    if (!b) {
+      // Pas de position imposée ici : sur téléphone, mobile-menu.js place déjà
+      // le bouton (centré, en absolu), ce qui suffit pour y accrocher le badge
+      bouton.classList.add('relative');
+      b = document.createElement('span');
+      b.className = 'ogo-badge-menu absolute -top-1 -right-1 inline-flex items-center justify-center text-[10px] font-bold text-white bg-red-600 rounded-full min-w-[18px] h-[18px] px-1 ring-2 ring-white';
+      b.title = 'Crédits à suivre : clients qui vous doivent et dettes à payer';
+      bouton.appendChild(b);
+    }
+    b.textContent = nombre > 99 ? '99+' : String(nombre);
+  }
+
+  var liens = [];
+  function lireGarde() {
+    try { var c = JSON.parse(sessionStorage.getItem(CLE) || 'null'); if (c) return { clients: Number(c.clients) || 0, dettes: Number(c.dettes) || 0 }; } catch (e) {}
+    return { clients: 0, dettes: 0 };
+  }
+  var compte = lireGarde();
+  // compte = { clients, dettes } ; une page peut n'en donner qu'une partie
+  function afficher(partiel) {
+    if (partiel && partiel.clients !== undefined) compte.clients = Number(partiel.clients) || 0;
+    if (partiel && partiel.dettes !== undefined) compte.dettes = Number(partiel.dettes) || 0;
+    try { sessionStorage.setItem(CLE, JSON.stringify(compte)); } catch (e) {}
+    var total = compte.clients + compte.dettes;
+    liens.forEach(function (l) { poserBadge(l, total); });
+    poserBadgeMenu(total);
+    // La page Crédits met le détail sur « On me doit » et « Je dois »
+    document.dispatchEvent(new CustomEvent('ogo:credits-compte', { detail: { clients: compte.clients, dettes: compte.dettes } }));
+  }
+  async function rafraichir() {
+    if (!liens.length || !window.OGOUE) return;
+    var O = window.OGOUE;
+    var lus = await Promise.all([
+      typeof O.getCredits === 'function' ? O.getCredits().catch(function () { return null; }) : null,
+      typeof O.getDepensesCredit === 'function' ? O.getDepensesCredit().catch(function () { return null; }) : null
+    ]);
+    var partiel = {};
+    if (lus[0] && lus[0].ok) partiel.clients = O.resumerCredits(lus[0].ventes, lus[0].reglements).nbClients;
+    if (lus[1] && lus[1].ok) partiel.dettes = lus[1].depenses.filter(function (d) { return d.moyen_paiement === 'credit'; }).length;
+    afficher(partiel);
+  }
+  // Plusieurs opérations à la suite (mode rush) : un seul recalcul
+  var attente = null;
+  function bientot() { clearTimeout(attente); attente = setTimeout(rafraichir, 400); }
+  window.OGOUE_badgeCredits = {
+    afficher: function (partiel) { if (liens.length) afficher(partiel); },
+    rafraichir: bientot,
+    compte: function () { return { clients: compte.clients, dettes: compte.dettes }; }
+  };
+
+  // Tout ce qui change un crédit (paiement, annulation, nouvelle vente ou
+  // dépense à crédit) recalcule le nombre, quelle que soit la page. Fait au
+  // chargement de ce fichier : les pages lisent ces fonctions après lui.
+  (function surveiller() {
+    var O = window.OGOUE;
+    if (!O) return;
+    var enCredit = function (data) { return data && (data.moyen_paiement === 'credit' || data.moyenPaiement === 'credit'); };
+    [['enregistrerReglement'], ['annulerReglement'], ['reglerDepense'], ['addVente', enCredit], ['addDepense', enCredit]].forEach(function (x) {
+      var nom = x[0], condition = x[1], origine = O[nom];
+      if (typeof origine !== 'function') return;
+      O[nom] = async function () {
+        var r = await origine.apply(this, arguments);
+        if (!condition || condition(arguments[0])) bientot();
+        return r;
+      };
+    });
+  })();
+
   async function demarrer() {
-    var liens = inserer();
+    liens = inserer();
     if (!liens.length) return;
-    var garde = Number(sessionStorage.getItem(CLE) || 0);
-    liens.forEach(function (l) { poserBadge(l, garde); });
-    if (!window.OGOUE || typeof window.OGOUE.getCredits !== 'function') return;
-    var r = await window.OGOUE.getCredits();
-    if (!r.ok) return;
-    var n = window.OGOUE.resumerCredits(r.ventes, r.reglements).nbEnRetard;
-    try { sessionStorage.setItem(CLE, String(n)); } catch (e) {}
-    liens.forEach(function (l) { poserBadge(l, n); });
+    var total = compte.clients + compte.dettes;
+    liens.forEach(function (l) { poserBadge(l, total); });
+    poserBadgeMenu(total);
+    await rafraichir();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', demarrer);

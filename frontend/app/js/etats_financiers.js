@@ -850,6 +850,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 donnees.ventesHtml = `<h3>Historique des Ventes (${donnees.ventes.length})</h3>${renderHistoriqueVentes(donnees.ventes)}`;
             }
             try { sessionStorage.removeItem("ogo_credits_retard"); } catch (err) {}
+            window.OGOUE_badgeCredits?.rafraichir();
             window.OGOUE_FEEDBACK?.succes(`Crédit réglé · ${echapperHtml(info.client)} · ${info.reste.toLocaleString("fr-FR")} FCFA`);
             appliquerFiltreDepenses(conteneur);
         });

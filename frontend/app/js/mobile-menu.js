@@ -21,6 +21,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (menuToggle && mobileMenu) {
         menuToggle.addEventListener('click', function() {
+            // Un seul panneau ouvert à la fois : ouvrir le menu ferme
+            // Paramètres, Profil ou Notifications (header-ui.js)
+            if (mobileMenu.classList.contains('hidden')) {
+                document.querySelectorAll('.ogo-popover').forEach(function (p) { p.remove(); });
+            }
             mobileMenu.classList.toggle('hidden');
         });
         

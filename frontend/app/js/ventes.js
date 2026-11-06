@@ -681,6 +681,7 @@
         // Vente à crédit : ce que doit le client et ses paiements ont changé
         if (vente?.moyen_paiement === "credit") {
           try { sessionStorage.removeItem("ogo_credits_retard"); } catch (err) {}
+          window.OGOUE_badgeCredits?.rafraichir();
           creditsClients.rafraichir();
         }
         console.log('✅ Vente supprimée avec succès');
@@ -748,6 +749,7 @@
       if (!r.ok) { alert(r.error); zone.querySelectorAll("button").forEach((b) => { b.disabled = false; }); return; }
       window.OGOUE_FEEDBACK?.succes(`Crédit réglé · ${echapperHtml(info.client)} · ${formatMontant(info.reste)}`);
       try { sessionStorage.removeItem("ogo_credits_retard"); } catch (err) {}
+      window.OGOUE_badgeCredits?.rafraichir();
       await creditsClients.rafraichir(); // le tableau se redessine avec la vente réglée
     });
   }
@@ -1541,6 +1543,7 @@
       }
       await rafraichir();
       try { sessionStorage.removeItem("ogo_credits_retard"); } catch (e) {}
+      window.OGOUE_badgeCredits?.rafraichir();
     }
     return {
       rafraichir,

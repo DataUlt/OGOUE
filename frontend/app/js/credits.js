@@ -148,6 +148,7 @@
       return;
     }
     resume = resumerCredits(r.ventes, r.reglements);
+    window.OGOUE_badgeCredits?.afficher({ clients: resume.nbClients });
     afficher();
   }
 
