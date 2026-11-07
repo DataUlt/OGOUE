@@ -307,40 +307,146 @@ document.addEventListener("DOMContentLoaded", function () {
         return tableauFlux;
     }
 
+    // ── Plan comptable SYSCOHADA révisé ───────────────────────────
+    // Les catégories de dépenses restent celles que voit le client ; chacune
+    // est rangée ici sur sa ligne du compte de résultat (référence SYSCOHADA).
+    // Retraits, remboursements d'emprunt et achats de matériel font sortir de
+    // l'argent mais ne sont pas des charges : ils restent hors du résultat.
+    const HORS_RESULTAT = ["retrait personnel", "remboursement d'emprunt", "matériel / équipement"];
+    const LIGNE_SYSCOHADA = {
+        "achats / stocks": "RA",
+        "matières premières": "RC",
+        "électricité": "RE", "eau": "RE",
+        "transport & logistique": "RG",
+        "loyer": "RH", "entretien & maintenance": "RH", "marketing": "RH", "internet & télécom": "RH",
+        "impôts & taxes": "RI",
+        "salaires": "RK",
+        "intérêts d'emprunt": "RM", "intérêt des emprunts": "RM",
+        "amendes & pénalités": "RP", "amendes": "RP",
+        "impôt sur le bénéfice": "RS", "impôts sur les bénéfices": "RS"
+    };
+    // Une catégorie inconnue (créée par le client, ou « Autres ») : autres charges
+    const ligneSyscohada = (categorie) => {
+        const cle = String(categorie || "").trim().toLowerCase();
+        return HORS_RESULTAT.includes(cle) ? null : (LIGNE_SYSCOHADA[cle] || "RJ");
+    };
+    const LIGNES_EXPLOITATION = ["RA", "RC", "RE", "RG", "RH", "RI", "RJ", "RK"];
+    const ORDRE_CATEGORIES = [
+        "Achats / Stocks", "Salaires", "Loyer", "Marketing", "Électricité",
+        "Eau", "Internet & Télécom", "Transport & Logistique", "Impôts & Taxes", "Entretien & Maintenance"
+    ];
+
+    // Revente ou fabrication, choisi dans « Ma boutique » (js/mode-activite.js)
+    let _modeActivite = null;
+    async function lireModeActivite() {
+        if (_modeActivite) return _modeActivite;
+        try {
+            const API_BASE_URL = (['localhost', '127.0.0.1'].some(h => location.hostname.includes(h)))
+                ? 'http://localhost:3001' : 'https://api.ogoue.com';
+            const r = await fetch(`${API_BASE_URL}/api/organization`, { headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` } });
+            const org = r.ok ? await r.json() : null;
+            _modeActivite = ["fabrication", "les_deux"].includes(org?.modeActivite) ? org.modeActivite : "revente";
+        } catch (e) { _modeActivite = "revente"; }
+        return _modeActivite;
+    }
+
+    // Entreprise « les deux » : noms (et identifiants) des produits fabriqués,
+    // pour reconnaître les ventes de produits fabriqués (TB)
+    async function lireProduitsFabriques() {
+        const articles = window.OGOUE?.getArticles ? await window.OGOUE.getArticles().catch(() => []) : [];
+        const s = new Set();
+        articles.filter((a) => a.fabrique && a.type !== "services").forEach((a) => {
+            s.add(String(a.name || "").trim().toLowerCase());
+            s.add("id:" + a.id);
+        });
+        return s;
+    }
+
+    /**
+     * Range les montants du serveur sur les lignes SYSCOHADA.
+     * @param data   compteResultat renvoyé par /api/etats-financiers
+     * @param ventes ventes de la période (pour séparer marchandises et services), ou null
+     * @param mode   "revente" (TA, RA), "fabrication" (TB, RC) ou "les_deux"
+     * @param fabriques produits fabriqués (lireProduitsFabriques), pour « les_deux »
+     */
+    function calculerSyscohada(data, ventes, mode = "revente", fabriques = null) {
+        const fabrication = mode === "fabrication";
+        const L = {};
+        const detail = {};
+        const hors = [];
+        Object.entries(data.depensesByCategory || {}).forEach(([cat, montant]) => {
+            const m = Number(montant) || 0;
+            if (!m) return;
+            let ligne = ligneSyscohada(cat);
+            if (!ligne) { hors.push({ label: cat, amount: m }); return; }
+            // Une entreprise qui fabrique achète des matières premières
+            if (ligne === "RA" && fabrication) ligne = "RC";
+            L[ligne] = (L[ligne] || 0) + m;
+            (detail[ligne] = detail[ligne] || []).push({ label: cat === "Autres" ? "Autres charges" : cat, amount: m });
+        });
+        // Ventes : « services » en 706, le reste en ventes de marchandises (701)
+        const totalVentes = Number(data.totalVentes) || 0;
+        const services = Array.isArray(ventes)
+            ? ventes.filter((v) => (v.type_vente || v.saleType) === "services").reduce((s, v) => s + (Number(v.montant) || 0), 0)
+            : 0;
+        L.TC = Math.min(services, totalVentes);
+        if (mode === "les_deux" && Array.isArray(ventes) && fabriques) {
+            // Chaque vente selon son produit : fabriqué (TB) ou revendu (TA)
+            const fabriquee = (v) => fabriques.has(String(v.description || "").trim().toLowerCase())
+                || (v.article_id && fabriques.has("id:" + v.article_id));
+            const tb = ventes.filter((v) => (v.type_vente || v.saleType) !== "services" && fabriquee(v))
+                .reduce((s, v) => s + (Number(v.montant) || 0), 0);
+            L.TB = Math.min(tb, totalVentes - L.TC);
+            L.TA = totalVentes - L.TC - L.TB;
+        } else {
+            L[fabrication ? "TB" : "TA"] = totalVentes - L.TC;
+        }
+
+        const v = (k) => L[k] || 0;
+        const S = {};
+        S.XA = v("TA") - v("RA") - v("RB");
+        S.XB = v("TA") + v("TB") + v("TC") + v("TD");
+        S.XC = S.XA + v("TB") + v("TC") + v("TD") + v("TE") + v("TF") + v("TG") + v("TH") + v("TI")
+            - (v("RC") + v("RD") + v("RE") + v("RF") + v("RG") + v("RH") + v("RI") + v("RJ"));
+        S.XD = S.XC - v("RK");
+        S.XE = S.XD + v("TJ") - v("RL");
+        S.XF = v("TK") + v("TL") + v("TM") - v("RM") - v("RN");
+        S.XG = S.XE + S.XF;
+        S.XH = v("TN") + v("TO") - v("RO") - v("RP");
+        S.XI = S.XG + S.XH - v("RQ") - v("RS");
+
+        const totalCharges = Object.keys(L).filter((k) => k[0] === "R").reduce((s, k) => s + L[k], 0);
+        return { L, S, detail, hors, mode, totalProduits: totalVentes, totalCharges, resultat: totalVentes - totalCharges };
+    }
+
     /**
      * Crée le HTML pour le Compte de Résultat avec synchronisation ligne par ligne
+     * (vue simple, celle que les clients connaissent)
      */
-    function renderCompteDeResultat(data) {
-        // Catégories d'exploitation
-        const exploitationCategories = [
-            "Achats / Stocks", "Salaires", "Loyer", "Marketing", "Électricité",
-            "Eau", "Internet & Télécom", "Transport & Logistique", "Impôts & Taxes", "Entretien & Maintenance"
-        ];
+    function renderCompteDeResultat(data, ventes = null, mode = "revente") {
+        const calcul = calculerSyscohada(data, ventes, mode);
 
-        // Calculer les montants
-        let chargesExploitation = 0;
-        const chargesExploitationItems = [];
-        
-        exploitationCategories.forEach(cat => {
-            const amount = data.depensesByCategory[cat] || 0;
-            if (amount > 0) {
-                chargesExploitation += amount;
-                chargesExploitationItems.push({ label: cat, amount });
-            }
-        });
+        // Charges d'exploitation : catégories habituelles d'abord, puis celles du client
+        const chargesExploitationItems = LIGNES_EXPLOITATION
+            .flatMap((ligne) => calcul.detail[ligne] || [])
+            .sort((a, b) => {
+                const ia = ORDRE_CATEGORIES.indexOf(a.label), ib = ORDRE_CATEGORIES.indexOf(b.label);
+                return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+            });
+        const chargesExploitation = chargesExploitationItems.reduce((s, x) => s + x.amount, 0);
 
-        const chargesFinancieres = data.depensesByCategory["Intérêt des emprunts"] || 0;
-        const chargesExceptionnelles = (data.depensesByCategory["Amendes"] || 0) + 
-                                      (data.depensesByCategory["Autres"] || 0);
-        const impotsBenefices = data.depensesByCategory["Impôts sur les bénéfices"] || 0;
-        const totalCharges = data.totalDepenses;
-        const totalProduits = data.totalVentes;
-        const resultat = data.resultat;
-        
+        const chargesFinancieres = calcul.L.RM || 0;
+        const chargesExceptionnelles = calcul.L.RP || 0;
+        const impotsBenefices = calcul.L.RS || 0;
+        const totalCharges = calcul.totalCharges;
+        const totalProduits = calcul.totalProduits;
+        const resultat = calcul.resultat;
+
         const isBenefice = resultat >= 0;
         const resultLabel = isBenefice ? "Bénéfice" : "Perte";
         const resultAmount = Math.abs(resultat);
-        const totalGeneral = totalProduits;
+        // Les deux colonnes s'équilibrent : produits + perte = charges + bénéfice
+        const totalGeneral = Math.max(totalProduits, totalCharges);
 
         // Construire les lignes synchronisées
         const maxExploitationItems = Math.max(chargesExploitationItems.length, 1);
@@ -412,11 +518,11 @@ document.addEventListener("DOMContentLoaded", function () {
                             <div class="grid grid-cols-2 bg-orange-200 font-semibold"><div class="px-4 py-2">Total charges d'exploitation</div><div class="px-4 py-2 text-right whitespace-nowrap">${chargesExploitation.toFixed(2).replace('.', ',')} FCFA</div></div>
                             
                             <div class="grid grid-cols-2 bg-orange-100"><div class="px-4 py-2 font-semibold">Charges financières</div><div class="px-4 py-2 text-right whitespace-nowrap"></div></div>
-                            ${chargesFinancieres > 0 ? `<div class="grid grid-cols-2"><div class="px-4 py-2">Intérêts des emprunts</div><div class="px-4 py-2 text-right whitespace-nowrap">${chargesFinancieres.toFixed(2).replace('.', ',')} FCFA</div></div>` : ''}
+                            ${chargesFinancieres > 0 ? `<div class="grid grid-cols-2"><div class="px-4 py-2">Intérêts d'emprunt</div><div class="px-4 py-2 text-right whitespace-nowrap">${chargesFinancieres.toFixed(2).replace('.', ',')} FCFA</div></div>` : ''}
                             <div class="grid grid-cols-2 bg-orange-200 font-semibold"><div class="px-4 py-2">Total charges financières</div><div class="px-4 py-2 text-right whitespace-nowrap">${chargesFinancieres.toFixed(2).replace('.', ',')} FCFA</div></div>
                             
                             <div class="grid grid-cols-2 bg-orange-100"><div class="px-4 py-2 font-semibold">Charges exceptionnelles</div><div class="px-4 py-2 text-right whitespace-nowrap"></div></div>
-                            ${chargesExceptionnelles > 0 ? `<div class="grid grid-cols-2"><div class="px-4 py-2">Amendes et autres charges</div><div class="px-4 py-2 text-right whitespace-nowrap">${chargesExceptionnelles.toFixed(2).replace('.', ',')} FCFA</div></div>` : ''}
+                            ${chargesExceptionnelles > 0 ? `<div class="grid grid-cols-2"><div class="px-4 py-2">Amendes et pénalités</div><div class="px-4 py-2 text-right whitespace-nowrap">${chargesExceptionnelles.toFixed(2).replace('.', ',')} FCFA</div></div>` : ''}
                             <div class="grid grid-cols-2 bg-orange-200 font-semibold"><div class="px-4 py-2">Total charges exceptionnelles</div><div class="px-4 py-2 text-right whitespace-nowrap">${chargesExceptionnelles.toFixed(2).replace('.', ',')} FCFA</div></div>
                             
                             ${impotsBenefices > 0 ? `<div class="grid grid-cols-2 bg-orange-100"><div class="px-4 py-2 font-semibold">Impôts sur les bénéfices</div><div class="px-4 py-2 text-right whitespace-nowrap">${impotsBenefices.toFixed(2).replace('.', ',')} FCFA</div></div>` : ''}
@@ -449,13 +555,162 @@ document.addEventListener("DOMContentLoaded", function () {
                             ${!isBenefice ? `<div class="grid grid-cols-2 bg-teal-100"><div class="px-4 py-2 font-semibold">${resultLabel}</div><div class="px-4 py-2 text-right font-semibold text-red-600">${resultAmount.toFixed(2).replace('.', ',')} FCFA</div></div>` : ''}
                             
                             <div class="grid grid-cols-2 bg-teal-800 text-white font-bold"><div class="px-4 py-2">Total des produits</div><div class="px-4 py-2 text-right whitespace-nowrap">${totalProduits.toFixed(2).replace('.', ',')} FCFA</div></div>
-                            
+
                             <div class="grid grid-cols-2 bg-teal-900 text-white font-bold"><div class="px-4 py-2">Total général</div><div class="px-4 py-2 text-right whitespace-nowrap">${totalGeneral.toFixed(2).replace('.', ',')} FCFA</div></div>
                         </div>
                     </div>
                 </div>
+                ${noteHorsResultat(calcul.hors)}
             </div>
         `;
+    }
+
+    // Sorties d'argent qui ne sont pas des charges : dites, mais pas comptées
+    function noteHorsResultat(hors) {
+        if (!hors.length) return "";
+        const liste = hors.map((h) => `${echapperHtml(h.label)} : ${Math.round(h.amount).toLocaleString("fr-FR")} FCFA`).join(" · ");
+        return `<p class="mt-3 text-xs text-gray-500 dark:text-gray-400">Non compris dans les charges (sorties d'argent qui ne sont pas des charges) : ${liste}. Ils figurent dans le tableau de flux de trésorerie.</p>`;
+    }
+
+    // ── Compte de résultat au format SYSCOHADA révisé (tableau en liste) ──
+    const LIGNES_COMPTE = [
+        ["TA", "Ventes de marchandises", "+"],
+        ["RA", "Achats de marchandises", "-"],
+        ["RB", "Variation de stocks de marchandises", "-"],
+        ["XA", "MARGE COMMERCIALE (somme TA à RB)"],
+        ["TB", "Ventes de produits fabriqués", "+"],
+        ["TC", "Travaux, services vendus", "+"],
+        ["TD", "Produits accessoires", "+"],
+        ["XB", "CHIFFRE D'AFFAIRES (A + B + C + D)"],
+        ["TE", "Production stockée (ou déstockage)", "+"],
+        ["TF", "Production immobilisée", "+"],
+        ["TG", "Subventions d'exploitation", "+"],
+        ["TH", "Autres produits", "+"],
+        ["TI", "Transferts de charges d'exploitation", "+"],
+        ["RC", "Achats de matières premières et fournitures liées", "-"],
+        ["RD", "Variation de stocks de matières premières et fournitures liées", "-"],
+        ["RE", "Autres achats", "-"],
+        ["RF", "Variation de stocks d'autres approvisionnements", "-"],
+        ["RG", "Transports", "-"],
+        ["RH", "Services extérieurs", "-"],
+        ["RI", "Impôts et taxes", "-"],
+        ["RJ", "Autres charges", "-"],
+        ["XC", "VALEUR AJOUTÉE (XB + RA + RB) + (somme TE à RJ)"],
+        ["RK", "Charges de personnel", "-"],
+        ["XD", "EXCÉDENT BRUT D'EXPLOITATION (XC + RK)"],
+        ["TJ", "Reprises d'amortissements, provisions et dépréciations", "+"],
+        ["RL", "Dotations aux amortissements, aux provisions et dépréciations", "-"],
+        ["XE", "RÉSULTAT D'EXPLOITATION (XD + TJ + RL)"],
+        ["TK", "Revenus financiers et assimilés", "+"],
+        ["TL", "Reprises de provisions et dépréciations financières", "+"],
+        ["TM", "Transferts de charges financières", "+"],
+        ["RM", "Frais financiers et charges assimilées", "-"],
+        ["RN", "Dotations aux provisions et aux dépréciations financières", "-"],
+        ["XF", "RÉSULTAT FINANCIER (somme TK à RN)"],
+        ["XG", "RÉSULTAT DES ACTIVITÉS ORDINAIRES (XE + XF)"],
+        ["TN", "Produits des cessions d'immobilisations", "+"],
+        ["TO", "Autres produits HAO", "+"],
+        ["RO", "Valeur comptable des cessions d'immobilisations", "-"],
+        ["RP", "Autres charges HAO", "-"],
+        ["XH", "RÉSULTAT HORS ACTIVITÉS ORDINAIRES (somme TN à RP)"],
+        ["RQ", "Participation des travailleurs", "-"],
+        ["RS", "Impôts sur le résultat", "-"],
+        ["XI", "RÉSULTAT NET (XG + XH + RQ + RS)"]
+    ];
+
+    /**
+     * @param cur   calculerSyscohada de la période
+     * @param prev  calculerSyscohada de la période précédente, ou null
+     * @param meta  { periode, periodePrec }
+     */
+    function renderCompteSyscohada(cur, prev, meta) {
+        const org = (() => { try { return JSON.parse(localStorage.getItem("ogo_org") || "null") || {}; } catch (e) { return {}; } })();
+        const montant = (calcul, ref, signe) => {
+            if (!calcul) return "";
+            const brut = ref[0] === "X" ? calcul.S[ref] : (calcul.L[ref] || 0);
+            const val = signe === "-" ? -brut : brut;
+            if (!val) return "-";
+            return (val < 0 ? "−" : "") + Math.round(Math.abs(val)).toLocaleString("fr-FR");
+        };
+        const td = "padding:5px 8px;border:1px solid #cbd5e1;font-size:12px";
+        const lignes = LIGNES_COMPTE.map(([ref, libelle, signe]) => {
+            const solde = ref[0] === "X";
+            const fond = ref === "XI" ? "background:#0B2A5B;color:#fff;" : solde ? "background:#e2e8f0;" : "";
+            const gras = solde ? "font-weight:700;" : "";
+            return `<tr style="${fond}${gras}">
+                <td style="${td};text-align:center;width:44px">${ref}</td>
+                <td style="${td}">${libelle}</td>
+                <td style="${td};text-align:center;width:28px">${signe || ""}</td>
+                <td style="${td};text-align:right;white-space:nowrap">${montant(cur, ref, signe)}</td>
+                <td style="${td};text-align:right;white-space:nowrap">${montant(prev, ref, signe)}</td>
+            </tr>`;
+        }).join("");
+        const enTete = (texte) => `<th style="${td};background:#0B2A5B;color:#fff;text-align:center">${texte}</th>`;
+        const champ = (libelle, valeur) => valeur ? `<div><span style="color:#64748b">${libelle} :</span> <strong>${echapperHtml(valeur)}</strong></div>` : "";
+        const remarques = [
+            "Établi à partir des opérations enregistrées dans OGOUE. Document non certifié par un expert-comptable.",
+            "Ventes et dépenses comptées à leur date, payées ou non (ventes et achats à crédit compris).",
+            cur.mode === "les_deux"
+                ? "Activité mixte : chaque produit est classé selon le catalogue, fabriqué (TB) ou revendu (TA) ; matières premières en RC, achats de marchandises en RA."
+                : cur.mode === "fabrication"
+                ? "Activité de fabrication : ventes de produits en produits fabriqués (TB), achats en matières premières (RC)."
+                : "Activité de revente : ventes de produits en marchandises (TA), achats en marchandises (RA). Modifiable dans « Ma boutique ».",
+            "Stocks non valorisés : les variations de stocks (RB, RD, RF) ne sont pas calculées.",
+            "Amortissements non calculés : les achats de matériel ne sont pas des charges de la période."
+        ];
+        if (cur.hors.length) {
+            remarques.push("Hors compte de résultat : " + cur.hors.map((h) => `${echapperHtml(h.label)} ${Math.round(h.amount).toLocaleString("fr-FR")} FCFA`).join(", ") + ".");
+        }
+        if (!prev) remarques.push("Période précédente non disponible.");
+        return `<div id="compte-syscohada" style="color:#0f172a;background:#fff;padding:4px">
+            <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px;font-size:12px;margin-bottom:10px">
+                <div>${champ("Entreprise", org.name)}${champ("RCCM", org.rccm)}${champ("NIF", org.nif)}</div>
+                <div style="text-align:right"><div><strong>COMPTE DE RÉSULTAT — SYSCOHADA révisé</strong></div>
+                    <div>Période : ${meta.periode}</div><div style="color:#64748b">Montants en FCFA</div></div>
+            </div>
+            <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:520px">
+                <thead><tr>${enTete("REF")}${enTete("LIBELLÉS")}${enTete("")}${enTete("PÉRIODE<br>" + meta.periode)}${enTete("PÉRIODE PRÉCÉDENTE<br>" + (meta.periodePrec || "—"))}</tr></thead>
+                <tbody>${lignes}</tbody>
+            </table></div>
+            <ul style="margin:10px 0 0 16px;padding:0;font-size:11px;color:#475569;list-style:disc">${remarques.map((r) => `<li>${r}</li>`).join("")}</ul>
+        </div>`;
+    }
+
+    // Période de même longueur, juste avant
+    function periodePrecedente(debut, fin) {
+        if (!debut) return null;
+        const d = new Date(debut + "T12:00:00"), f = new Date((fin || debut) + "T12:00:00");
+        const jours = Math.round((f - d) / 86400000) + 1;
+        const finPrec = new Date(d); finPrec.setDate(finPrec.getDate() - 1);
+        const debutPrec = new Date(finPrec); debutPrec.setDate(debutPrec.getDate() - jours + 1);
+        return { debut: getLocalDateString(debutPrec), fin: getLocalDateString(finPrec) };
+    }
+
+    /**
+     * Les deux présentations du compte de résultat : la vue simple (écran)
+     * et le format SYSCOHADA (impression), avec la période précédente.
+     */
+    async function construireComptes(debut, fin, ventes) {
+        const [compte, mode] = await Promise.all([generateCompteDeResultat(debut, fin), lireModeActivite()]);
+        const fabriques = mode === "les_deux" ? await lireProduitsFabriques() : null;
+        const cur = calculerSyscohada(compte, ventes, mode, fabriques);
+        let prev = null;
+        const p = periodePrecedente(debut, fin);
+        if (p) {
+            try {
+                const [etatsPrec, ventesPrec] = await Promise.all([
+                    chargerEtats(p.debut, p.fin),
+                    window.OGOUE.getVentesPourPlage ? window.OGOUE.getVentesPourPlage(p.debut, p.fin) : null
+                ]);
+                // Période coupée par la limite d'historique de la formule : chiffres partiels, on ne les montre pas
+                if (etatsPrec.compteResultat && !etatsPrec.periode?.tronque) prev = calculerSyscohada(etatsPrec.compteResultat, ventesPrec, mode, fabriques);
+            } catch (e) { prev = null; }
+        }
+        const libelle = (a, b) => (a ? `${formatDateFR(a)} au ${formatDateFR(b || a)}` : "toutes les opérations");
+        return {
+            simple: renderCompteDeResultat(compte, ventes, mode),
+            syscohada: renderCompteSyscohada(cur, prev, { periode: libelle(debut, fin), periodePrec: p && prev ? libelle(p.debut, p.fin) : "" })
+        };
     }
 
     /**
@@ -1184,25 +1439,40 @@ document.addEventListener("DOMContentLoaded", function () {
             console.log("✅ Ventes filtrées:", ventesFiltered);
             console.log("✅ Dépenses filtrées:", depensesFiltered);
 
-            const compteResultat = await generateCompteDeResultat(startDate, endDate);
-
-            console.log("📈 Compte de Résultat généré:", compteResultat);
+            const comptes = await construireComptes(startDate, endDate, ventesFiltered);
 
             // Créer ou récupérer le conteneur de résultat
             const resultsContainer = conteneurResultats("generateCompteBtn");
 
-            // REMPLACER le contenu (pas ajouter)
-            const compteHtml = `<div class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm p-5">
-                    <h3 class="text-lg font-bold mb-2">Compte de Résultat</h3>
-                    ${renderCompteDeResultat(compteResultat)}
+            // Vue simple à l'écran ; le format SYSCOHADA est celui qu'on imprime
+            const bouton = (vue, texte, actif) => `<button type="button" data-vue-compte="${vue}" class="h-9 px-4 rounded-full text-sm font-bold ${actif ? "bg-white dark:bg-gray-600 shadow-sm text-[#0d1b19] dark:text-white" : "text-gray-500"}">${texte}</button>`;
+            resultsContainer.innerHTML = `<div class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm p-5">
+                    <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
+                        <h3 class="text-lg font-bold">Compte de Résultat</h3>
+                        <div class="inline-flex rounded-full bg-gray-100 dark:bg-gray-800 p-1" data-vues-compte>
+                            ${bouton("simple", "Vue simple", true)}${bouton("syscohada", "Format SYSCOHADA", false)}
+                        </div>
+                    </div>
+                    <div data-compte-vue="simple">${comptes.simple}</div>
+                    <div data-compte-vue="syscohada" class="hidden">${comptes.syscohada}
+                        <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">C'est ce format qui est imprimé avec « Imprimer tout ».</p></div>
                 </div>`;
-            resultsContainer.innerHTML = compteHtml;
+            resultsContainer.querySelector("[data-vues-compte]").addEventListener("click", (e) => {
+                const b = e.target.closest("[data-vue-compte]");
+                if (!b) return;
+                resultsContainer.querySelectorAll("[data-vue-compte]").forEach((x) => {
+                    const on = x === b;
+                    ["bg-white", "dark:bg-gray-600", "shadow-sm", "text-[#0d1b19]", "dark:text-white"].forEach((k) => x.classList.toggle(k, on));
+                    x.classList.toggle("text-gray-500", !on);
+                });
+                resultsContainer.querySelectorAll("[data-compte-vue]").forEach((z) => z.classList.toggle("hidden", z.dataset.compteVue !== b.dataset.vueCompte));
+            });
 
             // Sauvegarder les données/rendus pour l'impression sélective
             window.etatFinanciersData = window.etatFinanciersData || {};
             window.etatFinanciersData.ventes = ventesFiltered;
             window.etatFinanciersData.depenses = depensesFiltered;
-            window.etatFinanciersData.compteHtml = compteHtml;
+            window.etatFinanciersData.compteHtml = `<h3>Compte de Résultat</h3>${comptes.syscohada}`;
 
             panel.classList.add("hidden");
         } catch (error) {
@@ -1651,14 +1921,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 const depensesFiltered = filterByDateRange(depenses);
 
                 // Générer les HTML
-                const compteData = await generateCompteDeResultat(startDate, endDate);
+                const comptes = await construireComptes(startDate, endDate, ventesFiltered);
                 const fluxData = await generateTableauDeFlux(startDate, endDate);
 
                 // Stocker les données et HTML pour impression
                 window.etatFinanciersData = window.etatFinanciersData || {};
                 window.etatFinanciersData.ventes = ventesFiltered;
                 window.etatFinanciersData.depenses = depensesFiltered;
-                window.etatFinanciersData.compteHtml = `<h3>Compte de Résultat</h3>${renderCompteDeResultat(compteData)}`;
+                window.etatFinanciersData.compteHtml = `<h3>Compte de Résultat</h3>${comptes.syscohada}`;
                 window.etatFinanciersData.fluxHtml = `<h3>Tableau de Flux de Trésorerie</h3>${renderTableauDeFlux(fluxData)}`;
                 window.etatFinanciersData.ventesHtml = `<h3>Historique des Ventes (${ventesFiltered.length})</h3>${renderHistoriqueVentes(ventesFiltered)}`;
                 window.etatFinanciersData.depensesHtml = `<h3>Historique des Dépenses (${depensesFiltered.length})</h3>${renderHistoriqueDepenses(depensesFiltered)}`;

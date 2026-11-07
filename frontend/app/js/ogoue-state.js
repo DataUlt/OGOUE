@@ -693,11 +693,11 @@ async function getRapportStock(debut, fin) {
  * Ajoute un article au catalogue
  * @returns {Promise<{ok: boolean, status: number, article: Object|null, error: string|null}>}
  */
-async function addArticle({ name, type = "produits", unitPrice = 0, stock = null, costPrice = null }) {
+async function addArticle({ name, type = "produits", unitPrice = 0, stock = null, costPrice = null, fabrique }) {
   try {
     const { ok, status, data } = await articlesRequest("", {
       method: "POST",
-      body: JSON.stringify({ name, type, unitPrice, stock, costPrice })
+      body: JSON.stringify({ name, type, unitPrice, stock, costPrice, ...(fabrique !== undefined ? { fabrique } : {}) })
     });
     return {
       ok,

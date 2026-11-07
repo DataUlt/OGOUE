@@ -23,6 +23,9 @@ const createSchema = z.object({
   // Coût d'achat unitaire, facultatif : sert à valoriser le stock
   costPrice: stockSchema.optional(),
   stock: stockSchema.optional(),
+  // Produit fabriqué par l'entreprise (sinon revendu tel quel). Ne compte que
+  // pour une entreprise qui fait les deux (compte de résultat SYSCOHADA).
+  fabrique: z.boolean().nullable().optional(),
 });
 
 const updateSchema = z.object({
@@ -31,7 +34,18 @@ const updateSchema = z.object({
   unitPrice: z.coerce.number().min(0).optional(),
   costPrice: stockSchema.optional(),
   stock: stockSchema.optional(),
+  fabrique: z.boolean().nullable().optional(),
 });
+
+// Colonne « fabrique » ajoutée par sql/MODE_ACTIVITE.sql : tant qu'elle manque,
+// on lit et on écrit sans elle.
+const COLONNES = "id, name, type, unit_price, cost_price, stock, created_at";
+const sansFabrique = (error) => /fabrique/i.test(error?.message || "");
+async function avecRepliFabrique(requete) {
+  let r = await requete(COLONNES + ", fabrique", true);
+  if (r.error && sansFabrique(r.error)) r = await requete(COLONNES, false);
+  return r;
+}
 
 // Plusieurs articles d'un coup, pour l'etape de configuration
 // qui suit la creation du compte.
@@ -48,6 +62,7 @@ function transform(row) {
     // null = pas de suivi de stock ; sinon la quantité disponible
     stock: row.stock === null || row.stock === undefined ? null : Number(row.stock),
     costPrice: row.cost_price === null || row.cost_price === undefined ? null : Number(row.cost_price),
+    fabrique: row.fabrique === true,
     createdAt: row.created_at,
   };
 }
@@ -59,12 +74,12 @@ export async function listArticles(req, res) {
   try {
     const organizationId = req.user.organizationId;
 
-    const { data, error } = await supabase
+    const { data, error } = await avecRepliFabrique((colonnes) => supabase
       .from("articles")
-      .select("id, name, type, unit_price, cost_price, stock, created_at")
+      .select(colonnes)
       .eq("organization_id", organizationId)
       .eq("is_active", true)
-      .order("name", { ascending: true });
+      .order("name", { ascending: true }));
 
     if (error) {
       console.error("Erreur listArticles:", error);
@@ -90,19 +105,20 @@ export async function createArticle(req, res) {
       return res.status(400).json({ error: "Organisation introuvable pour cet utilisateur" });
     }
 
-    const { data: row, error } = await supabase
+    const ligne = {
+      organization_id: organizationId,
+      name: data.name,
+      type: data.type,
+      unit_price: data.unitPrice,
+      stock: data.stock ?? null,
+      cost_price: data.costPrice ?? null,
+      created_by: req.user.userId || req.user.sub || req.user.id,
+    };
+    const { data: row, error } = await avecRepliFabrique((colonnes, avecChamp) => supabase
       .from("articles")
-      .insert({
-        organization_id: organizationId,
-        name: data.name,
-        type: data.type,
-        unit_price: data.unitPrice,
-        stock: data.stock ?? null,
-        cost_price: data.costPrice ?? null,
-        created_by: req.user.userId || req.user.sub || req.user.id,
-      })
-      .select("id, name, type, unit_price, cost_price, stock, created_at")
-      .single();
+      .insert(avecChamp ? { ...ligne, fabrique: data.fabrique ?? null } : ligne)
+      .select(colonnes)
+      .single());
 
     if (error) {
       if (error.code === UNIQUE_VIOLATION) {
@@ -161,6 +177,7 @@ export async function createArticlesBulk(req, res) {
         stock: a.stock ?? null,
         cost_price: a.costPrice ?? null,
         created_by: createdBy,
+        fabrique: a.fabrique ?? null,
       });
     }
 
@@ -170,11 +187,10 @@ export async function createArticlesBulk(req, res) {
     // Insertion ligne par ligne : un nom deja present dans le catalogue
     // ne doit pas annuler les autres.
     for (const row of rows) {
-      const { data, error } = await supabase
-        .from("articles")
-        .insert(row)
-        .select("id, name, type, unit_price, cost_price, stock, created_at")
-        .single();
+      const { data, error } = await avecRepliFabrique((colonnes, avecChamp) => {
+        const { fabrique, ...sans } = row;
+        return supabase.from("articles").insert(avecChamp ? row : sans).select(colonnes).single();
+      });
 
       if (error) {
         if (error.code === UNIQUE_VIOLATION) {
@@ -225,14 +241,14 @@ export async function updateArticle(req, res) {
     if (data.stock !== undefined) payload.stock = data.stock;
     if (data.costPrice !== undefined) payload.cost_price = data.costPrice;
 
-    const { data: row, error } = await supabase
+    const { data: row, error } = await avecRepliFabrique((colonnes, avecChamp) => supabase
       .from("articles")
-      .update(payload)
+      .update(avecChamp && data.fabrique !== undefined ? { ...payload, fabrique: data.fabrique } : payload)
       .eq("id", id)
       .eq("organization_id", organizationId)
       .eq("is_active", true)
-      .select("id, name, type, unit_price, cost_price, stock, created_at")
-      .maybeSingle();
+      .select(colonnes)
+      .maybeSingle());
 
     if (error) {
       if (error.code === UNIQUE_VIOLATION) {

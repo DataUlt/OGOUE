@@ -998,7 +998,8 @@
 
 // ===== Pop-up « Comment nous avez-vous connu ? » (comptes existants, une fois par session) =====
 (function () {
-  const CLE_VU = 'ogo_canal_pop_vu';
+  // Noté par compte : changer de compte dans le même onglet ne doit pas cacher la question
+  const cleVu = () => { try { return 'ogo_canal_pop_vu' + ':' + (JSON.parse(localStorage.getItem('user') || 'null')?.id || ''); } catch (e) { return 'ogo_canal_pop_vu'; } };
   const CHOIX = [
     ['recommandation', "Recommandation d'un proche"],
     ['facebook', 'Facebook'],
@@ -1040,7 +1041,7 @@
     select.addEventListener('change', () => { autre.style.display = select.value === 'autre' ? 'block' : 'none'; });
 
     document.getElementById('pop-canal-plus-tard').addEventListener('click', () => {
-      sessionStorage.setItem(CLE_VU, '1');
+      sessionStorage.setItem(cleVu(), '1');
       fond.remove();
     });
 
@@ -1058,7 +1059,7 @@
         });
         // 409 : déjà répondu ailleurs, on ferme sans gêner
         if (!reponse.ok && reponse.status !== 409) throw new Error('refus');
-        sessionStorage.setItem(CLE_VU, '1');
+        sessionStorage.setItem(cleVu(), '1');
         fond.remove();
       } catch (e) {
         erreur.textContent = "Impossible d'enregistrer votre réponse. Réessayez.";
@@ -1070,7 +1071,7 @@
   async function verifier() {
     const u = utilisateur();
     if (!u || u.role !== 'manager' || !getToken()) return;
-    if (sessionStorage.getItem(CLE_VU)) return;
+    if (sessionStorage.getItem(cleVu())) return;
     try {
       const reponse = await fetch(API_BASE_URL + '/api/organization', {
         headers: { 'Authorization': 'Bearer ' + getToken() }
@@ -1078,7 +1079,7 @@
       if (!reponse.ok) return;
       const org = await reponse.json();
       if (!org.acquisitionSource) afficher();
-      else sessionStorage.setItem(CLE_VU, '1');
+      else sessionStorage.setItem(cleVu(), '1');
     } catch (e) { /* hors ligne : on ne dérange pas */ }
   }
 
@@ -1087,7 +1088,8 @@
 
 // ===== Numéro WhatsApp (gérant déjà inscrit, une fois par session) =====
 (function popUpWhatsapp() {
-  const CLE_VU = 'ogo_whatsapp_pop_vu';
+  // Noté par compte : changer de compte dans le même onglet ne doit pas cacher la question
+  const cleVu = () => { try { return 'ogo_whatsapp_pop_vu' + ':' + (JSON.parse(localStorage.getItem('user') || 'null')?.id || ''); } catch (e) { return 'ogo_whatsapp_pop_vu'; } };
 
   function utilisateur() {
     try { return JSON.parse(localStorage.getItem('user') || 'null'); } catch (e) { return null; }
@@ -1113,7 +1115,7 @@
     const erreur = document.getElementById('pop-whatsapp-erreur');
 
     document.getElementById('pop-whatsapp-plus-tard').addEventListener('click', () => {
-      sessionStorage.setItem(CLE_VU, '1');
+      sessionStorage.setItem(cleVu(), '1');
       fond.remove();
     });
 
@@ -1132,7 +1134,7 @@
         });
         // 409 : numéro déjà enregistré ailleurs, on ferme sans gêner
         if (!reponse.ok && reponse.status !== 409) throw new Error('refus');
-        sessionStorage.setItem(CLE_VU, '1');
+        sessionStorage.setItem(cleVu(), '1');
         fond.remove();
       } catch (e) {
         erreur.textContent = "Impossible d'enregistrer votre numéro. Réessayez.";
@@ -1144,7 +1146,7 @@
   async function verifier() {
     const u = utilisateur();
     if (!u || u.role !== 'manager' || !getToken()) return;
-    if (sessionStorage.getItem(CLE_VU)) return;
+    if (sessionStorage.getItem(cleVu())) return;
     try {
       const reponse = await fetch(API_BASE_URL + '/api/auth/whatsapp', {
         headers: { 'Authorization': 'Bearer ' + getToken() }
@@ -1153,12 +1155,170 @@
       if (!reponse.ok) return;
       const data = await reponse.json();
       if (!data.whatsapp) afficher();
-      else sessionStorage.setItem(CLE_VU, '1');
+      else sessionStorage.setItem(cleVu(), '1');
     } catch (e) { /* hors ligne : on ne dérange pas */ }
   }
 
   // Après le pop-up « Comment nous avez-vous connu ? », pour ne pas les superposer
   document.addEventListener('DOMContentLoaded', () => setTimeout(verifier, 2000));
+})();
+
+// ===== Votre activité (gérant déjà inscrit, tant qu'il n'a pas répondu) =====
+// Revente, fabrication ou les deux : sert au compte de résultat SYSCOHADA.
+// « Les deux » : une seconde étape demande, produit par produit du
+// catalogue, s'il est revendu tel quel ou fabriqué. « Plus tard » la
+// repousse à la session suivante. Le même réglage se change dans « Ma boutique ».
+(function popUpActivite() {
+  // Noté par compte : changer de compte dans le même onglet ne doit pas cacher la question
+  const cleVu = () => { try { return 'ogo_activite_pop_vu' + ':' + (JSON.parse(localStorage.getItem('user') || 'null')?.id || ''); } catch (e) { return 'ogo_activite_pop_vu'; } };
+  const AUTRES = ['pop-canal', 'pop-whatsapp', 'ogo-mdp-fenetre', 'ogo-suppr-fenetre'];
+  const CHOIX = [
+    { valeur: 'revente', titre: "Je revends ce que j'achète", exemple: 'Boutique, alimentation, quincaillerie…' },
+    { valeur: 'fabrication', titre: 'Je fabrique ce que je vends', exemple: 'Boulangerie, couture, restaurant, atelier…' },
+    { valeur: 'les_deux', titre: 'Je fais les deux', exemple: 'Boutique qui fait aussi son pain, ses jus…' }
+  ];
+  const BOUTON = 'flex:1;height:46px;border:0;border-radius:999px;font-weight:600;cursor:pointer';
+  const echap = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  function utilisateur() {
+    try { return JSON.parse(localStorage.getItem('user') || 'null'); } catch (e) { return null; }
+  }
+  const appel = (chemin, options = {}) => fetch(API_BASE_URL + chemin, {
+    ...options,
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() }
+  });
+
+  function afficher() {
+    const fond = document.createElement('div');
+    fond.id = 'pop-activite';
+    fond.style.cssText = 'position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(15,23,42,.45);font-family:inherit';
+    fond.innerHTML = '<div data-boite style="width:100%;max-width:460px;max-height:90vh;overflow-y:auto;background:#fff;border-radius:24px;padding:24px;color:#0B1F3F"></div>';
+    document.body.appendChild(fond);
+    const boite = fond.querySelector('[data-boite]');
+    const fermer = () => { sessionStorage.setItem(cleVu(), '1'); fond.remove(); };
+
+    // Étape 1 : l'activité
+    function etapeActivite() {
+      let choisi = null;
+      boite.innerHTML =
+        '<h2 style="margin:0 0 6px;font-size:20px;font-weight:700">Votre activité</h2>' +
+        '<p style="margin:0 0 16px;font-size:14px;color:#4A5870">Pour que votre compte de résultat soit juste, dites-nous si vous revendez ce que vous achetez, si vous le fabriquez, ou les deux. Vous pourrez le changer dans « Ma boutique ».</p>' +
+        '<div data-choix style="display:flex;flex-direction:column;gap:10px">' +
+        CHOIX.map((c) => '<button type="button" data-valeur="' + c.valeur + '" style="text-align:left;padding:12px 14px;border:2px solid #E7EBF0;border-radius:16px;background:#fff;cursor:pointer;color:#0B1F3F">' +
+          '<span style="display:block;font-weight:700;font-size:15px">' + c.titre + '</span>' +
+          '<span style="display:block;font-size:12px;color:#7A869A;margin-top:2px">' + c.exemple + '</span></button>').join('') +
+        '</div>' +
+        '<p data-erreur style="display:none;margin:10px 0 0;font-size:13px;color:#B91C1C"></p>' +
+        '<div style="display:flex;gap:10px;margin-top:18px">' +
+        '<button data-plus-tard type="button" style="' + BOUTON + ';background:#F4F6F9;color:#0B1F3F">Plus tard</button>' +
+        '<button data-valider type="button" disabled style="' + BOUTON + ';background:#0B2A5B;color:#fff;opacity:.5">Continuer</button></div>';
+      const valider = boite.querySelector('[data-valider]');
+      boite.querySelector('[data-choix]').addEventListener('click', (e) => {
+        const b = e.target.closest('[data-valeur]');
+        if (!b) return;
+        choisi = b.dataset.valeur;
+        boite.querySelectorAll('[data-valeur]').forEach((x) => {
+          const on = x === b;
+          x.style.borderColor = on ? '#0088CC' : '#E7EBF0';
+          x.style.background = on ? 'rgba(0,136,204,.08)' : '#fff';
+        });
+        valider.disabled = false;
+        valider.style.opacity = '1';
+      });
+      boite.querySelector('[data-plus-tard]').addEventListener('click', fermer);
+      valider.addEventListener('click', async () => {
+        if (!choisi) return;
+        valider.disabled = true;
+        try {
+          const r = await appel('/api/organization', { method: 'PUT', body: JSON.stringify({ modeActivite: choisi }) });
+          if (!r.ok) throw new Error('refus');
+          if (choisi === 'les_deux') return etapeProduits();
+          fermer();
+        } catch (e) {
+          valider.disabled = false;
+          const err = boite.querySelector('[data-erreur]');
+          err.textContent = "Impossible d'enregistrer votre réponse. Réessayez.";
+          err.style.display = 'block';
+        }
+      });
+    }
+
+    // Étape 2 (les deux) : chaque produit du catalogue, revendu ou fabriqué
+    async function etapeProduits() {
+      boite.innerHTML = '<p style="font-size:14px;color:#4A5870">Chargement de votre catalogue…</p>';
+      let produits = [];
+      try {
+        const r = await appel('/api/articles');
+        const data = r.ok ? await r.json() : {};
+        produits = (data.articles || []).filter((a) => a.type !== 'services');
+      } catch (e) {}
+      if (!produits.length) {
+        boite.innerHTML =
+          '<h2 style="margin:0 0 6px;font-size:20px;font-weight:700">C\'est noté</h2>' +
+          '<p style="margin:0 0 16px;font-size:14px;color:#4A5870">Quand vous ajouterez un produit au catalogue, OGOUE vous demandera si vous le revendez ou le fabriquez.</p>' +
+          '<button data-fin type="button" style="' + BOUTON + ';width:100%;background:#0B2A5B;color:#fff">Terminer</button>';
+        boite.querySelector('[data-fin]').addEventListener('click', fermer);
+        return;
+      }
+      const ligne = (a) => {
+        const pastille = (fab, texte) => '<button type="button" data-id="' + echap(a.id) + '" data-fab="' + fab + '" style="height:34px;padding:0 12px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid ' +
+          ((!!a.fabrique) === fab ? '#0088CC;background:#0088CC;color:#fff' : '#E7EBF0;background:#fff;color:#4A5870') + '">' + texte + '</button>';
+        return '<div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:10px 0;border-top:1px solid #EEF0F3">' +
+          '<span style="font-weight:600;font-size:14px;min-width:0">' + echap(a.name) + '</span>' +
+          '<span style="display:flex;gap:6px">' + pastille(false, 'Je le revends') + pastille(true, 'Je le fabrique') + '</span></div>';
+      };
+      const dessiner = () => {
+        boite.innerHTML =
+          '<h2 style="margin:0 0 6px;font-size:20px;font-weight:700">Vos produits</h2>' +
+          '<p style="margin:0 0 12px;font-size:14px;color:#4A5870">Pour chaque produit de votre catalogue, dites si vous le revendez tel quel ou si vous le fabriquez. Les services ne sont pas concernés.</p>' +
+          '<div data-liste>' + produits.map(ligne).join('') + '</div>' +
+          '<p data-erreur style="display:none;margin:10px 0 0;font-size:13px;color:#B91C1C"></p>' +
+          '<button data-fin type="button" style="' + BOUTON + ';width:100%;margin-top:16px;background:#0B2A5B;color:#fff">Terminer</button>';
+        boite.querySelector('[data-fin]').addEventListener('click', fermer);
+        boite.querySelector('[data-liste]').addEventListener('click', async (e) => {
+          const b = e.target.closest('[data-id]');
+          if (!b) return;
+          const a = produits.find((x) => String(x.id) === b.dataset.id);
+          const fabrique = b.dataset.fab === 'true';
+          if (!a || !!a.fabrique === fabrique) return;
+          try {
+            const r = await appel('/api/articles/' + encodeURIComponent(a.id), { method: 'PUT', body: JSON.stringify({ fabrique }) });
+            if (!r.ok) throw new Error('refus');
+            a.fabrique = fabrique;
+            dessiner();
+          } catch (err) {
+            const p = boite.querySelector('[data-erreur]');
+            p.textContent = "Ce choix n'a pas pu être enregistré. Réessayez.";
+            p.style.display = 'block';
+          }
+        });
+      };
+      dessiner();
+    }
+
+    etapeActivite();
+  }
+
+  async function verifier() {
+    const u = utilisateur();
+    if (!u || u.role !== 'manager' || !getToken()) return;
+    if (sessionStorage.getItem(cleVu())) return;
+    // Pas pendant la configuration du compte, ni par-dessus une autre fenêtre
+    if (new URLSearchParams(location.search).get('onboarding') === '1') return;
+    if (AUTRES.some((id) => document.getElementById(id))) { setTimeout(verifier, 1500); return; }
+    try {
+      const r = await appel('/api/organization');
+      if (!r.ok) return;
+      const org = await r.json();
+      // Clé absente : réglage pas encore disponible sur ce serveur (migration ou déploiement)
+      if (!('modeActivite' in org)) return;
+      if (org.modeActivite) { sessionStorage.setItem(cleVu(), '1'); return; }
+      afficher();
+    } catch (e) { /* hors ligne : on ne dérange pas */ }
+  }
+
+  // Après les fenêtres « Comment nous avez-vous connu ? » et WhatsApp
+  document.addEventListener('DOMContentLoaded', () => setTimeout(verifier, 3000));
 })();
 
 // ===== Changement de mot de passe (gérant) =====

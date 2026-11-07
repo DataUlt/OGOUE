@@ -142,6 +142,16 @@
                         </select>
                     </div>
 
+                    <!-- Entreprise qui revend et fabrique : origine du produit (compte de résultat) -->
+                    <div id="article-fabrique-wrap" class="hidden flex-col">
+                        <label class="text-sm font-medium pb-2" for="article-fabrique">Ce produit, vous…</label>
+                        <select id="article-fabrique" name="fabrique"
+                                class="form-select rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-background-dark text-text-light dark:text-white h-12 px-4 text-base">
+                            <option value="non">Le revendez tel quel</option>
+                            <option value="oui">Le fabriquez vous-même</option>
+                        </select>
+                    </div>
+
                     <div class="flex flex-col">
                         <label class="text-sm font-medium pb-2" for="article-price">
                             Prix unitaire (FCFA)
@@ -228,6 +238,7 @@
     <script src="js/plan-ui.js"></script>
     <script src="js/tableau-cartes.js"></script>
     <script src="js/header-ui.js"></script>
+    <script src="js/mode-activite.js"></script>
     <script src="js/aide.js"></script>
     <script src="js/topbar-actions.js"></script>
     <script>
@@ -238,6 +249,20 @@
             const priceInput = document.getElementById("article-price");
             const stockInput = document.getElementById("article-stock");
             const costInput = document.getElementById("article-cost");
+            const fabriqueWrap = document.getElementById("article-fabrique-wrap");
+            const fabriqueInput = document.getElementById("article-fabrique");
+            // « Revendu / fabriqué » n'a de sens que pour une entreprise qui fait les deux
+            const modeDeux = () => window.OGOUE_MODE_ACTIVITE === "les_deux";
+            function majFabrique() {
+                const voir = modeDeux() && typeInput.value === "produits";
+                fabriqueWrap.classList.toggle("hidden", !voir);
+                fabriqueWrap.classList.toggle("flex", voir);
+            }
+            typeInput.addEventListener("change", majFabrique);
+            let derniersArticles = [];
+            document.addEventListener("ogo:mode-activite", function () { majFabrique(); render(derniersArticles); });
+            // Le mode peut être arrivé avant ce script (mode-activite.js le charge plus tôt)
+            majFabrique();
             const submitBtn = document.getElementById("article-submit");
             const messageBox = document.getElementById("form-message");
 
@@ -303,6 +328,7 @@
             }
 
             function render(articles) {
+                derniersArticles = articles;
                 loadingEl.classList.add("hidden");
                 countEl.textContent = articles.length ? `(${articles.length})` : "";
 
@@ -326,7 +352,8 @@
 
                     const tdType = document.createElement("td");
                     tdType.className = "py-3 pr-4 text-text-light-muted dark:text-gray-400";
-                    tdType.textContent = a.type === "services" ? "Service" : "Produit";
+                    tdType.textContent = a.type === "services" ? "Service"
+                        : modeDeux() ? (a.fabrique ? "Produit fabriqué" : "Produit revendu") : "Produit";
 
                     const tdPrice = document.createElement("td");
                     tdPrice.className = "py-3 pr-4 text-right";
@@ -365,6 +392,9 @@
                         { libelle: "Coût d'achat", action: onEditCost },
                         { libelle: "Stock", action: onEditStock }
                     ];
+                    if (modeDeux() && a.type !== "services") {
+                        options.push({ libelle: a.fabrique ? "Revendu tel quel" : "Fabriqué par moi", action: onEditOrigine });
+                    }
                     options.forEach(function (opt) {
                         const item = document.createElement("button");
                         item.type = "button";
@@ -499,6 +529,15 @@
                 await refresh();
             }
 
+            // Produit revendu ↔ fabriqué (entreprise « les deux »)
+            async function onEditOrigine(article) {
+                const fabrique = !article.fabrique;
+                const res = await window.OGOUE.updateArticle(article.id, { fabrique });
+                if (!res.ok) { showMessage(res.error, "error"); return; }
+                showMessage(`"${article.name}" est maintenant compté comme ${fabrique ? "fabriqué par vous" : "revendu tel quel"}.`, "success");
+                await refresh();
+            }
+
             async function onDelete(article) {
                 const ok = window.confirm(
                     `Retirer "${article.name}" du catalogue ?\n\n` +
@@ -546,7 +585,8 @@
                     type: typeInput.value,
                     unitPrice: Number(priceInput.value || 0),
                     stock: stock,
-                    costPrice: costPrice
+                    costPrice: costPrice,
+                    ...(modeDeux() && typeInput.value === "produits" ? { fabrique: fabriqueInput.value === "oui" } : {})
                 });
                 submitBtn.disabled = false;
 

@@ -1,16 +1,20 @@
 ﻿import { supabase, supabaseAuth } from "../db/supabase.js";
 import { DELAI_SUPPRESSION_JOURS, oublierEtatSuppression } from "../utils/compte-ferme.js";
 
+// Colonne ajoutée par sql/MODE_ACTIVITE.sql : tant qu'elle manque, on lit et
+// on écrit sans elle (le compte de résultat traite alors l'entreprise en revente)
+const MODES_ACTIVITE = ["revente", "fabrication", "les_deux"];
+const sansModeActivite = (error) => /mode_activite/i.test(error?.message || "");
+
 export async function getOrganization(req, res) {
   try {
     const organizationId = req.user.organizationId;
 
     console.log("➡️ Fetching organization id:", organizationId);
-    const { data: orgData, error } = await supabase
-      .from("organizations")
-      .select("id, name, rccm_number, nif_number, activity, activity_description, created_at, acquisition_source")
-      .eq("id", organizationId)
-      .single();
+    const lire = (colonnes) => supabase.from("organizations").select(colonnes).eq("id", organizationId).single();
+    const COLONNES = "id, name, rccm_number, nif_number, activity, activity_description, created_at, acquisition_source";
+    let { data: orgData, error } = await lire(COLONNES + ", mode_activite");
+    if (error && sansModeActivite(error)) ({ data: orgData, error } = await lire(COLONNES));
 
     if (error || !orgData) {
       console.error("Organization error:", error);
@@ -26,6 +30,9 @@ export async function getOrganization(req, res) {
       activityDescription: orgData.activity_description,
       createdAt: orgData.created_at,
       acquisitionSource: orgData.acquisition_source,
+      // null = pas encore répondu ; absent = colonne pas encore créée (migration
+      // non passée), le navigateur ne pose alors pas la question
+      modeActivite: "mode_activite" in orgData ? (orgData.mode_activite || null) : undefined,
     });
   } catch (error) {
     console.error("GetOrganization error:", error);
@@ -36,22 +43,31 @@ export async function getOrganization(req, res) {
 export async function updateOrganization(req, res) {
   try {
     const organizationId = req.user.organizationId;
-    const { name, activity, activityDescription, rccm, nif } = req.body;
+    const { name, activity, activityDescription, rccm, nif, modeActivite } = req.body;
+    if (modeActivite !== undefined && !MODES_ACTIVITE.includes(modeActivite)) {
+      return res.status(400).json({ error: "Activité invalide : revente, fabrication ou les deux." });
+    }
 
     console.log("➡️ Updating organization id:", organizationId);
-    const { data: orgData, error } = await supabase
-      .from("organizations")
-      .update({
-        name: name || undefined,
-        activity: activity || undefined,
-        activity_description: activityDescription || undefined,
-        rccm_number: rccm || undefined,
-        nif_number: nif || undefined,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", organizationId)
-      .select("id, name, rccm_number, nif_number, activity, activity_description, created_at")
-      .single();
+    const champs = {
+      name: name || undefined,
+      activity: activity || undefined,
+      activity_description: activityDescription || undefined,
+      rccm_number: rccm || undefined,
+      nif_number: nif || undefined,
+      mode_activite: modeActivite || undefined,
+      updated_at: new Date().toISOString(),
+    };
+    const COLONNES = "id, name, rccm_number, nif_number, activity, activity_description, created_at";
+    const ecrire = (valeurs, colonnes) => supabase.from("organizations").update(valeurs)
+      .eq("id", organizationId).select(colonnes).single();
+    let { data: orgData, error } = await ecrire(champs, COLONNES + ", mode_activite");
+    if (error && sansModeActivite(error)) {
+      // Migration pas encore passée : le reste s'enregistre, l'activité non
+      if (modeActivite) return res.status(503).json({ error: "Ce réglage n'est pas encore activé (sql/MODE_ACTIVITE.sql).", code: "migration_mode_activite" });
+      delete champs.mode_activite;
+      ({ data: orgData, error } = await ecrire(champs, COLONNES));
+    }
 
     if (error || !orgData) {
       console.error("Update organization error:", error);
@@ -66,6 +82,7 @@ export async function updateOrganization(req, res) {
         nifNumber: orgData.nif_number,
         activity: orgData.activity,
         activityDescription: orgData.activity_description,
+        modeActivite: orgData.mode_activite || null,
         createdAt: orgData.created_at,
       },
     });

@@ -176,6 +176,20 @@
     "Entretien & Maintenance"
   ];
 
+  // Moins fréquentes : proposées derrière « Plus de catégories ». Elles ont
+  // chacune leur place dans le compte de résultat SYSCOHADA (etats_financiers.js) ;
+  // les trois dernières sortent de l'argent sans être des charges.
+  const categoriesPlus = [
+    "Matières premières",
+    "Intérêts d'emprunt",
+    "Amendes & pénalités",
+    "Impôt sur le bénéfice",
+    "Retrait personnel",
+    "Remboursement d'emprunt",
+    "Matériel / Équipement"
+  ];
+  const categoriesConnues = () => [...baseCategories, ...categoriesPlus, ...loadCustomCategories()];
+
   const categorieSelect = document.getElementById("depense-categorie");
   const categorieAutreWrapper = document.getElementById("categorie-autre-wrapper");
   const categorieAutreInput = document.getElementById("depense-categorie-autre");
@@ -204,7 +218,7 @@
     if (!categorieSelect) return;
 
     const custom = loadCustomCategories();
-    const all = [...baseCategories, ...custom].filter(Boolean);
+    const all = [...baseCategories, ...categoriesPlus, ...custom].filter(Boolean);
 
     categorieSelect.innerHTML = "";
 
@@ -252,7 +266,7 @@
     if (!label) return ""; // sera géré par la validation
 
     const custom = loadCustomCategories();
-    const existsInBase = baseCategories.some((b) => b.toLowerCase() === label.toLowerCase());
+    const existsInBase = [...baseCategories, ...categoriesPlus].some((b) => b.toLowerCase() === label.toLowerCase());
     const existsInCustom = custom.some((c) => String(c).toLowerCase() === label.toLowerCase());
 
     if (!existsInBase && !existsInCustom) {
@@ -262,7 +276,7 @@
 
     // Rebuild + sélectionner la nouvelle catégorie
     buildCategorieOptions();
-    const baseMatch = baseCategories.find((b) => b.toLowerCase() === label.toLowerCase());
+    const baseMatch = [...baseCategories, ...categoriesPlus].find((b) => b.toLowerCase() === label.toLowerCase());
     categorieSelect.value = baseMatch ? baseMatch : label;
 
     toggleCategorieAutre(false);
@@ -943,8 +957,8 @@
         { name: "category", label: "Catégorie", type: "select", value: depense.categorie || "",
           options: [].concat(
             [{ value: "", label: "Sélectionner une catégorie" }],
-            depense.categorie && ![...baseCategories, ...loadCustomCategories()].includes(depense.categorie) ? [{ value: depense.categorie, label: depense.categorie }] : [],
-            [...baseCategories, ...loadCustomCategories()].map((c) => ({ value: c, label: c })),
+            depense.categorie && !categoriesConnues().includes(depense.categorie) ? [{ value: depense.categorie, label: depense.categorie }] : [],
+            categoriesConnues().map((c) => ({ value: c, label: c })),
             [{ value: "__OTHER__", label: "Autres (préciser)" }]
           ) },
         { name: "categorieAutre", label: "Préciser la catégorie", type: "text", value: "",
@@ -960,7 +974,7 @@
           corps.category = libelle;
           if (libelle) {
             const custom = loadCustomCategories();
-            const existe = [...baseCategories, ...custom].some((c) => c.toLowerCase() === libelle.toLowerCase());
+            const existe = [...baseCategories, ...categoriesPlus, ...custom].some((c) => c.toLowerCase() === libelle.toLowerCase());
             if (!existe) saveCustomCategories([...custom, libelle]);
           }
         }
@@ -1156,8 +1170,29 @@
     const ICONES = {
       "achats / stocks": "inventory_2", "salaires": "payments", "loyer": "home", "marketing": "campaign",
       "électricité": "bolt", "eau": "water_drop", "internet & télécom": "wifi", "transport & logistique": "local_shipping",
-      "impôts & taxes": "account_balance", "entretien & maintenance": "build"
+      "impôts & taxes": "account_balance", "entretien & maintenance": "build",
+      "matières premières": "grain", "intérêts d'emprunt": "percent", "amendes & pénalités": "gavel", "impôt sur le bénéfice": "receipt_long",
+      "retrait personnel": "person", "remboursement d'emprunt": "credit_score", "matériel / équipement": "construction"
     };
+    // Petite précision sous les cartes qui ne sont pas des charges
+    const PRECISIONS = {
+      "Matières premières": "Farine, tissu… pour fabriquer",
+      "Retrait personnel": "Argent pris pour vous",
+      "Remboursement d'emprunt": "Capital remboursé",
+      "Matériel / Équipement": "Achat durable : four, moto…"
+    };
+    let plusOuvert = false;
+    // Entreprise qui revend et fabrique : « Matières premières » parmi les
+    // cartes habituelles, juste après « Achats / Stocks »
+    let promues = [];
+    (async () => {
+      try {
+        const API = (["localhost", "127.0.0.1"].some((h) => location.hostname.includes(h))) ? "http://localhost:3001" : "https://api.ogoue.com";
+        const r = await fetch(`${API}/api/organization`, { headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` } });
+        const org = r.ok ? await r.json() : null;
+        if (org?.modeActivite === "les_deux") { promues = ["Matières premières"]; afficherCartes(); }
+      } catch (e) {}
+    })();
     const blocCartes = document.createElement("div");
     blocCartes.innerHTML = `
       <p class="text-base font-medium leading-normal pb-2 text-[#0a0c0a] dark:text-gray-200">Catégorie <span class="text-red-500">*</span></p>
@@ -1186,21 +1221,29 @@
 
     function afficherCartes() {
       const choix = [...categorieSelect.options].filter((o) => o.value && o.value !== "__OTHER__").map((o) => o.value);
-      const carte = (valeur, libelle, icone) => {
+      const carte = (valeur, libelle, icone, precision = PRECISIONS[valeur]) => {
         const on = categorieSelect.value === valeur;
         return `<button type="button" data-categorie="${echapperHtml(valeur)}"
           class="flex flex-col items-start gap-1.5 sm:flex-row sm:items-center sm:gap-3 min-w-0 text-left rounded-2xl border-2 px-3 max-[359px]:px-2.5 py-3 sm:px-4 min-h-[64px] transition ${on
             ? "border-primary bg-primary/10 dark:bg-primary/20"
             : "border-[#cfe7e3] dark:border-gray-700 bg-white dark:bg-[#182c29] hover:border-primary/50"}">
           <span class="material-symbols-outlined text-2xl ${on ? "text-primary" : "text-gray-400"}">${icone}</span>
-          <span class="min-w-0 max-w-full font-bold text-sm max-[359px]:text-[13px] sm:text-[15px] leading-tight break-words hyphens-auto text-[#0a0c0a] dark:text-white">${echapperHtml(libelle)}</span></button>`;
+          <span class="min-w-0 max-w-full font-bold text-sm max-[359px]:text-[13px] sm:text-[15px] leading-tight break-words hyphens-auto text-[#0a0c0a] dark:text-white">${echapperHtml(libelle).replace("Remboursement", "Rembourse\u00ADment")}${precision ? `<span class="block mt-0.5 text-xs font-normal text-gray-500 dark:text-gray-400">${echapperHtml(precision)}</span>` : ""}</span></button>`;
       };
       // Catégorie choisie : seule sa carte reste, et la suite du formulaire apparaît
       const choisie = categorieSelect.value;
-      const cartes = choix.map((c) => carte(c, c, ICONES[c.toLowerCase()] || "sell")).join("") +
+      const icone = (c) => ICONES[c.toLowerCase()] || "sell";
+      const courantes = choix.filter((c) => !categoriesPlus.includes(c));
+      promues.forEach((c) => { const i = courantes.indexOf("Achats / Stocks"); courantes.splice(i + 1, 0, c); });
+      const cartes = courantes.map((c) => carte(c, c, icone(c))).join("") +
+        (plusOuvert
+          ? categoriesPlus.filter((c) => !promues.includes(c)).map((c) => carte(c, c, icone(c))).join("")
+          : `<button type="button" data-plus-categories class="flex flex-col items-start gap-1.5 sm:flex-row sm:items-center sm:gap-3 min-w-0 text-left rounded-2xl border-2 border-dashed border-[#cfe7e3] dark:border-gray-700 px-3 py-3 sm:px-4 min-h-[64px] hover:border-primary/50">
+              <span class="material-symbols-outlined text-2xl text-gray-400">expand_more</span>
+              <span class="font-bold text-sm sm:text-[15px] leading-tight text-[#0a0c0a] dark:text-white">Plus de catégories</span></button>`) +
         carte("__OTHER__", "Autre catégorie", "add_circle");
       grille.innerHTML = choisie
-        ? (choisie === "__OTHER__" ? carte("__OTHER__", "Autre catégorie", "add_circle") : carte(choisie, choisie, ICONES[choisie.toLowerCase()] || "sell"))
+        ? (choisie === "__OTHER__" ? carte("__OTHER__", "Autre catégorie", "add_circle") : carte(choisie, choisie, icone(choisie)))
         : cartes;
       changer.classList.toggle("hidden", !choisie);
       suite().forEach((el) => el.classList.toggle("depense-attente", !choisie));
@@ -1212,6 +1255,7 @@
       afficherCartes();
     }
     grille.addEventListener("click", (e) => {
+      if (e.target.closest("[data-plus-categories]")) { plusOuvert = true; afficherCartes(); return; }
       const b = e.target.closest("[data-categorie]");
       if (!b) return;
       // Un appui sur la carte déjà choisie revient à la liste complète
@@ -1234,6 +1278,7 @@
     // catégorie choisie, et la nouvelle catégorie « Autres » parmi les cartes
     form.addEventListener("reset", () => setTimeout(() => {
       choisirMoyen(paiementHabituel());
+      plusOuvert = false;
       afficherCartes();
     }, 0));
 
