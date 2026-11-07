@@ -3,6 +3,18 @@
 // verse (tout ou une partie). Les données viennent de GET /api/credits ;
 // le regroupement par client est fait par OGOUE.resumerCredits.
 (function () {
+  // Agent : il encaisse les crédits clients, mais n'a pas la navigation du
+  // gérant (tableau de bord, financement) : l'en-tête le ramène à sa comptabilité
+  (function adapterPourAgent() {
+    let u = null;
+    try { u = JSON.parse(localStorage.getItem("user") || "null"); } catch (e) {}
+    if (!u || u.role !== "agent") return;
+    document.querySelectorAll('header a[href^="module_tableau_bord"], header a[href^="module_scoring"], #mobile-menu a[href^="module_tableau_bord"], #mobile-menu a[href^="module_scoring"]').forEach((a) => {
+      if (a.querySelector("img")) a.href = "module_agent_dashboard.html"; else a.remove();
+    });
+    document.querySelectorAll('header a[href^="module_ventes"], #mobile-menu a[href^="module_ventes"]').forEach((a) => { a.href = "module_agent_dashboard.html"; });
+  })();
+
   if (!window.OGOUE?.getCredits) return;
   const { getCredits, enregistrerReglement, annulerReglement, resumerCredits } = window.OGOUE;
 

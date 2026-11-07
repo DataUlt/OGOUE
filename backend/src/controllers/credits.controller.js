@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { supabase } from "../db/supabase.js";
 import { cleClient, duPar, lireCreditsOrganisation } from "../utils/credits.js";
+import { peutAgirSur, refusPasAuteur } from "../utils/droits-operation.js";
 
 const MESSAGE_MIGRATION = "Le suivi des crédits n'est pas encore activé (sql/CREDITS_CLIENTS.sql).";
 
@@ -133,9 +134,23 @@ export async function enregistrerReglement(req, res) {
   }
 }
 
-/** DELETE /api/credits/reglements/:id — annuler un règlement saisi par erreur */
+/**
+ * DELETE /api/credits/reglements/:id — annuler un règlement saisi par erreur.
+ * Le gérant annule tout ; un agent seulement les paiements qu'il a saisis,
+ * comme pour ses ventes et ses dépenses.
+ */
 export async function annulerReglement(req, res) {
   try {
+    const { data: row, error: e1 } = await supabase
+      .from("credit_reglements")
+      .select("id, cree_par")
+      .eq("id", req.params.id)
+      .eq("organization_id", req.user.organizationId)
+      .maybeSingle();
+    if (e1) return res.status(503).json({ error: MESSAGE_MIGRATION, code: "migration_credits" });
+    if (!row) return res.status(404).json({ error: "Règlement introuvable" });
+    if (!peutAgirSur(req.user, row.cree_par)) return refusPasAuteur(res);
+
     const { data, error } = await supabase
       .from("credit_reglements")
       .delete()

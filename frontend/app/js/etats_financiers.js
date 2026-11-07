@@ -1281,7 +1281,9 @@ document.addEventListener("DOMContentLoaded", function () {
         const lignes = [...conteneur.querySelectorAll("tr[data-etat-credit]")];
         const nombre = { tout: lignes.length, credit: 0, regle: 0 };
         lignes.forEach((l) => {
-            const etat = l.dataset.etatCredit;
+            // « Réglé » = tout ce qui est payé : comptant (Cash, Mobile Money)
+            // comme crédit soldé ensuite. « Crédit » = encore dû.
+            const etat = l.dataset.etatCredit === "comptant" ? "regle" : l.dataset.etatCredit;
             if (etat in nombre) nombre[etat] += 1;
             l.style.display = choisi === "tout" || etat === choisi ? "" : "none";
         });
@@ -1298,7 +1300,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const vente = zone.dataset.nature === "vente";
             vide.textContent = choisi === "credit"
                 ? (vente ? "Aucune vente à crédit en attente de paiement sur la période." : "Aucune dépense à crédit à payer sur la période.")
-                : "Aucun crédit réglé sur la période.";
+                : (vente ? "Aucune vente payée sur la période." : "Aucune dépense payée sur la période.");
         }
     }
     function brancherFiltreDepenses(conteneur) {

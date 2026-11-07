@@ -1497,6 +1497,8 @@ function ouvrirSuppressionCompte() {
   function utilisateur() { try { return JSON.parse(localStorage.getItem('user') || 'null'); } catch (e) { return null; } }
 
   function poserBadge(lien, nombre) {
+    // Onglet des pages agents : le badge se met à côté du texte, pas dessous
+    if (lien.querySelector(':scope > p')) lien = lien.querySelector(':scope > p');
     var b = lien.querySelector(':scope > .ogo-badge-credits');
     if (!nombre) { if (b) b.remove(); return; }
     if (!b) {
@@ -1508,9 +1510,15 @@ function ouvrirSuppressionCompte() {
     b.textContent = nombre > 99 ? '99+' : String(nombre);
   }
 
+  var estAgent = false;
   function inserer() {
     var u = utilisateur();
-    if (!u || u.role === 'agent') return [];
+    if (!u) return [];
+    // Agent : l'onglet « Crédits » est déjà dans ses pages ; il ne voit que les clients
+    if (u.role === 'agent') {
+      estAgent = true;
+      return Array.prototype.slice.call(document.querySelectorAll('nav a[href^="module_credits"]'));
+    }
     var entete = document.querySelector('header');
     if (!entete) return [];
     var surPage = /module_credits/.test(location.pathname);
@@ -1574,9 +1582,9 @@ function ouvrirSuppressionCompte() {
     var O = window.OGOUE;
     var lus = await Promise.all([
       typeof O.getCredits === 'function' ? O.getCredits().catch(function () { return null; }) : null,
-      typeof O.getDepensesCredit === 'function' ? O.getDepensesCredit().catch(function () { return null; }) : null
+      !estAgent && typeof O.getDepensesCredit === 'function' ? O.getDepensesCredit().catch(function () { return null; }) : null
     ]);
-    var partiel = {};
+    var partiel = estAgent ? { dettes: 0 } : {};
     if (lus[0] && lus[0].ok) partiel.clients = O.resumerCredits(lus[0].ventes, lus[0].reglements).nbClients;
     if (lus[1] && lus[1].ok) partiel.dettes = lus[1].depenses.filter(function (d) { return d.moyen_paiement === 'credit'; }).length;
     afficher(partiel);

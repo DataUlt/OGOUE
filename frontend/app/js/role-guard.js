@@ -19,7 +19,9 @@
     "module_agent_resume",
     // Le catalogue est celui de l'organisation : l'agent travaille dans
     // la boutique du gerant et doit donc y acceder comme lui.
-    "module_articles"
+    "module_articles",
+    // Crédits clients : l'agent encaisse ce que les clients doivent
+    "module_credits"
   ];
 
   var user = null;

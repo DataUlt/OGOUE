@@ -23,6 +23,10 @@
     fournisseurs: { titre: "Mes dettes", sousTitre: "Ce qu'il vous reste à payer : achats, factures, impôts… enregistrés à crédit." },
   };
   const bascule = el("creditsBascule");
+  // Les dettes de l'entreprise (« Je dois ») restent au gérant
+  let estAgent = false;
+  try { estAgent = JSON.parse(localStorage.getItem("user") || "null")?.role === "agent"; } catch (e) {}
+  if (estAgent) bascule.classList.add("hidden");
   let charge = false;
   function choisirVue(vue) {
     bascule.querySelectorAll("[data-vue]").forEach((b) => {
@@ -174,5 +178,5 @@
   });
 
   recherche.addEventListener("input", afficher);
-  choisirVue(location.hash === "#fournisseurs" ? "fournisseurs" : "clients");
+  choisirVue(!estAgent && location.hash === "#fournisseurs" ? "fournisseurs" : "clients");
 })();
