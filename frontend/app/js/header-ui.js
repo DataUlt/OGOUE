@@ -1629,3 +1629,16 @@ function ouvrirSuppressionCompte() {
   else demarrer();
 })();
 
+
+// ===== Logo sur téléphone, pages sans menu aux trois traits (agents) =====
+// Même réglage que mobile-menu.js : taille d'origine, et le dessin du logo
+// (l'image a ~44 px de marge transparente à gauche) aligné sur le texte de
+// la page. Concerne les en-têtes « container px-4 » de l'application.
+(function () {
+  var style = document.createElement('style');
+  style.textContent =
+    '@media (max-width: 767px) {' +
+    '  header .container.px-4 img[alt*="Logo"] { margin-left: -42px; max-width: none; }' +
+    '}';
+  document.head.appendChild(style);
+})();
