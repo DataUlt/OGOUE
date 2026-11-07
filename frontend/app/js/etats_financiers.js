@@ -638,14 +638,14 @@ document.addEventListener("DOMContentLoaded", function () {
             const fond = ref === "XI" ? "background:#0B2A5B;color:#fff;" : solde ? "background:#e2e8f0;" : "";
             const gras = solde ? "font-weight:700;" : "";
             return `<tr style="${fond}${gras}">
-                <td style="${td};text-align:center;width:44px">${ref}</td>
+                <td class="cs-ref" style="${td};text-align:center;width:44px">${ref}</td>
                 <td style="${td}">${libelle}</td>
-                <td style="${td};text-align:center;width:28px">${signe || ""}</td>
+                <td class="cs-signe" style="${td};text-align:center;width:28px">${signe || ""}</td>
                 <td style="${td};text-align:right;white-space:nowrap">${montant(cur, ref, signe)}</td>
                 <td style="${td};text-align:right;white-space:nowrap">${montant(prev, ref, signe)}</td>
             </tr>`;
         }).join("");
-        const enTete = (texte) => `<th style="${td};background:#0B2A5B;color:#fff;text-align:center">${texte}</th>`;
+        const enTete = (texte, classe = "") => `<th class="${classe}" style="${td};background:#0B2A5B;color:#fff;text-align:center">${texte}</th>`;
         const champ = (libelle, valeur) => valeur ? `<div><span style="color:#64748b">${libelle} :</span> <strong>${echapperHtml(valeur)}</strong></div>` : "";
         const remarques = [
             "Établi à partir des opérations enregistrées dans OGOUE. Document non certifié par un expert-comptable.",
@@ -662,14 +662,23 @@ document.addEventListener("DOMContentLoaded", function () {
             remarques.push("Hors compte de résultat : " + cur.hors.map((h) => `${echapperHtml(h.label)} ${Math.round(h.amount).toLocaleString("fr-FR")} FCFA`).join(", ") + ".");
         }
         if (!prev) remarques.push("Période précédente non disponible.");
-        return `<div id="compte-syscohada" style="color:#0f172a;background:#fff;padding:4px">
+        // Téléphone : sans la colonne des signes, texte et marges réduits, les
+        // libellés passent à la ligne. Le tableau tient dans l'écran sans défiler.
+        const styleMobile = `<style>@media (max-width: 640px) {
+            #compte-syscohada .cs-table { min-width: 0 !important; }
+            #compte-syscohada .cs-signe { display: none; }
+            #compte-syscohada td, #compte-syscohada th { padding: 4px 5px !important; font-size: 11px !important; }
+            #compte-syscohada .cs-ref { width: 28px !important; }
+            #compte-syscohada .cs-dates { font-size: 9.5px; font-weight: 400; }
+        }</style>`;
+        return `<div id="compte-syscohada" style="color:#0f172a;background:#fff;padding:4px">${styleMobile}
             <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px;font-size:12px;margin-bottom:10px">
                 <div>${champ("Entreprise", org.name)}${champ("RCCM", org.rccm)}${champ("NIF", org.nif)}</div>
                 <div style="text-align:right"><div><strong>COMPTE DE RÉSULTAT — SYSCOHADA révisé</strong></div>
                     <div>Période : ${meta.periode}</div><div style="color:#64748b">Montants en FCFA</div></div>
             </div>
-            <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:520px">
-                <thead><tr>${enTete("REF")}${enTete("LIBELLÉS")}${enTete("")}${enTete("PÉRIODE<br>" + meta.periode)}${enTete("PÉRIODE PRÉCÉDENTE<br>" + (meta.periodePrec || "—"))}</tr></thead>
+            <div style="overflow-x:auto"><table class="cs-table" style="width:100%;border-collapse:collapse;min-width:520px">
+                <thead><tr>${enTete("REF", "cs-ref")}${enTete("LIBELLÉS")}${enTete("", "cs-signe")}${enTete(`PÉRIODE<br><span class="cs-dates">${meta.periode}</span>`)}${enTete(`PÉRIODE PRÉCÉDENTE<br><span class="cs-dates">${meta.periodePrec || "—"}</span>`)}</tr></thead>
                 <tbody>${lignes}</tbody>
             </table></div>
             <ul style="margin:10px 0 0 16px;padding:0;font-size:11px;color:#475569;list-style:disc">${remarques.map((r) => `<li>${r}</li>`).join("")}</ul>

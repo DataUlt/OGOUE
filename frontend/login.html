@@ -296,7 +296,13 @@
         
         localStorage.setItem('authToken', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
-        
+
+        // Nouvelle connexion : les questions laissées « Plus tard » (activité,
+        // WhatsApp, canal) reviennent tant qu'elles n'ont pas de réponse
+        try {
+          Object.keys(sessionStorage).filter((k) => /_pop_vu/.test(k)).forEach((k) => sessionStorage.removeItem(k));
+        } catch (e) {}
+
         try {
           const orgResponse = await fetch(`${API_BASE_URL}/api/organization`, {
             method: 'GET',
