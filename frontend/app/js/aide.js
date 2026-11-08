@@ -3,13 +3,16 @@
 // TUTORIELS VIDEO DANS L'APPLICATION
 // ============================================================
 // Source unique des tutoriels affiches une fois connecte. Pour
-// ajouter une video : une ligne dans TUTORIELS, rien d'autre.
+// ajouter un tutoriel : une ligne dans TUTORIELS, rien d'autre.
+// Un tutoriel est soit une capsule animee (capsule : fichier de
+// /capsules/, les memes que sur la page d'accueil), soit une video
+// YouTube (video : identifiant) tant qu'il n'existe pas de capsule.
 //
 // Ce script fait trois choses :
 //   1. il ajoute le lien « Aide » au menu du gerant (a cote de
 //      « Financement »), sur ordinateur comme sur telephone ;
 //   2. il branche les boutons [data-tuto="<cle>"] sur une fenetre
-//      qui lit la video sans quitter la page ;
+//      qui lit le tutoriel sans quitter la page ;
 //   3. il remplit la grille [data-aide-grille] de module_aide.html.
 //
 // Les videos avancees sont « non repertoriees » sur YouTube : elles
@@ -21,21 +24,29 @@
   var TUTORIELS = [
     {
       cle: "tour",
-      video: "nO7nZ8Mj7gk",
+      capsule: "capsule-3-tour-ogoue.html",
       titre: "Faites le tour d'OGOUE",
       description: "Une vue d'ensemble de l'application, de A à Z."
     },
     {
       cle: "catalogue",
-      video: "dtjZvHN8Emo",
+      capsule: "capsule-2-catalogue.html",
       titre: "Remplissez votre catalogue",
       description: "Ajoutez vos articles et services pour aller plus vite à chaque vente.",
       page: "module_articles.html",
       libellePage: "Ouvrir le catalogue"
     },
     {
+      cle: "gerer-catalogue",
+      capsule: "capsule-5-gerer-le-catalogue.html",
+      titre: "Gérez votre catalogue",
+      description: "Changez un prix, mettez à jour un stock, déclarez une sortie de stock ou retirez un article.",
+      page: "module_articles.html",
+      libellePage: "Ouvrir le catalogue"
+    },
+    {
       cle: "vente",
-      video: "a3UVDdkE484",
+      capsule: "capsule-4-enregistrer-une-vente.html",
       titre: "Enregistrez une vente",
       description: "Saisissez une vente et retrouvez-la dans votre historique.",
       page: "module_ventes.html",
@@ -62,10 +73,19 @@
     return "https://i.ytimg.com/vi/" + video + "/hqdefault.jpg";
   }
 
+  // Capsule : page de /capsules/ ; sa hauteur suit le message qu'elle
+  // envoie (plus haute sur telephone, texte au-dessus de la maquette).
   // youtube-nocookie : pas de cookie de suivi tant que la video n'est
   // pas lancee, comme sur la page d'accueil.
   function creerLecteur(tuto, autoplay) {
     var iframe = document.createElement("iframe");
+    if (tuto.capsule) {
+      iframe.src = "/capsules/" + tuto.capsule;
+      iframe.title = tuto.titre;
+      iframe.className = "block w-full border-0";
+      iframe.style.aspectRatio = "16 / 11";
+      return iframe;
+    }
     iframe.src = "https://www.youtube-nocookie.com/embed/" + tuto.video +
       "?rel=0" + (autoplay ? "&autoplay=1" : "");
     iframe.title = tuto.titre;
@@ -75,6 +95,18 @@
     iframe.className = "absolute inset-0 w-full h-full";
     return iframe;
   }
+
+  window.addEventListener("message", function (e) {
+    var d = e.data;
+    if (e.origin !== location.origin || !d || !d.ogoueCapsule || !d.hauteur) return;
+    var cadres = document.querySelectorAll("iframe");
+    for (var i = 0; i < cadres.length; i++) {
+      if (cadres[i].contentWindow === e.source) {
+        cadres[i].style.aspectRatio = "auto";
+        cadres[i].style.height = d.hauteur + "px";
+      }
+    }
+  });
 
   // ---------- 1. Lien « Aide » dans le menu ----------
   // Seul l'en-tete du haut est vise : sur module_scoring, un onglet du
@@ -122,12 +154,12 @@
       '<div class="w-full max-w-4xl">' +
         '<div class="flex items-center justify-between gap-4 mb-3">' +
           '<p data-aide-titre class="text-white text-base sm:text-lg font-bold"></p>' +
-          '<button type="button" data-aide-fermer aria-label="Fermer la vidéo" ' +
+          '<button type="button" data-aide-fermer aria-label="Fermer" ' +
             'class="inline-flex items-center justify-center size-10 shrink-0 rounded-full bg-white/15 text-white hover:bg-white/25">' +
             '<span class="material-symbols-outlined">close</span>' +
           "</button>" +
         "</div>" +
-        '<div data-aide-cadre class="relative aspect-video overflow-hidden rounded-xl bg-black shadow-2xl"></div>' +
+        '<div data-aide-cadre></div>' +
         (estAgent() ? "" :
         '<p class="mt-3 text-center text-sm text-white/80">' +
           'Retrouvez tous les tutoriels dans <a href="module_aide.html" class="font-semibold underline hover:text-white">Aide</a>.' +
@@ -146,13 +178,15 @@
   function ouvrir(tuto) {
     if (!fenetre) construireFenetre();
     fenetre.querySelector("[data-aide-titre]").textContent = tuto.titre;
-    fenetre.querySelector("[data-aide-cadre]").replaceChildren(creerLecteur(tuto, true));
+    var cadre = fenetre.querySelector("[data-aide-cadre]");
+    cadre.className = tuto.capsule ? "max-h-[80vh] overflow-y-auto" : "relative aspect-video overflow-hidden rounded-xl bg-black shadow-2xl";
+    cadre.replaceChildren(creerLecteur(tuto, true));
     fenetre.classList.remove("hidden");
     fenetre.classList.add("flex");
     document.body.style.overflow = "hidden";
   }
 
-  // Vider le cadre arrete la video : sans cela le son continue.
+  // Vider le cadre arrete la video ou la capsule : sans cela elle continue.
   function fermer() {
     fenetre.querySelector("[data-aide-cadre]").replaceChildren();
     fenetre.classList.add("hidden");
@@ -185,18 +219,24 @@
       var lancer = document.createElement("button");
       lancer.type = "button";
       lancer.className = "group absolute inset-0 w-full h-full";
-      lancer.setAttribute("aria-label", "Lire la vidéo : " + tuto.titre);
-      lancer.innerHTML =
-        '<img src="' + vignette(tuto.video) + '" alt="" loading="lazy" ' +
-          'class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]">' +
-        '<span class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></span>' +
+      lancer.setAttribute("aria-label", (tuto.capsule ? "Lancer le tutoriel : " : "Lire la vidéo : ") + tuto.titre);
+      lancer.innerHTML = (tuto.capsule
+        ? '<span class="absolute inset-0 flex flex-col justify-end gap-1 p-5 text-left" style="background:#0B2A5B">' +
+            '<span class="text-xs font-bold tracking-wide" style="color:#62D7EC">Tutoriel animé</span>' +
+          "</span>"
+        : '<img src="' + vignette(tuto.video) + '" alt="" loading="lazy" ' +
+            'class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]">' +
+          '<span class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></span>') +
         '<span class="absolute inset-0 flex items-center justify-center">' +
           '<span class="flex items-center justify-center size-16 rounded-full bg-primary text-white shadow-xl transition-transform group-hover:scale-110">' +
             '<span class="material-symbols-outlined text-4xl" style="font-variation-settings:\'FILL\' 1">play_arrow</span>' +
           "</span>" +
         "</span>";
+      // Capsule : lue en grand dans la fenetre (dans une demi-colonne,
+      // elle passerait en format telephone)
       lancer.addEventListener("click", function () {
-        cadre.replaceChildren(creerLecteur(tuto, true));
+        if (tuto.capsule) ouvrir(tuto);
+        else cadre.replaceChildren(creerLecteur(tuto, true));
       });
       cadre.appendChild(lancer);
 

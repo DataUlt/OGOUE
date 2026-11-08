@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Créez votre compte · OGOUE</title>
+<meta name="description" content="Capsule de prise en main OGOUE : Créez votre compte">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700;800&display=swap">
+<!--
+  OGOUE · Capsule 1 sur 4 : Créez votre compte
+  Fichier autonome (HTML + CSS + JS, aucune dépendance sauf la police Geist).
+  Intégration : voir LISEZ-MOI.md livré avec les capsules.
+  Pour modifier un texte : tableau CAPSULE plus bas (k = surtitre, t = titre, p = texte, m = maquette).
+-->
+<style>
+:root{--navy:#0B2A5B;--ink:#0B1F3F;--muted:#4A5568;--blue:#0088CC;--cyan:#14B8D9;--cyanSoft:#E2F6FA;--cyanTxt:#62D7EC;--orange:#F2A04B;--orangeSoft:#FDF0E1;--orangeInk:#A65A0F;--line:#E7EBF0;--field:#CBD3DD;--page:#EEF1F5}
+*{box-sizing:border-box}
+html,body{margin:0;background:transparent;color:var(--ink);font-family:'Geist',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+.ogo{width:100%;max-width:1152px;margin:0 auto}
+.stage{position:relative;width:100%;aspect-ratio:16/9;background:var(--navy);color:#fff;border-radius:16px;overflow:hidden;display:grid;grid-template-columns:1fr 1.15fr;gap:clamp(20px,3.5vw,40px);padding:clamp(24px,4.2vw,48px) clamp(24px,4.5vw,52px) clamp(30px,4.8vw,56px);container-type:inline-size}
+.txt{align-self:center;display:flex;flex-direction:column;gap:12px}
+.k{margin:0;font-size:clamp(12px,1.35vw,15px);font-weight:700;color:var(--cyanTxt);letter-spacing:.04em}
+.t{margin:0;font-size:clamp(22px,3.65vw,42px);line-height:1.08;font-weight:800;letter-spacing:-.015em}
+.p{margin:0;font-size:clamp(14px,1.65vw,19px);line-height:1.5;color:#DCE6F5;max-width:36ch}
+.side{align-self:center;min-width:0}
+.in{animation:ogoIn .45s ease both}
+.in2{animation:ogoIn2 .5s ease both}
+@keyframes ogoIn{from{opacity:0;transform:translateY(10px)}}
+@keyframes ogoIn2{from{opacity:0;transform:translateY(16px)}}
+@keyframes ogoPulse{0%,100%{box-shadow:0 0 0 3px var(--cyan)}50%{box-shadow:0 0 0 9px rgba(20,184,217,.28)}}
+@keyframes ogoBlink{50%{opacity:0}}
+.hot{animation:ogoPulse 1.6s ease-in-out infinite}
+.bar{position:absolute;left:0;right:0;bottom:0;height:6px;background:rgba(255,255,255,.15)}
+.bar i{display:block;height:100%;width:0;background:var(--cyan)}
+.brand{background:#fff;border-radius:14px;padding:clamp(24px,3.8vw,44px) clamp(22px,3.5vw,40px);display:flex;flex-direction:column;gap:14px;box-shadow:0 22px 48px rgba(0,0,0,.35);color:var(--ink)}
+.brand .wm{font-size:clamp(32px,4.5vw,52px);font-weight:800;color:var(--navy);letter-spacing:.02em;display:flex;align-items:center;gap:14px}
+.brand .wm svg{width:clamp(60px,8vw,96px);height:auto}
+.brand .sl{font-size:clamp(13px,1.4vw,16px);color:#33415C}
+.brand .cp{font-size:13px;font-weight:700;color:#007C96;letter-spacing:.08em;text-transform:uppercase}
+.mk{background:#fff;color:var(--ink);border-radius:14px;padding:18px 20px;box-shadow:0 22px 48px rgba(0,0,0,.35);display:flex;flex-direction:column;gap:12px;font-size:14px}
+.url{display:flex;align-items:center;gap:7px;background:var(--page);border-radius:8px;padding:7px 12px;font-size:12px;color:var(--muted)}
+.url i{width:8px;height:8px;border-radius:50%;background:#C3CCD8;display:inline-block}
+.url span{margin-left:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nav{display:flex;align-items:center;gap:14px;font-size:13px;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:10px;flex-wrap:wrap}
+.nav .wm{font-weight:800;color:var(--navy);font-size:15px;letter-spacing:.02em;margin-right:auto}
+.nv{padding:3px 8px;border-radius:6px}
+.nv.on{color:var(--navy);font-weight:700;background:var(--cyanSoft)}
+.mh{font-size:19px;font-weight:800;line-height:1.2;margin:0}
+.ms{font-size:13px;color:var(--muted);margin:0;line-height:1.45}
+.g1,.g2,.g3{display:grid;gap:10px}
+.g1{grid-template-columns:minmax(0,1fr)}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.fl{display:flex;flex-direction:column;gap:5px;min-width:0}
+.lb{font-size:12px;font-weight:600;color:#33415C}
+.fv{min-height:36px;border:1px solid var(--field);border-radius:7px;padding:8px 10px;background:#fff;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fv.ph{color:#6B778A}
+.caret{display:inline-block;width:2px;height:15px;background:var(--blue);margin-left:1px;vertical-align:-2px;animation:ogoBlink .9s step-end infinite}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--field);border-radius:999px;padding:7px 14px;font-size:13px;background:#fff}
+.chip.on{background:var(--cyan);border-color:var(--cyan);color:#06243A;font-weight:700}
+.card{border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:4px;font-size:13px;background:#fff;min-width:0}
+.card.on{border:2px solid var(--cyan);background:var(--cyanSoft);padding:11px}
+.card b{font-size:14px}
+.card span{color:var(--muted)}
+.tag{font-size:10px;font-weight:800;color:var(--orangeInk);background:var(--orangeSoft);border-radius:4px;padding:1px 5px;margin-left:4px}
+.kpi{background:#F4F6F9;border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.kpi small{font-size:12px;color:var(--muted)}
+.kpi b{font-size:19px;font-weight:800;white-space:nowrap}
+.kpi.dark{background:var(--navy);color:#fff}
+.kpi.dark small{color:#CFE0F5}
+.rows{display:flex;flex-direction:column}
+.rw{display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding:8px 2px;font-size:13px}
+.rw.hl{background:var(--cyanSoft);font-weight:700;border-radius:6px;padding:8px}
+.btns{display:flex;gap:10px;flex-wrap:wrap}
+.bt{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:9px 18px;font-size:13px;font-weight:700;background:var(--blue);color:#fff}
+.bt.full{flex:1}
+.bt.outline{background:#fff;color:var(--blue);border:1px solid var(--blue)}
+.bt.cyan{background:var(--cyan);color:#06243A}
+.bt.orange{background:var(--orangeSoft);color:var(--orangeInk)}
+.bt.navy{background:var(--navy)}
+.note{font-size:13px;color:var(--muted);margin:0;line-height:1.45}
+.next{background:var(--navy);color:#fff;border-radius:10px;padding:12px 14px;font-size:14px;font-weight:700}
+.next span{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--cyanTxt);margin-bottom:2px}
+.info{background:var(--cyanSoft);border:1px solid #BDE9F2;border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px}
+.info.warn{background:var(--orangeSoft);border-color:#F6D9B5}
+.info b{font-size:16px}
+.chk{display:flex;align-items:center;gap:8px;font-size:13px}
+.chk i{width:16px;height:16px;border-radius:4px;background:var(--blue);display:inline-block;flex:none}
+.stp{display:flex;align-items:center}
+.sd{width:26px;height:26px;border-radius:50%;border:2px solid #D5D9D5;background:#fff;font-size:12px;font-weight:700;color:#5C6C60;display:flex;align-items:center;justify-content:center;flex:none}
+.sd.ok{background:var(--blue);border-color:var(--blue);color:#fff}
+.sd.act{background:var(--blue);border-color:var(--navy);color:#fff;box-shadow:0 0 0 3px rgba(0,136,204,.2)}
+.sl{flex:1;height:2px;background:#D5D9D5}
+.sl.ok{background:var(--blue)}
+.qty{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px}
+.qb{display:inline-flex;align-items:center;gap:10px;font-weight:700}
+.qb i{font-style:normal;width:24px;height:24px;border-radius:50%;border:1px solid var(--field);display:inline-flex;align-items:center;justify-content:center}
+.score{display:flex;align-items:center;gap:16px}
+.score b{font-size:40px;font-weight:800;color:var(--navy)}
+.score circle.v{transition:stroke-dasharray 1.2s ease .3s}
+.chart svg{display:block;width:100%;height:110px}
+.ctrl{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px}
+.cb{font:600 15px 'Geist',system-ui,sans-serif;border:1px solid var(--field);background:#fff;color:var(--ink);border-radius:10px;padding:10px 18px;cursor:pointer;min-height:44px}
+.cb.main{background:var(--blue);border-color:var(--blue);color:#fff;min-width:110px}
+.cb:hover{border-color:var(--blue)}
+.pos{margin-left:auto;font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.dots{display:flex;gap:8px}
+.dt{width:16px;height:16px;border-radius:50%;border:2px solid #9AA6B8;background:transparent;padding:0;cursor:pointer}
+.dt.on{background:var(--blue);border-color:var(--blue)}
+.dt.done{background:#9AA6B8}
+button:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* Tablette : maquette un peu plus compacte */
+@media (max-width:960px){.mk{padding:14px;gap:9px;font-size:13px}.mh{font-size:16px}.fv{min-height:32px;padding:6px 8px;font-size:13px}.kpi b{font-size:16px}.score b{font-size:30px}.chart svg{height:80px}}
+/* Téléphone : texte au-dessus, maquette en dessous */
+@media (max-width:700px){.stage{aspect-ratio:auto;grid-template-columns:1fr;padding:24px 18px 30px;gap:20px}.p{max-width:none}.pos{margin-left:0}.dots{width:100%;justify-content:center}.ctrl{justify-content:center}}
+@media (prefers-reduced-motion:reduce){.in,.in2,.hot,.caret{animation:none}.score circle.v{transition:none}}
+</style>
+</head>
+<body>
+<div class="ogo" id="ogo">
+  <div class="stage" id="stage">
+    <div class="txt" id="txt" aria-live="polite"></div>
+    <div class="side" id="side" aria-hidden="true"></div>
+    <div class="bar"><i id="prog"></i></div>
+  </div>
+  <div class="ctrl">
+    <button type="button" class="cb" id="prev" aria-label="Plan précédent">Précédent</button>
+    <button type="button" class="cb main" id="play">Pause</button>
+    <button type="button" class="cb" id="next" aria-label="Plan suivant">Suivant</button>
+    <span class="pos" id="pos"></span>
+    <div class="dots" id="dots" role="group" aria-label="Plans de la capsule"></div>
+  </div>
+</div>
+<script>
+/* ===== Contenu de la capsule ===== */
+const CAPSULE = {
+ "num": 1,
+ "title": "Créez votre compte",
+ "slides": [
+  {
+   "brand": true,
+   "k": "Capsule 1 sur 5",
+   "t": "Créez votre compte",
+   "p": "En moins de deux minutes, vous créez votre espace OGOUE. Suivez le guide."
+  },
+  {
+   "k": "Le site",
+   "t": "Cliquez sur « Commencer »",
+   "p": "Rendez-vous sur ogoue.com. Le bouton se trouve en haut à droite de la page.",
+   "url": "ogoue.com",
+   "m": [
+    {
+     "k": "sitenav"
+    },
+    {
+     "k": "head",
+     "t": "Bien gérer aujourd'hui pour mieux préparer son développement demain.",
+     "s": "OGOUE vous accompagne à chaque étape."
+    }
+   ]
+  },
+  {
+   "k": "La formule",
+   "t": "Choisissez votre formule",
+   "p": "Essentiel est gratuite pour démarrer. Pour Pro ou Équipe, vous créez d'abord votre compte, puis vous réglez.",
+   "url": "ogoue.com/tarifs",
+   "m": [
+    {
+     "k": "head",
+     "t": "À chaque activité sa formule"
+    },
+    {
+     "k": "cards",
+     "items": [
+      {
+       "t": "Essentiel",
+       "s": "Gratuit · 70 ventes et dépenses / mois",
+       "on": true
+      },
+      {
+       "t": "Pro",
+       "s": "10 000 FCFA / mois"
+      },
+      {
+       "t": "Équipe",
+       "s": "25 000 FCFA / mois"
+      }
+     ]
+    },
+    {
+     "k": "btns",
+     "items": [
+      {
+       "t": "Créer mon compte",
+       "hot": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "k": "Étape 1 sur 4 · Vous",
+   "t": "Présentez-vous",
+   "p": "Prénom, nom et adresse e-mail : elle vous servira à vous connecter. Ajoutez aussi votre WhatsApp : c'est le moyen le plus simple de vous joindre et de vous aider. Jamais de publicité.",
+   "url": "ogoue.com/signin",
+   "m": [
+    {
+     "k": "steps",
+     "n": 1
+    },
+    {
+     "k": "head",
+     "t": "Créer votre compte"
+    },
+    {
+     "k": "fields",
+     "items": [
+      {
+       "l": "Prénom",
+       "v": "Mireille"
+      },
+      {
+       "l": "Nom",
+       "v": "Nzé"
+      }
+     ]
+    },
+    {
+     "k": "fields",
+     "items": [
+      {
+       "l": "Adresse e-mail",
+       "v": "mireille@ateliernze.ga"
+      }
+     ]
+    },
+    {
+     "k": "fields",
+     "items": [
+      {
+       "l": "Numéro WhatsApp (facultatif)",
+       "v": "+241 06 12 34 56",
+       "type": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "k": "Étape 2 sur 4 · Votre entreprise",
+   "t": "Nommez votre entreprise",
+   "p": "Son nom apparaîtra sur vos reçus. Le RCCM et le NIF sont facultatifs : vous pourrez les ajouter plus tard.",
+   "url": "ogoue.com/signin",
+   "m": [
+    {
+     "k": "steps",
+     "n": 2
+    },
+    {
+     "k": "head",
+     "t": "Votre entreprise",
+     "s": "Son nom apparaîtra sur vos reçus."
+    },
+    {
+     "k": "fields",
+     "items": [
+      {
+       "l": "Nom de l'entreprise",
+       "v": "Atelier Nzé",
+       "type": true
+      }
+     ]
+    },
+    {
+     "k": "fields",
+     "items": [
+      {
+       "l": "N° RCCM (facultatif)",
+       "v": "GA-LBV-01...",
+       "ph": true
+      },
+      {
+       "l": "N° NIF (facultatif)",
+       "v": "2022 0101 5209-E",
+       "ph": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "k": "Étape 3 sur 4 · Votre activité",
+   "t": "Décrivez votre activité",
+   "p": "Dites ce que vous faites : OGOUE s'adapte ainsi à votre quotidien.",
+   "url": "ogoue.com/signin",
+   "m": [
+    {
+     "k": "steps",
+     "n": 3
+    },
+    {
+     "k": "head",
+     "t": "Votre activité"
+    },
+    {
+     "k": "fields",
+     "items": [
+      {
+       "l": "Activité",
+       "v": "Couture"
+      }
+     ]
+    },
+    {
+     "k": "fields",
+     "items": [
+      {
+       "l": "Précisez la nature de l'activité",
+       "v": "Confection et vente de vêtements",
+       "type": true
+      }
+     ]
+    },
+    {
+     "k": "fields",
+     "items": [
+      {
+       "l": "Comment nous avez-vous connu ?",
+       "v": "YouTube (tutoriels)  ▾"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "k": "Étape 4 sur 4 · Sécurité",
+   "t": "Sécurisez votre compte",
+   "p": "Un mot de passe d'au moins 8 caractères, confirmé. Acceptez les conditions d'utilisation, puis cliquez sur « Continuer ».",
+   "url": "ogoue.com/signin",
+   "m": [
+    {
+     "k": "steps",
+     "n": 4
+    },
+    {
+     "k": "head",
+     "t": "Sécurisez votre compte"
+    },
+    {
+     "k": "fields",
+     "items": [
+      {
+       "l": "Mot de passe",
+       "v": "••••••••••",
+       "type": true
+      },
+      {
+       "l": "Confirmer le mot de passe",
+       "v": "••••••••••"
+      }
+     ]
+    },
+    {
+     "k": "check",
+     "t": "J'accepte les conditions d'utilisation d'OGOUE"
+    },
+    {
+     "k": "btns",
+     "items": [
+      {
+       "t": "Continuer",
+       "hot": true,
+       "full": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "k": "C'est fait",
+   "t": "Confirmez votre e-mail",
+   "p": "OGOUE vous envoie un lien de confirmation. Cliquez dessus, puis connectez-vous : votre compte est prêt.",
+   "url": "ogoue.com/signin",
+   "m": [
+    {
+     "k": "info",
+     "t": "Vérifiez votre e-mail",
+     "s": "Nous avons envoyé un lien de confirmation à mireille@ateliernze.ga. Cliquez dessus pour activer votre compte, puis connectez-vous."
+    },
+    {
+     "k": "btns",
+     "items": [
+      {
+       "t": "Aller à la connexion",
+       "hot": true
+      }
+     ]
+    },
+    {
+     "k": "next",
+     "t": "Capsule 2 · Remplissez votre catalogue"
+    }
+   ]
+  }
+ ]
+};
+
+/* ===== Réglages ===== */
+const VITESSE = 1;            // 1 = normal, 0.8 = plus lent, 1.2 = plus rapide
+const DUREE_MIN = 11000;      // durée minimale d'un plan (ms)
+const DUREE_MAX = 22000;      // durée maximale d'un plan (ms)
+const MS_PAR_CARACTERE = 115; // la durée d'un plan dépend de la longueur de son texte
+const FRAPPE_MS = 95;         // vitesse de la saisie animée (ms par caractère)
+const FRAPPE_DEBUT = 1000;    // délai avant le début de la saisie (ms)
+
+/* ===== Lecteur ===== */
+(function () {
+  const S = CAPSULE.slides, NUM = CAPSULE.num;
+  const STEP_NAMES = ['Vous', 'Votre entreprise', 'Votre activité', 'Sécurité'];
+  const $ = (id) => document.getElementById(id);
+  const txt = $('txt'), side = $('side'), prog = $('prog'), dots = $('dots'), play = $('play'), pos = $('pos');
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const cls = (base, flags) => base + Object.keys(flags).filter((k) => flags[k]).map((k) => ' ' + k).join('');
+  const reduit = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let i = 0, t = 0, playing = false, ended = false, visible = false, started = false, last = 0, typed = [];
+
+  const dur = (s) => Math.min(DUREE_MAX, Math.max(DUREE_MIN, ((s.t || '').length + (s.p || '').length) * MS_PAR_CARACTERE));
+
+  function block(b) {
+    switch (b.k) {
+      case 'sitenav': return '<div class="nav"><span class="wm">OGOUÉ</span><span>Accueil</span><span>Tarifs</span><span>À propos</span><span class="bt hot">Commencer</span></div>';
+      case 'appnav': return '<div class="nav"><span class="wm">OGOUÉ</span>' + ['Tableau de Bord', 'Comptabilité', 'Financement'].map((x, j) => '<span class="' + cls('nv', { on: j === b.on || b.hot, hot: b.hot }) + '">' + x + '</span>').join('') + '</div>';
+      case 'head': return '<div><p class="mh">' + esc(b.t) + '</p>' + (b.s ? '<p class="ms">' + esc(b.s) + '</p>' : '') + '</div>';
+      case 'steps': return '<div style="display:flex;flex-direction:column;gap:8px"><div class="stp">' + [1, 2, 3, 4].map((x) => '<span class="' + cls('sd', { ok: x < b.n, act: x === b.n }) + '">' + x + '</span>' + (x < 4 ? '<span class="' + cls('sl', { ok: x < b.n }) + '"></span>' : '')).join('') + '</div><span class="lb">Étape ' + b.n + ' sur 4 · ' + STEP_NAMES[b.n - 1] + '</span></div>';
+      case 'fields': return '<div class="g' + b.items.length + '">' + b.items.map((x) => '<div class="fl"><span class="lb">' + esc(x.l) + '</span><div class="' + cls('fv', { ph: x.ph, hot: x.hot || x.type }) + '"' + (x.type ? ' data-type="' + esc(x.v) + '"' : '') + '>' + (x.type ? '' : esc(x.v)) + '</div></div>').join('') + '</div>';
+      case 'chips': return '<div style="display:flex;flex-direction:column;gap:6px">' + (b.label ? '<span class="lb">' + esc(b.label) + '</span>' : '') + '<div class="chips">' + b.items.map((x) => '<span class="' + cls('chip', { on: x.on, hot: x.hot }) + '">' + esc(x.t) + '</span>').join('') + '</div></div>';
+      case 'cards': return '<div class="g' + Math.min(3, b.items.length) + '">' + b.items.map((x) => '<div class="' + cls('card', { on: x.on, hot: x.hot }) + '"><b>' + esc(x.t) + (x.tag ? '<span class="tag">' + esc(x.tag) + '</span>' : '') + '</b>' + (x.s ? '<span>' + esc(x.s) + '</span>' : '') + '</div>').join('') + '</div>';
+      case 'kpis': return '<div class="g3">' + b.items.map((x) => '<div class="' + cls('kpi', { dark: x[2] }) + '"><small>' + esc(x[0]) + '</small><b>' + esc(x[1]) + '</b></div>').join('') + '</div>';
+      case 'rows': return '<div class="rows">' + b.items.map((x) => '<div class="' + cls('rw', { hl: x[2] }) + '"><span>' + esc(x[0]) + '</span><strong>' + esc(x[1]) + '</strong></div>').join('') + '</div>';
+      case 'btns': return '<div class="btns">' + b.items.map((x) => '<span class="' + cls('bt', { [x.v || '_']: !!x.v, full: x.full, hot: x.hot }) + '">' + esc(x.t) + '</span>').join('') + '</div>';
+      case 'note': return '<p class="note">' + esc(b.t) + '</p>';
+      case 'next': return '<div class="next"><span>À suivre</span>' + esc(b.t) + '</div>';
+      case 'info': return '<div class="' + cls('info', { warn: b.warn }) + '"><b>' + esc(b.t) + '</b><span class="ms">' + esc(b.s) + '</span></div>';
+      case 'check': return '<div class="chk"><i></i>' + esc(b.t) + '</div>';
+      case 'qty': return '<div class="qty"><span>' + esc(b.n) + '</span><span class="qb"><i>−</i>' + esc(b.q) + '<i>+</i></span><strong>' + esc(b.tot) + '</strong></div>';
+      case 'score': return '<div class="score"><svg width="86" height="86" viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15" fill="none" stroke="#E7EBF0" stroke-width="4"/><circle class="v" cx="18" cy="18" r="15" fill="none" stroke="#14B8D9" stroke-width="4" stroke-dasharray="0 94.2" data-dash="' + (b.pct * 0.942).toFixed(1) + ' 94.2" transform="rotate(-90 18 18)" stroke-linecap="round"/></svg><div style="display:flex;flex-direction:column"><b>' + esc(b.v) + '</b><span class="ms">Score de traçabilité</span></div></div>';
+      case 'chart': return '<div class="chart" style="display:flex;flex-direction:column;gap:6px"><div style="display:flex;gap:14px;font-size:12px;font-weight:700"><span style="color:#007C96">● Entré</span><span style="color:#A65A0F">● Sorti</span></div><svg viewBox="0 0 300 110" preserveAspectRatio="none" aria-hidden="true"><path d="M0 92 L50 80 L100 70 L150 52 L200 44 L250 28 L300 20" fill="none" stroke="#14B8D9" stroke-width="3"/><path d="M0 100 L50 96 L100 90 L150 86 L200 80 L250 74 L300 70" fill="none" stroke="#F2A04B" stroke-width="3"/><path d="M250 28 L250 74" stroke="#0B2A5B" stroke-width="1.5" stroke-dasharray="4 3"/></svg><span class="ms">L\'écart entre les deux courbes, c\'est ce qui vous reste.</span></div>';
+    }
+    return '';
+  }
+
+  function render() {
+    const s = S[i];
+    txt.innerHTML = '<div class="in" style="display:flex;flex-direction:column;gap:12px"><p class="k">' + esc(s.k) + '</p><h2 class="t">' + esc(s.t) + '</h2><p class="p">' + esc(s.p) + '</p></div>';
+    if (s.brand) {
+      side.innerHTML = '<div class="brand in2"><div class="wm">OGOUÉ<svg viewBox="0 0 64 22" aria-hidden="true"><path d="M2 14c10-8 18 6 30 0s18-8 26-4" fill="none" stroke="#14B8D9" stroke-width="4" stroke-linecap="round"/><path d="M52 3l9-1-1 9M60 2L49 13" fill="none" stroke="#F2A04B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="sl">Bien gérer aujourd\'hui pour mieux préparer son développement demain.</span><span class="cp">' + esc(S[0].k) + '</span></div>';
+    } else {
+      side.innerHTML = '<div class="mk in2"><div class="url"><i></i><i></i><i></i><span>' + esc(s.url) + '</span></div>' + (s.m || []).map(block).join('') + '</div>';
+    }
+    typed = [...side.querySelectorAll('[data-type]')];
+    if (reduit) typed.forEach((el) => { el.textContent = el.dataset.type; });
+    const sc = side.querySelector('circle.v');
+    if (sc) requestAnimationFrame(() => requestAnimationFrame(() => sc.setAttribute('stroke-dasharray', sc.dataset.dash)));
+    [...dots.children].forEach((b, n) => { b.className = cls('dt', { on: n === i, done: n < i }); b.setAttribute('aria-current', n === i ? 'step' : 'false'); });
+    pos.textContent = 'Plan ' + (i + 1) + ' / ' + S.length;
+    update();
+  }
+
+  function update() {
+    prog.style.width = Math.min(100, (t / dur(S[i])) * 100) + '%';
+    if (!reduit) typed.forEach((el) => {
+      const full = el.dataset.type, c = Math.max(0, Math.floor((t - FRAPPE_DEBUT) / FRAPPE_MS));
+      el.textContent = full.slice(0, c);
+      if (c < full.length) { const k = document.createElement('span'); k.className = 'caret'; el.appendChild(k); }
+      else el.classList.remove('hot');
+    });
+    play.textContent = playing ? 'Pause' : (ended ? 'Revoir' : 'Lecture');
+  }
+
+  function go(n) { i = (n + S.length) % S.length; t = 0; ended = false; render(); }
+
+  function frame(now) {
+    const dt = last ? Math.min(100, now - last) : 0; last = now;
+    if (playing && visible) {
+      t += dt * VITESSE;
+      if (t >= dur(S[i])) {
+        if (i < S.length - 1) go(i + 1);
+        else { t = dur(S[i]); playing = false; ended = true; update(); }
+      } else update();
+    }
+    requestAnimationFrame(frame);
+  }
+
+  S.forEach((_, n) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'dt'; b.setAttribute('aria-label', 'Aller au plan ' + (n + 1)); b.onclick = () => go(n); dots.appendChild(b); });
+  $('prev').onclick = () => go(i - 1);
+  $('next').onclick = () => go(i + 1);
+  play.onclick = () => {
+    if (playing) playing = false;
+    else if (ended) { playing = true; go(0); }
+    else playing = true;
+    update();
+  };
+  $('ogo').addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') go(i + 1);
+    if (e.key === 'ArrowLeft') go(i - 1);
+  });
+
+  /* Démarre seulement quand la capsule est visible à l'écran (et pas si l'utilisateur a demandé moins d'animations). */
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver((es) => {
+      visible = es[0].isIntersecting;
+      if (visible && !started) { started = true; playing = !reduit; update(); }
+    }, { threshold: 0.4 }).observe($('stage'));
+  } else { visible = true; started = true; playing = !reduit; }
+
+  /* Hauteur pour l'iframe parente (voir LISEZ-MOI.md) */
+  const envoyerHauteur = () => { if (window.parent !== window) window.parent.postMessage({ ogoueCapsule: NUM, hauteur: document.documentElement.scrollHeight }, '*'); };
+  if ('ResizeObserver' in window) new ResizeObserver(envoyerHauteur).observe(document.body);
+  window.addEventListener('load', envoyerHauteur);
+
+  render();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
