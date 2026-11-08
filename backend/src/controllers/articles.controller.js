@@ -278,6 +278,98 @@ export async function updateArticle(req, res) {
 }
 
 /**
+ * POST /api/articles/:id/sortie — sortie de stock hors vente.
+ * Produit abîmé, pris pour l'usage personnel, perdu ou volé : le stock baisse
+ * et le mouvement garde son motif, pour l'état des stocks.
+ */
+const sortieSchema = z.object({
+  quantite: z.coerce.number().positive(),
+  motif: z.enum(["abime", "usage_personnel", "perte"]),
+});
+export async function sortieStock(req, res) {
+  try {
+    const { quantite, motif } = sortieSchema.parse(req.body);
+    const organizationId = req.user.organizationId;
+    const { data: article } = await supabase
+      .from("articles")
+      .select("id, name, stock")
+      .eq("id", req.params.id)
+      .eq("organization_id", organizationId)
+      .eq("is_active", true)
+      .maybeSingle();
+    if (!article) return res.status(404).json({ error: "Article introuvable" });
+    if (article.stock === null) return res.status(400).json({ error: "Cet article n'est pas suivi en stock." });
+    if (quantite > Number(article.stock)) {
+      return res.status(409).json({ error: `Il ne reste que ${Number(article.stock)} en stock pour « ${article.name} ».` });
+    }
+    // Condition sur la valeur lue : une vente simultanée ne fait pas passer le stock sous zéro
+    const { data: maj } = await supabase
+      .from("articles")
+      .update({ stock: Number(article.stock) - quantite, updated_at: new Date().toISOString() })
+      .eq("id", article.id)
+      .eq("stock", article.stock)
+      .select("id, stock")
+      .maybeSingle();
+    if (!maj) return res.status(409).json({ error: "Le stock vient de changer. Réessayez.", code: "STOCK_CONCURRENT" });
+    await enregistrerMouvement({ organizationId, articleId: article.id, delta: -quantite, motif });
+    return res.json({ ok: true, stock: Number(maj.stock) });
+  } catch (error) {
+    if (error?.name === "ZodError") {
+      return res.status(400).json({ error: "Indiquez une quantité et le motif : abîmé, usage personnel ou perte." });
+    }
+    console.error("Erreur sortieStock:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+/**
+ * POST /api/articles/inventaire — corrige le stock après un comptage.
+ * Reçoit l'écart constaté par article (stock compté − stock théorique à la
+ * fin de la période inventoriée) et l'ajoute au stock actuel : les ventes
+ * faites depuis restent comptées. Chaque correction est un mouvement
+ * « inventaire ». Réservé au gérant.
+ */
+const inventaireSchema = z.object({
+  ecarts: z.array(z.object({ id: z.string().uuid(), ecart: z.coerce.number() })).min(1).max(500),
+});
+export async function corrigerInventaire(req, res) {
+  try {
+    const { ecarts } = inventaireSchema.parse(req.body);
+    const organizationId = req.user.organizationId;
+    const corriges = [];
+    const echecs = [];
+    for (const { id, ecart } of ecarts) {
+      if (!ecart) continue;
+      const { data: article } = await supabase
+        .from("articles")
+        .select("id, name, stock")
+        .eq("id", id)
+        .eq("organization_id", organizationId)
+        .eq("is_active", true)
+        .maybeSingle();
+      if (!article || article.stock === null) { echecs.push(id); continue; }
+      const avant = Number(article.stock);
+      const apres = Math.max(0, avant + ecart);
+      const { data: maj } = await supabase
+        .from("articles")
+        .update({ stock: apres, updated_at: new Date().toISOString() })
+        .eq("id", article.id)
+        .eq("stock", article.stock)
+        .select("id")
+        .maybeSingle();
+      if (!maj) { echecs.push(article.name); continue; }
+      await enregistrerMouvement({ organizationId, articleId: article.id, delta: apres - avant, motif: "inventaire" });
+      corriges.push({ id: article.id, stock: apres });
+    }
+    return res.json({ ok: true, corriges, echecs });
+  } catch (error) {
+    if (error?.name === "ZodError") return res.status(400).json({ error: "Comptage invalide." });
+    console.error("Erreur corrigerInventaire:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+/**
  * Suppression logique : les ventes deja enregistrees conservent le
  * libelle saisi a l'epoque, on ne veut donc pas casser l'historique.
  */

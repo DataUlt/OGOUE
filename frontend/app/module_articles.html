@@ -392,6 +392,9 @@
                         { libelle: "Coût d'achat", action: onEditCost },
                         { libelle: "Stock", action: onEditStock }
                     ];
+                    if (a.stock !== null && a.stock !== undefined) {
+                        options.push({ libelle: "Sortie de stock", action: onSortieStock });
+                    }
                     if (modeDeux() && a.type !== "services") {
                         options.push({ libelle: a.fabrique ? "Revendu tel quel" : "Fabriqué par moi", action: onEditOrigine });
                     }
@@ -527,6 +530,65 @@
                 }
                 hideMessage();
                 await refresh();
+            }
+
+            // Sortie de stock hors vente : abîmé, usage personnel, perte.
+            // Le stock baisse et le motif apparaît dans l'état des stocks.
+            function onSortieStock(article) {
+                document.getElementById("ogo-sortie-stock")?.remove();
+                const MOTIFS = [["abime", "Abîmé"], ["usage_personnel", "Usage personnel"], ["perte", "Perte ou vol"]];
+                const fond = document.createElement("div");
+                fond.id = "ogo-sortie-stock";
+                fond.className = "fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4";
+                fond.innerHTML = `
+                    <form class="w-full max-w-sm rounded-2xl bg-white dark:bg-card-dark p-6 shadow-xl" novalidate>
+                        <h2 class="text-lg font-bold">Sortie de stock</h2>
+                        <p class="mt-1 text-sm text-text-light-muted dark:text-gray-400">${article.name.replace(/[<>&"]/g, "")} · en stock : ${article.stock}</p>
+                        <label class="block mt-4 text-sm font-medium" for="sortie-quantite">Quantité retirée</label>
+                        <input id="sortie-quantite" type="number" min="1" step="any" inputmode="decimal" value="1"
+                               class="form-input mt-2 w-full h-12 rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-background-dark px-5 text-base">
+                        <p class="mt-4 text-sm font-medium">Pourquoi ?</p>
+                        <div class="mt-2 flex flex-wrap gap-2" data-motifs>
+                            ${MOTIFS.map(([v, l], i) => `<button type="button" data-motif="${v}" class="h-10 px-4 rounded-full border text-sm font-semibold ${i === 0 ? "border-primary bg-primary/10 text-primary" : "border-gray-300 dark:border-gray-600"}">${l}</button>`).join("")}
+                        </div>
+                        <p data-erreur class="hidden mt-3 text-sm font-medium text-red-600"></p>
+                        <div class="mt-6 flex gap-3">
+                            <button type="button" data-annuler class="flex-1 h-11 rounded-full bg-gray-100 dark:bg-gray-700 font-semibold">Annuler</button>
+                            <button type="submit" class="flex-1 h-11 rounded-full bg-primary text-white font-bold disabled:opacity-60">Retirer du stock</button>
+                        </div>
+                    </form>`;
+                document.body.appendChild(fond);
+                let motif = "abime";
+                const form = fond.querySelector("form");
+                const erreur = fond.querySelector("[data-erreur]");
+                const fermer = () => fond.remove();
+                fond.addEventListener("click", (e) => { if (e.target === fond) fermer(); });
+                fond.querySelector("[data-annuler]").addEventListener("click", fermer);
+                fond.querySelector("[data-motifs]").addEventListener("click", (e) => {
+                    const b = e.target.closest("[data-motif]");
+                    if (!b) return;
+                    motif = b.dataset.motif;
+                    fond.querySelectorAll("[data-motif]").forEach((x) => {
+                        const on = x === b;
+                        ["border-primary", "bg-primary/10", "text-primary"].forEach((k) => x.classList.toggle(k, on));
+                        ["border-gray-300", "dark:border-gray-600"].forEach((k) => x.classList.toggle(k, !on));
+                    });
+                });
+                form.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+                    const quantite = Number(String(fond.querySelector("#sortie-quantite").value).replace(",", "."));
+                    if (!(quantite > 0)) { erreur.textContent = "Indiquez la quantité retirée."; erreur.classList.remove("hidden"); return; }
+                    if (quantite > Number(article.stock)) { erreur.textContent = `Il ne reste que ${article.stock} en stock.`; erreur.classList.remove("hidden"); return; }
+                    const bouton = form.querySelector("button[type=submit]");
+                    bouton.disabled = true;
+                    const res = await window.OGOUE.sortieStock(article.id, quantite, motif);
+                    if (!res.ok) { bouton.disabled = false; erreur.textContent = res.error; erreur.classList.remove("hidden"); return; }
+                    fermer();
+                    const libelle = MOTIFS.find(([v]) => v === motif)[1].toLowerCase();
+                    showMessage(`${quantite} « ${article.name} » retiré${quantite > 1 ? "s" : ""} du stock (${libelle}). Stock restant : ${res.stock}.`, "success");
+                    await refresh();
+                });
+                setTimeout(() => fond.querySelector("#sortie-quantite").select(), 0);
             }
 
             // Produit revendu ↔ fabriqué (entreprise « les deux »)

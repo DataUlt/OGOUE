@@ -119,6 +119,10 @@ function plagePreset(preset) {
     lundi.setDate(t.getDate() - ((t.getDay() + 6) % 7));
     return { preset, debut: isoDe(lundi), fin: isoDe(t) };
   }
+  // Année : du 1er janvier à aujourd'hui
+  if (preset === "annee") {
+    return { preset, debut: isoDe(new Date(t.getFullYear(), 0, 1)), fin: isoDe(t) };
+  }
   return {
     preset: "mois",
     debut: isoDe(new Date(t.getFullYear(), t.getMonth(), 1)),
@@ -128,7 +132,7 @@ function plagePreset(preset) {
 
 // La plage correspond-elle à une période rapide ? Sinon, plage personnalisée.
 function plageDepuis(debut, fin) {
-  const preset = ["jour", "semaine", "mois"].find((p) => {
+  const preset = ["jour", "semaine", "mois", "annee"].find((p) => {
     const r = plagePreset(p);
     return r.debut === debut && r.fin === fin;
   }) || null;
@@ -156,6 +160,15 @@ function periodePrecedente(debut, fin, preset) {
       debut: isoDe(new Date(m.getFullYear(), m.getMonth() - 1, 1)),
       fin: isoDe(new Date(m.getFullYear(), m.getMonth(), 0))
     };
+  }
+  // Année en cours : comparée à l'année précédente à la même date
+  // (1er janvier → même jour), pas à une année entière
+  if (preset === "annee") {
+    const d = deIso(debut), f = deIso(fin);
+    const finPrec = new Date(f.getFullYear() - 1, f.getMonth(), f.getDate());
+    // 29 février sans équivalent : le 28 de l'année précédente
+    if (finPrec.getMonth() !== f.getMonth()) finPrec.setDate(0);
+    return { debut: isoDe(new Date(d.getFullYear() - 1, 0, 1)), fin: isoDe(finPrec) };
   }
   const n = joursEntre(debut, fin).length;
   const fp = deIso(debut);
@@ -1112,6 +1125,10 @@ function libellePeriode(plage, precedente) {
   if (plage.preset === "mois") {
     const mois = nomMois(plage.fin);
     return { phrase: `en ${mois}`, vs: nomMois(precedente.debut), court: mois };
+  }
+  if (plage.preset === "annee") {
+    const annee = plage.debut.slice(0, 4);
+    return { phrase: `en ${annee}`, vs: `${Number(annee) - 1} à la même date`, court: annee };
   }
   return { phrase: "sur la période", vs: "la période précédente", court: "la période" };
 }

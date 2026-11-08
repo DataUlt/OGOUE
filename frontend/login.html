@@ -245,34 +245,34 @@
 
   </div>
 
+  <script src="/app/js/connexion-feedback.js"></script>
   <script>
-    const SUITE = new URLSearchParams(location.search).get('suite') || '';
+    const SUITE =  new URLSearchParams(location.search).get('suite') || '';
     const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
       ? 'http://localhost:3001'
       : 'https://api.ogoue.com';
 
     async function handleLogin(event) {
       event.preventDefault();
-      
+
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
       const errorDiv = document.getElementById('errorMessage');
       const successDiv = document.getElementById('successMessage');
       const submitBtn = event.target.querySelector('button[type="submit"]');
       const originalText = submitBtn.textContent;
-      
+
       errorDiv.classList.add('hidden');
       successDiv.classList.add('hidden');
-      
+
       if (!email || !password) {
         showError("Veuillez remplir tous les champs");
         return;
       }
-      
+
       try {
-        submitBtn.textContent = "Connexion en cours...";
-        submitBtn.disabled = true;
-        
+        window.OGOUE_CONNEXION.attente(submitBtn, "Connexion…");
+
         const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
           method: 'POST',
           headers: {
@@ -283,17 +283,16 @@
             password: password
           })
         });
-        
+
         const data = await response.json();
-        
+
         if (!response.ok) {
           showError(data.error || "Erreur de connexion");
           if (data.code === 'EMAIL_NON_CONFIRME') ajouterRenvoiConfirmation(data.email);
-          submitBtn.textContent = originalText;
-          submitBtn.disabled = false;
+          window.OGOUE_CONNEXION.fin(submitBtn);
           return;
         }
-        
+
         localStorage.setItem('authToken', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
 
@@ -311,7 +310,7 @@
               'Authorization': `Bearer ${data.token}`
             }
           });
-          
+
           if (orgResponse.ok) {
             const orgData = await orgResponse.json();
             localStorage.setItem('ogo_org', JSON.stringify(orgData));
@@ -319,29 +318,23 @@
         } catch (orgError) {
           console.error('Could not fetch organization:', orgError);
         }
-        
-        showSuccess("Connexion réussie ! Redirection...");
-        
+
         const APP_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
           ? 'http://127.0.0.1:8080/app'
           : 'https://www.ogoue.com/app';
-        setTimeout(() => {
-          // Suite prévue à l'inscription (paiement ou onboarding), limitée à deux chemins connus
-          const destination = (SUITE.startsWith('/paiement.html?') || SUITE.startsWith('/app/module_articles.html'))
-            ? SUITE
-            : `${APP_BASE}/module_tableau_bord.html`;
-          window.location.href = destination;
-        }, 1500);
-        
+        // Suite prévue à l'inscription (paiement ou onboarding), limitée à deux chemins connus
+        const destination = (SUITE.startsWith('/paiement.html?') || SUITE.startsWith('/app/module_articles.html'))
+          ? SUITE
+          : `${APP_BASE}/module_tableau_bord.html`;
+        window.OGOUE_CONNEXION.reussie({ prenom: data.user?.firstName, destination });
+
       } catch (error) {
         console.error('Error:', error);
         showError("Erreur réseau : " + error.message);
-        const submitBtn = event.target.querySelector('button[type="submit"]');
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
+        window.OGOUE_CONNEXION.fin(event.target.querySelector('button[type="submit"]'));
       }
     }
-    
+
     // Propose le renvoi du lien quand le compte existe mais que l'e-mail n'est pas confirmé
     function ajouterRenvoiConfirmation(email) {
       const bouton = document.createElement('button');
@@ -372,7 +365,7 @@
       errorDiv.textContent = message;
       errorDiv.classList.remove('hidden');
     }
-    
+
     function showSuccess(message) {
       const successDiv = document.getElementById('successMessage');
       successDiv.textContent = message;
@@ -412,7 +405,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       const mobileMenuBtn = document.getElementById('mobileBtn');
       const mobileMenu = document.getElementById('mobileMenu');
-      
+
       if (mobileMenuBtn && mobileMenu) {
         mobileMenuBtn.addEventListener('click', () => {
           mobileMenu.classList.toggle('hidden');
@@ -430,7 +423,7 @@
       const input = document.getElementById(inputId);
       const button = document.getElementById(buttonId);
       const icon = button.querySelector('.material-symbols-outlined');
-      
+
       if (input.type === 'password') {
         input.type = 'text';
         icon.textContent = 'visibility_off';

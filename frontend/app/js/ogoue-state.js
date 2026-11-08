@@ -753,6 +753,29 @@ async function updateArticle(id, changes) {
   }
 }
 
+/** Sortie de stock hors vente : motif "abime", "usage_personnel" ou "perte" */
+async function sortieStock(id, quantite, motif) {
+  try {
+    const { ok, data } = await articlesRequest(`/${id}/sortie`, {
+      method: "POST",
+      body: JSON.stringify({ quantite, motif })
+    });
+    return { ok, stock: ok ? data.stock : null, error: ok ? null : (data?.error || "Sortie de stock non enregistrée") };
+  } catch (error) {
+    return { ok: false, stock: null, error: "Erreur réseau" };
+  }
+}
+
+/** Corrige le stock après un comptage : [{ id, ecart }] */
+async function corrigerInventaire(ecarts) {
+  try {
+    const { ok, data } = await articlesRequest("/inventaire", { method: "POST", body: JSON.stringify({ ecarts }) });
+    return { ok, corriges: ok ? data.corriges : [], echecs: ok ? data.echecs : [], error: ok ? null : (data?.error || "Correction non enregistrée") };
+  } catch (error) {
+    return { ok: false, corriges: [], echecs: [], error: "Erreur réseau" };
+  }
+}
+
 /** Retire un article du catalogue (suppression logique) */
 async function deleteArticle(id) {
   try {
@@ -1194,6 +1217,8 @@ window.OGOUE = {
   addArticle,
   addArticlesBulk,
   updateArticle,
+  sortieStock,
+  corrigerInventaire,
   deleteArticle,
   getCreditProducts,
   getCreditProduct,

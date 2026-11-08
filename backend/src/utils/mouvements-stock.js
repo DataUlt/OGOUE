@@ -74,6 +74,11 @@ export async function rapportStock(organizationId, debut, fin) {
 
     const entrees = dansPeriode.filter((m) => Number(m.delta) > 0).reduce((s, m) => s + Number(m.delta), 0);
     const ventes = -dansPeriode.filter((m) => m.motif === "vente").reduce((s, m) => s + Number(m.delta), 0);
+    // Sorties hors ventes saisies dans le catalogue, par motif (abîmé, usage personnel, perte)
+    const sortiesMotifs = {};
+    dansPeriode.filter((m) => ["abime", "usage_personnel", "perte"].includes(m.motif)).forEach((m) => {
+      sortiesMotifs[m.motif] = (sortiesMotifs[m.motif] || 0) - Number(m.delta);
+    });
     const ventesParJour = ventes / jours;
     const couverture = ventesParJour > 0 ? stockFin / ventesParJour : null;
 
@@ -96,6 +101,7 @@ export async function rapportStock(organizationId, debut, fin) {
       stockDepart,
       entrees,
       ventes,
+      sortiesMotifs,
       stock: stockFin,
       valeur,
       couvertureJours: couverture === null ? null : Math.round(couverture),

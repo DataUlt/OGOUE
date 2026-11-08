@@ -149,6 +149,7 @@
         .tdb-pills { display: flex; background: rgba(255,255,255,.09); border-radius: 999px; padding: 4px; gap: 2px; }
         .tdb-pill { border: 0; background: transparent; color: rgba(255,255,255,.8); height: 34px; padding: 0 14px; border-radius: 999px; cursor: pointer; font-weight: 600; font-size: 13.5px; white-space: nowrap; }
         .tdb-pill.is-on { background: #FFFFFF; color: #0B1F3F; }
+        @media (max-width: 420px) { .tdb-pill { padding: 0 9px; font-size: 13px; } }
         .tdb-range { height: 42px; padding: 0 14px 0 16px; border-radius: 999px; border: 0; background: rgba(255,255,255,.09); color: #fff; display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 600; cursor: pointer; white-space: nowrap; }
         .tdb-range .material-symbols-rounded { font-size: 19px; }
         .tdb-picker { position: relative; }
@@ -370,6 +371,7 @@
                             <button type="button" class="tdb-pill" data-preset="jour">Aujourd'hui</button>
                             <button type="button" class="tdb-pill" data-preset="semaine">Semaine</button>
                             <button type="button" class="tdb-pill" data-preset="mois">Mois</button>
+                            <button type="button" class="tdb-pill" data-preset="annee">Année</button>
                         </div>
 
                         <!-- Filtre par date personnalisé -->

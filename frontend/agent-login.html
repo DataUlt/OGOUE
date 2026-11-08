@@ -179,6 +179,7 @@
 
   </div>
 
+  <script src="/app/js/connexion-feedback.js"></script>
   <script>
     const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
       ? 'http://localhost:3001'
@@ -186,13 +187,13 @@
 
     async function handleAgentLogin(event) {
       event.preventDefault();
-      
+
       const accessCode = document.getElementById('accessCode').value.trim();
       const errorDiv = document.getElementById('errorMessage');
       const successDiv = document.getElementById('successMessage');
       const submitBtn = event.target.querySelector('button[type="submit"]');
       const originalText = submitBtn.textContent;
-      
+
       errorDiv.classList.add('hidden');
       successDiv.classList.add('hidden');
 
@@ -202,8 +203,7 @@
       }
 
       try {
-        submitBtn.textContent = "Connexion en cours...";
-        submitBtn.disabled = true;
+        window.OGOUE_CONNEXION.attente(submitBtn, "Connexion…");
 
         const response = await fetch(`${API_BASE_URL}/api/auth/agent-login`, {
           method: 'POST',
@@ -217,8 +217,7 @@
 
         if (!response.ok) {
           showError(data.error || 'Code d\'accès invalide');
-          submitBtn.textContent = originalText;
-          submitBtn.disabled = false;
+          window.OGOUE_CONNEXION.fin(submitBtn);
           return;
         }
 
@@ -228,21 +227,15 @@
           localStorage.setItem('ogo_org', JSON.stringify(data.organization));
         }
 
-        showSuccess("Connexion réussie ! Redirection...");
-
         const APP_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
           ? 'http://127.0.0.1:8080/app'
           : 'https://www.ogoue.com/app';
-        setTimeout(() => {
-          window.location.href = `${APP_BASE}/module_agent_dashboard.html`;
-        }, 1500);
+        window.OGOUE_CONNEXION.reussie({ prenom: data.user?.firstName, destination: `${APP_BASE}/module_agent_dashboard.html` });
 
       } catch (error) {
         console.error('Error:', error);
         showError("Erreur réseau : " + error.message);
-        const submitBtn = event.target.querySelector('button[type="submit"]');
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
+        window.OGOUE_CONNEXION.fin(event.target.querySelector('button[type="submit"]'));
       }
     }
 
@@ -262,7 +255,7 @@
       const input = document.getElementById(inputId);
       const button = document.getElementById(buttonId);
       const icon = button.querySelector('.material-symbols-outlined');
-      
+
       if (input.type === 'password' || input.type === 'text') {
         if (input.type === 'text') {
           input.type = 'password';
@@ -277,7 +270,7 @@
     // Mobile menu toggle - Direct binding
     const mobileMenuBtn = document.getElementById('mobileBtn');
     const mobileMenu = document.getElementById('mobileMenu');
-    
+
     if (mobileMenuBtn && mobileMenu) {
       mobileMenuBtn.addEventListener('click', (e) => {
         e.preventDefault();

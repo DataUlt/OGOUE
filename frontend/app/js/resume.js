@@ -378,6 +378,18 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   });
 
+  // Périodes rapides (filtre-periode.js) : imposer une période au calendrier
+  window.OGOUE_FILTRE_DATES = {
+    definir(debut, fin) {
+      startDate = debut;
+      endDate = fin;
+      current = new Date(Number(fin.slice(0, 4)), Number(fin.slice(5, 7)) - 1, 1);
+      panel.classList.add("hidden");
+      updateLabelAndNotify();
+      renderCalendar();
+    }
+  };
+
   window.OGUE_RESUME_FILTER = {
     get startDate() {
       return startDate;

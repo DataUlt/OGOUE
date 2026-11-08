@@ -166,6 +166,18 @@ document.addEventListener("DOMContentLoaded", function () {
     // Valeur par défaut : aujourd'hui
     setTodayDefault();
 
+    // Périodes rapides (filtre-periode.js) : imposer une période au calendrier
+    window.OGOUE_FILTRE_DATES = {
+        definir(debut, fin) {
+            startDate = debut;
+            endDate = fin;
+            current = new Date(Number(fin.slice(0, 4)), Number(fin.slice(5, 7)) - 1, 1);
+            panel.classList.add("hidden");
+            updateLabel();
+            renderCalendar();
+        }
+    };
+
     // Ouverture / fermeture du panel
     btn.addEventListener("click", () => {
         panel.classList.toggle("hidden");
@@ -2049,6 +2061,151 @@ document.addEventListener("DOMContentLoaded", function () {
         
     }
 
+    // ── État des stocks (document à imprimer) ──────────────────────
+    // Stock théorique = stock initial + entrées − sorties, d'après les
+    // mouvements enregistrés. Le stock compté est saisi par le gérant lors de
+    // l'inventaire physique ; l'écart et la valeur en découlent. Ce comptage
+    // n'est pas enregistré : il sert au document du jour.
+    const fmtNb = (n) => Number(n || 0).toLocaleString("fr-FR", { maximumFractionDigits: 2 });
+    const fmtF = (n) => Math.round(Number(n) || 0).toLocaleString("fr-FR");
+    const signe = (n) => (n > 0 ? "+" : n < 0 ? "−" : "") + fmtNb(Math.abs(n));
+    const S = {
+        carte: "color:#0f172a;background:#fff;font-family:inherit",
+        h2: "margin:22px 0 8px;font-size:15px;font-weight:700;color:#0B2A5B",
+        table: "width:100%;border-collapse:collapse;font-size:12.5px",
+        th: "padding:7px 8px;background:#0B2A5B;color:#fff;font-weight:600;text-align:right;border:1px solid #0B2A5B",
+        thG: "padding:7px 8px;background:#0B2A5B;color:#fff;font-weight:600;text-align:left;border:1px solid #0B2A5B",
+        td: "padding:6px 8px;border:1px solid #cbd5e1;text-align:right;white-space:nowrap",
+        tdG: "padding:6px 8px;border:1px solid #cbd5e1;text-align:left"
+    };
+
+    // Les quatre colonnes de la partie 1 expliquées, en haut du document
+    const LEXIQUE_STOCKS = (() => {
+        const carte = (num, titre, sousTitre, texte, exemple) => `<div style="flex:1 1 180px;border:1px solid #cbd5e1;border-radius:12px;padding:10px 12px;background:#fff">
+            <div style="font-weight:700;font-size:13px;color:#0B2A5B">${num}. ${titre}</div>
+            <div style="font-size:12px;color:#0088CC;font-weight:600;margin-bottom:4px">${sousTitre}</div>
+            <div style="font-size:12px;line-height:1.5;color:#334155">${texte}</div>
+            <div style="font-size:11.5px;line-height:1.5;color:#64748b;margin-top:4px">${exemple}</div></div>`;
+        return `<div style="margin-top:18px;border-radius:14px;background:#f1f5f9;padding:12px">
+            <div style="font-weight:700;font-size:13px;margin-bottom:8px">Comment lire ce document</div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+                ${carte(1, "Stock initial", "Ce que vous possédez au départ",
+                    "La quantité en magasin au début de la période. Pour une nouvelle activité, il peut être de zéro ; sinon, c'est en général le stock final de la période précédente.",
+                    "Ex. : le 1er octobre, vous commencez avec 20 sacs de riz.")}
+                ${carte(2, "Entrées", "Ce que vous ajoutez au stock",
+                    "Tout ce qui entre pendant la période : achats auprès des fournisseurs, mais aussi retours de clients ou transferts entrants.",
+                    "Ex. : 10 sacs d'un fournisseur + 5 d'un autre = 15 sacs.")}
+                ${carte(3, "Sorties", "Ce que vous retirez du stock",
+                    "Tout ce qui quitte le stock : les ventes, mais aussi les produits abîmés, perdus ou pris pour votre usage personnel (« Sortie de stock » dans le catalogue).",
+                    "Ex. : 12 vendus + 1 abîmé + 1 pris pour vous = 14 sacs.")}
+                ${carte(4, "Stock théorique", "Ce que vous devriez avoir",
+                    "Ce qui devrait rester en magasin d'après toutes les opérations enregistrées dans OGOUE. On le compare ensuite au stock réellement compté.",
+                    "<strong style=\"color:#0B2A5B\">Stock initial + Entrées − Sorties = Stock théorique</strong>")}
+            </div></div>`;
+    })();
+
+    function calculerEtatStocks(articles, comptes) {
+        return articles.map((a) => {
+            const sorties = Math.max(0, a.stockDepart + a.entrees - a.stock);
+            const compte = comptes[a.id] === undefined || comptes[a.id] === "" ? a.stock : Number(comptes[a.id]);
+            const ecart = compte - a.stock;
+            return { ...a, sorties, theorique: a.stock, compte, ecart, valeurComptee: a.coutAchat === null ? null : compte * a.coutAchat };
+        });
+    }
+
+    // Parties 3 et 4, et chiffres du haut : recalculés à chaque saisie du comptage
+    function partiesCalculees(lignes, meta) {
+        const valorises = lignes.filter((l) => l.valeurComptee !== null);
+        const total = valorises.reduce((s, l) => s + l.valeurComptee, 0);
+        const sansCout = lignes.filter((l) => l.valeurComptee === null);
+        const valo = `<table style="${S.table}"><thead><tr><th style="${S.thG}">Produit</th><th style="${S.th}">Quantité comptée</th><th style="${S.th}">Coût unitaire</th><th style="${S.th}">Valeur</th></tr></thead><tbody>${
+            lignes.map((l) => `<tr><td style="${S.tdG}">${echapperHtml(l.name)}</td><td style="${S.td}">${fmtNb(l.compte)}</td><td style="${S.td}">${l.coutAchat === null ? "non renseigné" : fmtF(l.coutAchat)}</td><td style="${S.td}">${l.valeurComptee === null ? "—" : fmtF(l.valeurComptee)}</td></tr>`).join("")
+        }<tr style="font-weight:700;background:#e2e8f0"><td style="${S.tdG}" colspan="3">TOTAL</td><td style="${S.td}">${fmtF(total)} FCFA</td></tr></tbody></table>`;
+
+        const MOTIFS_SORTIE = { abime: "abîmé", usage_personnel: "usage personnel", perte: "perte ou vol" };
+        const sortiesHorsVentes = lignes.filter((l) => l.sortiesMotifs && Object.keys(l.sortiesMotifs).length).map((l) =>
+            `<li><strong>${echapperHtml(l.name)}</strong> : sorties hors ventes, ${Object.entries(l.sortiesMotifs).map(([m, q]) => `${fmtNb(q)} ${MOTIFS_SORTIE[m] || m}`).join(", ")}.</li>`).join("");
+        const alertes = lignes.map((l) => {
+            const nom = echapperHtml(l.name);
+            const unites = (n) => `${fmtNb(Math.abs(n))} unité${Math.abs(n) > 1 ? "s" : ""}`;
+            if (l.ecart < 0) return `<li><strong>${nom}</strong> : écart négatif de ${unites(l.ecart)} (manquant).</li>`;
+            if (l.ecart > 0) return `<li><strong>${nom}</strong> : écart positif de ${unites(l.ecart)} (surplus).</li>`;
+            if (l.compte <= 0) return `<li><strong>${nom}</strong> : stock épuisé, à réapprovisionner.</li>`;
+            return `<li><strong>${nom}</strong> : stock conforme.</li>`;
+        }).join("");
+        const nbEcarts = lignes.filter((l) => l.ecart !== 0).length;
+        const conclusion = `Au ${meta.situation}, la valeur du stock physique recensé est estimée à <strong>${fmtF(total)} FCFA</strong>.` +
+            (nbEcarts ? ` Des écarts ont été constatés sur ${nbEcarts} référence${nbEcarts > 1 ? "s" : ""} et doivent être vérifiés.` : " Aucun écart n'a été constaté entre le stock théorique et le stock compté.") +
+            (sansCout.length ? ` ${sansCout.length} référence${sansCout.length > 1 ? "s n'ont" : " n'a"} pas de coût d'achat renseigné et ne sont pas valorisées.` : "");
+        return { total, valo, alertes: `<ul style="margin:0 0 10px 18px;padding:0;font-size:13px;line-height:1.7;list-style:disc">${alertes}${sortiesHorsVentes}</ul><p style="margin:0;font-size:13px">${conclusion}</p>` };
+    }
+
+    /**
+     * Document complet. interactif : la colonne « Stock compté » est un champ
+     * de saisie (écran) ; sinon le chiffre saisi est écrit (impression).
+     */
+    function documentEtatStocks(lignes, meta, interactif) {
+        const p = partiesCalculees(lignes, meta);
+        const champ = (l) => interactif
+            ? `<input type="number" min="0" step="any" inputmode="decimal" data-compte="${echapperHtml(l.id)}" value="${l.compte}" style="width:80px;padding:4px 6px;border:1px solid #94a3b8;border-radius:6px;text-align:right;font:inherit;color:#0f172a;background:#fff">`
+            : fmtNb(l.compte);
+        const couleurEcart = (n) => (n < 0 ? "#b91c1c" : n > 0 ? "#047857" : "#0f172a");
+        const ligneInfo = (libelle, valeur) => valeur ? `<div><span style="color:#64748b">${libelle} :</span> <strong>${echapperHtml(valeur)}</strong></div>` : "";
+        return `<div data-etat-stocks style="${S.carte}">
+            <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px 24px;align-items:flex-start">
+                <div>
+                    <div style="font-size:13px;font-weight:800;letter-spacing:.08em;color:#0088CC">OGOUE</div>
+                    <div style="font-size:22px;font-weight:800;color:#0B2A5B;margin-top:2px">ÉTAT DES STOCKS</div>
+                    <div style="font-size:13px;color:#475569;margin-top:2px">Situation au ${meta.situation}</div>
+                    <div style="font-size:13px;margin-top:10px;line-height:1.6">
+                        ${ligneInfo("Entreprise", meta.entreprise)}${ligneInfo("Activité", meta.activite)}${ligneInfo("Période de suivi", meta.periode)}
+                    </div>
+                </div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap">
+                    <div style="border:1px solid #cbd5e1;border-radius:12px;padding:10px 14px;min-width:120px"><div style="font-size:11px;color:#64748b">Références suivies</div><div style="font-size:22px;font-weight:800">${lignes.length}</div></div>
+                    <div style="border:1px solid #cbd5e1;border-radius:12px;padding:10px 14px;min-width:150px;background:#f1f5f9"><div style="font-size:11px;color:#64748b">Valeur du stock physique</div><div style="font-size:22px;font-weight:800"><span data-total-stock>${fmtF(p.total)}</span> <span style="font-size:12px;font-weight:600;color:#64748b">FCFA</span></div></div>
+                </div>
+            </div>
+
+            ${LEXIQUE_STOCKS}
+
+            <h2 style="${S.h2}">1. Situation détaillée des stocks</h2>
+            <div style="overflow-x:auto"><table style="${S.table}"><thead><tr><th style="${S.thG}">Produit</th><th style="${S.th}">Stock initial</th><th style="${S.th}">Entrées</th><th style="${S.th}">Sorties</th><th style="${S.th}">Stock théorique</th></tr></thead><tbody>${
+                lignes.map((l) => `<tr><td style="${S.tdG}">${echapperHtml(l.name)}</td><td style="${S.td}">${fmtNb(l.stockDepart)}</td><td style="${S.td}">${fmtNb(l.entrees)}</td><td style="${S.td}">${fmtNb(l.sorties)}</td><td style="${S.td};font-weight:700">${fmtNb(l.theorique)}</td></tr>`).join("")
+            }</tbody></table></div>
+
+            <h2 style="${S.h2}">2. Résultat de l'inventaire physique</h2>
+            ${interactif ? `<p style="margin:0 0 8px;font-size:12.5px;color:#475569">Saisissez ce que vous avez compté sur place. Par défaut, le stock compté est égal au stock théorique.</p>` : ""}
+            <div style="overflow-x:auto"><table style="${S.table}"><thead><tr><th style="${S.thG}">Produit</th><th style="${S.th}">Stock théorique</th><th style="${S.th}">Stock compté</th><th style="${S.th}">Écart</th></tr></thead><tbody>${
+                lignes.map((l) => `<tr><td style="${S.tdG}">${echapperHtml(l.name)}</td><td style="${S.td}">${fmtNb(l.theorique)}</td><td style="${S.td}">${champ(l)}</td><td style="${S.td};font-weight:700;color:${couleurEcart(l.ecart)}" data-ecart="${echapperHtml(l.id)}">${signe(l.ecart)}</td></tr>`).join("")
+            }</tbody></table></div>
+
+            ${interactif ? `<div style="margin-top:10px;display:flex;flex-wrap:wrap;align-items:center;gap:10px">
+                <button type="button" data-corriger-stock style="height:38px;padding:0 16px;border:0;border-radius:999px;background:#0088CC;color:#fff;font-weight:700;font-size:13px;cursor:pointer">Corriger le stock avec ce comptage</button>
+                <span data-corriger-message style="font-size:12.5px;color:#475569">Le stock de l'application sera ajusté des écarts ci-dessus.</span></div>` : ""}
+
+            <h2 style="${S.h2}">3. Valorisation du stock</h2>
+            <div style="overflow-x:auto" data-partie-valo>${p.valo}</div>
+
+            <h2 style="${S.h2}">4. Alertes et observations</h2>
+            <div data-partie-alertes>${p.alertes}</div>
+
+            <p style="margin:18px 0 0;padding-top:10px;border-top:1px solid #e2e8f0;font-size:11px;color:#64748b">Document de gestion généré à partir des mouvements et du comptage physique enregistrés dans OGOUE.</p>
+        </div>`;
+    }
+
+    // Coordonnées de l'entreprise pour l'en-tête du document
+    async function lireEntreprise() {
+        let org = {};
+        try { org = JSON.parse(localStorage.getItem("ogo_org") || "null") || {}; } catch (e) {}
+        try {
+            const API_BASE_URL = (['localhost', '127.0.0.1'].some(h => location.hostname.includes(h))) ? 'http://localhost:3001' : 'https://api.ogoue.com';
+            const r = await fetch(`${API_BASE_URL}/api/organization`, { headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` } });
+            if (r.ok) { const o = await r.json(); org = { ...org, name: o.name || org.name, activity: o.activity }; }
+        } catch (e) {}
+        return org;
+    }
+
     /**
      * Bouton "Générer l'aperçu" - Inventaire du stock
      * Deux documents : l'état des stocks, et la liste de réapprovisionnement.
@@ -2071,14 +2228,6 @@ document.addEventListener("DOMContentLoaded", function () {
             const articles = rapport.articles;
             const fcfa = (n) => `${Math.round(Number(n) || 0).toLocaleString("fr-FR")} FCFA`;
             const nombre = (n) => Number(n || 0).toLocaleString("fr-FR", { maximumFractionDigits: 2 });
-            const jours = (n) => (n === null || n === undefined ? "—" : `${n} jour${n > 1 ? "s" : ""}`);
-            const statutHtml = {
-                "OK": '<span class="text-green-700">✅ OK</span>',
-                "À commander": '<span class="text-amber-600 font-semibold">⚠️ À commander</span>',
-                "Stock dormant": '<span class="text-blue-700">🔵 Stock dormant</span>',
-                "Rupture": '<span class="text-red-600 font-semibold">🔴 Rupture</span>',
-                "Vide": '<span class="text-gray-500">Vide</span>',
-            };
 
             const libelleFr = new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
             const titrePeriode = `du ${libelleFr.format(new Date(debut + "T12:00:00"))} au ${libelleFr.format(new Date(fin + "T12:00:00"))}`;
@@ -2090,54 +2239,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-            // 1. État des stocks
-            const valeurTotale = articles.reduce((s, a) => s + a.valeur, 0);
-            const lignesEtat = articles.map((a) => `<tr class="border-b border-gray-100 dark:border-gray-700">
-                    <td class="py-3 pr-4 font-medium">${echapperHtml(a.name)}</td>
-                    <td class="py-3 pr-4 text-right">${nombre(a.stockDepart)}</td>
-                    <td class="py-3 pr-4 text-right font-semibold">${nombre(a.stock)}</td>
-                    <td class="py-3 pr-4 text-right">${a.coutAchat === null ? "—" : fcfa(a.coutAchat)}</td>
-                    <td class="py-3 pr-4 text-right">${fcfa(a.valeur)}</td>
-                    <td class="py-3 pr-4 text-right">${nombre(a.ventes)}</td>
-                    <td class="py-3 pr-4 text-right">${jours(a.couvertureJours)}</td>
-                    <td class="py-3">${statutHtml[a.statut] || echapperHtml(a.statut)}</td>
-                </tr>`).join("");
-
-            const documentEtat = `<div class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm p-5">
-                    <h3 class="text-lg font-bold">1. État des stocks</h3>
-                    <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary mb-4">${titrePeriode}.</p>
-                    <div class="rounded-lg bg-background-light dark:bg-background-dark p-4 mb-4 text-sm">
-                        <p class="font-semibold mb-1">Qu'est-ce que la couverture ?</p>
-                        <p class="mb-2">La couverture répond à une seule question : avec le rythme de vente actuel, pendant combien de jours ce stock va-t-il tenir ?</p>
-                        <p class="mb-1"><span class="font-semibold">Le calcul :</span> on mesure le rythme (unités vendues par jour), puis on divise le stock par ce rythme.</p>
-                        <p class="mb-2"><span class="font-semibold">Exemple :</span> stock de 14 robes, 1 vendue sur 24 jours. Rythme : 1 ÷ 24. Couverture : 14 × 24 = 336 jours. Ce résultat repose sur une seule vente : une vente de plus ou de moins change tout.</p>
-                        <p><span class="font-semibold">Pourquoi c'est utile :</span> 2 unités par jour avec 14 en stock donne 7 jours, il faut commander vite. 1 unité par mois avec 14 en stock donne 14 mois : du stock qui dort, de l'argent immobilisé.</p>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm">
-                            <thead>
-                                <tr class="border-b border-black/10">
-                                    <th class="py-2 pr-4 font-medium">Article</th>
-                                    <th class="py-2 pr-4 font-medium text-right">Stock de départ</th>
-                                    <th class="py-2 pr-4 font-medium text-right">Stock</th>
-                                    <th class="py-2 pr-4 font-medium text-right">Coût d'achat unitaire</th>
-                                    <th class="py-2 pr-4 font-medium text-right">Valeur du stock</th>
-                                    <th class="py-2 pr-4 font-medium text-right">Ventes sur période</th>
-                                    <th class="py-2 pr-4 font-medium text-right">Couverture</th>
-                                    <th class="py-2 font-medium">Statut</th>
-                                </tr>
-                            </thead>
-                            <tbody>${lignesEtat}</tbody>
-                            <tfoot>
-                                <tr class="font-bold">
-                                    <td class="pt-3 pr-4" colspan="4">Total</td>
-                                    <td class="pt-3 pr-4 text-right">${fcfa(valeurTotale)}</td>
-                                    <td colspan="3"></td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                </div>`;
+            // 1. État des stocks : document en 4 parties, comptage saisi à l'écran
+            const org = await lireEntreprise();
+            const dateLongue = (iso) => libelleFr.format(new Date(iso + "T12:00:00")).replace(/^0?1 /, "1er ");
+            const meta = {
+                situation: dateLongue(fin),
+                entreprise: org.name || "",
+                activite: org.activity || "",
+                periode: `Du ${dateLongue(debut)} au ${dateLongue(fin)}`
+            };
+            const comptes = {};
 
             // 2. Liste de réapprovisionnement : seulement ce qui manque
             const aCommander = articles.filter((a) => a.aCommander > 0);
@@ -2151,7 +2262,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 </tr>`).join("");
 
             const documentReappro = `<div class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm p-5">
-                    <h3 class="text-lg font-bold">2. Liste de réapprovisionnement</h3>
+                    <h3 class="text-lg font-bold">Liste de réapprovisionnement</h3>
                     <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary mb-4">Besoin pour 30 jours, au rythme des ventes de la période. Prête à envoyer à votre fournisseur.</p>
                     ${aCommander.length === 0
                         ? `<p class="text-text-light-secondary dark:text-text-dark-secondary">Rien à commander : vos stocks couvrent les 30 prochains jours.</p>`
@@ -2178,13 +2289,79 @@ document.addEventListener("DOMContentLoaded", function () {
                 </div>`;
 
             const resultsContainer = conteneurResultats("generateStockBtn");
-            resultsContainer.innerHTML = `<div class="flex flex-col gap-6">${documentEtat}${documentReappro}</div>`;
+            resultsContainer.innerHTML = `<div class="flex flex-col gap-6">
+                    <div class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm p-5">
+                        <div class="flex justify-end mb-3">
+                            <button type="button" data-imprimer-stocks class="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-[#0B2A5B] text-white text-sm font-bold hover:bg-[#0B2A5B]/90">
+                                <span class="material-symbols-outlined text-base">print</span>Imprimer l'état des stocks</button>
+                        </div>
+                        <div data-zone-etat>${documentEtatStocks(calculerEtatStocks(articles, comptes), meta, true)}</div>
+                    </div>
+                    ${documentReappro}</div>`;
             panel.classList.add("hidden");
+
+            // Comptage : écart, valorisation, alertes et total suivent la saisie
+            const zoneEtat = resultsContainer.querySelector("[data-zone-etat]");
+            zoneEtat.addEventListener("input", (e) => {
+                const champ = e.target.closest("[data-compte]");
+                if (!champ) return;
+                comptes[champ.dataset.compte] = champ.value;
+                const lignes = calculerEtatStocks(articles, comptes);
+                lignes.forEach((l) => {
+                    const c = zoneEtat.querySelector(`[data-ecart="${CSS.escape(String(l.id))}"]`);
+                    if (c) { c.textContent = signe(l.ecart); c.style.color = l.ecart < 0 ? "#b91c1c" : l.ecart > 0 ? "#047857" : "#0f172a"; }
+                });
+                const p = partiesCalculees(lignes, meta);
+                zoneEtat.querySelector("[data-partie-valo]").innerHTML = p.valo;
+                zoneEtat.querySelector("[data-partie-alertes]").innerHTML = p.alertes;
+                zoneEtat.querySelector("[data-total-stock]").textContent = fmtF(p.total);
+            });
+            // Corriger le stock : chaque écart devient un mouvement « inventaire »
+            zoneEtat.addEventListener("click", async (e) => {
+                const bouton = e.target.closest("[data-corriger-stock]");
+                if (!bouton) return;
+                const msg = zoneEtat.querySelector("[data-corriger-message]");
+                const ecarts = calculerEtatStocks(articles, comptes).filter((l) => l.ecart !== 0).map((l) => ({ id: l.id, ecart: l.ecart, name: l.name }));
+                if (!ecarts.length) { msg.textContent = "Aucun écart : le stock est déjà juste."; msg.style.color = "#047857"; return; }
+                const liste = ecarts.map((x) => `• ${x.name} : ${signe(x.ecart)}`).join("\n");
+                if (!confirm(`Ajuster le stock de ${ecarts.length} article${ecarts.length > 1 ? "s" : ""} ?\n\n${liste}`)) return;
+                bouton.disabled = true;
+                const r = await window.OGOUE.corrigerInventaire(ecarts.map(({ id, ecart }) => ({ id, ecart })));
+                bouton.disabled = false;
+                if (!r.ok) { msg.textContent = r.error; msg.style.color = "#b91c1c"; return; }
+                msg.style.color = r.echecs.length ? "#b45309" : "#047857";
+                msg.textContent = `Stock corrigé pour ${r.corriges.length} article${r.corriges.length > 1 ? "s" : ""}.` +
+                    (r.echecs.length ? ` ${r.echecs.length} n'ont pas pu l'être (stock modifié entre-temps) : générez de nouveau l'aperçu.` : " Imprimez le document pour garder la trace du comptage.");
+                bouton.style.display = "none";
+            });
+
+            resultsContainer.querySelector("[data-imprimer-stocks]").addEventListener("click", () => {
+                const html = documentEtatStocks(calculerEtatStocks(articles, comptes), meta, false);
+                const w = window.open("", "", "width=900,height=1000");
+                if (!w) { alert("Autorisez les fenêtres pour imprimer."); return; }
+                w.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>État des stocks</title><style>body{font-family:Arial,sans-serif;margin:24px}@media print{body{margin:10mm}th{-webkit-print-color-adjust:exact;print-color-adjust:exact}tr{page-break-inside:avoid}}</style></head><body>${html}</body></html>`);
+                w.document.close();
+                setTimeout(() => { w.print(); w.close(); }, 400);
+            });
         } catch (error) {
             console.error("Erreur lors de la génération de l'inventaire:", error);
             const resultsContainer = conteneurResultats("generateStockBtn");
             resultsContainer.innerHTML = `<div class="bg-card-light text-red-700 rounded-xl shadow-sm p-5">Erreur: ${error && error.message ? error.message : error}</div>`;
         }
+    }
+
+    // « Générer l'aperçu » : roue de chargement dans le bouton, puis écran
+    // « … prêt » quand l'aperçu est affiché (rien si une erreur s'affiche)
+    function avecChargement(bouton, action, titre) {
+        return async (e) => {
+            if (bouton.disabled) return;
+            const F = window.OGOUE_CONNEXION;
+            F?.attente(bouton, "Génération…");
+            try { await action(e); } finally { F?.fin(bouton); }
+            const zone = document.getElementById("etatFinanciersResults");
+            const erreur = !zone || !zone.textContent.trim() || zone.querySelector(".text-red-700") || /^\s*Erreur/.test(zone.textContent);
+            if (!erreur) F?.pret({ titre, texte: "Votre aperçu s'affiche ci-dessous." });
+        };
     }
 
     // Attacher les événements aux boutons via IDs
@@ -2196,24 +2373,24 @@ document.addEventListener("DOMContentLoaded", function () {
     const printAllBtn = document.getElementById("printAllBtn");
 
     if (generateCompteBtn) {
-        generateCompteBtn.addEventListener("click", handleGenerateCompte);
+        generateCompteBtn.addEventListener("click", avecChargement(generateCompteBtn, handleGenerateCompte, "Compte de résultat prêt"));
     }
 
     if (generateFluxBtn) {
-        generateFluxBtn.addEventListener("click", handleGenerateFlux);
+        generateFluxBtn.addEventListener("click", avecChargement(generateFluxBtn, handleGenerateFlux, "Tableau de flux prêt"));
     }
 
     if (generateVentesBtn) {
-        generateVentesBtn.addEventListener("click", handleGenerateVentes);
+        generateVentesBtn.addEventListener("click", avecChargement(generateVentesBtn, handleGenerateVentes, "Historique des ventes prêt"));
     }
 
     if (generateDepensesBtn) {
-        generateDepensesBtn.addEventListener("click", handleGenerateDepenses);
+        generateDepensesBtn.addEventListener("click", avecChargement(generateDepensesBtn, handleGenerateDepenses, "Historique des dépenses prêt"));
     }
 
     const generateStockBtn = document.getElementById("generateStockBtn");
     if (generateStockBtn) {
-        generateStockBtn.addEventListener("click", handleGenerateStock);
+        generateStockBtn.addEventListener("click", avecChargement(generateStockBtn, handleGenerateStock, "Inventaire du stock prêt"));
     }
 
     if (exportPdfBtn) {
