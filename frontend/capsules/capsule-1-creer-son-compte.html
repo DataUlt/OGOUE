@@ -117,6 +117,8 @@ button:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
 @media (max-width:960px){.mk{padding:14px;gap:9px;font-size:13px}.mh{font-size:16px}.fv{min-height:32px;padding:6px 8px;font-size:13px}.kpi b{font-size:16px}.score b{font-size:30px}.chart svg{height:80px}}
 /* Téléphone : texte au-dessus, maquette en dessous */
 @media (max-width:700px){.stage{aspect-ratio:auto;grid-template-columns:1fr;padding:24px 18px 30px;gap:20px}.p{max-width:none}.pos{margin-left:0}.dots{width:100%;justify-content:center}.ctrl{justify-content:center}}
+/* Petit écran : les cartes côte à côte n'ont plus la place, une par ligne */
+@media (max-width:560px){.cards.g3,.cards.g2{grid-template-columns:minmax(0,1fr)}}
 @media (prefers-reduced-motion:reduce){.in,.in2,.hot,.caret{animation:none}.score circle.v{transition:none}}
 </style>
 </head>
@@ -330,7 +332,7 @@ const CAPSULE = {
      "items": [
       {
        "l": "Comment nous avez-vous connu ?",
-       "v": "YouTube (tutoriels)  ▾"
+       "v": "Recommandation d'un proche  ▾"
       }
      ]
     }
@@ -424,6 +426,10 @@ const FRAPPE_DEBUT = 1000;    // délai avant le début de la saisie (ms)
   const $ = (id) => document.getElementById(id);
   const txt = $('txt'), side = $('side'), prog = $('prog'), dots = $('dots'), play = $('play'), pos = $('pos');
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  /* Logo OGOUE : l'image du site, recadree sur sa partie visible
+     (1536 x 1024 px, dessin entre x 404-1122 et y 314-562). h = hauteur affichée. */
+  const logo = (h) => { const s = h / 248, px = (v) => Math.round(v * s) + 'px';
+    return '<span class="logo" style="display:block;position:relative;overflow:hidden;width:' + px(718) + ';height:' + px(248) + '"><img src="/app/Logo-ogoue%20(2).png" alt="OGOUE" style="position:absolute;max-width:none;left:-' + px(404) + ';top:-' + px(314) + ';width:' + px(1536) + ';height:' + px(1024) + '"></span>'; };
   const cls = (base, flags) => base + Object.keys(flags).filter((k) => flags[k]).map((k) => ' ' + k).join('');
   const reduit = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   let i = 0, t = 0, playing = false, ended = false, visible = false, started = false, last = 0, typed = [];
@@ -432,13 +438,13 @@ const FRAPPE_DEBUT = 1000;    // délai avant le début de la saisie (ms)
 
   function block(b) {
     switch (b.k) {
-      case 'sitenav': return '<div class="nav"><span class="wm">OGOUÉ</span><span>Accueil</span><span>Tarifs</span><span>À propos</span><span class="bt hot">Commencer</span></div>';
-      case 'appnav': return '<div class="nav"><span class="wm">OGOUÉ</span>' + ['Tableau de Bord', 'Comptabilité', 'Financement'].map((x, j) => '<span class="' + cls('nv', { on: j === b.on || b.hot, hot: b.hot }) + '">' + x + '</span>').join('') + '</div>';
+      case 'sitenav': return '<div class="nav"><span class="wm">' + logo(26) + '</span><span>Accueil</span><span>Tarifs</span><span>À propos</span><span class="bt hot">Commencer</span></div>';
+      case 'appnav': return '<div class="nav"><span class="wm">' + logo(26) + '</span>' + ['Tableau de Bord', 'Comptabilité', 'Financement'].map((x, j) => '<span class="' + cls('nv', { on: j === b.on || b.hot, hot: b.hot }) + '">' + x + '</span>').join('') + '</div>';
       case 'head': return '<div><p class="mh">' + esc(b.t) + '</p>' + (b.s ? '<p class="ms">' + esc(b.s) + '</p>' : '') + '</div>';
       case 'steps': return '<div style="display:flex;flex-direction:column;gap:8px"><div class="stp">' + [1, 2, 3, 4].map((x) => '<span class="' + cls('sd', { ok: x < b.n, act: x === b.n }) + '">' + x + '</span>' + (x < 4 ? '<span class="' + cls('sl', { ok: x < b.n }) + '"></span>' : '')).join('') + '</div><span class="lb">Étape ' + b.n + ' sur 4 · ' + STEP_NAMES[b.n - 1] + '</span></div>';
       case 'fields': return '<div class="g' + b.items.length + '">' + b.items.map((x) => '<div class="fl"><span class="lb">' + esc(x.l) + '</span><div class="' + cls('fv', { ph: x.ph, hot: x.hot || x.type }) + '"' + (x.type ? ' data-type="' + esc(x.v) + '"' : '') + '>' + (x.type ? '' : esc(x.v)) + '</div></div>').join('') + '</div>';
       case 'chips': return '<div style="display:flex;flex-direction:column;gap:6px">' + (b.label ? '<span class="lb">' + esc(b.label) + '</span>' : '') + '<div class="chips">' + b.items.map((x) => '<span class="' + cls('chip', { on: x.on, hot: x.hot }) + '">' + esc(x.t) + '</span>').join('') + '</div></div>';
-      case 'cards': return '<div class="g' + Math.min(3, b.items.length) + '">' + b.items.map((x) => '<div class="' + cls('card', { on: x.on, hot: x.hot }) + '"><b>' + esc(x.t) + (x.tag ? '<span class="tag">' + esc(x.tag) + '</span>' : '') + '</b>' + (x.s ? '<span>' + esc(x.s) + '</span>' : '') + '</div>').join('') + '</div>';
+      case 'cards': return '<div class="cards g' + Math.min(3, b.items.length) + '">' + b.items.map((x) => '<div class="' + cls('card', { on: x.on, hot: x.hot }) + '"><b>' + esc(x.t) + (x.tag ? '<span class="tag">' + esc(x.tag) + '</span>' : '') + '</b>' + (x.s ? '<span>' + esc(x.s) + '</span>' : '') + '</div>').join('') + '</div>';
       case 'kpis': return '<div class="g3">' + b.items.map((x) => '<div class="' + cls('kpi', { dark: x[2] }) + '"><small>' + esc(x[0]) + '</small><b>' + esc(x[1]) + '</b></div>').join('') + '</div>';
       case 'rows': return '<div class="rows">' + b.items.map((x) => '<div class="' + cls('rw', { hl: x[2] }) + '"><span>' + esc(x[0]) + '</span><strong>' + esc(x[1]) + '</strong></div>').join('') + '</div>';
       case 'btns': return '<div class="btns">' + b.items.map((x) => '<span class="' + cls('bt', { [x.v || '_']: !!x.v, full: x.full, hot: x.hot }) + '">' + esc(x.t) + '</span>').join('') + '</div>';
@@ -457,7 +463,7 @@ const FRAPPE_DEBUT = 1000;    // délai avant le début de la saisie (ms)
     const s = S[i];
     txt.innerHTML = '<div class="in" style="display:flex;flex-direction:column;gap:12px"><p class="k">' + esc(s.k) + '</p><h2 class="t">' + esc(s.t) + '</h2><p class="p">' + esc(s.p) + '</p></div>';
     if (s.brand) {
-      side.innerHTML = '<div class="brand in2"><div class="wm">OGOUÉ<svg viewBox="0 0 64 22" aria-hidden="true"><path d="M2 14c10-8 18 6 30 0s18-8 26-4" fill="none" stroke="#14B8D9" stroke-width="4" stroke-linecap="round"/><path d="M52 3l9-1-1 9M60 2L49 13" fill="none" stroke="#F2A04B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="sl">Bien gérer aujourd\'hui pour mieux préparer son développement demain.</span><span class="cp">' + esc(S[0].k) + '</span></div>';
+      side.innerHTML = '<div class="brand in2"><div class="wm">' + logo(64) + '</div><span class="sl">Bien gérer aujourd\'hui pour mieux préparer son développement demain.</span><span class="cp">' + esc(S[0].k) + '</span></div>';
     } else {
       side.innerHTML = '<div class="mk in2"><div class="url"><i></i><i></i><i></i><span>' + esc(s.url) + '</span></div>' + (s.m || []).map(block).join('') + '</div>';
     }
