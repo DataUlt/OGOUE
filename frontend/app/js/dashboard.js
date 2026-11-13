@@ -489,7 +489,8 @@ function rendreBarres(v, zone) {
   const y = (val) => Y0 - (val / sommet) * (Y0 - HAUT);
   const creneau = (X1 - X0) / n;
   const cx = (i) => X0 + creneau * (i + 0.5);
-  const ecart = Math.max(2, Math.min(6, creneau * 0.05));
+  // Petit espace entre la barre des ventes et celle des dépenses d'un même créneau
+  const ecart = Math.max(mobile ? 5 : 2, Math.min(8, creneau * 0.08));
   const large = Math.max(4, Math.min(46, (creneau * 0.7 - ecart) / 2));
   let meilleur = -1;
   seaux.forEach((s, i) => { if (s.ca > 0 && (meilleur < 0 || s.ca > seaux[meilleur].ca)) meilleur = i; });
@@ -525,34 +526,99 @@ function rendreBarres(v, zone) {
     return "";
   }
 
+  // Montants au-dessus des barres, à l'horizontale, jamais sur une autre barre
+  // ni sur un autre montant ; sans place, il reste au toucher de la barre.
+  const largeurTexte = (txt) => txt.length * 6.6;
+  const obstacles = [];   // emprise des barres
+  seaux.forEach((s, i) => {
+    const xV = cx(i) - ecart / 2 - large, xD = cx(i) + ecart / 2;
+    const hV = Math.max(hauteur(s.ca), hauteur(s.recu)), hD = Math.max(hauteur(s.dep), hauteur(s.sorti));
+    if (hV > 0) obstacles.push({ id: "v" + i, x0: xV - 1, x1: xV + large + 1, y0: Y0 - hV, y1: Y0 });
+    if (hD > 0) obstacles.push({ id: "d" + i, x0: xD - 1, x1: xD + large + 1, y0: Y0 - hD, y1: Y0 });
+  });
+  const poses = [];       // emprise des montants déjà posés
+  const touche = (r, o) => r.x0 < o.x1 && r.x1 > o.x0 && r.y0 < o.y1 && r.y1 > o.y0;
+  const libre = (r, propre) => r.x0 >= X0 - 4 && r.x1 <= W && r.y0 >= 0
+    && !obstacles.some((o) => o.id !== propre && touche(r, o)) && !poses.some((p) => touche(r, p));
+  // Le montant se pose à l'horizontale, juste au-dessus de sa barre, centré. Si la
+  // barre voisine du même jour est plus haute et le gênerait, il glisse sur le
+  // côté opposé, juste assez pour ne pas la toucher (ventes vers la gauche,
+  // dépenses vers la droite), et sa barre glisse avec lui pour rester centrée
+  // dessous, si elle ne touche alors aucune autre barre.
+  const decalage = {};    // barre déplacée sous son montant : id → décalage en px
+  function placer(xc, sommetBarre, txt, propre, classe) {
+    const l = largeurTexte(txt);
+    const y = sommetBarre - 7;
+    const essai = (x) => {
+      const r = { x0: x - l / 2, x1: x + l / 2, y0: y - 11, y1: y + 3 };
+      if (!libre(r, propre)) return "";
+      poses.push(r);
+      const dx = x - xc;
+      // Seules les barres des ventes suivent leur montant ; celles des dépenses ne bougent pas
+      if (Math.abs(dx) > 0.5 && propre[0] === "v") {
+        const o = obstacles.find((b) => b.id === propre);
+        const deplacee = o && { x0: o.x0 + dx, x1: o.x1 + dx, y0: o.y0, y1: o.y1 };
+        if (deplacee && deplacee.x0 >= X0 && !obstacles.some((b) => b.id !== propre && touche(deplacee, b))) {
+          Object.assign(o, { x0: deplacee.x0, x1: deplacee.x1 });
+          decalage[propre] = dx;
+        }
+      }
+      return `<text x="${x}" y="${y}" text-anchor="middle" class="${classe}">${txt}</text>`;
+    };
+    // Dans les bords du graphique (une barre collée au bord droit, par exemple)
+    const dansBords = (x) => Math.min(Math.max(x, X0 - 4 + l / 2), W - l / 2);
+    const i = propre.slice(1), voisine = obstacles.find((o) => o.id === (propre[0] === "v" ? "d" : "v") + i);
+    const ecarte = !voisine ? xc
+      : propre[0] === "v" ? Math.min(xc, voisine.x0 - 1 - l / 2) : Math.max(xc, voisine.x1 + 1 + l / 2);
+    // Centré d'abord, puis ramené dans les bords, puis écarté de la barre voisine ;
+    // jamais décollé de sa barre : le montant la recouvre toujours en partie
+    for (const x of [xc, dansBords(xc), ecarte, dansBords(ecarte)]) {
+      if (Math.abs(x - xc) > l / 2) continue;
+      const pose = essai(x);
+      if (pose) return pose;
+    }
+    return "";
+  }
+
+  // 1) Les montants : le meilleur créneau d'abord, puis les ventes du plus grand au plus petit
+  const geo = seaux.map((s, i) => {
+    const xV = cx(i) - ecart / 2 - large, xD = cx(i) + ecart / 2;
+    return {
+      xV, xD,
+      sommetV: Y0 - Math.max(hauteur(s.ca), hauteur(s.recu)),
+      sommetD: Y0 - Math.max(hauteur(s.dep), hauteur(s.sorti)),
+    };
+  });
+  let montantsVendus = "";
+  if (meilleur >= 0) {
+    const s = seaux[meilleur], g = geo[meilleur];
+    if (s.ca > 0) montantsVendus += placer(g.xV + large / 2, g.sommetV, montantCourt(s.ca), "v" + meilleur, "act-val");
+    if (s.dep > 0) montantsVendus += placer(g.xD + large / 2, g.sommetD, montantCourt(s.dep), "d" + meilleur, "act-val");
+  }
+  montantsVendus += seaux
+    .map((s, i) => ({ s, i }))
+    .filter(({ s, i }) => i !== meilleur && s.ca > 0)
+    .sort((a, b) => b.s.ca - a.s.ca)
+    .map(({ s, i }) => placer(geo[i].xV + large / 2, geo[i].sommetV, montantCourt(s.ca), "v" + i, "act-val act-val-autre"))
+    .join("");
+
+  // 2) Les barres, à leur place (ou glissées sous leur montant)
   const batons = seaux.map((s, i) => {
     const fort = i === meilleur;
-    const xV = cx(i) - ecart / 2 - large, xD = cx(i) + ecart / 2;
+    const xV = geo[i].xV + (decalage["v" + i] || 0), xD = geo[i].xD + (decalage["d" + i] || 0);
     const bV = barre(i, xV, s.ca, s.recu, ACT_ENTREE, ["ca", "recu"], fort);
     const bD = barre(i, xD, s.dep, s.sorti, ACT_SORTIE, ["dep", "sorti"], fort);
     let html = bV.html + bD.html;
-    if (fort) {
-      const xcV = xV + large / 2, xcD = xD + large / 2;
-      // Les deux totaux au-dessus de leurs barres ; s'ils se toucheraient
-      // (barres de hauteur proche et montants larges), celui de la barre la
-      // plus basse monte d'une ligne
-      let yV = bV.haut, yD = bD.haut;
-      const demi = (txt) => txt.length * 3.6;
-      const tV = montantCourt(s.ca), tD = s.dep > 0 ? montantCourt(s.dep) : "";
-      if (tD && Math.abs(yV - yD) < 14 && demi(tV) + demi(tD) + 4 > xcD - xcV) {
-        if (yV > yD) yV = yD - 14; else yD = yV - 14;
-      }
-      html += `<text x="${xcV}" y="${yV}" text-anchor="middle" class="act-val">${tV}</text>`;
-      if (tD) html += `<text x="${xcD}" y="${yD}" text-anchor="middle" class="act-val">${tD}</text>`;
-      html += montantPaye(xcV, s.ca, s.recu, bV) + montantPaye(xcD, s.dep, s.sorti, bD);
-    }
+    if (fort) html += montantPaye(xV + large / 2, s.ca, s.recu, bV) + montantPaye(xD + large / 2, s.dep, s.sorti, bD);
     return html;
   }).join("");
 
   // Libellés : tous s'ils tiennent, sinon quelques-uns répartis
   // Sur téléphone, autant de libellés que la largeur en laisse (environ 56 px chacun)
   const k = Math.min(n, mobile ? Math.max(2, Math.min(6, Math.floor((X1 - X0) / 56))) : 12);
-  const indices = k === n ? seaux.map((_, i) => i) : Array.from({ length: k }, (_, j) => Math.round((j * (n - 1)) / (k - 1)));
+  // Une barre sur « pas » : écarts réguliers, jamais deux libellés collés
+  const pasLib = Math.ceil(n / k);
+  const indices = seaux.map((_, i) => i).filter((i) => i % pasLib === 0);
   // Sous chaque libellé, ce qui reste (argent reçu − argent sorti) : vert ou rouge
   const etiquettes = indices.map((i) => {
     const s = seaux[i];
@@ -563,7 +629,7 @@ function rendreBarres(v, zone) {
     return `<text x="${cx(i)}" y="${H - 24}" text-anchor="middle" class="act-mois${i === meilleur ? " is-on" : ""}" data-i="${i}">${echapper(s.court)}</text>` + ligneReste;
   }).join("");
 
-  zone.innerHTML = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" class="act-svg">${grille}${batons}${etiquettes}</svg><div class="tdb-tip act-tip" id="actTip" hidden></div>`;
+  zone.innerHTML = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" class="act-svg">${grille}${batons}${montantsVendus}${etiquettes}</svg><div class="tdb-tip act-tip" id="actTip" hidden></div>`;
   barresCourantes = { seaux, X0, creneau, cx, W, meilleur };
 
   const nom = { mois: "Meilleur mois", semaine: "Meilleure semaine", jour: "Meilleur jour" }[unite];

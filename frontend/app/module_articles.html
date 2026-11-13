@@ -157,7 +157,12 @@
                             Prix unitaire (FCFA)
                         </label>
                         <input id="article-price" name="unitPrice" type="number" min="0" step="1" value="0"
-                               class="form-input rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-background-dark text-text-light dark:text-white h-12 px-4 text-base">
+                               class="form-input rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-background-dark text-text-light dark:text-white h-12 px-4 text-base disabled:opacity-50">
+                        <!-- Prix libre : gâteaux, couture sur mesure… le prix se tape à chaque vente -->
+                        <label class="mt-2 inline-flex items-start gap-2 text-sm cursor-pointer select-none">
+                            <input id="article-prix-libre" type="checkbox" class="mt-0.5 rounded border-gray-300 text-primary focus:ring-primary">
+                            <span>Le prix change à chaque vente <span class="text-text-light-muted dark:text-gray-400">(gâteaux, sur mesure…) : vous le tapez au moment de vendre</span></span>
+                        </label>
                     </div>
 
                     <div class="flex flex-col">
@@ -328,6 +333,11 @@
             }
 
             function render(articles) {
+                // Du dernier article enregistré au premier (le serveur les envoie par ordre alphabétique)
+                articles = articles.slice().sort(function (a, b) {
+                    return String(b.createdAt || "").localeCompare(String(a.createdAt || ""))
+                        || String(a.name).localeCompare(String(b.name), "fr");
+                });
                 derniersArticles = articles;
                 loadingEl.classList.add("hidden");
                 countEl.textContent = articles.length ? `(${articles.length})` : "";
@@ -357,7 +367,8 @@
 
                     const tdPrice = document.createElement("td");
                     tdPrice.className = "py-3 pr-4 text-right";
-                    tdPrice.textContent = formatPrice(a.unitPrice);
+                    tdPrice.textContent = Number(a.unitPrice) > 0 ? formatPrice(a.unitPrice) : "Prix libre";
+                    if (!(Number(a.unitPrice) > 0)) tdPrice.className += " text-text-light-muted dark:text-gray-400 italic";
 
                     const tdStock = document.createElement("td");
                     tdStock.className = "py-3 pr-4 text-right";
@@ -458,7 +469,7 @@
 
             async function onEditPrice(article) {
                 const saisie = window.prompt(
-                    `Nouveau prix unitaire pour "${article.name}" (FCFA) :`,
+                    `Nouveau prix unitaire pour "${article.name}" (FCFA).\nMettez 0 si le prix change à chaque vente (prix libre) :`,
                     String(article.unitPrice || 0)
                 );
                 if (saisie === null) return;
@@ -616,6 +627,14 @@
                 await refresh();
             }
 
+            // Case « Le prix change à chaque vente » : le champ prix se grise
+            const prixLibreInput = document.getElementById("article-prix-libre");
+            prixLibreInput?.addEventListener("change", function () {
+                priceInput.disabled = prixLibreInput.checked;
+                if (prixLibreInput.checked) priceInput.value = "";
+                else { priceInput.value = "0"; priceInput.focus(); }
+            });
+
             form.addEventListener("submit", async function (e) {
                 e.preventDefault();
                 hideMessage();
@@ -641,11 +660,19 @@
                     return;
                 }
 
+                const prixLibre = !!prixLibreInput?.checked;
+                const prix = prixLibre ? 0 : Number(priceInput.value || 0);
+                if (!prixLibre && !(prix > 0)) {
+                    showMessage("Indiquez un prix, ou cochez « Le prix change à chaque vente ».", "error");
+                    priceInput.focus();
+                    return;
+                }
+
                 submitBtn.disabled = true;
                 const res = await window.OGOUE.addArticle({
                     name: name,
                     type: typeInput.value,
-                    unitPrice: Number(priceInput.value || 0),
+                    unitPrice: prix,
                     stock: stock,
                     costPrice: costPrice,
                     ...(modeDeux() && typeInput.value === "produits" ? { fabrique: fabriqueInput.value === "oui" } : {})
@@ -660,6 +687,7 @@
                 showMessage(`"${name}" a été ajouté à votre catalogue.`, "success");
                 nameInput.value = "";
                 priceInput.value = "0";
+                if (prixLibreInput) { prixLibreInput.checked = false; priceInput.disabled = false; }
                 stockInput.value = "";
                 costInput.value = "";
                 nameInput.focus();

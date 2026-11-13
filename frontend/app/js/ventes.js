@@ -513,6 +513,10 @@
     if (articlesCache.length > 0) setModeListNotEmpty();
   }
 
+  // Prix négocié dans la saisie par cartes : mention ajoutée en tête du commentaire
+  // (« Prix négocié : 500 F au lieu de 600 F »), que le gérant voit sur la vente
+  let notePrixAuto = "";
+
   function getFormData() {
     const dateInput = document.getElementById("vente-date");
     const moyenInput = document.getElementById("vente-moyen-paiement");
@@ -581,7 +585,7 @@
       client_email: lireClient("recu-client-email"),
       // Facultatif : absent du contrôle de présence plus haut, une vente
       // sans commentaire doit pouvoir s'enregistrer.
-      note: (noteInput?.value || "").trim(),
+      note: [notePrixAuto, (noteInput?.value || "").trim()].filter(Boolean).join(" · "),
       file // Ajouter l'objet File pour l'upload
     };
   }
@@ -774,6 +778,13 @@
       </td>
       <td class="px-6 py-4">
         ${formatMontant(vente.montant)}
+        ${
+          // Prix changé à la saisie (par le gérant ou un agent) : signalé ici,
+          // le détail (« 500 F au lieu de 600 F ») s'ouvre d'un appui
+          /^Prix négocié :/.test(vente.note || "")
+            ? `<button type="button" class="commentaire-complet mt-1 flex items-center gap-1 whitespace-nowrap rounded-full bg-orange-100 dark:bg-orange-900/40 px-2 py-0.5 text-[11px] font-bold text-orange-800 dark:text-orange-200" title="${echapperHtml(vente.note.split(" · ")[0])}" data-commentaire="${echapperHtml(vente.note)}"><span class="material-symbols-outlined text-[13px]">sell</span>Prix négocié</button>`
+            : ""
+        }
       </td>
       <td class="px-6 py-4">
         ${
@@ -1720,7 +1731,24 @@
     const cle = (nom) => normalizeLabel(nom).toLowerCase();
     const suiviStock = (a) => a.stock !== null && a.stock !== undefined;
     const enCredit = () => moyenInput.value === "credit";
-    const totalPanier = () => panier.reduce((s, l) => s + (Number(l.article.unitPrice) || 0) * l.quantite, 0);
+    // Prix d'une ligne : celui du catalogue au départ, modifiable (prix négocié) ;
+    // article à prix libre (prix 0 au catalogue) : vide tant qu'on ne l'a pas tapé
+    const prixCatalogue = (a) => Number(a.unitPrice) || 0;
+    const prixDe = (l) => (l.prix == null ? 0 : l.prix);
+    const prixInitial = (a) => (prixCatalogue(a) > 0 ? prixCatalogue(a) : null);
+    const noteDe = (l) => {
+      const cat = prixCatalogue(l.article);
+      return cat > 0 && l.prix != null && l.prix !== cat ? `Prix négocié : ${fcfa(l.prix)} F au lieu de ${fcfa(cat)} F` : "";
+    };
+    const texteLigne = (l) => {
+      const cat = prixCatalogue(l.article);
+      const ecart = cat > 0 && l.prix != null && l.prix !== cat
+        ? ` <span class="text-orange-700 dark:text-orange-300">· au lieu de ${fcfa(cat)} F (${l.prix > cat ? "+" : "−"}${fcfa(Math.abs(l.prix - cat))} F)</span>` : "";
+      return l.prix == null
+        ? `× ${l.quantite} · <span class="text-orange-700 dark:text-orange-300 font-semibold">indiquez le prix</span>`
+        : `× ${l.quantite} = <strong>${formatPrice(prixDe(l) * l.quantite)}</strong>${ecart}`;
+    };
+    const totalPanier = () => panier.reduce((s, l) => s + prixDe(l) * l.quantite, 0);
     const styleChoix = (b, on) => {
       ["bg-white", "dark:bg-gray-600", "shadow-sm", "text-[#0d1b19]", "dark:text-white"].forEach((k) => b.classList.toggle(k, on));
       b.classList.toggle("text-gray-500", !on);
@@ -1818,10 +1846,10 @@
     function carte(a) {
       const prix = Number(a.unitPrice) || 0;
       const reste = suiviStock(a) ? Number(a.stock) : null;
-      const bloque = prix <= 0 || (reste !== null && reste <= 0);
+      // Sans prix au catalogue : « prix libre », on le tape à chaque vente
+      const bloque = reste !== null && reste <= 0;
       const l = ligneDe(a);
-      const sousTitre = prix <= 0 ? "Prix à fixer dans le catalogue"
-        : reste !== null && reste <= 0 ? "Rupture de stock"
+      const sousTitre = reste !== null && reste <= 0 ? "Rupture de stock"
         : reste !== null ? `Stock : ${reste}` : "";
       return `<button type="button" data-carte-article="${echapperHtml(a.id)}" ${bloque ? "disabled" : ""}
         class="relative text-left min-h-[80px] sm:min-h-[104px] rounded-2xl border-2 p-3 sm:p-4 flex flex-col justify-between gap-1 sm:gap-2 transition active:scale-95 touch-manipulation select-none
@@ -1830,7 +1858,7 @@
                  : "border-[#cfe7e3] dark:border-gray-600 bg-white dark:bg-[#1f3532] hover:border-primary"}">
         <span class="font-bold text-[#0d1b19] dark:text-white leading-snug line-clamp-2">${echapperHtml(a.name)}</span>
         <span>
-          <span class="flex flex-wrap items-center gap-x-2 gap-y-1 text-base font-bold text-primary"><span class="whitespace-nowrap">${prix > 0 ? formatPrice(prix) : "—"}</span>${l ? `<span class="whitespace-nowrap rounded-lg bg-primary px-2 py-0.5 text-xs font-extrabold text-white">× ${l.quantite}</span>` : ""}</span>
+          <span class="flex flex-wrap items-center gap-x-2 gap-y-1 text-base font-bold text-primary"><span class="whitespace-nowrap">${prix > 0 ? formatPrice(prix) : `<span class="text-sm">Prix libre</span>`}</span>${l ? `<span class="whitespace-nowrap rounded-lg bg-primary px-2 py-0.5 text-xs font-extrabold text-white">× ${l.quantite}</span>` : ""}</span>
           <!-- Ligne gardée même vide : les prix restent alignés d’une carte à l’autre -->
           <span class="block text-xs text-gray-500 dark:text-gray-400">${sousTitre || "&nbsp;"}</span>
         </span>
@@ -1872,11 +1900,21 @@
         : `<p class="col-span-full text-sm text-gray-500 dark:text-gray-400">Aucun article ne correspond. Ajoutez-le au catalogue avec le lien ci-dessous.</p>`;
       zonePanier.classList.toggle("hidden", !panier.length);
       zonePanier.innerHTML = panier.map((l) => {
-        const prix = Number(l.article.unitPrice) || 0;
-        return `<div class="flex items-center justify-between gap-3 px-4 py-2.5" data-ligne="${echapperHtml(l.article.id)}">
-          <span class="min-w-0 text-sm text-[#0d1b19] dark:text-gray-100"><strong>${echapperHtml(l.article.name)}</strong> × ${l.quantite} = ${formatPrice(prix * l.quantite)}</span>
-          <span class="flex items-center gap-2 shrink-0">
+        // Prix : celui du catalogue, modifiable (prix négocié) ; vide pour un article à prix libre.
+        // Quantité : − / + pour ajuster, ou saisie directe dans la case (100 sans appuyer 100 fois)
+        const aFixer = l.prix == null;
+        return `<div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-2.5" data-ligne="${echapperHtml(l.article.id)}">
+          <span class="min-w-0 flex-1 basis-[150px] text-sm text-[#0d1b19] dark:text-gray-100"><strong>${echapperHtml(l.article.name)}</strong>
+            <span class="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-gray-600 dark:text-gray-300">
+              <input type="number" data-prix value="${aFixer ? "" : l.prix}" min="1" step="1" inputmode="numeric" placeholder="Prix" aria-label="Prix de ${echapperHtml(l.article.name)}"
+                     class="form-input w-[92px] h-8 px-2 rounded-lg border ${aFixer ? "border-orange-400 bg-orange-50 dark:bg-orange-950/30" : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"} text-right text-sm font-bold text-[#0d1b19] dark:text-white focus:ring-2 focus:ring-primary/40 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none">
+              <span>F</span>
+              <span data-ligne-prix>${texteLigne(l)}</span>
+            </span></span>
+          <span class="ml-auto flex items-center gap-1.5 shrink-0">
             <button type="button" data-moins class="size-8 rounded-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 font-bold" aria-label="Une unité de moins">−</button>
+            <input type="number" data-quantite value="${l.quantite}" min="1" ${Number.isFinite(maxPour(l.article)) ? `max="${maxPour(l.article)}"` : ""} step="1" inputmode="numeric" aria-label="Quantité de ${echapperHtml(l.article.name)}"
+                   class="form-input w-14 h-8 px-1 rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-center text-sm font-bold text-[#0d1b19] dark:text-white focus:ring-2 focus:ring-primary/40 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none">
             <button type="button" data-plus class="size-8 rounded-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 font-bold" aria-label="Une unité de plus">+</button>
             <button type="button" data-retirer class="ml-1 text-xs font-medium text-gray-500 hover:text-red-600 hover:underline">Retirer</button>
           </span></div>`;
@@ -1896,12 +1934,14 @@
         if (articleSelect) articleSelect.value = "";
         qteInput.value = "";
         montantInput.value = "";
+        notePrixAuto = "";
         return;
       }
       const { article: a, quantite } = panier[0];
       if (articleSelect) articleSelect.value = a.name;
       qteInput.value = String(quantite);
-      montantInput.value = String((Number(a.unitPrice) || 0) * quantite);
+      montantInput.value = String(prixDe(panier[0]) * quantite);
+      notePrixAuto = noteDe(panier[0]);
       typeInput.value = a.type === "services" ? "services" : "produits";
       moyenInput.value = paiement;
     }
@@ -1968,10 +2008,11 @@
       if (!a) return;
       grilleOuverte = false;
       if (ligneDe(a)) return changerQuantite(a, 1);
-      panier.push({ article: a, quantite: 1 });
+      panier.push({ article: a, quantite: 1, prix: prixInitial(a) });
       if (navigator.vibrate) navigator.vibrate(15);
       reporterChoix();
       afficher();
+      if (prixInitial(a) == null) zonePanier.querySelector(`[data-ligne="${CSS.escape(String(a.id))}"] [data-prix]`)?.focus();
     });
     zonePanier.addEventListener("click", (e) => {
       const l = e.target.closest("[data-ligne]");
@@ -1981,6 +2022,55 @@
       if (e.target.closest("[data-plus]")) changerQuantite(a, 1);
       else if (e.target.closest("[data-moins]")) changerQuantite(a, -1);
       else if (e.target.closest("[data-retirer]")) { panier = panier.filter((x) => x.article.id !== a.id); reporterChoix(); afficher(); }
+    });
+
+    // Quantité tapée au clavier : prise en compte pendant la saisie (total, champs
+    // envoyés), la ligne n'est redessinée qu'à la sortie de la case
+    const ligneDeCase = (champ) => {
+      const id = champ.closest("[data-ligne]")?.dataset.ligne;
+      return panier.find((x) => String(x.article.id) === id) || null;
+    };
+    zonePanier.addEventListener("input", (e) => {
+      const champ = e.target.closest("[data-quantite]");
+      if (!champ) return;
+      const l = ligneDeCase(champ);
+      if (!l) return;
+      const q = Math.floor(Number(champ.value));
+      if (!champ.value || !Number.isFinite(q) || q < 1) return; // case vide pendant la saisie
+      if (q > maxPour(l.article)) {
+        erreur.textContent = `Il ne reste que ${maxPour(l.article)} unité(s) de « ${l.article.name} » en stock.`;
+        erreur.classList.remove("hidden");
+        return;
+      }
+      erreur.classList.add("hidden");
+      l.quantite = q;
+      const zonePrix = champ.closest("[data-ligne]").querySelector("[data-ligne-prix]");
+      if (zonePrix) zonePrix.innerHTML = texteLigne(l);
+      reporterChoix();
+      afficherTotal();
+    });
+    // Prix tapé : prix libre, ou prix négocié (plus bas ou plus haut que le catalogue)
+    zonePanier.addEventListener("input", (e) => {
+      const champ = e.target.closest("[data-prix]");
+      if (!champ) return;
+      const l = ligneDeCase(champ);
+      if (!l) return;
+      const p = Math.round(Number(champ.value));
+      l.prix = champ.value && Number.isFinite(p) && p > 0 ? p : null;
+      erreur.classList.add("hidden");
+      const zonePrix = champ.closest("[data-ligne]").querySelector("[data-ligne-prix]");
+      if (zonePrix) zonePrix.innerHTML = texteLigne(l);
+      reporterChoix();
+      afficherTotal();
+    });
+    // En quittant la case : une valeur vide, nulle ou au-delà du stock reprend la dernière quantité valable
+    zonePanier.addEventListener("change", (e) => {
+      if (!e.target.closest("[data-quantite], [data-prix]")) return;
+      afficher();
+    });
+    // Entrée valide la quantité sans envoyer la vente
+    zonePanier.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && e.target.closest("[data-quantite], [data-prix]")) { e.preventDefault(); e.target.blur(); }
     });
     blocCartes.querySelector("[data-cartes-ajouter]").addEventListener("click", ouvrirAjoutCatalogue);
     boutonAutre.addEventListener("click", () => { grilleOuverte = true; afficher(); });
@@ -2011,7 +2101,10 @@
           <label class="block mb-4"><span class="block text-sm font-semibold text-[#0d1b19] dark:text-gray-200 mb-2">Nom</span>
             <input name="nom" type="text" maxlength="120" placeholder="Ex. : Gâteau au chocolat" class="${champAjout}"></label>
           <label class="block mb-4"><span class="block text-sm font-semibold text-[#0d1b19] dark:text-gray-200 mb-2">Prix de vente (FCFA)</span>
-            <input name="prix" type="number" min="1" step="1" inputmode="numeric" placeholder="Ex. : 4000" class="${champAjout}"></label>
+            <input name="prix" type="number" min="1" step="1" inputmode="numeric" placeholder="Ex. : 4000" class="${champAjout} disabled:opacity-50"></label>
+          <label class="-mt-2 mb-4 flex items-start gap-2 text-sm cursor-pointer select-none text-[#0d1b19] dark:text-gray-200">
+            <input name="libre" type="checkbox" class="mt-0.5 rounded border-gray-300 text-primary focus:ring-primary">
+            <span>Le prix change à chaque vente <span class="text-gray-500 dark:text-gray-400">(gâteaux, sur mesure…)</span></span></label>
           <label class="block mb-2" data-bloc-stock><span class="block text-sm font-semibold text-[#0d1b19] dark:text-gray-200 mb-2">Stock disponible <span class="font-normal text-gray-500">(facultatif)</span></span>
             <input name="stock" type="number" min="0" step="1" inputmode="numeric" placeholder="Laissez vide si vous ne suivez pas le stock" class="${champAjout}"></label>
           <p data-erreur class="hidden mt-3 text-sm font-medium text-red-600"></p>
@@ -2034,6 +2127,11 @@
         blocStock.classList.toggle("hidden", type === "services"); // un service ne se stocke pas
       };
       majType();
+      // Prix libre : pas de prix au catalogue, on le tape à chaque vente
+      {
+        const caseLibre = fond.querySelector('[name="libre"]'), champPrix = fond.querySelector('[name="prix"]');
+        caseLibre.addEventListener("change", () => { champPrix.disabled = caseLibre.checked; if (caseLibre.checked) champPrix.value = ""; });
+      }
       fond.querySelector("[data-type]").addEventListener("click", (e) => {
         const b = e.target.closest("[data-valeur]");
         if (b) { type = b.dataset.valeur; majType(); }
@@ -2048,11 +2146,12 @@
       f.addEventListener("submit", async (e) => {
         e.preventDefault();
         const nom = normalizeLabel(f.elements.nom.value);
-        const prix = Number(f.elements.prix.value);
+        const libre = f.elements.libre.checked;
+        const prix = libre ? 0 : Number(f.elements.prix.value);
         const stockSaisi = f.elements.stock.value.trim();
         const montrer = (m) => { erreurAjout.textContent = m; erreurAjout.classList.remove("hidden"); };
         if (!nom) return montrer("Indiquez le nom.");
-        if (!(prix > 0)) return montrer("Indiquez un prix de vente supérieur à 0.");
+        if (!libre && !(prix > 0)) return montrer("Indiquez un prix de vente, ou cochez « Le prix change à chaque vente ».");
         if (findArticleByName(nom)) return montrer("Un article porte déjà ce nom dans le catalogue.");
         const stock = type === "produits" && stockSaisi !== "" ? Math.max(0, Math.floor(Number(stockSaisi))) : null;
 
@@ -2072,7 +2171,7 @@
         await apresChangementListe();
         const ajoute = ordre.find((a) => (resultat.article && a.id === resultat.article.id) || cle(a.name) === cle(nom));
         if (ajoute && !(suiviStock(ajoute) && Number(ajoute.stock) <= 0) && !ligneDe(ajoute)) {
-          panier.push({ article: ajoute, quantite: 1 });
+          panier.push({ article: ajoute, quantite: 1, prix: prixInitial(ajoute) });
           reporterChoix();
           afficher();
         }
@@ -2097,6 +2196,12 @@
         (cible || blocCartes).scrollIntoView({ behavior: "smooth", block: "center" });
       };
       if (!panier.length) return bloquer("Choisissez un article en appuyant sur sa carte.");
+      const sansPrix = panier.find((l) => !(prixDe(l) > 0));
+      if (sansPrix) {
+        bloquer(`Indiquez le prix de « ${sansPrix.article.name} ».`, zonePanier);
+        zonePanier.querySelector(`[data-ligne="${CSS.escape(String(sansPrix.article.id))}"] [data-prix]`)?.focus();
+        return;
+      }
       if (enCredit() && (Number(champAvance.value) || 0) >= totalPanier()) {
         return bloquer("L'avance couvre tout : choisissez plutôt Cash ou Mobile Money.", blocCredit);
       }
@@ -2110,7 +2215,8 @@
       window.OGOUE_FEEDBACK?.debut(bouton, "Enregistrement des ventes…");
       let faites = 0;
       for (const l of panier) {
-        const prix = Number(l.article.unitPrice) || 0;
+        const prix = prixDe(l);
+        const noteSaisie = (document.getElementById("vente-note")?.value || "").trim();
         const ok = await addVente({
           ...base,
           id: generateId(),
@@ -2119,6 +2225,7 @@
           type_vente: l.article.type === "services" ? "services" : "produits",
           quantite: l.quantite,
           montant: prix * l.quantite,
+          note: [noteDe(l), noteSaisie].filter(Boolean).join(" · "),
           justificatif: "",
           editer_recu: false,
           file: null,
@@ -2212,6 +2319,7 @@
                class="form-input ml-auto w-full sm:w-64 h-10 rounded-full border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark text-sm px-4 text-[#0d1b19] dark:text-white">
       </div>
       <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Un appui = une vente. Appuis rapides sur la même carte = une vente de plusieurs unités (2 appuis = quantité 2). Le reçu ou le justificatif s'ajoute plus tard, depuis le tableau des ventes.</p>
+      <div data-rush-libre class="hidden mb-3 scroll-mt-24 rounded-2xl border-2 border-primary bg-primary/5 dark:bg-[#1f3532] p-3"></div>
       <div data-rush-grille class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3"></div>
       <div data-rush-barre class="hidden sticky bottom-3 mt-4 z-10 items-center gap-3 rounded-2xl bg-[#0d1b19] text-white px-4 py-3 shadow-lg">
         <span class="material-symbols-outlined text-base animate-spin">progress_activity</span>
@@ -2225,6 +2333,11 @@
     const texteAttente = zone.querySelector("[data-rush-attente]");
     const bilan = zone.querySelector("[data-rush-bilan]");
     const recherche = zone.querySelector("[data-rush-recherche]");
+    // Prix libre : la zone reste ouverte après une vente (le gâteau suivant au même prix = un appui)
+    const zoneLibre = zone.querySelector("[data-rush-libre]");
+    let libreOuvert = null;          // article à prix libre en cours de saisie
+    const prixFrequents = {};        // prix les plus vendus ce mois-ci, par article
+    const prixRecents = {};          // derniers prix tapés pendant la session, par article
 
     // Crédit : choisi vente par vente, jamais retenu ; sinon le dernier moyen utilisé
     const paiementHabituel = () => { const m = lire(CLE_PAIEMENT, "cash"); return m === "mobile_money" ? m : "cash"; };
@@ -2272,9 +2385,16 @@
       let ventes = [];
       try { ventes = await getVentesPeriodeCourante(); } catch (e) {}
       const compte = {};
+      const parPrix = {};
       (ventes || []).forEach((v) => {
         const k = cle(v.description);
         compte[k] = (compte[k] || 0) + 1;
+        const q = Number(v.quantite) || 1, unitaire = Math.round((Number(v.montant) || 0) / q);
+        if (unitaire > 0) { parPrix[k] = parPrix[k] || {}; parPrix[k][unitaire] = (parPrix[k][unitaire] || 0) + 1; }
+      });
+      Object.keys(prixFrequents).forEach((k) => delete prixFrequents[k]);
+      Object.entries(parPrix).forEach(([k, m]) => {
+        prixFrequents[k] = Object.entries(m).sort((a, b) => b[1] - a[1] || Number(a[0]) - Number(b[0])).map(([p]) => Number(p));
       });
       ordre = [...articlesCache].sort((a, b) =>
         (compte[cle(b.name)] || 0) - (compte[cle(a.name)] || 0) || String(a.name).localeCompare(String(b.name), "fr"));
@@ -2283,20 +2403,19 @@
     function carte(a) {
       const prix = Number(a.unitPrice) || 0;
       const reste = suiviStock(a) ? Number(a.stock) - attenteDe(a) : null;
-      const bloque = prix <= 0 || (reste !== null && reste <= 0);
+      const bloque = reste !== null && reste <= 0;
       const n = (envoyes[a.id] || 0) + attenteDe(a);
-      const sousTitre = prix <= 0
-        ? "Prix à fixer dans le catalogue"
-        : reste !== null && reste <= 0
-          ? "Rupture de stock"
-          : reste !== null ? `Stock : ${reste}` : "";
+      const ouvert = libreOuvert && libreOuvert.id === a.id;
+      const sousTitre = reste !== null && reste <= 0
+        ? "Rupture de stock"
+        : reste !== null ? `Stock : ${reste}` : prix <= 0 ? "Touchez puis tapez le prix" : "";
       return `<button type="button" data-rush-article="${echapperHtml(a.id)}" ${bloque ? "disabled" : ""}
         class="relative text-left min-h-[80px] sm:min-h-[104px] rounded-2xl border-2 p-3 sm:p-4 flex flex-col justify-between gap-1 sm:gap-2 transition active:scale-95 touch-manipulation select-none
-               ${bloque ? "border-gray-200 dark:border-gray-700 opacity-50 cursor-not-allowed" : "border-[#cfe7e3] dark:border-gray-600 bg-white dark:bg-[#1f3532] hover:border-primary"}">
+               ${bloque ? "border-gray-200 dark:border-gray-700 opacity-50 cursor-not-allowed" : ouvert ? "border-primary bg-primary/5 dark:bg-[#1f3532]" : "border-[#cfe7e3] dark:border-gray-600 bg-white dark:bg-[#1f3532] hover:border-primary"}">
         ${n ? `<span class="absolute -top-2 -right-2 min-w-7 h-7 px-2 rounded-full bg-primary text-white text-sm font-bold flex items-center justify-center">×${n}</span>` : ""}
         <span class="font-bold text-[#0d1b19] dark:text-white leading-snug line-clamp-2">${echapperHtml(a.name)}</span>
         <span>
-          <span class="block text-base font-bold text-primary">${prix > 0 ? formatPrice(prix) : "—"}</span>
+          <span class="block text-base font-bold text-primary">${prix > 0 ? formatPrice(prix) : "Prix libre"}</span>
           <!-- Ligne gardée même vide : les prix restent alignés d’une carte à l’autre -->
           <span class="block text-xs text-gray-500 dark:text-gray-400">${sousTitre || "&nbsp;"}</span>
         </span>
@@ -2331,7 +2450,7 @@
     function envoyer(p) {
       const article = p.article;
       chaine = chaine.then(async () => {
-        const prix = Number(article.unitPrice) || 0;
+        const prix = p.prix || Number(article.unitPrice) || 0;
         const quantite = p.quantite;
         const montant = prix * quantite;
         const resultat = await addVente({
@@ -2378,7 +2497,153 @@
       envoyer(p);
     }
 
+    // ── Prix libre ──
+    function clientCredit() {
+      const champ = zone.querySelector("[data-rush-client]");
+      const client = normalizeLabel(champ.value);
+      if (paiement === "credit" && !client) {
+        champ.focus();
+        champ.classList.add("ring-2", "ring-red-500");
+        setTimeout(() => champ.classList.remove("ring-2", "ring-red-500"), 1500);
+        window.OGOUE_FEEDBACK?.succes("Indiquez d'abord le nom du client qui prend à crédit");
+        return null;
+      }
+      return client;
+    }
+    function prixProposes(a) {
+      const vus = new Set();
+      return [...(prixRecents[a.id] || []), ...(prixFrequents[cle(a.name)] || [])]
+        .filter((p) => p > 0 && !vus.has(p) && vus.add(p)).slice(0, 4);
+    }
+    // Quantité de la prochaine vente à prix libre : − / +, ou appuis rapides sur un même prix
+    let qteLibre = 1;
+    let serieLibre = null;   // appuis rapides en cours sur un prix proposé : { p, prix }
+    const resteLibre = (a) => (suiviStock(a) ? Number(a.stock) - attenteDe(a) : Infinity);
+    function majQteLibre() {
+      const v = zoneLibre.querySelector("[data-libre-qte-val]");
+      if (v) v.textContent = String(qteLibre);
+      const moins = zoneLibre.querySelector('[data-libre-qte="-1"]');
+      if (moins) moins.disabled = qteLibre <= 1;
+    }
+    function dessinerLibre() {
+      if (!libreOuvert) { zoneLibre.classList.add("hidden"); zoneLibre.innerHTML = ""; return; }
+      const a = libreOuvert;
+      const prix = prixProposes(a);
+      // Un prix en cours de frappe survit au rafraîchissement
+      const enCoursDeFrappe = zoneLibre.querySelector("[data-libre-montant]");
+      const valeur = enCoursDeFrappe?.value || "", focus = document.activeElement === enCoursDeFrappe;
+      const rond = "inline-flex items-center justify-center size-9 rounded-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 font-bold text-[#0d1b19] dark:text-white disabled:opacity-40";
+      zoneLibre.innerHTML = `
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="font-bold text-[#0d1b19] dark:text-white">${echapperHtml(a.name)} <span class="font-normal text-sm text-gray-500 dark:text-gray-400">· à quel prix ?</span></p>
+          <button type="button" data-libre-fermer aria-label="Fermer" class="inline-flex items-center justify-center size-8 rounded-full bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300"><span class="material-symbols-outlined text-base">close</span></button>
+        </div>
+        ${prix.length ? `<div class="flex flex-wrap gap-2 mb-2">${prix.map((p) =>
+          `<button type="button" data-libre-prix="${p}" class="h-11 px-4 rounded-full bg-white dark:bg-gray-700 border-2 border-primary/40 text-[15px] font-bold text-primary active:scale-95">${formatPrice(p)}</button>`).join("")}</div>` : ""}
+        <div class="flex items-center gap-2 mb-2 text-sm text-gray-600 dark:text-gray-300">
+          <span>Quantité</span>
+          <button type="button" data-libre-qte="-1" class="${rond}" aria-label="Une unité de moins">−</button>
+          <span data-libre-qte-val class="min-w-6 text-center text-base font-bold text-[#0d1b19] dark:text-white">${qteLibre}</span>
+          <button type="button" data-libre-qte="1" class="${rond}" aria-label="Une unité de plus">+</button>
+        </div>
+        <form data-libre-form class="flex gap-2" novalidate>
+          <input data-libre-montant type="number" min="1" step="1" inputmode="numeric" enterkeyhint="send" placeholder="Autre prix" aria-label="Prix de ${echapperHtml(a.name)}"
+                 class="form-input flex-1 min-w-0 h-11 rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-background-dark px-4 text-base font-bold text-[#0d1b19] dark:text-white [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none">
+          <button type="submit" class="shrink-0 h-11 px-5 rounded-full bg-primary text-white text-[15px] font-bold active:scale-95">Vendre</button>
+        </form>`;
+      const champ = zoneLibre.querySelector("[data-libre-montant]");
+      champ.value = valeur;
+      if (focus) champ.focus();
+      majQteLibre();
+      zoneLibre.classList.remove("hidden");
+    }
+    function ouvrirLibre(article) {
+      if (libreOuvert && libreOuvert.id !== article.id) { cloturerSerieLibre(); qteLibre = 1; }
+      libreOuvert = article;
+      dessinerLibre();
+      afficher();
+      zoneLibre.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      // Sans prix déjà connu, le clavier s'ouvre tout de suite
+      if (!prixProposes(article).length) zoneLibre.querySelector("[data-libre-montant]")?.focus();
+    }
+    // Fin d'une vente à prix libre : le prix monte en tête, la quantité revient à 1
+    function apresVenteLibre(article, montant) {
+      prixRecents[article.id] = [montant, ...(prixRecents[article.id] || []).filter((x) => x !== montant)];
+      qteLibre = 1;
+      if (libreOuvert && libreOuvert.id === article.id) dessinerLibre();
+    }
+    function cloturerSerieLibre() {
+      const s = serieLibre;
+      if (!s) return;
+      serieLibre = null;
+      clearTimeout(s.p.minuterie);
+      envoyer(s.p);
+      apresVenteLibre(s.p.article, s.prix);
+    }
+    // Appui sur un prix proposé : des appuis rapides sur le même prix s'additionnent
+    function appuiPrixLibre(montant) {
+      const article = libreOuvert;
+      if (!article || !(montant > 0)) return;
+      if (serieLibre && (serieLibre.p.article.id !== article.id || serieLibre.prix !== montant)) cloturerSerieLibre();
+      const ajout = serieLibre ? 1 : qteLibre;
+      if (resteLibre(article) < ajout) {
+        window.OGOUE_FEEDBACK?.succes(`Stock insuffisant pour « ${echapperHtml(article.name)} »`);
+        return;
+      }
+      if (serieLibre) {
+        serieLibre.p.quantite += 1;
+        clearTimeout(serieLibre.p.minuterie);
+      } else {
+        const client = clientCredit();
+        if (client === null) return;
+        const p = { article, quantite: qteLibre, minuterie: null, paiement, client: paiement === "credit" ? client : "", prix: montant };
+        enAttente.push(p);
+        serieLibre = { p, prix: montant };
+      }
+      serieLibre.p.minuterie = setTimeout(cloturerSerieLibre, DELAI_REGROUPEMENT_MS);
+      if (navigator.vibrate) navigator.vibrate(15);
+      afficher();
+      majBarre();
+    }
+    // « Autre prix » + Vendre : part tout de suite, avec la quantité choisie
+    function vendreLibre(montant) {
+      const article = libreOuvert;
+      if (!article || !(montant > 0)) return;
+      cloturerSerieLibre();
+      if (resteLibre(article) < qteLibre) {
+        window.OGOUE_FEEDBACK?.succes(`Stock insuffisant pour « ${echapperHtml(article.name)} »`);
+        return;
+      }
+      const client = clientCredit();
+      if (client === null) return;
+      const p = { article, quantite: qteLibre, minuterie: null, paiement, client: paiement === "credit" ? client : "", prix: montant };
+      enAttente.push(p);
+      if (navigator.vibrate) navigator.vibrate(15);
+      envoyer(p);
+      const champ = zoneLibre.querySelector("[data-libre-montant]");
+      if (champ) champ.value = "";
+      apresVenteLibre(article, montant);   // la zone reste ouverte, ce prix en premier
+      afficher();
+      majBarre();
+    }
+    zoneLibre.addEventListener("click", (e) => {
+      if (e.target.closest("[data-libre-fermer]")) { cloturerSerieLibre(); libreOuvert = null; qteLibre = 1; dessinerLibre(); afficher(); return; }
+      const q = e.target.closest("[data-libre-qte]");
+      if (q && !q.disabled) { qteLibre = Math.max(1, qteLibre + Number(q.dataset.libreQte)); majQteLibre(); return; }
+      const b = e.target.closest("[data-libre-prix]");
+      if (b) appuiPrixLibre(Number(b.dataset.librePrix));
+    });
+    zoneLibre.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const champ = zoneLibre.querySelector("[data-libre-montant]");
+      const montant = Math.round(Number(champ?.value));
+      if (!(montant > 0)) { champ?.focus(); return; }
+      vendreLibre(montant);
+    });
+
     function appui(article) {
+      // Article à prix libre : on demande le prix (pas de regroupement des appuis)
+      if (!(Number(article.unitPrice) > 0)) return ouvrirLibre(article);
       let p = enCours[article.id];
       if (p) {
         p.quantite += 1;
@@ -2408,6 +2673,7 @@
     // Page quittée ou mise en arrière-plan : les séries ouvertes partent tout de suite
     function toutCloturer() {
       Object.values(enCours).forEach(cloturer);
+      cloturerSerieLibre();
     }
     document.addEventListener("visibilitychange", () => { if (document.hidden) toutCloturer(); });
     window.addEventListener("pagehide", toutCloturer);
@@ -2431,6 +2697,8 @@
         afficher();
         majBarre();
       } else {
+        libreOuvert = null;
+        dessinerLibre();
         toutCloturer();
       }
     }
