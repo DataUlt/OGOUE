@@ -154,6 +154,10 @@
               <h2 class="mt-4 text-xl font-bold text-text-light">Vérifiez votre e-mail</h2>
               <p class="mt-2 text-sm text-text-light-muted">Nous avons envoyé un lien de confirmation à <strong id="confirmationEmail"></strong>. Cliquez dessus pour activer votre compte, puis connectez-vous.</p>
               <p class="mt-3 text-sm text-text-light-muted">L'e-mail peut mettre <strong>jusqu'à 15 minutes</strong> à arriver. Pensez à regarder dans vos spams et dans l'onglet « Promotions ».</p>
+              <p class="mt-3 text-sm text-text-light-muted">Toujours rien après 15 minutes ? Écrivez-nous sur WhatsApp au <strong>+241 07 60 45 60</strong> : nous confirmons votre compte nous-mêmes.</p>
+              <a id="lienWhatsappConfirmation" href="https://wa.me/24107604560" target="_blank" rel="noopener" class="mt-3 inline-flex items-center gap-2 rounded-[14px] border border-[#25D366] text-[#128C7E] font-semibold px-5 py-2.5 hover:bg-[#25D366]/10">
+                <span class="material-symbols-outlined text-xl">chat</span>Nous écrire sur WhatsApp
+              </a>
               <button type="button" id="btnRenvoyer" onclick="renvoyerConfirmation()" class="mt-6 rounded-[14px] text-white bg-[#0B2A5B] hover:bg-[#0B2A5B]/90 font-semibold px-5 py-3 disabled:opacity-60">Renvoyer le lien</button>
               <p class="mt-5 text-sm"><a id="lienConnexion" href="/login" class="text-primary font-bold hover:underline">Aller à la connexion</a></p>
             </div>
@@ -561,6 +565,9 @@
       // La page de confirmation mène ensuite à cette suite (paiement ou onboarding)
       try { localStorage.setItem('ogo_suite_apres_confirmation', suite); } catch (e) { /* navigation privée */ }
       document.getElementById('confirmationEmail').textContent = email;
+      // Message WhatsApp prérempli avec l'adresse, pour une confirmation manuelle
+      document.getElementById('lienWhatsappConfirmation').href = 'https://wa.me/24107604560?text=' + encodeURIComponent(
+        "Bonjour OGOUE, je me suis inscrit avec l'adresse " + email + " mais je n'ai pas reçu l'e-mail de confirmation. Pouvez-vous confirmer mon compte ?");
       document.getElementById('lienConnexion').href = '/login?suite=' + encodeURIComponent(suite);
       document.getElementById('errorMessage').classList.add('hidden');
       document.getElementById('successMessage').classList.add('hidden');
