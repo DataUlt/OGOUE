@@ -59,6 +59,13 @@ const corsOptions = {
       console.log('✅ [CORS] Origin allowed (regex):', origin);
       return callback(null, true);
     }
+
+    // Téléphone sur le Wi-Fi de l'ordinateur (http://192.168.x.x:8080), pour tester en local.
+    // Jamais sur Render : la variable RENDER y est toujours définie.
+    if (!process.env.RENDER && /^http:\/\/192\.168\.\d{1,3}\.\d{1,3}:8080$/.test(origin)) {
+      console.log('✅ [CORS] Origin allowed (réseau local):', origin);
+      return callback(null, true);
+    }
     
     console.log('❌ [CORS] Origin NOT allowed:', origin);
     console.log('📋 [CORS] Allowed origins list:', allowedOrigins);

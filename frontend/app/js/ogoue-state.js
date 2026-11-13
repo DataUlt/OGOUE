@@ -6,7 +6,7 @@
 // URL de base du backend
 const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
   ? 'http://localhost:3001'
-  : 'https://api.ogoue.com';
+  : (/^192\.168\./.test(location.hostname) ? 'http://' + location.hostname + ':3001' : 'https://api.ogoue.com');
 
 // ─────────────────────────────────────────────────
 // 🔐 AUTHENTICATION HELPERS
@@ -58,7 +58,7 @@ function handleUnauthorized() {
   oublierChiffresMemorises();
   const MARKETING_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
     ? 'http://127.0.0.1:8080'
-    : 'https://www.ogoue.com';
+    : (/^192\.168\./.test(location.hostname) ? location.origin + '' : 'https://www.ogoue.com');
   
   // Délai de 5 secondes pour que l'utilisateur voie l'erreur
   console.warn('❌ Session expirée. Redirection vers la connexion dans 5 secondes...');

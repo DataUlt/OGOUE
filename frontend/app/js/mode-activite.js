@@ -20,7 +20,7 @@
   if (!formulaire) return;
 
   const API = (["localhost", "127.0.0.1"].some((h) => location.hostname.includes(h)))
-    ? "http://localhost:3001/api" : "https://api.ogoue.com/api";
+    ? "http://localhost:3001/api" : (/^192\.168\./.test(location.hostname) ? "http://" + location.hostname + ":3001/api" : "https://api.ogoue.com/api");
   const entetes = () => ({ "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("authToken")}` });
 
   const CHOIX = [

@@ -286,7 +286,7 @@
 
       const APP_BASE = (['localhost', '127.0.0.1'].some(h => location.hostname.includes(h)))
         ? 'http://127.0.0.1:8080/app'
-        : 'https://www.ogoue.com/app';
+        : (/^192\.168\./.test(location.hostname) ? location.origin + '/app' : 'https://www.ogoue.com/app');
       document.getElementById("lienApp").href = APP_BASE + '/module_tableau_bord.html';
 
       // Copie du numero : sur telephone, le recopier a la main est la

@@ -16,6 +16,11 @@ function getAPIBaseURL() {
         window.location.hostname === '127.0.0.1') {
         return 'http://localhost:3001'; // ou le port de votre backend local
     }
+
+    // Téléphone sur le même Wi-Fi que l'ordinateur (192.168.x.x) : serveur de l'ordinateur
+    if (/^192\.168\./.test(window.location.hostname)) {
+        return 'http://' + window.location.hostname + ':3001';
+    }
     
     // En préproduction sur Render (preview)
     if (window.location.hostname.includes('onrender.com')) {

@@ -274,7 +274,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const API_BASE_URL = (['localhost', '127.0.0.1'].some(h => location.hostname.includes(h)))
             ? 'http://localhost:3001'
-            : 'https://api.ogoue.com';
+            : (/^192\.168\./.test(location.hostname) ? 'http://' + location.hostname + ':3001' : 'https://api.ogoue.com');
 
         const params = new URLSearchParams();
         if (startDateISO) params.set("startDate", startDateISO);
@@ -354,7 +354,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (_modeActivite) return _modeActivite;
         try {
             const API_BASE_URL = (['localhost', '127.0.0.1'].some(h => location.hostname.includes(h)))
-                ? 'http://localhost:3001' : 'https://api.ogoue.com';
+                ? 'http://localhost:3001' : (/^192\.168\./.test(location.hostname) ? 'http://' + location.hostname + ':3001' : 'https://api.ogoue.com');
             const r = await fetch(`${API_BASE_URL}/api/organization`, { headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` } });
             const org = r.ok ? await r.json() : null;
             _modeActivite = ["fabrication", "les_deux"].includes(org?.modeActivite) ? org.modeActivite : "revente";
@@ -876,7 +876,7 @@ document.addEventListener("DOMContentLoaded", function () {
             ? API_BASE_URL
             : (["localhost", "127.0.0.1"].includes(window.location.hostname)
                 ? "http://localhost:3001"
-                : "https://api.ogoue.com");
+                : (/^192\.168\./.test(location.hostname) ? "http://" + location.hostname + ":3001" : "https://api.ogoue.com"));
 
         const config = {
             vente: {
@@ -987,7 +987,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const API_JUSTIF = (['localhost', '127.0.0.1'].some(h => location.hostname.includes(h)))
         ? 'http://localhost:3001'
-        : 'https://api.ogoue.com';
+        : (/^192\.168\./.test(location.hostname) ? 'http://' + location.hostname + ':3001' : 'https://api.ogoue.com');
 
     /**
      * Cellule « Justificatif » d'une ligne d'historique.
@@ -2199,7 +2199,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let org = {};
         try { org = JSON.parse(localStorage.getItem("ogo_org") || "null") || {}; } catch (e) {}
         try {
-            const API_BASE_URL = (['localhost', '127.0.0.1'].some(h => location.hostname.includes(h))) ? 'http://localhost:3001' : 'https://api.ogoue.com';
+            const API_BASE_URL = (['localhost', '127.0.0.1'].some(h => location.hostname.includes(h))) ? 'http://localhost:3001' : (/^192\.168\./.test(location.hostname) ? 'http://' + location.hostname + ':3001' : 'https://api.ogoue.com');
             const r = await fetch(`${API_BASE_URL}/api/organization`, { headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` } });
             if (r.ok) { const o = await r.json(); org = { ...org, name: o.name || org.name, activity: o.activity }; }
         } catch (e) {}

@@ -183,7 +183,7 @@
   <script>
     const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
       ? 'http://localhost:3001'
-      : 'https://api.ogoue.com';
+      : (/^192\.168\./.test(location.hostname) ? 'http://' + location.hostname + ':3001' : 'https://api.ogoue.com');
 
     async function handleAgentLogin(event) {
       event.preventDefault();
@@ -229,7 +229,7 @@
 
         const APP_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
           ? 'http://127.0.0.1:8080/app'
-          : 'https://www.ogoue.com/app';
+          : (/^192\.168\./.test(location.hostname) ? location.origin + '/app' : 'https://www.ogoue.com/app');
         window.OGOUE_CONNEXION.reussie({ prenom: data.user?.firstName, destination: `${APP_BASE}/module_agent_dashboard.html` });
 
       } catch (error) {

@@ -38,7 +38,7 @@
   <script>
     const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
       ? 'http://localhost:3001'
-      : 'https://api.ogoue.com';
+      : (/^192\.168\./.test(location.hostname) ? 'http://' + location.hostname + ':3001' : 'https://api.ogoue.com');
 
     // Le lien de confirmation arrive avec la session dans le fragment de l'URL
     // (#access_token=...). On la lit, on efface le fragment, puis on ouvre la session.

@@ -5,7 +5,7 @@
   const ORG_KEY = 'ogo_org';
   const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:3001'
-    : 'https://api.ogoue.com';
+    : (/^192\.168\./.test(location.hostname) ? 'http://' + location.hostname + ':3001' : 'https://api.ogoue.com');
 
   // Le nom de l'entreprise vient de la base et repasse en HTML dans le
   // panneau de profil. Il est saisi librement à l'inscription.
@@ -326,7 +326,7 @@
 
       const API_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
         ? 'http://localhost:3001/api'
-        : 'https://api.ogoue.com/api';
+        : (/^192\.168\./.test(location.hostname) ? 'http://' + location.hostname + ':3001/api' : 'https://api.ogoue.com/api');
 
       console.log('Sauvegarde org:', { rccm: org.rccm, nif: org.nif });
 
@@ -827,7 +827,7 @@
         // Redirect to marketing login page (env-aware)
         const MARKETING_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
           ? 'http://localhost:8080'
-          : 'https://www.ogoue.com';
+          : (/^192\.168\./.test(location.hostname) ? location.origin + '' : 'https://www.ogoue.com');
         window.location.href = `${MARKETING_BASE}/login.html`;
       }
     });
@@ -1435,7 +1435,7 @@ function ouvrirSuppressionCompte() {
       if (typeof oublierChiffresMemorises === 'function') oublierChiffresMemorises();
       const MARKETING_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
         ? 'http://localhost:8080'
-        : 'https://www.ogoue.com';
+        : (/^192\.168\./.test(location.hostname) ? location.origin + '' : 'https://www.ogoue.com');
       window.location.href = MARKETING_BASE + '/login.html';
     } catch (e) {
       bouton.disabled = false;
