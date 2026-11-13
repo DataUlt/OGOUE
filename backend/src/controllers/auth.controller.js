@@ -314,11 +314,16 @@ export async function register(req, res) {
     }
 
     // Seul le lien de confirmation part ici ; aucune session n'est ouverte.
-    await envoyerConfirmation(parsed.email, parsed.redirectOrigin);
+    // Le compte existe quoi qu'il arrive : si le mail n'a pas pu partir, on le
+    // dit à la personne au lieu de lui annoncer un e-mail qui n'arrivera pas.
+    const envoi = await envoyerConfirmation(parsed.email, parsed.redirectOrigin);
 
     return res.status(201).json({
-      message: "Inscription enregistrée. Un e-mail de confirmation vient de vous être envoyé.",
+      message: envoi.ok
+        ? "Inscription enregistrée. Un e-mail de confirmation vient de vous être envoyé."
+        : "Votre compte est créé, mais l'e-mail de confirmation n'a pas pu partir.",
       needsConfirmation: true,
+      mailEnvoye: envoi.ok,
       email: parsed.email,
     });
 
@@ -341,9 +346,17 @@ const ORIGINES_CONFIRMATION = ["http://127.0.0.1:8080", "http://localhost:8080",
 
 async function envoyerConfirmation(email, origine) {
   const emailRedirectTo = ORIGINES_CONFIRMATION.includes(origine) ? `${origine}/confirmation.html` : undefined;
-  const { error } = await supabaseAuth.auth.resend({ type: "signup", email, options: { emailRedirectTo } });
-  if (error) console.error("Envoi du lien de confirmation échoué:", error.message);
-  return !error;
+  try {
+    const { error } = await supabaseAuth.auth.resend({ type: "signup", email, options: { emailRedirectTo } });
+    if (!error) return { ok: true };
+    console.error("Envoi du lien de confirmation échoué:", error.status, error.message);
+    // Supabase limite les envois rapprochés (un par minute et par adresse)
+    const tropTot = error.status === 429 || /seconds|rate limit/i.test(error.message || "");
+    return { ok: false, tropTot };
+  } catch (err) {
+    console.error("Envoi du lien de confirmation échoué:", err?.message || err);
+    return { ok: false, tropTot: false };
+  }
 }
 
 /**
@@ -354,7 +367,16 @@ async function envoyerConfirmation(email, origine) {
 export async function resendConfirmation(req, res) {
   try {
     const parsed = z.object({ email: z.string().email(), redirectOrigin: z.string().max(200).optional().nullable() }).parse(req.body);
-    await envoyerConfirmation(parsed.email, parsed.redirectOrigin);
+    // Supabase ne signale pas les adresses inconnues : une erreur ici est un vrai
+    // échec d'envoi, qu'on annonce plutôt que de promettre un e-mail.
+    const envoi = await envoyerConfirmation(parsed.email, parsed.redirectOrigin);
+    if (!envoi.ok) {
+      return res.status(envoi.tropTot ? 429 : 503).json({
+        error: envoi.tropTot
+          ? "Un lien vient déjà d'être envoyé. Patientez une minute avant d'en demander un nouveau."
+          : "L'e-mail n'a pas pu partir pour le moment. Réessayez dans quelques minutes, ou écrivez-nous sur WhatsApp au +241 07 60 45 60.",
+      });
+    }
     return res.json({
       message: "Si un compte en attente existe pour cette adresse, un nouveau lien de confirmation vient d'être envoyé.",
     });

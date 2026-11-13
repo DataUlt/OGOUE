@@ -153,6 +153,7 @@
               <span class="material-symbols-outlined text-5xl text-[#0B2A5B]">mark_email_unread</span>
               <h2 class="mt-4 text-xl font-bold text-text-light">Vérifiez votre e-mail</h2>
               <p class="mt-2 text-sm text-text-light-muted">Nous avons envoyé un lien de confirmation à <strong id="confirmationEmail"></strong>. Cliquez dessus pour activer votre compte, puis connectez-vous.</p>
+              <p class="mt-3 text-sm text-text-light-muted">L'e-mail peut mettre <strong>jusqu'à 15 minutes</strong> à arriver. Pensez à regarder dans vos spams et dans l'onglet « Promotions ».</p>
               <button type="button" id="btnRenvoyer" onclick="renvoyerConfirmation()" class="mt-6 rounded-[14px] text-white bg-[#0B2A5B] hover:bg-[#0B2A5B]/90 font-semibold px-5 py-3 disabled:opacity-60">Renvoyer le lien</button>
               <p class="mt-5 text-sm"><a id="lienConnexion" href="/login" class="text-primary font-bold hover:underline">Aller à la connexion</a></p>
             </div>
@@ -532,6 +533,14 @@
           ? `/paiement.html?plan=${encodeURIComponent(PLAN_CHOISI)}&periode=${encodeURIComponent(PERIODE_CHOISIE)}`
           : '/app/module_articles.html?onboarding=1';
         afficherVerificationEmail(email, suite);
+        // Compte créé mais mail non parti : on le dit, avec la marche à suivre
+        if (data.mailEnvoye === false) {
+          document.querySelector('#confirmationPanel h2').textContent = "L'e-mail n'est pas parti";
+          document.querySelector('#confirmationPanel p').innerHTML =
+            'Votre compte est bien créé, mais le lien de confirmation n\'a pas pu être envoyé à <strong></strong>. ' +
+            'Patientez une minute puis cliquez sur « Renvoyer le lien ». Si cela échoue encore, écrivez-nous sur WhatsApp au +241 07 60 45 60.';
+          document.querySelector('#confirmationPanel p strong').textContent = email;
+        }
         submitBtn.textContent = originalText;
         submitBtn.disabled = false;
         return;
@@ -585,8 +594,11 @@
         });
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Envoi impossible');
+        document.getElementById('errorMessage').classList.add('hidden');
+        document.querySelector('#confirmationPanel h2').textContent = 'Vérifiez votre e-mail';
         showSuccess(data.message);
       } catch (error) {
+        document.getElementById('successMessage').classList.add('hidden');
         showError(error.message);
       } finally {
         bouton.disabled = false;
