@@ -1,4 +1,4 @@
-﻿// js/dashboard.js
+// js/dashboard.js
 // Tableau de bord : données réelles de la période choisie, présentées selon
 // Éléments absents de la page : l'opération est simplement ignorée
 const fantome = new Proxy(function () {}, { get: () => fantome, set: () => true, apply: () => fantome });
@@ -481,7 +481,7 @@ function rendreBarres(v, zone) {
   const n = seaux.length;
   const mobile = window.innerWidth <= 760;
   const W = Math.max(280, zone.clientWidth);
-  const H = mobile ? 226 : 266;
+  const H = mobile ? 166 : 266;
   const X0 = mobile ? 66 : 84, X1 = W - 10, HAUT = 36, Y0 = H - 46;
   const max = Math.max(0, ...seaux.map((s) => Math.max(s.ca, s.recu, s.dep, s.sorti)));
   const pas = pasActivite(max);
@@ -550,7 +550,8 @@ function rendreBarres(v, zone) {
   }).join("");
 
   // Libellés : tous s'ils tiennent, sinon quelques-uns répartis
-  const k = Math.min(n, mobile ? 6 : 12);
+  // Sur téléphone, autant de libellés que la largeur en laisse (environ 56 px chacun)
+  const k = Math.min(n, mobile ? Math.max(2, Math.min(6, Math.floor((X1 - X0) / 56))) : 12);
   const indices = k === n ? seaux.map((_, i) => i) : Array.from({ length: k }, (_, j) => Math.round((j * (n - 1)) / (k - 1)));
   // Sous chaque libellé, ce qui reste (argent reçu − argent sorti) : vert ou rouge
   const etiquettes = indices.map((i) => {
@@ -681,7 +682,7 @@ function rendreActivite(v) {
   // Dimensions
   const mobile = window.innerWidth <= 760;
   const W = Math.max(280, zone.clientWidth);
-  const H = mobile ? 210 : 250;
+  const H = mobile ? 166 : 250;
   const X0 = mobile ? 66 : 84, X1 = W - 10, HAUT = 12, Y0 = H - 30;
   const max = Math.max(0, ...ventes, ...depenses);
   const pas = pasActivite(max);
@@ -1130,7 +1131,7 @@ function libellePeriode(plage, precedente) {
     const annee = plage.debut.slice(0, 4);
     return { phrase: `en ${annee}`, vs: `${Number(annee) - 1} à la même date`, court: annee };
   }
-  return { phrase: "sur la période", vs: "la période précédente", court: "la période" };
+  // Période choisie au calendrier : ses dates dans la phrase (le bouton ne montre qu'une icône sur téléphone)
 }
 
 // Calcule tout ce que la page affiche à partir des données chargées

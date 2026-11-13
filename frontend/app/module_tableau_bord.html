@@ -290,6 +290,44 @@
             .tdb-panel { left: 0; right: auto; width: min(320px, calc(100vw - 32px)); }
             .tdb-lower > div, .tdb-side, .tdb-box { min-width: 0; }
             .tdb-op:nth-child(n+6) { display: none; }
+
+            /* La carte du haut tient sur un écran de téléphone, graphique compris */
+            .tdb-wrap { gap: 10px; padding-top: 4px; }
+            .tdb-head { gap: 10px; }
+            .tdb-date { font-size: 13px; }
+            .tdb-h1 { font-size: 24px; margin-top: 0; }
+            .tdb-mbtn { height: 44px; }
+            .tdb-hero { padding: 16px 18px; gap: 10px; }
+            .tdb-hero-top { row-gap: 8px; }
+            .tdb-hero-phrase { flex: 1; min-width: 0; font-size: 14px; }
+            /* Le calendrier passe en icône sur la ligne de la phrase, les périodes en dessous */
+            .tdb-tools { display: contents; }
+            .tdb-picker { order: 1; }
+            .tdb-tools .tdb-pills { order: 2; width: 100%; min-width: 0; }
+            .tdb-tools .tdb-pill { flex: 1 1 auto; padding: 0 6px; font-size: 13px; }
+            .tdb-pill { height: 32px; }
+            #dateFilterLabel { display: none; }
+            .tdb-range { height: 34px; padding: 0 9px; gap: 0; }
+            .tdb-panel { left: auto; right: 0; }
+            .tdb-hero { gap: 8px; }
+            /* Entré et Sorti l'un sous l'autre, à droite du montant (dessous si le montant est trop long) */
+            .tdb-main-row { gap: 8px 12px; align-items: center; }
+            .tdb-stats { flex-direction: column; gap: 4px; }
+            /* « Cumulé / Par jour » en bas à droite, sur la ligne de la légende */
+            #actVues { position: absolute; right: 18px; bottom: 12px; }
+            #actVues .tdb-pill { height: 28px; padding: 0 10px; font-size: 12.5px; }
+            .tdb-note { padding-right: 140px; min-height: 36px; }
+            .tdb-num { font-size: 44px; }
+            .tdb-trend { margin-top: 6px; font-size: 13px; }
+            .tdb-trend-pill { height: 22px; }
+            .tdb-stat-l { font-size: 13px; }
+            .tdb-stat-v { font-size: 18px; margin-top: 2px; }
+            .act-tete { margin-bottom: -4px; }
+            .act-meilleur { font-size: 13px; }
+            /* Légende du graphique : repliée, on la déplie en touchant la ligne */
+            .tdb-note { font-size: 12px; padding-top: 8px; align-items: flex-start; cursor: pointer; }
+            .tdb-note:not(.is-ouverte) #actNote { display: none; }
+            .tdb-note:not(.is-ouverte)::after { content: "Comment lire ce graphique"; }
         }
     </style>
     <!-- Restriction d'acces : un agent est redirige vers ses propres pages -->
@@ -443,7 +481,7 @@
 
                 <div class="act-chart" id="actChart"><div class="tdb-skel-block" style="min-height:250px"></div></div>
 
-                <div class="tdb-note">
+                <div class="tdb-note" onclick="this.classList.toggle('is-ouverte')">
                     <span class="material-symbols-rounded">info</span><span id="actNote">L'écart entre les deux courbes, c'est ce qui vous reste.</span>
                 </div>
             </section>

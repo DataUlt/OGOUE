@@ -55,7 +55,7 @@
     <header class="sticky top-0 z-50 w-full bg-white border-b border-black/10">
       <nav class="px-6 lg:px-10 py-2 lg:py-4 flex items-center justify-between gap-4">
         <a href="/" class="flex items-center">
-          <img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-20 lg:h-24 w-auto max-lg:h-28 max-lg:max-w-none max-lg:-my-4 max-lg:-ml-11">
+          <img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-20 lg:h-24 w-auto max-lg:h-28 max-lg:max-w-none max-lg:-my-6 max-lg:-ml-11">
         </a>
 
         <div class="hidden lg:flex items-center gap-7 text-[15px] font-semibold">
@@ -96,13 +96,13 @@
         <main class="flex-1">
 
       <!-- FORM SECTION -->
-      <section class="pt-12 pb-24 sm:pt-16 sm:pb-32">
+      <section class="pt-7 pb-12 sm:pt-16 sm:pb-32">
         <div class="max-w-md mx-auto px-6 lg:px-8">
-          <div class="text-center mb-12">
-            <h1 class="text-3xl font-black tracking-tighter text-text-light sm:text-4xl">
+          <div class="text-center mb-7 sm:mb-12">
+            <h1 class="text-[28px] font-black tracking-tighter text-text-light sm:text-4xl">
               Se connecter
             </h1>
-            <p class="mt-3 text-text-light-muted">
+            <p class="mt-1 sm:mt-3 text-[15px] sm:text-base text-text-light-muted">
               Accédez à votre espace OGOUE
             </p>
           </div>
@@ -110,7 +110,7 @@
           <div id="errorMessage" class="hidden p-4 mb-6 bg-red-100/80 border border-red-300 text-red-700 rounded-lg text-sm"></div>
           <div id="successMessage" class="hidden p-4 mb-6 bg-cyan-100/80 border border-cyan-300 text-cyan-700 rounded-lg text-sm"></div>
 
-          <form class="space-y-6" onsubmit="handleLogin(event)">
+          <form class="space-y-5 sm:space-y-6" onsubmit="handleLogin(event)">
             <!-- Email -->
             <div>
               <label class="block text-sm font-semibold text-text-light mb-2" for="email">
@@ -133,9 +133,15 @@
 
             <!-- Password -->
             <div>
-              <label class="block text-sm font-semibold text-text-light mb-2" for="password">
-                Mot de passe
-              </label>
+              <!-- « Mot de passe oublié ? » sur la ligne du libellé : toujours visible sans défiler -->
+              <div class="flex items-baseline justify-between gap-3 mb-2">
+                <label class="block text-sm font-semibold text-text-light" for="password">
+                  Mot de passe
+                </label>
+                <a class="text-sm font-semibold text-primary hover:underline" href="forgot-password">
+                  Mot de passe oublié ?
+                </a>
+              </div>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <span class="material-symbols-outlined text-text-light-muted">lock</span>
@@ -168,7 +174,7 @@
                 <label class="cursor-pointer group">
                   <input checked="" class="peer sr-only" name="role" type="radio" value="gerant" />
                   <div
-                    class="flex flex-col items-center justify-center h-24 p-3 rounded-lg border border-black/10 bg-white hover:bg-white/60 peer-checked:bg-primary peer-checked:text-background-dark peer-checked:border-primary transition-all">
+                    class="flex flex-col items-center justify-center h-20 sm:h-24 p-3 rounded-lg border border-black/10 bg-white hover:bg-white/60 peer-checked:bg-primary peer-checked:text-background-dark peer-checked:border-primary transition-all">
                     <span class="material-symbols-outlined mb-2">storefront</span>
                     <span class="text-xs font-semibold">Gérant</span>
                   </div>
@@ -176,7 +182,7 @@
                 <label class="cursor-pointer group">
                   <input class="peer sr-only" name="role" type="radio" value="agent" />
                   <div
-                    class="flex flex-col items-center justify-center h-24 p-3 rounded-lg border border-black/10 bg-white hover:bg-white/60 peer-checked:bg-primary peer-checked:text-background-dark peer-checked:border-primary transition-all">
+                    class="flex flex-col items-center justify-center h-20 sm:h-24 p-3 rounded-lg border border-black/10 bg-white hover:bg-white/60 peer-checked:bg-primary peer-checked:text-background-dark peer-checked:border-primary transition-all">
                     <span class="material-symbols-outlined mb-2">people</span>
                     <span class="text-xs font-semibold">Agent</span>
                   </div>
@@ -184,7 +190,7 @@
                 <label class="cursor-pointer group">
                   <input class="peer sr-only" name="role" type="radio" value="institution" />
                   <div
-                    class="flex flex-col items-center justify-center h-24 p-3 rounded-lg border border-black/10 bg-white hover:bg-white/60 peer-checked:bg-primary peer-checked:text-background-dark peer-checked:border-primary transition-all">
+                    class="flex flex-col items-center justify-center h-20 sm:h-24 p-3 rounded-lg border border-black/10 bg-white hover:bg-white/60 peer-checked:bg-primary peer-checked:text-background-dark peer-checked:border-primary transition-all">
                     <span class="material-symbols-outlined mb-2">account_balance</span>
                     <span class="text-xs font-semibold text-center leading-tight">Institution financière</span>
                   </div>
@@ -204,13 +210,6 @@
               <a href="/agent-login"
                 class="block w-full py-3 px-4 rounded-lg bg-primary text-background-dark font-bold text-sm hover:bg-primary/90 transition-colors text-center">
                 Accéder à mon espace
-              </a>
-            </div>
-
-            <!-- Links -->
-            <div class="text-center">
-              <a class="text-sm text-text-light-muted hover:text-text-light transition-colors" href="forgot-password">
-                Mot de passe oublié ?
               </a>
             </div>
 
@@ -250,7 +249,7 @@
     const SUITE =  new URLSearchParams(location.search).get('suite') || '';
     const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
       ? 'http://localhost:3001'
-      : 'https://api.ogoue.com';
+      : (/^192\.168\./.test(location.hostname) ? 'http://' + location.hostname + ':3001' : 'https://api.ogoue.com');
 
     async function handleLogin(event) {
       event.preventDefault();
@@ -321,7 +320,7 @@
 
         const APP_BASE = (['localhost','127.0.0.1'].some(h => location.hostname.includes(h)))
           ? 'http://127.0.0.1:8080/app'
-          : 'https://www.ogoue.com/app';
+          : (/^192\.168\./.test(location.hostname) ? location.origin + '/app' : 'https://www.ogoue.com/app');
         // Suite prévue à l'inscription (paiement ou onboarding), limitée à deux chemins connus
         const destination = (SUITE.startsWith('/paiement.html?') || SUITE.startsWith('/app/module_articles.html'))
           ? SUITE

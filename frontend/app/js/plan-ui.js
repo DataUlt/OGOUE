@@ -13,7 +13,7 @@
 (function () {
   const API_BASE_URL = (['localhost', '127.0.0.1'].some(h => location.hostname.includes(h)))
     ? 'http://localhost:3001'
-    : 'https://api.ogoue.com';
+    : (/^192\.168\./.test(location.hostname) ? 'http://' + location.hostname + ':3001' : 'https://api.ogoue.com');
 
   // Formule qui ouvre chaque fonction : sert a dire quoi souscrire plutot
   // qu'un vague « passez a la formule superieure ».
@@ -453,8 +453,8 @@
         : '';
 
       el.innerHTML = `
-        <div class="rounded-lg border ${cadre} px-4 py-3 text-sm">
-          <div class="flex items-center justify-between gap-3 mb-2">
+        <div class="rounded-lg border ${cadre} px-3 py-2 sm:px-4 sm:py-3 text-[13px] sm:text-sm">
+          <div class="flex items-center justify-between gap-3 mb-1.5 sm:mb-2">
             <span class="font-semibold text-[#0a0c0a] dark:text-white">Opérations ce mois-ci</span>
             <span class="text-gray-600 dark:text-gray-300">${nombre(utilisees)} / ${nombre(limite)}</span>
           </div>

@@ -69,7 +69,7 @@
 
         /* ? FORCER le champ date à la même taille que les autres et icône à droite */
         .date-input{
-            height: 56px !important;                /* = h-14 */
+            height: 56px !important;                /* = h-12 sm:h-14 */
             padding: 0 48px 0 15px !important;      /* espace réservé à droite pour l'icône */
             box-sizing: border-box !important;
             line-height: 56px !important;          /* centre le texte */
@@ -181,13 +181,13 @@
 
     <!-- ===== CONTENU PAGE VENTES ===== -->
     <main class="flex-grow">
-        <div class="mx-auto max-w-[1120px] px-[18px] md:px-11 py-8">
-            <div class="flex flex-col gap-8">
+        <div class="mx-auto max-w-[1120px] px-[18px] md:px-11 py-4 sm:py-8">
+            <div class="flex flex-col gap-4 sm:gap-8">
 
                 <!-- Titre page -->
-                <header class="flex flex-wrap justify-between items-center gap-3 mb-2">
-                    <div class="flex flex-col gap-1">
-                        <h1 class="text-[#0d1b19] dark:text-white text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em]">
+                <header class="flex flex-nowrap sm:flex-wrap justify-between items-start sm:items-center gap-3 sm:mb-2">
+                    <div class="flex flex-col gap-1 min-w-0">
+                        <h1 class="text-[#0d1b19] dark:text-white text-[24px] sm:text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em]">
                             Gestion Comptable
                         </h1>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
@@ -196,9 +196,9 @@
                     </div>
                     <!-- Tutoriel video, lu dans une fenetre par aide.js -->
                     <button type="button" data-tuto="vente"
-                            class="inline-flex items-center gap-2 rounded-lg border border-[#0B2A5B] bg-[#0B2A5B] px-4 py-2 text-sm font-bold text-white dark:text-white hover:bg-[#0B2A5B]/90">
+                            class="shrink-0 inline-flex items-center gap-1.5 sm:gap-2 rounded-lg border border-[#0B2A5B] bg-[#0B2A5B] px-3 py-1.5 sm:px-4 sm:py-2 text-[13px] sm:text-sm font-bold text-white dark:text-white hover:bg-[#0B2A5B]/90">
                         <span class="material-symbols-outlined text-xl text-primary" style="font-variation-settings:'FILL' 1">play_circle</span>
-                        <span>Voir le tuto</span>
+                        <span class="sm:hidden">Tuto</span><span class="hidden sm:inline">Voir le tuto</span>
                     </button>
                 </header>
 
@@ -206,42 +206,42 @@
                 <div class="border-b border-gray-200 dark:border-gray-700">
                     <nav class="grid grid-cols-4 sm:flex sm:gap-8 -mb-px">
                         <a href="module_ventes"
-                           class="shrink-0 whitespace-nowrap flex flex-col items-center justify-center border-b-[3px] border-b-primary text-[#0d1b19] dark:text-white pb-3 pt-4 px-1 sm:px-2">
+                           class="shrink-0 whitespace-nowrap flex flex-col items-center justify-center border-b-[3px] border-b-primary text-[#0d1b19] dark:text-white pb-2.5 pt-2 sm:pb-3 sm:pt-4 px-1 sm:px-2">
                             <p class="text-sm font-bold leading-normal tracking-[0.015em]">Ventes</p>
                         </a>
                         <a href="module_depenses"
-                           class="shrink-0 whitespace-nowrap flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-1 sm:px-2">
+                           class="shrink-0 whitespace-nowrap flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-2.5 pt-2 sm:pb-3 sm:pt-4 px-1 sm:px-2">
                             <p class="text-sm font-bold leading-normal tracking-[0.015em]">Dépenses</p>
                         </a>
                         <a href="module_resume_ventes_depenses"
-                           class="shrink-0 whitespace-nowrap flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-1 sm:px-2">
+                           class="shrink-0 whitespace-nowrap flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-2.5 pt-2 sm:pb-3 sm:pt-4 px-1 sm:px-2">
                             <p class="text-sm font-bold leading-normal tracking-[0.015em]">Résumé</p>
                         </a>
                         <a data-exige="etatsFinanciers" href="module_etats_financiers"
-                           class="shrink-0 whitespace-nowrap flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-3 pt-4 px-1 sm:px-2">
+                           class="shrink-0 whitespace-nowrap flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 pb-2.5 pt-2 sm:pb-3 sm:pt-4 px-1 sm:px-2">
                             <p class="text-sm font-bold leading-normal tracking-[0.015em]"><span class="sm:hidden">Analyse</span><span class="hidden sm:inline">Analyse financière</span></p>
                         </a>
                     </nav>
                 </div>
 
                 <!-- Card Ventes -->
-                <div class="mt-4 bg-white dark:bg-[#182c29] p-8 rounded-xl shadow-sm border border-[#cfe7e3]/70 dark:border-gray-700/70">
-                    <h2 class="text-xl font-bold text-[#0d1b19] dark:text-white mb-6">Enregistrer une nouvelle vente</h2>
+                <div class="sm:mt-4 bg-white dark:bg-[#182c29] p-5 sm:p-8 rounded-xl shadow-sm border border-[#cfe7e3]/70 dark:border-gray-700/70">
+                    <h2 class="text-lg sm:text-xl font-bold text-[#0d1b19] dark:text-white mb-4 sm:mb-6">Enregistrer une nouvelle vente</h2>
 
                     <!-- Compteur mensuel d'opérations, rempli par plan-ui.js -->
-                    <div data-compteur-operations class="hidden mb-6"></div>
+                    <div data-compteur-operations class="hidden mb-4 sm:mb-6"></div>
 
                     <!-- ? Formulaire Ventes -->
-                    <form id="form-ventes" class="space-y-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <form id="form-ventes" class="space-y-4 sm:space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                             <label class="flex flex-col">
-                                <p class="text-base font-medium leading-normal pb-2 text-[#0d1b19] dark:text-gray-200">
+                                <p class="text-[15px] sm:text-base font-medium leading-normal pb-1.5 sm:pb-2 text-[#0d1b19] dark:text-gray-200">
                                     Date de la transaction<span class="text-red-500">*</span>
                                 </p>
                                 <input
                                     id="vente-date"
                                     name="date"
-                                    class="form-input date-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0d1b19] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-14 placeholder:text-gray-400 dark:placeholder:text-gray-500 p-[15px] text-base font-normal leading-normal"
+                                    class="form-input date-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0d1b19] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-12 sm:h-14 placeholder:text-gray-400 dark:placeholder:text-gray-500 p-[15px] text-base font-normal leading-normal"
                                     required
                                     type="date"
                                 />
@@ -249,7 +249,7 @@
 
                             <!-- ? Bloc Article / Service (Option B) -->
                             <div class="flex flex-col">
-                                <p class="text-base font-medium leading-normal pb-2 text-[#0d1b19] dark:text-gray-200">
+                                <p class="text-[15px] sm:text-base font-medium leading-normal pb-1.5 sm:pb-2 text-[#0d1b19] dark:text-gray-200">
                                     Nom de l'article / service <span class="text-red-500">*</span>
                                 </p>
 
@@ -258,7 +258,7 @@
                                     <input
                                         id="vente-description"
                                         name="description"
-                                        class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0d1b19] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-14 placeholder:text-gray-400 dark:placeholder:text-gray-500 p-[15px] text-base font-normal leading-normal"
+                                        class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0d1b19] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-12 sm:h-14 placeholder:text-gray-400 dark:placeholder:text-gray-500 p-[15px] text-base font-normal leading-normal"
                                         placeholder="Ex: Robe, Vente Edan, ..."
                                         required
                                     />
@@ -269,7 +269,7 @@
                                     <select
                                         id="vente-article-select"
                                         name="article_select"
-                                        class="form-select flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0d1b19] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-14 p-[15px] text-base font-normal leading-normal"
+                                        class="form-select flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0d1b19] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-12 sm:h-14 p-[15px] text-base font-normal leading-normal"
                                     >
                                         <!-- options injectées en JS -->
                                     </select>
@@ -279,7 +279,7 @@
                                         <input
                                             id="vente-article-autre"
                                             name="article_autre"
-                                            class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0d1b19] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-14 placeholder:text-gray-400 dark:placeholder:text-gray-500 p-[15px] text-base font-normal leading-normal"
+                                            class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0d1b19] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-12 sm:h-14 placeholder:text-gray-400 dark:placeholder:text-gray-500 p-[15px] text-base font-normal leading-normal"
                                             placeholder="Saisir un nouvel article / service..."
                                         />
                                     </div>
@@ -294,15 +294,15 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                             <label class="flex flex-col">
-                                <p class="text-base font-medium leading-normal pb-2 text-[#0d1b19] dark:text-gray-200">
+                                <p class="text-[15px] sm:text-base font-medium leading-normal pb-1.5 sm:pb-2 text-[#0d1b19] dark:text-gray-200">
                                     Moyen de paiement<span class="text-red-500">*</span>
                                 </p>
                                 <select
                                     id="vente-moyen-paiement"
                                     name="moyen_paiement"
-                                    class="form-select flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0d1b19] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-14 p-[15px] text-base font-normal leading-normal"
+                                    class="form-select flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0d1b19] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-12 sm:h-14 p-[15px] text-base font-normal leading-normal"
                                     required
                                 >
                                     <option value="">Sélectionner un moyen de paiement</option>
@@ -312,13 +312,13 @@
                                 </select>
                             </label>
                             <label class="flex flex-col">
-                                <p class="text-base font-medium leading-normal pb-2 text-[#0d1b19] dark:text-gray-200">
+                                <p class="text-[15px] sm:text-base font-medium leading-normal pb-1.5 sm:pb-2 text-[#0d1b19] dark:text-gray-200">
                                     Type de vente<span class="text-red-500">*</span>
                                 </p>
                                 <select
                                     id="vente-type"
                                     name="type_vente"
-                                    class="form-select flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0d1b19] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-14 p-[15px] text-base font-normal leading-normal"
+                                    class="form-select flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0d1b19] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-12 sm:h-14 p-[15px] text-base font-normal leading-normal"
                                     required
                                 >
                                     <option value="">Sélectionner un type de vente</option>
@@ -328,15 +328,15 @@
                             </label>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                             <label class="flex flex-col">
-                                <p class="text-base font-medium leading-normal pb-2 text-[#0d1b19] dark:text-gray-200">
+                                <p class="text-[15px] sm:text-base font-medium leading-normal pb-1.5 sm:pb-2 text-[#0d1b19] dark:text-gray-200">
                                     Quantité<span class="text-red-500">*</span>
                                 </p>
                                 <input
                                     id="vente-quantite"
                                     name="quantite"
-                                    class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0d1b19] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-14 placeholder:text-gray-400 dark:placeholder:text-gray-500 p-[15px] text-base font-normal leading-normal"
+                                    class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0d1b19] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-12 sm:h-14 placeholder:text-gray-400 dark:placeholder:text-gray-500 p-[15px] text-base font-normal leading-normal"
                                     placeholder="0"
                                     required
                                     type="number"
@@ -344,13 +344,13 @@
                                 />
                             </label>
                             <label class="flex flex-col">
-                                <p class="text-base font-medium leading-normal pb-2 text-[#0d1b19] dark:text-gray-200">
+                                <p class="text-[15px] sm:text-base font-medium leading-normal pb-1.5 sm:pb-2 text-[#0d1b19] dark:text-gray-200">
                                     Prix Total<span class="text-red-500">*</span>
                                 </p>
                                 <input
                                     id="vente-montant"
                                     name="montant"
-                                    class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0d1b19] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-14 placeholder:text-gray-400 dark:placeholder:text-gray-500 p-[15px] text-base font-normal leading-normal"
+                                    class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0d1b19] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark h-12 sm:h-14 placeholder:text-gray-400 dark:placeholder:text-gray-500 p-[15px] text-base font-normal leading-normal"
                                     placeholder="0 FCFA"
                                     required
                                     type="number"
@@ -361,7 +361,7 @@
                         </div>
 
                         <label class="flex flex-col">
-                            <p class="text-base font-medium leading-normal pb-2 text-[#0d1b19] dark:text-gray-200">
+                            <p class="text-[15px] sm:text-base font-medium leading-normal pb-1.5 sm:pb-2 text-[#0d1b19] dark:text-gray-200">
                                 Commentaire
                                 <span class="font-normal text-gray-500 dark:text-gray-400">(facultatif)</span>
                             </p>
@@ -379,7 +379,7 @@
                         </label>
 
                         <div>
-                            <p class="text-base font-medium leading-normal pb-2 text-[#0d1b19] dark:text-gray-200">
+                            <p class="text-[15px] sm:text-base font-medium leading-normal pb-1.5 sm:pb-2 text-[#0d1b19] dark:text-gray-200">
                                 Justificatif de la vente
                             </p>
 

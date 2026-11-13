@@ -7,7 +7,7 @@
 
   const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:3001'
-    : 'https://api.ogoue.com';
+    : (/^192\.168\./.test(location.hostname) ? 'http://' + location.hostname + ':3001' : 'https://api.ogoue.com');
   const { appState, addVente, getVentesPourPeriode } = window.OGOUE;
 
   const form = document.getElementById("form-ventes");
@@ -1607,23 +1607,23 @@
     const blocPaiement = document.createElement("div");
     blocPaiement.className = "hidden flex-col";
     blocPaiement.innerHTML =
-      `<p class="text-base font-medium leading-normal pb-2 text-[#0d1b19] dark:text-gray-200">Moyen de paiement<span class="text-red-500">*</span></p>` +
+      `<p class="text-[15px] sm:text-base font-medium leading-normal pb-1.5 sm:pb-2 text-[#0d1b19] dark:text-gray-200">Moyen de paiement<span class="text-red-500">*</span></p>` +
       `<div class="inline-flex self-start rounded-full bg-gray-100 dark:bg-gray-800 p-1" data-cartes-paiement>` +
-      `<button type="button" data-paiement="cash" class="px-3 sm:px-5 h-12 rounded-full text-sm font-bold whitespace-nowrap">Cash</button>` +
-      `<button type="button" data-paiement="mobile_money" class="px-3 sm:px-5 h-12 rounded-full text-sm font-bold whitespace-nowrap">Mobile Money</button>` +
-      `<button type="button" data-paiement="credit" class="px-3 sm:px-5 h-12 rounded-full text-sm font-bold whitespace-nowrap" title="Le client paiera plus tard">Crédit</button></div>`;
+      `<button type="button" data-paiement="cash" class="px-3 sm:px-5 h-10 sm:h-12 rounded-full text-sm font-bold whitespace-nowrap">Cash</button>` +
+      `<button type="button" data-paiement="mobile_money" class="px-3 sm:px-5 h-10 sm:h-12 rounded-full text-sm font-bold whitespace-nowrap">Mobile Money</button>` +
+      `<button type="button" data-paiement="credit" class="px-3 sm:px-5 h-10 sm:h-12 rounded-full text-sm font-bold whitespace-nowrap" title="Le client paiera plus tard">Crédit</button></div>`;
     ligneDate.appendChild(blocPaiement);
 
     // ── Grille d'articles, panier et total ──
     const blocCartes = document.createElement("div");
     blocCartes.className = "hidden";
     blocCartes.innerHTML = `
-      <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
-        <p class="text-base font-medium leading-normal text-[#0d1b19] dark:text-gray-200">Article / service<span class="text-red-500">*</span></p>
+      <div class="flex flex-nowrap sm:flex-wrap items-center justify-between gap-3 mb-3">
+        <p class="shrink-0 text-[15px] sm:text-base font-medium leading-normal text-[#0d1b19] dark:text-gray-200">Article / service<span class="text-red-500">*</span></p>
         <input type="search" data-cartes-recherche placeholder="Rechercher un article"
-               class="form-input w-full sm:w-64 h-10 rounded-full border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark text-sm px-4 text-[#0d1b19] dark:text-white">
+               class="form-input flex-1 min-w-0 sm:flex-none sm:w-64 h-10 rounded-full border border-gray-300 dark:border-gray-600 bg-background-light dark:bg-background-dark text-sm px-4 text-[#0d1b19] dark:text-white">
       </div>
-      <p data-cartes-astuce class="text-sm text-gray-500 dark:text-gray-400 mb-3">Un appui ajoute l'article à la vente. Réglez ensuite la quantité avec + et −.</p>
+      <p data-cartes-astuce class="max-sm:hidden text-sm text-gray-500 dark:text-gray-400 mb-3">Un appui ajoute l'article à la vente. Réglez ensuite la quantité avec + et −.</p>
       <div data-cartes-grille class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3"></div>
       <p data-cartes-erreur class="hidden mt-3 text-sm font-medium text-red-600"></p>
       <button type="button" data-cartes-ajouter class="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
@@ -1824,7 +1824,7 @@
         : reste !== null && reste <= 0 ? "Rupture de stock"
         : reste !== null ? `Stock : ${reste}` : "";
       return `<button type="button" data-carte-article="${echapperHtml(a.id)}" ${bloque ? "disabled" : ""}
-        class="relative text-left min-h-[104px] rounded-2xl border-2 p-4 flex flex-col justify-between gap-2 transition active:scale-95 touch-manipulation select-none
+        class="relative text-left min-h-[80px] sm:min-h-[104px] rounded-2xl border-2 p-3 sm:p-4 flex flex-col justify-between gap-1 sm:gap-2 transition active:scale-95 touch-manipulation select-none
                ${bloque ? "border-gray-200 dark:border-gray-700 opacity-50 cursor-not-allowed"
                  : l ? "border-primary bg-primary/5 dark:bg-[#1f3532]"
                  : "border-[#cfe7e3] dark:border-gray-600 bg-white dark:bg-[#1f3532] hover:border-primary"}">
@@ -1857,7 +1857,7 @@
       if (chargement && !ordre.length) {
         // Cartes d'attente, à la place des anciens champs
         grille.innerHTML = Array.from({ length: 4 }, () =>
-          `<div class="min-h-[104px] rounded-2xl border-2 border-gray-100 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 animate-pulse"></div>`).join("");
+          `<div class="min-h-[80px] sm:min-h-[104px] rounded-2xl border-2 border-gray-100 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 animate-pulse"></div>`).join("");
         zonePanier.classList.add("hidden");
         return;
       }
@@ -2184,15 +2184,15 @@
 
     // ── Bascule Saisie normale / Mode rush, à côté du titre ──
     const entete = document.createElement("div");
-    entete.className = "flex flex-wrap items-center justify-between gap-3 mb-6";
+    entete.className = "flex flex-wrap items-center justify-between gap-2 sm:gap-3 mb-3 sm:mb-6";
     titre.classList.remove("mb-6");
     titre.replaceWith(entete);
     entete.appendChild(titre);
     const bascule = document.createElement("div");
     bascule.className = "inline-flex rounded-full bg-gray-100 dark:bg-gray-800 p-1";
     bascule.innerHTML =
-      `<button type="button" data-mode="normal" class="px-4 h-9 rounded-full text-sm font-bold">Saisie normale</button>` +
-      `<button type="button" data-mode="rush" class="px-4 h-9 rounded-full text-sm font-bold inline-flex items-center gap-1"><span class="material-symbols-outlined text-base">bolt</span>Mode rush</button>`;
+      `<button type="button" data-mode="normal" class="px-3 sm:px-4 h-8 sm:h-9 rounded-full text-[13px] sm:text-sm font-bold">Saisie normale</button>` +
+      `<button type="button" data-mode="rush" class="px-3 sm:px-4 h-8 sm:h-9 rounded-full text-[13px] sm:text-sm font-bold inline-flex items-center gap-1"><span class="material-symbols-outlined text-base">bolt</span>Mode rush</button>`;
     entete.appendChild(bascule);
 
     // ── Zone du mode rush, sous le formulaire ──
@@ -2291,7 +2291,7 @@
           ? "Rupture de stock"
           : reste !== null ? `Stock : ${reste}` : "";
       return `<button type="button" data-rush-article="${echapperHtml(a.id)}" ${bloque ? "disabled" : ""}
-        class="relative text-left min-h-[104px] rounded-2xl border-2 p-4 flex flex-col justify-between gap-2 transition active:scale-95 touch-manipulation select-none
+        class="relative text-left min-h-[80px] sm:min-h-[104px] rounded-2xl border-2 p-3 sm:p-4 flex flex-col justify-between gap-1 sm:gap-2 transition active:scale-95 touch-manipulation select-none
                ${bloque ? "border-gray-200 dark:border-gray-700 opacity-50 cursor-not-allowed" : "border-[#cfe7e3] dark:border-gray-600 bg-white dark:bg-[#1f3532] hover:border-primary"}">
         ${n ? `<span class="absolute -top-2 -right-2 min-w-7 h-7 px-2 rounded-full bg-primary text-white text-sm font-bold flex items-center justify-center">×${n}</span>` : ""}
         <span class="font-bold text-[#0d1b19] dark:text-white leading-snug line-clamp-2">${echapperHtml(a.name)}</span>

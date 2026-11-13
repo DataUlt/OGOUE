@@ -8,7 +8,7 @@
 
   const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:3001'
-    : 'https://api.ogoue.com';
+    : (/^192\.168\./.test(location.hostname) ? 'http://' + location.hostname + ':3001' : 'https://api.ogoue.com');
   const { appState, addDepense, getDepensesPourPeriode } = window.OGOUE;
 
   // =========================
@@ -1148,9 +1148,9 @@
     blocPaiement.innerHTML =
       `<p class="text-base font-medium leading-normal pb-2 text-[#0a0c0a] dark:text-gray-200">Moyen de paiement <span class="text-red-500">*</span></p>` +
       `<div class="inline-flex self-start rounded-full bg-gray-100 dark:bg-gray-800 p-1" data-depense-paiement>` +
-      `<button type="button" data-paiement="cash" class="px-3 sm:px-5 h-12 rounded-full text-sm font-bold whitespace-nowrap">Cash</button>` +
-      `<button type="button" data-paiement="mobile_money" class="px-3 sm:px-5 h-12 rounded-full text-sm font-bold whitespace-nowrap">Mobile Money</button>` +
-      `<button type="button" data-paiement="credit" class="px-3 sm:px-5 h-12 rounded-full text-sm font-bold whitespace-nowrap" title="Payé plus tard">Crédit</button></div>`;
+      `<button type="button" data-paiement="cash" class="px-3 sm:px-5 h-10 sm:h-12 rounded-full text-sm font-bold whitespace-nowrap">Cash</button>` +
+      `<button type="button" data-paiement="mobile_money" class="px-3 sm:px-5 h-10 sm:h-12 rounded-full text-sm font-bold whitespace-nowrap">Mobile Money</button>` +
+      `<button type="button" data-paiement="credit" class="px-3 sm:px-5 h-10 sm:h-12 rounded-full text-sm font-bold whitespace-nowrap" title="Payé plus tard">Crédit</button></div>`;
     labelCategorie.insertAdjacentElement("afterend", blocPaiement);
     function majMoyen() {
       blocPaiement.querySelectorAll("[data-paiement]").forEach((b) => {
@@ -1187,7 +1187,7 @@
     let promues = [];
     (async () => {
       try {
-        const API = (["localhost", "127.0.0.1"].some((h) => location.hostname.includes(h))) ? "http://localhost:3001" : "https://api.ogoue.com";
+        const API = (["localhost", "127.0.0.1"].some((h) => location.hostname.includes(h))) ? "http://localhost:3001" : (/^192\.168\./.test(location.hostname) ? "http://" + location.hostname + ":3001" : "https://api.ogoue.com");
         const r = await fetch(`${API}/api/organization`, { headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` } });
         const org = r.ok ? await r.json() : null;
         if (org?.modeActivite === "les_deux") { promues = ["Matières premières"]; afficherCartes(); }
@@ -1196,7 +1196,14 @@
     const blocCartes = document.createElement("div");
     blocCartes.innerHTML = `
       <p class="text-base font-medium leading-normal pb-2 text-[#0a0c0a] dark:text-gray-200">Catégorie <span class="text-red-500">*</span></p>
-      <div data-cartes-categories class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3"></div>
+      <div data-cartes-categories class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 touch-pan-y"></div>
+      <div data-cartes-pages class="hidden mt-3 items-center justify-between gap-3">
+        <button type="button" data-page="-1" aria-label="Catégories précédentes" class="size-10 shrink-0 inline-flex items-center justify-center rounded-full border-2 border-[#cfe7e3] dark:border-gray-700 text-[#0a0c0a] dark:text-white disabled:opacity-30">
+          <span class="material-symbols-outlined">chevron_left</span></button>
+        <span data-pages-points class="flex items-center gap-1.5"></span>
+        <button type="button" data-page="1" aria-label="Catégories suivantes" class="size-10 shrink-0 inline-flex items-center justify-center rounded-full border-2 border-[#cfe7e3] dark:border-gray-700 text-[#0a0c0a] dark:text-white disabled:opacity-30">
+          <span class="material-symbols-outlined">chevron_right</span></button>
+      </div>
       <button type="button" data-changer-categorie class="hidden mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline">
         <span class="material-symbols-outlined text-base">swap_horiz</span>Changer de catégorie</button>
       <p data-cartes-erreur class="hidden mt-3 text-sm font-medium text-red-600">Choisissez la catégorie de cette dépense.</p>`;
@@ -1204,6 +1211,12 @@
     const grille = blocCartes.querySelector("[data-cartes-categories]");
     const erreur = blocCartes.querySelector("[data-cartes-erreur]");
     const changer = blocCartes.querySelector("[data-changer-categorie]");
+    // Téléphone : quatre catégories à la fois, flèches (ou glissement du doigt) pour les suivantes
+    const navPages = blocCartes.querySelector("[data-cartes-pages]");
+    const pointsPages = blocCartes.querySelector("[data-pages-points]");
+    const ecranEtroit = window.matchMedia("(max-width: 639px)");
+    const PAR_PAGE = 4;
+    let page = 0, nbPages = 1;
 
     // Tant qu'aucune catégorie n'est choisie, la suite du formulaire (montant,
     // commentaire, justificatif, bouton) reste cachée. Classe dédiée : les
@@ -1235,13 +1248,31 @@
       const icone = (c) => ICONES[c.toLowerCase()] || "sell";
       const courantes = choix.filter((c) => !categoriesPlus.includes(c));
       promues.forEach((c) => { const i = courantes.indexOf("Achats / Stocks"); courantes.splice(i + 1, 0, c); });
-      const cartes = courantes.map((c) => carte(c, c, icone(c))).join("") +
-        (plusOuvert
-          ? categoriesPlus.filter((c) => !promues.includes(c)).map((c) => carte(c, c, icone(c))).join("")
-          : `<button type="button" data-plus-categories class="flex flex-col items-start gap-1.5 sm:flex-row sm:items-center sm:gap-3 min-w-0 text-left rounded-2xl border-2 border-dashed border-[#cfe7e3] dark:border-gray-700 px-3 py-3 sm:px-4 min-h-[64px] hover:border-primary/50">
-              <span class="material-symbols-outlined text-2xl text-gray-400">expand_more</span>
-              <span class="font-bold text-sm sm:text-[15px] leading-tight text-[#0a0c0a] dark:text-white">Plus de catégories</span></button>`) +
-        carte("__OTHER__", "Autre catégorie", "add_circle");
+      const plus = categoriesPlus.filter((c) => !promues.includes(c)).map((c) => carte(c, c, icone(c)));
+      const autre = carte("__OTHER__", "Autre catégorie", "add_circle");
+      let cartes;
+      const enPages = ecranEtroit.matches && !choisie;
+      if (enPages) {
+        // Toutes les catégories, réparties par quatre : les pages remplacent « Plus de catégories »
+        const toutes = [...courantes.map((c) => carte(c, c, icone(c))), ...plus, autre];
+        nbPages = Math.max(1, Math.ceil(toutes.length / PAR_PAGE));
+        page = Math.min(Math.max(0, page), nbPages - 1);
+        cartes = toutes.slice(page * PAR_PAGE, (page + 1) * PAR_PAGE).join("");
+        navPages.querySelector('[data-page="-1"]').disabled = page === 0;
+        navPages.querySelector('[data-page="1"]').disabled = page === nbPages - 1;
+        pointsPages.innerHTML = Array.from({ length: nbPages }, (_, i) =>
+          `<span class="block h-2 rounded-full transition-all ${i === page ? "w-5 bg-primary" : "w-2 bg-gray-300 dark:bg-gray-600"}"></span>`).join("");
+      } else {
+        cartes = courantes.map((c) => carte(c, c, icone(c))).join("") +
+          (plusOuvert
+            ? plus.join("")
+            : `<button type="button" data-plus-categories class="flex flex-col items-start gap-1.5 sm:flex-row sm:items-center sm:gap-3 min-w-0 text-left rounded-2xl border-2 border-dashed border-[#cfe7e3] dark:border-gray-700 px-3 py-3 sm:px-4 min-h-[64px] hover:border-primary/50">
+                <span class="material-symbols-outlined text-2xl text-gray-400">expand_more</span>
+                <span class="font-bold text-sm sm:text-[15px] leading-tight text-[#0a0c0a] dark:text-white">Plus de catégories</span></button>`) +
+          autre;
+      }
+      navPages.classList.toggle("hidden", !enPages);
+      navPages.classList.toggle("flex", enPages);
       grille.innerHTML = choisie
         ? (choisie === "__OTHER__" ? carte("__OTHER__", "Autre catégorie", "add_circle") : carte(choisie, choisie, icone(choisie)))
         : cartes;
@@ -1265,6 +1296,31 @@
     });
     changer.addEventListener("click", () => choisirCategorie(""));
 
+    // Pages de catégories : flèches, glissement du doigt, passage téléphone / ordinateur
+    function allerPage(sens) {
+      const cible = Math.min(Math.max(0, page + sens), nbPages - 1);
+      if (cible === page) return;
+      page = cible;
+      afficherCartes();
+    }
+    navPages.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-page]");
+      if (b && !b.disabled) allerPage(Number(b.dataset.page));
+    });
+    let depart = null;
+    grille.addEventListener("touchstart", (e) => {
+      if (!ecranEtroit.matches || categorieSelect.value) return;
+      depart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }, { passive: true });
+    grille.addEventListener("touchend", (e) => {
+      if (!depart) return;
+      const dx = e.changedTouches[0].clientX - depart.x, dy = e.changedTouches[0].clientY - depart.y;
+      depart = null;
+      // Glissement net et plutôt horizontal : vers la gauche = suivantes, vers la droite = précédentes
+      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.5) allerPage(dx < 0 ? 1 : -1);
+    }, { passive: true });
+    ecranEtroit.addEventListener?.("change", () => afficherCartes());
+
     // Sans catégorie, on ne laisse pas partir la dépense : le message est sous les cartes
     form.addEventListener("submit", (e) => {
       if (categorieSelect.value) return;
@@ -1279,6 +1335,7 @@
     form.addEventListener("reset", () => setTimeout(() => {
       choisirMoyen(paiementHabituel());
       plusOuvert = false;
+      page = 0;
       afficherCartes();
     }, 0));
 
