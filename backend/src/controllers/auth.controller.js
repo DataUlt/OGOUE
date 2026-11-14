@@ -360,6 +360,33 @@ async function envoyerConfirmation(email, origine) {
 }
 
 /**
+ * POST /auth/refresh
+ * Renouvelle la session d'un gérant avant que son jeton (1 h par défaut chez
+ * Supabase) n'expire : le site l'appelle en arrière-plan, la personne reste
+ * connectée tant qu'elle se sert d'OGOUE. Les agents n'en ont pas besoin
+ * (jeton OGOUE de 24 h). Chaque jeton de prolongation ne sert qu'une fois :
+ * Supabase en renvoie un nouveau.
+ */
+export async function refreshSession(req, res) {
+  try {
+    const parsed = z.object({ refreshToken: z.string().min(10).max(4000) }).safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: "Session invalide" });
+    const { data, error } = await supabaseAuth.auth.refreshSession({ refresh_token: parsed.data.refreshToken });
+    if (error || !data?.session) {
+      return res.status(401).json({ error: "Session expirée. Reconnectez-vous." });
+    }
+    return res.json({
+      token: data.session.access_token,
+      refreshToken: data.session.refresh_token,
+      expiresAt: data.session.expires_at,
+    });
+  } catch (err) {
+    console.error("Refresh error:", err?.message || err);
+    return res.status(500).json({ error: "Renouvellement de la session impossible pour le moment" });
+  }
+}
+
+/**
  * POST /auth/resend-confirmation
  * Renvoie le lien de confirmation. La réponse est la même que le compte
  * existe ou non, pour ne pas révéler les adresses inscrites.

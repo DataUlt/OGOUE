@@ -222,6 +222,7 @@
         }
 
         localStorage.setItem('authToken', data.token);
+        localStorage.removeItem('ogo_session'); // un agent n'a pas de prolongation (jeton de 24 h)
         localStorage.setItem('user', JSON.stringify(data.user));
         if (data.organization) {
           localStorage.setItem('ogo_org', JSON.stringify(data.organization));

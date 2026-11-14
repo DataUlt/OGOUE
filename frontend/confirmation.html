@@ -81,6 +81,8 @@
         const { user } = await reponse.json();
 
         localStorage.setItem('authToken', accessToken);
+        // Jeton de prolongation : la session se renouvelle seule (app/js/session.js)
+        if (refreshToken) localStorage.setItem('ogo_session', JSON.stringify({ access: accessToken, refresh: refreshToken }));
         localStorage.setItem('user', JSON.stringify(user));
         // Nouvelle connexion : les questions laissées « Plus tard » reviennent
         try { Object.keys(sessionStorage).filter((k) => /_pop_vu/.test(k)).forEach((k) => sessionStorage.removeItem(k)); } catch (e) {}
@@ -172,6 +174,8 @@
         if (!reponse.ok || !data.token) throw new Error(data.error || 'Connexion impossible. Réessayez.');
 
         localStorage.setItem('authToken', data.token);
+        // Jeton de prolongation : la session se renouvelle seule (app/js/session.js)
+        if (data.refreshToken) localStorage.setItem('ogo_session', JSON.stringify({ access: data.token, refresh: data.refreshToken }));
         localStorage.setItem('user', JSON.stringify(data.user));
         // Nouvelle connexion : les questions laissées « Plus tard » reviennent
         try { Object.keys(sessionStorage).filter((k) => /_pop_vu/.test(k)).forEach((k) => sessionStorage.removeItem(k)); } catch (e) {}

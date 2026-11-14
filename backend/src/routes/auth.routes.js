@@ -1,5 +1,5 @@
-﻿import express from "express";
-import { register, login, getMe, registerAgent, loginAgent, forgotPassword, resetPassword, loginSecondary, registerSecondary, changePassword, resendConfirmation, getWhatsapp, enregistrerWhatsapp } from "../controllers/auth.controller.js";
+import express from "express";
+import { register, login, getMe, registerAgent, loginAgent, forgotPassword, resetPassword, loginSecondary, registerSecondary, changePassword, resendConfirmation, refreshSession, getWhatsapp, enregistrerWhatsapp } from "../controllers/auth.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { limiterTentatives } from "../middleware/securite.middleware.js";
 
@@ -41,6 +41,9 @@ const limiteInscription = limiterTentatives(
 // Routes publiques (sans authentification)
 authRoutes.post("/register", limiteInscription, register);
 authRoutes.post("/login", limiteConnexion, login);
+// Renouvellement de la session du gérant, en arrière-plan : plafond large (un appel par heure et par onglet en temps normal)
+const limiteRenouvellement = limiterTentatives(60, 15 * 60 * 1000, "Trop de renouvellements de session. Réessayez dans quelques minutes.");
+authRoutes.post("/refresh", limiteRenouvellement, refreshSession);
 authRoutes.post("/agent-register", limiteCodeAgent, registerAgent);    // Enregistrer un agent via code
 authRoutes.post("/agent-login", limiteCodeAgent, loginAgent);          // Vérifier code d'accès agent
 authRoutes.post("/resend-confirmation", limiteMotDePasseOublie, resendConfirmation);  // Renvoyer le lien de confirmation

@@ -293,6 +293,8 @@
         }
 
         localStorage.setItem('authToken', data.token);
+        // Jeton de prolongation : la session se renouvelle seule (app/js/session.js)
+        if (data.refreshToken) localStorage.setItem('ogo_session', JSON.stringify({ access: data.token, refresh: data.refreshToken }));
         localStorage.setItem('user', JSON.stringify(data.user));
 
         // Nouvelle connexion : les questions laissées « Plus tard » (activité,
