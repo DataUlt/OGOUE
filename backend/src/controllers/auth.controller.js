@@ -486,13 +486,34 @@ export async function login(req, res) {
         .ilike("email", motifEmail)
         .limit(1);
 
-      if (!comptesConnus || comptesConnus.length === 0) {
+      // La fiche `users` n'est créée qu'à la première connexion réussie : un compte
+      // tout juste confirmé n'y est pas encore. On regarde donc aussi les comptes
+      // Supabase, sinon une erreur de mot de passe passerait pour un compte inexistant.
+      let compteExiste = !!(comptesConnus && comptesConnus.length);
+      if (!compteExiste) {
+        try {
+          const cible = parsed.email.trim().toLowerCase();
+          for (let page = 1; page <= 20 && !compteExiste; page++) {
+            const { data: lot, error: lotErreur } = await supabase.auth.admin.listUsers({ page, perPage: 1000 });
+            if (lotErreur || !lot?.users?.length) break;
+            compteExiste = lot.users.some((u) => (u.email || "").toLowerCase() === cible);
+            if (lot.users.length < 1000) break;
+          }
+        } catch (e) {
+          console.error("Recherche du compte Supabase :", e?.message || e);
+        }
+      }
+
+      if (!compteExiste) {
         return res.status(401).json({
           error: "Oups ! Il semble que vous n'ayez pas encore de compte OGOUE. Inscrivez-vous pour commencer.",
         });
       }
 
-      return res.status(401).json({ error: "Mot de passe incorrect" });
+      return res.status(401).json({
+        error: "Oups ! Ce mot de passe n'est pas le bon. Vérifiez-le (attention aux majuscules) ou utilisez « Mot de passe oublié ? ».",
+        code: "MOT_DE_PASSE_INCORRECT",
+      });
     }
 
     // Première connexion après confirmation : on crée le profil

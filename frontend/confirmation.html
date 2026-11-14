@@ -152,6 +152,15 @@
           body: JSON.stringify({ email: emailConfirme, password: motDePasse })
         });
         const data = await reponse.json().catch(() => ({}));
+        // L'adresse vient d'être confirmée : le compte existe, un refus vient du mot de passe
+        if (reponse.status === 401) {
+          erreur.innerHTML = 'Oups ! Ce mot de passe n\'est pas le bon. Saisissez celui choisi à l\'inscription (attention aux majuscules), '
+            + 'ou <a href="/forgot-password" class="font-bold underline">créez-en un nouveau</a>.';
+          erreur.classList.remove('hidden');
+          bouton.disabled = false;
+          document.getElementById('finaliser-mdp').select();
+          return;
+        }
         if (!reponse.ok || !data.token) throw new Error(data.error || 'Connexion impossible. Réessayez.');
 
         localStorage.setItem('authToken', data.token);
