@@ -27,8 +27,16 @@
     <!-- Première fois : le compte se termine avec le mot de passe (voir finaliserAvecMotDePasse) -->
     <form id="finaliser" class="hidden mt-6 text-left" onsubmit="finaliserAvecMotDePasse(event)">
       <label for="finaliser-mdp" class="block text-sm font-semibold text-[#0a0c0a]">Mot de passe</label>
-      <input id="finaliser-mdp" type="password" autocomplete="current-password" required
-        class="mt-2 block w-full h-14 px-4 rounded-[14px] border border-black/20 text-[17px] focus:outline-none focus:border-[#0088CC] focus:ring-2 focus:ring-[#0088CC]/20" />
+      <!-- L'œil affiche ou masque le mot de passe tapé -->
+      <div class="relative mt-2">
+        <input id="finaliser-mdp" type="password" autocomplete="current-password" required
+          class="block w-full h-14 pl-4 pr-14 rounded-[14px] border border-black/20 text-[17px] focus:outline-none focus:border-[#0088CC] focus:ring-2 focus:ring-[#0088CC]/20" />
+        <button type="button" id="finaliser-oeil" aria-label="Afficher le mot de passe"
+          onclick="const c = document.getElementById('finaliser-mdp'), voir = c.type === 'password'; c.type = voir ? 'text' : 'password'; this.querySelector('span').textContent = voir ? 'visibility_off' : 'visibility'; this.setAttribute('aria-label', voir ? 'Masquer le mot de passe' : 'Afficher le mot de passe'); c.focus();"
+          class="absolute inset-y-0 right-0 w-14 flex items-center justify-center text-[#5c6c60] hover:text-[#0a0c0a]">
+          <span class="material-symbols-outlined text-2xl">visibility</span>
+        </button>
+      </div>
       <p id="finaliser-erreur" class="hidden mt-3 text-sm text-red-600"></p>
       <button id="finaliser-bouton" type="submit" class="mt-5 w-full h-14 rounded-[16px] bg-[#0088CC] text-white text-[17px] font-bold hover:bg-[#0088CC]/90 disabled:opacity-60">Accéder à mon compte</button>
     </form>
