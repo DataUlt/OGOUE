@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>L'origine de notre nom - OGOUE</title>
+  <meta name="description" content="OGOUE tire son nom du fleuve Ogooué : un espace de vie, de commerce et de rencontres. Un nom inspiré de notre territoire, une vision tournée vers l'avenir." />
+  <link rel="icon" type="image/png" href="app/O-removebg-preview.png">
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" crossorigin href="https://fonts.gstatic.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#0088CC",
+            "background-light": "#f6f8f6",
+            "background-dark": "#111712",
+            "text-light": "#0a0c0a",
+            "text-light-muted": "#5c6c60",
+            secondary: "#1E3A5F",
+          },
+          fontFamily: {
+            display: ["Manrope", "sans-serif"],
+          },
+          borderRadius: {
+            DEFAULT: "1rem",
+            lg: "2rem",
+            xl: "3rem",
+            full: "9999px",
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+    }
+    .titre-xl { font-size: clamp(32px, 5.2vw, 60px); line-height: 1.06; font-weight: 800; letter-spacing: -0.02em; }
+    .titre-l  { font-size: clamp(28px, 3.6vw, 42px); line-height: 1.15; font-weight: 800; letter-spacing: -0.015em; }
+    .surtitre { font-size: 14px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #0088CC; }
+    .texte { font-size: 17px; line-height: 1.75; color: #3d4a40; }
+    .texte + .texte { margin-top: 1.1rem; }
+    /* Phrase forte : comme le fil de l'eau, une ligne bleue la porte */
+    .citation { border-left: 4px solid #0088CC; padding: 4px 0 4px 20px; font-size: clamp(20px, 2.4vw, 26px); line-height: 1.4; font-weight: 700; font-style: italic; color: #1E3A5F; }
+    .photo { border-radius: 22px; overflow: hidden; background: #e8ede8; }
+    .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .legende { margin-top: 10px; font-size: 13px; line-height: 1.5; color: #5c6c60; }
+    @media (max-width: 639px) { .texte { font-size: 16px; } }
+  </style>
+</head>
+
+<body class="bg-background-light font-display text-text-light antialiased flex flex-col min-h-screen">
+  <div class="relative w-full overflow-x-hidden flex flex-col flex-1">
+
+    <!-- HEADER -->
+    <header class="sticky top-0 z-50 w-full bg-white border-b border-black/10">
+      <nav class="px-6 lg:px-10 py-2 lg:py-4 flex items-center justify-between gap-4">
+        <a href="/" class="flex items-center">
+          <img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-20 lg:h-24 w-auto max-lg:h-28 max-lg:max-w-none max-lg:-my-6 max-lg:-ml-11">
+        </a>
+
+        <div class="hidden lg:flex items-center gap-7 text-[15px] font-semibold">
+          <a class="text-text-light hover:text-primary transition-colors" href="/">Accueil</a>
+          <a class="text-text-light hover:text-primary transition-colors" href="/#accompagnement">Notre accompagnement</a>
+          <a class="text-text-light hover:text-primary transition-colors" href="/index.html#comment">Comment ça marche</a>
+          <a class="text-text-light hover:text-primary transition-colors" href="/tarifs">Tarifs</a>
+          <a class="text-text-light hover:text-primary transition-colors" href="/#apropos">À propos</a>
+          <a class="text-primary transition-colors" href="/notre-histoire" aria-current="page">Notre histoire</a>
+        </div>
+
+        <div class="hidden lg:flex items-center gap-5">
+          <a href="/login" class="text-[15px] font-semibold text-text-light hover:text-primary transition-colors">Se connecter</a>
+          <a href="/tarifs" class="rounded-full px-5 py-3 bg-primary text-white text-[15px] font-bold hover:bg-primary/90 transition-colors">Commencer</a>
+        </div>
+
+        <!-- Mobile -->
+        <button id="mobileBtn" class="lg:hidden inline-flex items-center justify-center rounded-full h-10 w-10 border border-black/10 bg-white hover:bg-background-light transition"
+                aria-label="Ouvrir le menu">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+      </nav>
+
+      <div id="mobileMenu" class="hidden lg:hidden border-t border-black/10 bg-white">
+        <div class="flex flex-col gap-1 px-6 py-4">
+          <a class="rounded-xl px-4 py-3 text-[15px] font-semibold text-text-light hover:bg-background-light transition" href="/">Accueil</a>
+          <a class="rounded-xl px-4 py-3 text-[15px] font-semibold text-text-light hover:bg-background-light transition" href="/#accompagnement">Notre accompagnement</a>
+          <a class="rounded-xl px-4 py-3 text-[15px] font-semibold text-text-light hover:bg-background-light transition" href="/index.html#comment">Comment ça marche</a>
+          <a class="rounded-xl px-4 py-3 text-[15px] font-semibold text-text-light hover:bg-background-light transition" href="/tarifs">Tarifs</a>
+          <a class="rounded-xl px-4 py-3 text-[15px] font-semibold text-text-light hover:bg-background-light transition" href="/#apropos">À propos</a>
+          <a class="rounded-xl px-4 py-3 text-[15px] font-semibold text-primary bg-background-light transition" href="/notre-histoire" aria-current="page">Notre histoire</a>
+          <div class="pt-3 flex flex-col gap-2">
+            <a href="/login" class="rounded-full h-12 px-6 inline-flex items-center justify-center border border-black/10 bg-white text-[15px] font-bold">Se connecter</a>
+            <a href="/tarifs" class="rounded-full h-12 px-6 inline-flex items-center justify-center bg-primary text-white text-[15px] font-bold">Créer un compte</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 bg-white">
+
+      <!-- 1. OUVERTURE : le fleuve -->
+      <section class="relative isolate overflow-hidden">
+        <img src="/images/ogooue/fleuve-ogooue.jpg" alt="Le fleuve Ogooué entre deux rives couvertes de forêt" class="absolute inset-0 -z-10 h-full w-full object-cover">
+        <div class="absolute inset-0 -z-10 bg-gradient-to-t from-[#0b1f3a]/90 via-[#0b1f3a]/55 to-[#0b1f3a]/25"></div>
+        <div class="max-w-5xl mx-auto px-6 pt-28 pb-16 sm:pt-40 sm:pb-24">
+          <p class="surtitre" style="color:#7cd0f5">Notre histoire</p>
+          <h1 class="titre-xl mt-4 text-white max-w-3xl">L'origine de notre nom, l'inspiration de notre vision</h1>
+          <p class="mt-5 max-w-2xl text-lg leading-relaxed text-white/85">Un nom inspiré de notre territoire. Une vision tournée vers l'avenir.</p>
+        </div>
+      </section>
+
+      <!-- 2. UNE INSPIRATION PROFONDÉMENT GABONAISE -->
+      <section class="px-6 py-16 sm:py-24">
+        <div class="max-w-6xl mx-auto grid grid-cols-[minmax(0,1fr)] lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] gap-10 lg:gap-16 items-start">
+          <div>
+            <h2 class="titre-l">Une inspiration profondément gabonaise</h2>
+            <div class="mt-6">
+              <p class="texte">Lorsque nous avons commencé à imaginer OGOUE, nous nous sommes posé une question simple : quel symbole de notre patrimoine pouvait incarner à la fois l'activité économique, la rencontre et la circulation des richesses ?</p>
+              <p class="texte">Nous cherchions quelque chose de profondément ancré dans notre identité gabonaise. Un symbole qui raconte une histoire, qui parle à notre quotidien et qui porte en lui une véritable vision de développement.</p>
+              <p class="texte"><strong class="text-text-light">C'est alors que le fleuve Ogooué s'est imposé naturellement à nous.</strong></p>
+              <p class="texte">Au Gabon, le fleuve est bien plus qu'un cours d'eau. Il est un espace de vie, de commerce et de rencontres. Il permet aux populations de se déplacer, aux marchandises de circuler, aux activités de se développer et aux communautés de se rapprocher.</p>
+            </div>
+          </div>
+          <figure class="lg:mt-16">
+            <div class="photo aspect-[4/3]"><img src="/images/ogooue/rive-lambarene-pirogues.jpg" alt="Des pirogues amarrées sur la rive de l'Ogooué à Lambaréné" loading="lazy"></div>
+            <figcaption class="legende">Pirogues amarrées sur la rive de l'Ogooué, à Lambaréné.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <!-- 3. SUR SES RIVES : la vie, le commerce -->
+      <section class="px-6 pb-16 sm:pb-24">
+        <div class="max-w-6xl mx-auto">
+          <div class="max-w-3xl">
+            <p class="texte">Sur ses rives, des femmes et des hommes exercent leurs activités, vendent leurs produits, transportent des marchandises et construisent leurs moyens de subsistance.</p>
+          </div>
+          <div class="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <figure>
+              <div class="photo aspect-[4/3]"><img src="/images/ogooue/preparation-poisson-lambarene.jpg" alt="Des pêcheurs préparent le poisson sur des tables posées dans le fleuve, une pirogue au premier plan" loading="lazy"></div>
+              <figcaption class="legende">La pêche du jour préparée au bord de l'eau, au marché d'Isaac, Lambaréné.</figcaption>
+            </figure>
+            <figure>
+              <div class="photo aspect-[4/3]"><img src="/images/ogooue/sechage-poisson-lambarene.jpg" alt="Du poisson mis à sécher sur des claies au bord de l'Ogooué, des pirogues sur l'eau" loading="lazy"></div>
+              <figcaption class="legende">Le poisson sèche sur les claies, face au fleuve.</figcaption>
+            </figure>
+            <figure>
+              <div class="photo aspect-[4/3]"><img src="/images/ogooue/marche-poisson-lambarene.jpg" alt="Des vendeuses au marché de poisson fumé de Lambaréné" loading="lazy"></div>
+              <figcaption class="legende">Au marché du poisson fumé, le commerce du fleuve continue à terre.</figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. LE FLEUVE RELIE : d'une rive à l'autre -->
+      <section class="px-6 py-16 sm:py-24 bg-background-light">
+        <div class="max-w-6xl mx-auto grid grid-cols-[minmax(0,1fr)] lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+          <figure class="order-2 lg:order-1">
+            <div class="photo aspect-square sm:aspect-[4/3] lg:aspect-square"><img src="/images/ogooue/pirogue-lac-ezanga.jpg" alt="La proue d'une pirogue sur le lac Ezanga, face à une rive boisée" loading="lazy"></div>
+            <figcaption class="legende">En pirogue sur le lac Ezanga, dans la région des lacs de l'Ogooué.</figcaption>
+          </figure>
+          <div class="order-1 lg:order-2">
+            <p class="texte">Mais le fleuve est également un lien entre les territoires et les populations. Il permet d'aller d'une rive à l'autre, d'un point à un autre, de découvrir d'autres réalités, d'autres cultures et d'autres perspectives.</p>
+            <p class="citation mt-8">C'est précisément cette double dimension qui nous a inspirés : faire circuler les richesses et créer des connexions.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. UN NOM, UNE VISION : le sigle -->
+      <section class="px-6 py-16 sm:py-24">
+        <div class="max-w-6xl mx-auto">
+          <h2 class="titre-l">Un nom, une vision</h2>
+          <p class="texte mt-6 max-w-3xl">OGOUE est également un sigle qui traduit concrètement notre ambition : <em>Outil de Gestion Optimisé et Unifié pour les Petites et Moyennes Entreprises.</em></p>
+
+          <!-- Le sigle, lettre par lettre -->
+          <div class="mt-10 grid grid-cols-5 gap-2 sm:gap-4" aria-label="Outil de Gestion Optimisé et Unifié pour les Petites et Moyennes Entreprises">
+            <div class="rounded-2xl bg-[#0b1f3a] text-white px-1 py-5 sm:p-6 text-center">
+              <p class="text-4xl sm:text-6xl font-extrabold">O</p>
+              <p class="mt-2 text-[10px] leading-tight sm:text-sm font-semibold text-white/80">Outil</p>
+            </div>
+            <div class="rounded-2xl bg-[#0b1f3a] text-white px-1 py-5 sm:p-6 text-center">
+              <p class="text-4xl sm:text-6xl font-extrabold">G</p>
+              <p class="mt-2 text-[10px] leading-tight sm:text-sm font-semibold text-white/80">de Gestion</p>
+            </div>
+            <div class="rounded-2xl bg-[#0b1f3a] text-white px-1 py-5 sm:p-6 text-center">
+              <p class="text-4xl sm:text-6xl font-extrabold">O</p>
+              <p class="mt-2 text-[10px] leading-tight sm:text-sm font-semibold text-white/80">Optimisé</p>
+            </div>
+            <div class="rounded-2xl bg-[#0b1f3a] text-white px-1 py-5 sm:p-6 text-center">
+              <p class="text-4xl sm:text-6xl font-extrabold">U</p>
+              <p class="mt-2 text-[10px] leading-tight sm:text-sm font-semibold text-white/80">et Unifié</p>
+            </div>
+            <div class="rounded-2xl bg-primary text-white px-1 py-5 sm:p-6 text-center">
+              <p class="text-4xl sm:text-6xl font-extrabold">E</p>
+              <p class="mt-2 text-[10px] leading-tight sm:text-sm font-semibold text-white/90">Entreprises</p>
+            </div>
+          </div>
+
+          <div class="mt-12 grid grid-cols-[minmax(0,1fr)] lg:grid-cols-2 gap-x-16">
+            <div>
+              <p class="texte">Ce nom associe ainsi deux dimensions : une inspiration profondément liée à notre territoire et une mission tournée vers le développement des activités économiques.</p>
+              <p class="texte">À travers OGOUE, nous avons voulu reprendre la symbolique du fleuve et la transposer dans le monde de l'entrepreneuriat et de la finance.</p>
+              <p class="texte">Nous sommes partis d'un constat : les entrepreneurs, qu'ils soient commerçants, indépendants ou dirigeants de petites et moyennes entreprises, ont besoin d'outils pour mieux structurer leurs activités, suivre leurs performances et préparer leur développement.</p>
+            </div>
+            <div class="mt-4 lg:mt-0">
+              <p class="texte">Mais ils ont également besoin d'accéder à des opportunités, à des ressources et à des partenaires capables de les accompagner dans leur croissance.</p>
+              <p class="texte">De l'autre côté, les institutions financières disposent de ressources et de solutions de financement, mais ont besoin de mieux comprendre les activités et les réalités des entrepreneurs pour pouvoir les accompagner.</p>
+              <p class="texte">Entre ces deux mondes, il existe parfois une distance, un manque de connexion et un canal qui reste à construire.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. LE PONT : deux rives, un lien -->
+      <section class="px-6 pb-16 sm:pb-24">
+        <div class="max-w-6xl mx-auto rounded-[28px] bg-[#0b1f3a] text-white p-6 sm:p-12">
+          <div class="grid grid-cols-[minmax(0,1fr)] md:grid-cols-[1fr_auto_1fr] items-center gap-6 md:gap-8 text-center">
+            <div class="rounded-2xl bg-white/10 p-5">
+              <span class="material-symbols-outlined text-3xl text-[#7cd0f5]">storefront</span>
+              <p class="mt-2 font-bold">Les entrepreneurs</p>
+              <p class="mt-1 text-sm text-white/70">Commerçants, indépendants, dirigeants de PME</p>
+            </div>
+            <div class="flex md:flex-col items-center justify-center gap-3">
+              <span class="hidden md:block h-px w-16 bg-white/30"></span>
+              <span class="rounded-full bg-primary px-5 py-2 text-sm font-extrabold tracking-wide">OGOUE</span>
+              <span class="hidden md:block h-px w-16 bg-white/30"></span>
+            </div>
+            <div class="rounded-2xl bg-white/10 p-5">
+              <span class="material-symbols-outlined text-3xl text-[#7cd0f5]">account_balance</span>
+              <p class="mt-2 font-bold">Les institutions financières</p>
+              <p class="mt-1 text-sm text-white/70">Microfinance, mesofinance, banques</p>
+            </div>
+          </div>
+          <p class="mt-10 text-center text-[22px] sm:text-[28px] font-extrabold italic leading-snug">C'est ce pont que nous souhaitons contribuer à bâtir.</p>
+          <p class="mt-4 text-center text-[16px] sm:text-[17px] leading-relaxed text-white/80 max-w-3xl mx-auto">À l'image du fleuve qui relie les rives, OGOUE ambitionne de rapprocher les entrepreneurs des solutions et des opportunités dont ils ont besoin pour faire évoluer leurs activités.</p>
+        </div>
+      </section>
+
+      <!-- 7. FAIRE CIRCULER LES OPPORTUNITÉS -->
+      <section class="px-6 py-16 sm:py-24 bg-background-light">
+        <div class="max-w-6xl mx-auto grid grid-cols-[minmax(0,1fr)] lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] gap-10 lg:gap-16 items-center">
+          <div>
+            <h2 class="titre-l">Faire circuler les opportunités</h2>
+            <div class="mt-6">
+              <p class="texte">Notre ambition ne se limite donc pas à proposer une solution numérique de gestion.</p>
+              <p class="texte">Nous souhaitons contribuer à une meilleure structuration des activités économiques gabonaises, faciliter la circulation de l'information financière et créer progressivement des passerelles entre les entrepreneurs et les acteurs qui peuvent soutenir leur développement.</p>
+              <p class="texte">Nous croyons que chaque activité, quelle que soit sa taille, mérite de disposer des moyens nécessaires pour mieux s'organiser, gagner en visibilité et envisager de nouvelles perspectives.</p>
+              <p class="texte"><strong class="text-text-light">C'est cette vision qui guide notre démarche.</strong></p>
+            </div>
+          </div>
+          <figure>
+            <div class="photo aspect-[4/3]"><img src="/images/ogooue/bateaux-lambarene-port-gentil.jpg" alt="Des bateaux amarrés à Lambaréné, qui relient la ville à Port-Gentil par l'Ogooué" loading="lazy"></div>
+            <figcaption class="legende">À Lambaréné, les bateaux qui relient la ville à Port-Gentil par le fleuve.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <!-- 8. CONCLUSION -->
+      <section class="px-6 py-20 sm:py-28 text-center">
+        <div class="max-w-3xl mx-auto">
+          <p class="text-[56px] sm:text-[88px] font-extrabold tracking-tight leading-none text-[#0b1f3a]">OGOUE</p>
+          <p class="mt-5 text-xl sm:text-2xl italic font-semibold text-secondary">Un nom inspiré de notre territoire. Une vision tournée vers l'avenir.</p>
+          <p class="mt-5 text-[17px] leading-relaxed text-text-light-muted">Faire circuler les richesses, rapprocher les acteurs économiques et connecter les entrepreneurs aux opportunités de demain.</p>
+          <div class="mt-10 flex flex-col sm:flex-row justify-center gap-3">
+            <a href="/tarifs" class="rounded-full px-7 py-4 inline-flex items-center justify-center bg-primary text-white text-base font-bold hover:bg-primary/90 transition">Créer mon compte</a>
+            <a href="/#apropos" class="rounded-full px-7 py-4 inline-flex items-center justify-center border border-black/15 bg-white text-base font-bold text-text-light hover:bg-background-light transition">Nos valeurs</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Crédits : licences Creative Commons, l'auteur doit être cité -->
+      <section class="px-6 pb-14">
+        <div class="max-w-6xl mx-auto border-t border-black/10 pt-6 text-[12px] leading-relaxed text-text-light-muted">
+          <p class="font-semibold text-text-light">Crédits photographiques (Wikimedia Commons)</p>
+          <ul class="mt-2 space-y-1">
+            <li>Fleuve Ogooué : <a class="underline hover:text-text-light" href="https://commons.wikimedia.org/wiki/File:Ogoou%C3%A9.JPG" target="_blank" rel="noopener">Susi4</a>, licence <a class="underline hover:text-text-light" href="https://creativecommons.org/licenses/by-sa/3.0/deed.fr" target="_blank" rel="noopener">CC BY-SA 3.0</a>.</li>
+            <li>Rive de Lambaréné, préparation et séchage du poisson, marché du poisson fumé, bateaux Lambaréné – Port-Gentil : <a class="underline hover:text-text-light" href="https://commons.wikimedia.org/wiki/File:Ogooue_River_(46256022452).jpg" target="_blank" rel="noopener">David Stanley</a>, licence <a class="underline hover:text-text-light" href="https://creativecommons.org/licenses/by/2.0/deed.fr" target="_blank" rel="noopener">CC BY 2.0</a>.</li>
+            <li>Pirogue sur le lac Ezanga : <a class="underline hover:text-text-light" href="https://commons.wikimedia.org/wiki/File:Aper%C3%A7u_du_lac_Ezanga.jpg" target="_blank" rel="noopener">Mabiala Serge</a>, domaine public (CC0).</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER : ne contient que des liens vers des pages qui existent -->
+    <footer class="bg-white border-t border-black/10 px-6 py-14">
+      <div class="max-w-7xl mx-auto grid grid-cols-[minmax(0,1fr)] md:grid-cols-3 lg:grid-cols-5 gap-10">
+        <div>
+          <img src="/app/Logo-ogoue (2).png" alt="OGOUÉ Logo" class="h-14 w-auto max-w-none -ml-[22px]">
+          <p class="mt-4 text-sm text-text-light-muted leading-relaxed">Bien gérer aujourd’hui pour mieux préparer son développement demain</p>
+        </div>
+        <div>
+          <p class="text-sm font-bold">OGOUE</p>
+          <ul class="mt-4 space-y-3 text-sm text-text-light-muted">
+            <li><a class="hover:text-text-light" href="/#accompagnement">Notre accompagnement</a></li>
+            <li><a class="hover:text-text-light" href="/#financement">Financement</a></li>
+            <li><a class="hover:text-text-light" href="/#apropos">À propos</a></li>
+            <li><a class="hover:text-text-light" href="/notre-histoire">L'origine de notre nom</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="text-sm font-bold">Votre espace</p>
+          <ul class="mt-4 space-y-3 text-sm text-text-light-muted">
+            <li><a class="hover:text-text-light" href="/tarifs">Créer un compte</a></li>
+            <li><a class="hover:text-text-light" href="/login">Se connecter</a></li>
+            <li><a class="hover:text-text-light" href="/faq">FAQ</a></li>
+            <li><a class="hover:text-text-light" href="/conditions-utilisation">Conditions d'utilisation</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="text-sm font-bold">Financeurs</p>
+          <ul class="mt-4 space-y-3 text-sm text-text-light-muted">
+            <li><a class="hover:text-text-light" href="https://financement.ogoue.com/institution-login">Espace institution</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="text-sm font-bold">Nous contacter</p>
+          <ul class="mt-4 space-y-3 text-sm text-text-light-muted">
+            <li><a class="inline-flex items-center gap-2 hover:text-text-light" href="tel:+24107604560">
+              <span class="material-symbols-outlined text-lg">call</span>+241 07 60 45 60</a></li>
+            <li><a class="inline-flex items-center gap-2 hover:text-text-light" href="https://wa.me/24107604560" target="_blank" rel="noopener">
+              <span class="material-symbols-outlined text-lg">chat</span>Écrire sur WhatsApp</a></li>
+          </ul>
+        </div>
+      </div>
+      <p class="max-w-7xl mx-auto mt-12 pt-6 border-t border-black/10 text-sm text-text-light-muted">© 2026 OGOUE. Tous droits réservés.</p>
+    </footer>
+
+  </div>
+
+  <script>
+    // Menu mobile
+    const btn = document.getElementById("mobileBtn");
+    const menu = document.getElementById("mobileMenu");
+    btn?.addEventListener("click", () => menu.classList.toggle("hidden"));
+  </script>
+</body>
+</html>
