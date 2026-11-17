@@ -14,6 +14,7 @@
 
 import { supabase, supabaseSecondary } from "../db/supabase.js";
 import { lireToutesLesLignes } from "./pagination.js";
+import { nettoyerFinancementOrphelins } from "./nettoyage-financement.js";
 
 const UNE_JOURNEE_MS = 24 * 60 * 60 * 1000;
 const PAR_LOT = 100; // fichiers retirés du stockage par appel
@@ -119,9 +120,13 @@ export async function purgerComptesExpires() {
   }
 }
 
-// Au démarrage (après une minute, le temps que le serveur soit prêt), puis chaque jour
+// Au démarrage (après une minute, le temps que le serveur soit prêt), puis chaque jour.
+// Après la purge, les comptes devenus orphelins dans la base Financement sont retirés.
 export function planifierPurgeComptes() {
-  const lancer = () => purgerComptesExpires().catch((e) => console.error("❌ Purge des comptes :", e?.message));
+  const lancer = () => purgerComptesExpires()
+    .catch((e) => console.error("❌ Purge des comptes :", e?.message))
+    .then(() => nettoyerFinancementOrphelins())
+    .catch((e) => console.error("❌ Nettoyage Financement :", e?.message));
   setTimeout(lancer, 60 * 1000);
   setInterval(lancer, UNE_JOURNEE_MS);
 }
